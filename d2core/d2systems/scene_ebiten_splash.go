@@ -64,7 +64,7 @@ func (s *EbitenSplashScene) boot() {
 // Update and render the terminal to the terminal viewport
 func (s *EbitenSplashScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityEbitenSplash
+		s.Components.Priority.Add(id).Priority = scenePriorityEbitenSplash
 	}
 
 	if s.Paused() {
@@ -115,13 +115,13 @@ func (s *EbitenSplashScene) createSplash() {
 
 			square := s.Add.Rectangle(ox+x*size, oy+y*size, size, size, orange)
 
-			s.AddAlpha(square).Alpha = 0
+			s.Components.Alpha.Add(square).Alpha = 0
 
 			squares = append(squares, square)
 		}
 	}
 
-	interactive := s.AddInteractive(s.NewEntity())
+	interactive := s.Components.Interactive.Add(s.NewEntity())
 
 	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
 
@@ -146,7 +146,7 @@ func (s *EbitenSplashScene) updateSplash() {
 
 	// fade out after timeout
 	if s.timeElapsed >= splashTimeout {
-		vpAlpha, _ := s.GetAlpha(s.Viewports[0])
+		vpAlpha, _ := s.Components.Alpha.Get(s.Viewports[0])
 		vpAlpha.Alpha -= 0.0425
 		if vpAlpha.Alpha <= 0 {
 			vpAlpha.Alpha = 0
@@ -164,9 +164,9 @@ func (s *EbitenSplashScene) updateSplash() {
 		a := math.Sin(s.timeElapsed*2 + -90 + (float64(idx)/numSquares))
 		a = (a+1)/2 // clamp between 0..1
 
-		alpha, found := s.GetAlpha(id)
+		alpha, found := s.Components.Alpha.Get(id)
 		if !found {
-			s.AddAlpha(id)
+			s.Components.Alpha.Add(id)
 		}
 
 		alpha.Alpha = a

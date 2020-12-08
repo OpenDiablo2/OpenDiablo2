@@ -27,17 +27,17 @@ func (*ViewportFilter) New() akara.Component {
 // ViewportFilterFactory is a wrapper for the generic component factory that returns ViewportFilter component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a ViewportFilter.
 type ViewportFilterFactory struct {
-	ViewportFilter *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddViewportFilter adds a ViewportFilter component to the given entity and returns it
-func (m *ViewportFilterFactory) AddViewportFilter(id akara.EID) *ViewportFilter {
-	return m.ViewportFilter.Add(id).(*ViewportFilter)
+// Add adds a ViewportFilter component to the given entity and returns it
+func (m *ViewportFilterFactory) Add(id akara.EID) *ViewportFilter {
+	return m.ComponentFactory.Add(id).(*ViewportFilter)
 }
 
-// GetViewportFilter returns the ViewportFilter component for the given entity, and a bool for whether or not it exists
-func (m *ViewportFilterFactory) GetViewportFilter(id akara.EID) (*ViewportFilter, bool) {
-	component, found := m.ViewportFilter.Get(id)
+// Get returns the ViewportFilter component for the given entity, and a bool for whether or not it exists
+func (m *ViewportFilterFactory) Get(id akara.EID) (*ViewportFilter, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	logPrefixFileTypeResolver = "File Type Resolver"
+	logPrefixFileTypeResolver = "ComponentFactory Type Resolver"
 )
 
 // static check that FileTypeResolver implements the System interface
@@ -31,8 +31,10 @@ type FileTypeResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
-	d2components.FileFactory
-	d2components.FileTypeFactory
+	Components struct {
+		File d2components.FileFactory
+		FileType d2components.FileTypeFactory
+	}
 }
 
 // Init initializes the system with the given world
@@ -53,8 +55,8 @@ func (m *FileTypeResolver) setupLogger() {
 }
 
 func (m *FileTypeResolver) setupFactories() {
-	m.InjectComponent(&d2components.File{}, &m.File)
-	m.InjectComponent(&d2components.FileType{}, &m.FileType)
+	m.InjectComponent(&d2components.File{}, &m.Components.File.ComponentFactory)
+	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
 }
 
 func (m *FileTypeResolver) setupSubscriptions() {
@@ -77,12 +79,12 @@ func (m *FileTypeResolver) Update() {
 
 //nolint:gocyclo // this big switch statement is unfortunate, but necessary
 func (m *FileTypeResolver) determineFileType(id akara.EID) {
-	fp, found := m.GetFile(id)
+	fp, found := m.Components.File.Get(id)
 	if !found {
 		return
 	}
 
-	ft := m.AddFileType(id)
+	ft := m.Components.FileType.Add(id)
 
 	// try to immediately load as an mpq
 	if _, err := d2mpq.Load(fp.Path); err == nil {

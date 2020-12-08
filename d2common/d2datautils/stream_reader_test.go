@@ -13,7 +13,7 @@ func TestStreamReaderByte(t *testing.T) {
 	}
 
 	if ss := sr.GetSize(); ss != 4 {
-		t.Fatalf("StreamREader.GetSize() was expected to return %d, but returned %d instead", 4, ss)
+		t.Fatalf("StreamREader.Get() was expected to return %d, but returned %d instead", 4, ss)
 	}
 
 	for i := 0; i < len(data); i++ {

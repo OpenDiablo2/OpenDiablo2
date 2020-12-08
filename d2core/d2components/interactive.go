@@ -32,17 +32,17 @@ func (*Interactive) New() akara.Component {
 // InteractiveFactory is a wrapper for the generic component factory that returns Interactive component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Interactive.
 type InteractiveFactory struct {
-	Interactive *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddInteractive adds a Interactive component to the given entity and returns it
-func (m *InteractiveFactory) AddInteractive(id akara.EID) *Interactive {
-	return m.Interactive.Add(id).(*Interactive)
+// Add adds a Interactive component to the given entity and returns it
+func (m *InteractiveFactory) Add(id akara.EID) *Interactive {
+	return m.ComponentFactory.Add(id).(*Interactive)
 }
 
-// GetInteractive returns the Interactive component for the given entity, and a bool for whether or not it exists
-func (m *InteractiveFactory) GetInteractive(id akara.EID) (*Interactive, bool) {
-	component, found := m.Interactive.Get(id)
+// Get returns the Interactive component for the given entity, and a bool for whether or not it exists
+func (m *InteractiveFactory) Get(id akara.EID) (*Interactive, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -9,9 +9,7 @@ import (
 var _ akara.Component = &Dirty{}
 
 // Dirty is a flag component that is used to denote a "dirty" state
-type Dirty struct {
-	IsDirty bool
-}
+type Dirty struct {}
 
 // New creates a new Dirty. By default, IsDirty is false.
 func (*Dirty) New() akara.Component {
@@ -21,17 +19,17 @@ func (*Dirty) New() akara.Component {
 // DirtyFactory is a wrapper for the generic component factory that returns Dirty component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dirty.
 type DirtyFactory struct {
-	Dirty *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddDirty adds a Dirty component to the given entity and returns it
-func (m *DirtyFactory) AddDirty(id akara.EID) *Dirty {
-	return m.Dirty.Add(id).(*Dirty)
+// Add adds a Dirty component to the given entity and returns it
+func (m *DirtyFactory) Add(id akara.EID) *Dirty {
+	return m.ComponentFactory.Add(id).(*Dirty)
 }
 
-// GetDirty returns the Dirty component for the given entity, and a bool for whether or not it exists
-func (m *DirtyFactory) GetDirty(id akara.EID) (*Dirty, bool) {
-	component, found := m.Dirty.Get(id)
+// Get returns the Dirty component for the given entity, and a bool for whether or not it exists
+func (m *DirtyFactory) Get(id akara.EID) (*Dirty, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

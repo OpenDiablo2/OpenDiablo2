@@ -33,12 +33,14 @@ type GameConfigSystem struct {
 	*d2util.Logger
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
-	d2components.GameConfigFactory
-	d2components.FileFactory
-	d2components.FileTypeFactory
-	d2components.FileHandleFactory
-	d2components.FileSourceFactory
-	d2components.DirtyFactory
+	Components struct {
+		GameConfig d2components.GameConfigFactory
+		File d2components.FileFactory
+		FileType d2components.FileTypeFactory
+		FileHandle d2components.FileHandleFactory
+		FileSource d2components.FileSourceFactory
+		Dirty d2components.DirtyFactory
+	}
 	activeConfig *d2components.GameConfig
 }
 
@@ -62,12 +64,12 @@ func (m *GameConfigSystem) setupLogger() {
 func (m *GameConfigSystem) setupFactories() {
 	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.File{}, &m.File)
-	m.InjectComponent(&d2components.FileType{}, &m.FileType)
-	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
-	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
-	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
-	m.InjectComponent(&d2components.Dirty{}, &m.Dirty)
+	m.InjectComponent(&d2components.File{}, &m.Components.File.ComponentFactory)
+	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
+	m.InjectComponent(&d2components.FileHandle{}, &m.Components.FileHandle.ComponentFactory)
+	m.InjectComponent(&d2components.FileSource{}, &m.Components.FileSource.ComponentFactory)
+	m.InjectComponent(&d2components.GameConfig{}, &m.Components.GameConfig.ComponentFactory)
+	m.InjectComponent(&d2components.Dirty{}, &m.Components.Dirty.ComponentFactory)
 }
 
 func (m *GameConfigSystem) setupSubscriptions() {
@@ -112,12 +114,12 @@ func (m *GameConfigSystem) Update() {
 
 func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
 	for _, eid := range entities {
-		fp, found := m.GetFile(eid)
+		fp, found := m.Components.File.Get(eid)
 		if !found {
 			continue
 		}
 
-		ft, found := m.GetFileType(eid)
+		ft, found := m.Components.FileType.Get(eid)
 		if !found {
 			continue
 		}
@@ -132,12 +134,12 @@ func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
 }
 
 func (m *GameConfigSystem) loadConfig(eid akara.EID) {
-	fh, found := m.GetFileHandle(eid)
+	fh, found := m.Components.FileHandle.Get(eid)
 	if !found {
 		return
 	}
 
-	gameConfig := m.AddGameConfig(eid)
+	gameConfig := m.Components.GameConfig.Add(eid)
 
 	if err := json.NewDecoder(fh.Data).Decode(gameConfig); err != nil {
 		m.RemoveEntity(eid)

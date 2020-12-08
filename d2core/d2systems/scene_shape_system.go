@@ -29,12 +29,14 @@ type ShapeSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	RenderSystem *RenderSystem
-	d2components.TransformFactory
-	d2components.ColorFactory
-	d2components.RectangleFactory
-	d2components.TextureFactory
-	d2components.SizeFactory
-	d2components.OriginFactory
+	Components struct {
+		Transform d2components.TransformFactory
+		Color d2components.ColorFactory
+		Rectangle d2components.RectangleFactory
+		Texture d2components.TextureFactory
+		Size d2components.SizeFactory
+		Origin d2components.OriginFactory
+	}
 	loadQueue      spriteLoadQueue
 	shapesToRender *akara.Subscription
 	shapesToUpdate *akara.Subscription
@@ -53,12 +55,12 @@ func (t *ShapeSystem) Init(world *akara.World) {
 }
 
 func (t *ShapeSystem) setupFactories() {
-	t.InjectComponent(&d2components.Color{}, &t.ColorFactory.Color)
-	t.InjectComponent(&d2components.Transform{}, &t.TransformFactory.Transform)
-	t.InjectComponent(&d2components.Texture{}, &t.TextureFactory.Texture)
-	t.InjectComponent(&d2components.Origin{}, &t.OriginFactory.Origin)
-	t.InjectComponent(&d2components.Size{}, &t.SizeFactory.Size)
-	t.InjectComponent(&d2components.Rectangle{}, &t.RectangleFactory.Rectangle)
+	t.InjectComponent(&d2components.Color{}, &t.Components.Color.ComponentFactory)
+	t.InjectComponent(&d2components.Transform{}, &t.Components.Transform.ComponentFactory)
+	t.InjectComponent(&d2components.Texture{}, &t.Components.Texture.ComponentFactory)
+	t.InjectComponent(&d2components.Origin{}, &t.Components.Origin.ComponentFactory)
+	t.InjectComponent(&d2components.Size{}, &t.Components.Size.ComponentFactory)
+	t.InjectComponent(&d2components.Rectangle{}, &t.Components.Rectangle.ComponentFactory)
 }
 
 func (t *ShapeSystem) setupSubscriptions() {
@@ -88,20 +90,20 @@ func (t *ShapeSystem) Update() {
 	}
 }
 
-// Sprite queues a sprite spriteation to be loaded
+// ComponentFactory queues a sprite spriteation to be loaded
 func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akara.EID {
 	t.Debug("creating rectangle")
 
 	eid := t.NewEntity()
-	r := t.AddRectangle(eid)
+	r := t.Components.Rectangle.Add(eid)
 
 	r.X, r.Y = float64(x), float64(y)
 	r.Width, r.Height = float64(width), float64(height)
 
-	c := t.AddColor(eid)
+	c := t.Components.Color.Add(eid)
 	c.Color = color
 
-	texture := t.AddTexture(eid)
+	texture := t.Components.Texture.Add(eid)
 	texture.Texture = t.RenderSystem.renderer.NewSurface(width, height)
 	texture.Texture.Clear(c.Color)
 
@@ -109,22 +111,22 @@ func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akar
 }
 
 func (t *ShapeSystem) updateShape(eid akara.EID) {
-	transform, found := t.GetTransform(eid)
+	transform, found := t.Components.Transform.Get(eid)
 	if !found {
 		return
 	}
 
-	size, found := t.GetSize(eid)
+	size, found := t.Components.Size.Get(eid)
 	if !found {
 		return
 	}
 
-	texture, found := t.GetTexture(eid)
+	texture, found := t.Components.Texture.Get(eid)
 	if !found || texture.Texture == nil {
 		return
 	}
 
-	rectangle, rectangleFound := t.GetRectangle(eid)
+	rectangle, rectangleFound := t.Components.Rectangle.Get(eid)
 	if rectangleFound {
 		transform.Translation.X, transform.Translation.Y = rectangle.X, rectangle.Y
 		size.X, size.Y = rectangle.Width, rectangle.Height
@@ -137,12 +139,12 @@ func (t *ShapeSystem) updateShape(eid akara.EID) {
 }
 
 func (t *ShapeSystem) renderShape(eid akara.EID) {
-	texture, found := t.GetTexture(eid)
+	texture, found := t.Components.Texture.Get(eid)
 	if !found || texture.Texture == nil {
 		return
 	}
 
-	col, found := t.GetColor(eid)
+	col, found := t.Components.Color.Get(eid)
 	if !found {
 		return
 	}

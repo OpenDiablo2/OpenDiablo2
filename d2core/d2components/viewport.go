@@ -36,17 +36,17 @@ func (*Viewport) New() akara.Component {
 // ViewportFactory is a wrapper for the generic component factory that returns Viewport component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Viewport.
 type ViewportFactory struct {
-	Viewport *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddViewport adds a Viewport component to the given entity and returns it
-func (m *ViewportFactory) AddViewport(id akara.EID) *Viewport {
-	return m.Viewport.Add(id).(*Viewport)
+// Add adds a Viewport component to the given entity and returns it
+func (m *ViewportFactory) Add(id akara.EID) *Viewport {
+	return m.ComponentFactory.Add(id).(*Viewport)
 }
 
-// GetViewport returns the Viewport component for the given entity, and a bool for whether or not it exists
-func (m *ViewportFactory) GetViewport(id akara.EID) (*Viewport, bool) {
-	component, found := m.Viewport.Get(id)
+// Get returns the Viewport component for the given entity, and a bool for whether or not it exists
+func (m *ViewportFactory) Get(id akara.EID) (*Viewport, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

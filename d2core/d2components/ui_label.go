@@ -2,8 +2,9 @@
 package d2components
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2label"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2label"
 )
 
 // static check that Label implements Component
@@ -14,7 +15,7 @@ type Label struct {
 	*d2label.Label
 }
 
-// New returns a Label component. By default, it contains an empty string.
+// New returns a Label component. This component contains an embedded *d2label.Label
 func (*Label) New() akara.Component {
 	return &Label{
 		d2label.New(),
@@ -24,17 +25,17 @@ func (*Label) New() akara.Component {
 // LabelFactory is a wrapper for the generic component factory that returns Label component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Label.
 type LabelFactory struct {
-	Label *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddLabel adds a Label component to the given entity and returns it
-func (m *LabelFactory) AddLabel(id akara.EID) *Label {
-	return m.Label.Add(id).(*Label)
+// Add adds a Label component to the given entity and returns it
+func (m *LabelFactory) Add(id akara.EID) *Label {
+	return m.ComponentFactory.Add(id).(*Label)
 }
 
-// GetLabel returns the Label component for the given entity, and a bool for whether or not it exists
-func (m *LabelFactory) GetLabel(id akara.EID) (*Label, bool) {
-	component, found := m.Label.Get(id)
+// Get returns the Label component for the given entity, and a bool for whether or not it exists
+func (m *LabelFactory) Get(id akara.EID) (*Label, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -41,29 +41,30 @@ func NewBaseScene(key string) *BaseScene {
 var _ akara.System = &BaseScene{}
 
 type sceneSystems struct {
-	*RenderSystem
-	*InputSystem
+	Render *RenderSystem
+	Input *InputSystem
 	*GameObjectFactory
 }
 
 type sceneComponents struct {
-	d2components.SceneGraphNodeFactory
-	d2components.ViewportFactory
-	d2components.MainViewportFactory
-	d2components.ViewportFilterFactory
-	d2components.PriorityFactory
-	d2components.CameraFactory
-	d2components.TextureFactory
-	d2components.InteractiveFactory
-	d2components.TransformFactory
-	d2components.SpriteFactory
-	d2components.OriginFactory
-	d2components.AlphaFactory
-	d2components.DrawEffectFactory
-	d2components.RectangleFactory
-	d2components.ColorFactory
-	d2components.CommandRegistrationFactory
-	d2components.DirtyFactory
+	SceneGraphNode d2components.SceneGraphNodeFactory
+	Viewport d2components.ViewportFactory
+	MainViewport d2components.MainViewportFactory
+	ViewportFilter d2components.ViewportFilterFactory
+	Priority d2components.PriorityFactory
+	Camera d2components.CameraFactory
+	Texture d2components.TextureFactory
+	Interactive d2components.InteractiveFactory
+	Transform d2components.TransformFactory
+	Sprite d2components.SpriteFactory
+	SegmentedSprite d2components.SegmentedSpriteFactory
+	Origin d2components.OriginFactory
+	Alpha d2components.AlphaFactory
+	DrawEffect d2components.DrawEffectFactory
+	Rectangle d2components.RectangleFactory
+	Color d2components.ColorFactory
+	CommandRegistration d2components.CommandRegistrationFactory
+	Dirty d2components.DirtyFactory
 }
 
 // BaseScene encapsulates common behaviors for systems that are considered "scenes",
@@ -74,7 +75,7 @@ type sceneComponents struct {
 type BaseScene struct {
 	*akara.BaseSystem
 	sceneSystems
-	sceneComponents
+	Components sceneComponents
 	Geom struct {
 		Rectangle rectangle.Namespace
 	}
@@ -142,19 +143,19 @@ func (s *BaseScene) boot() {
 
 func (s *BaseScene) bindRequiredSystems() {
 	for idx := range s.Systems {
-		noRenderSys := s.sceneSystems.RenderSystem == nil
-		noInputSys := s.sceneSystems.InputSystem == nil
+		noRenderSys := s.sceneSystems.Render == nil
+		noInputSys := s.sceneSystems.Input == nil
 		noObjectFactory := s.sceneSystems.GameObjectFactory == nil
 
 		sys := s.Systems[idx]
 
 		if rendersys, found := sys.(*RenderSystem); found && noRenderSys {
-			s.sceneSystems.RenderSystem = rendersys
+			s.sceneSystems.Render = rendersys
 			continue
 		}
 
 		if inputSys, found := sys.(*InputSystem); found && noInputSys {
-			s.sceneSystems.InputSystem = inputSys
+			s.sceneSystems.Input = inputSys
 			continue
 		}
 
@@ -166,17 +167,17 @@ func (s *BaseScene) bindRequiredSystems() {
 }
 
 func (s *BaseScene) requiredSystemsPresent() bool {
-	if s.sceneSystems.RenderSystem == nil {
+	if s.sceneSystems.Render == nil {
 		s.Debug("waiting for render system ...")
 		return false
 	}
 
-	if s.sceneSystems.RenderSystem.renderer == nil {
+	if s.sceneSystems.Render.renderer == nil {
 		s.Debug("waiting for renderer instance ...")
 		return false
 	}
 
-	if s.sceneSystems.InputSystem == nil {
+	if s.sceneSystems.Input == nil {
 		s.Debug("waiting for input system")
 		return false
 	}
@@ -190,31 +191,32 @@ func (s *BaseScene) requiredSystemsPresent() bool {
 }
 
 func (s *BaseScene) setupSceneObjectFactories() {
-	s.sceneSystems.SpriteFactory.RenderSystem = s.sceneSystems.RenderSystem
-	s.sceneSystems.ShapeSystem.RenderSystem = s.sceneSystems.RenderSystem
-	s.sceneSystems.UIWidgetFactory.RenderSystem = s.sceneSystems.RenderSystem
+	s.sceneSystems.GameObjectFactory.Sprites.RenderSystem = s.sceneSystems.Render
+	s.sceneSystems.GameObjectFactory.Shapes.RenderSystem = s.sceneSystems.Render
+	s.sceneSystems.GameObjectFactory.UI.RenderSystem = s.sceneSystems.Render
 }
 
 func (s *BaseScene) setupFactories() {
 	s.Debug("setting up component factories")
 
-	s.InjectComponent(&d2components.MainViewport{}, &s.MainViewport)
-	s.InjectComponent(&d2components.Viewport{}, &s.Viewport)
-	s.InjectComponent(&d2components.ViewportFilter{}, &s.ViewportFilter)
-	s.InjectComponent(&d2components.Camera{}, &s.Camera)
-	s.InjectComponent(&d2components.Priority{}, &s.Priority)
-	s.InjectComponent(&d2components.Texture{}, &s.Texture)
-	s.InjectComponent(&d2components.Interactive{}, &s.Interactive)
-	s.InjectComponent(&d2components.Transform{}, &s.Transform)
-	s.InjectComponent(&d2components.Origin{}, &s.Origin)
-	s.InjectComponent(&d2components.Alpha{}, &s.Alpha)
-	s.InjectComponent(&d2components.SceneGraphNode{}, &s.SceneGraphNode)
-	s.InjectComponent(&d2components.DrawEffect{}, &s.DrawEffect)
-	s.InjectComponent(&d2components.Sprite{}, &s.SpriteFactory.Sprite)
-	s.InjectComponent(&d2components.Rectangle{}, &s.RectangleFactory.Rectangle)
-	s.InjectComponent(&d2components.Color{}, &s.Color)
-	s.InjectComponent(&d2components.CommandRegistration{}, &s.CommandRegistration)
-	s.InjectComponent(&d2components.Dirty{}, &s.Dirty)
+	s.InjectComponent(&d2components.MainViewport{}, &s.Components.MainViewport.ComponentFactory)
+	s.InjectComponent(&d2components.Viewport{}, &s.Components.Viewport.ComponentFactory)
+	s.InjectComponent(&d2components.ViewportFilter{}, &s.Components.ViewportFilter.ComponentFactory)
+	s.InjectComponent(&d2components.Camera{}, &s.Components.Camera.ComponentFactory)
+	s.InjectComponent(&d2components.Priority{}, &s.Components.Priority.ComponentFactory)
+	s.InjectComponent(&d2components.Texture{}, &s.Components.Texture.ComponentFactory)
+	s.InjectComponent(&d2components.Interactive{}, &s.Components.Interactive.ComponentFactory)
+	s.InjectComponent(&d2components.Transform{}, &s.Components.Transform.ComponentFactory)
+	s.InjectComponent(&d2components.Origin{}, &s.Components.Origin.ComponentFactory)
+	s.InjectComponent(&d2components.Alpha{}, &s.Components.Alpha.ComponentFactory)
+	s.InjectComponent(&d2components.SceneGraphNode{}, &s.Components.SceneGraphNode.ComponentFactory)
+	s.InjectComponent(&d2components.DrawEffect{}, &s.Components.DrawEffect.ComponentFactory)
+	s.InjectComponent(&d2components.Sprite{}, &s.Components.Sprite.ComponentFactory)
+	s.InjectComponent(&d2components.SegmentedSprite{}, &s.Components.SegmentedSprite.ComponentFactory)
+	s.InjectComponent(&d2components.Rectangle{}, &s.Components.Rectangle.ComponentFactory)
+	s.InjectComponent(&d2components.Color{}, &s.Components.Color.ComponentFactory)
+	s.InjectComponent(&d2components.CommandRegistration{}, &s.Components.CommandRegistration.ComponentFactory)
+	s.InjectComponent(&d2components.Dirty{}, &s.Components.Dirty.ComponentFactory)
 }
 
 // Key returns the scene's key
@@ -238,12 +240,12 @@ func (s *BaseScene) Update() {
 
 func (s *BaseScene) updateSceneGraph() {
 	for _, eid := range s.SceneObjects {
-		node, found := s.GetSceneGraphNode(eid)
+		node, found := s.Components.SceneGraphNode.Get(eid)
 		if !found {
 			continue
 		}
 
-		transform, found := s.GetTransform(eid)
+		transform, found := s.Components.Transform.Get(eid)
 		if !found {
 			continue
 		}
@@ -255,12 +257,12 @@ func (s *BaseScene) updateSceneGraph() {
 }
 
 func (s *BaseScene) renderViewports() {
-	if s.sceneSystems.RenderSystem == nil {
+	if s.sceneSystems.Render == nil {
 		s.Warning("render system not present")
 		return
 	}
 
-	if s.sceneSystems.RenderSystem.renderer == nil {
+	if s.sceneSystems.Render.renderer == nil {
 		s.Warning("render system doesn't have a renderer instance")
 		return
 	}
@@ -287,9 +289,9 @@ func (s *BaseScene) binGameObjectsByViewport() map[int][]akara.EID {
 	bins := make(map[int][]akara.EID)
 
 	for _, eid := range s.SceneObjects {
-		vpfilter, found := s.GetViewportFilter(eid)
+		vpfilter, found := s.Components.ViewportFilter.Get(eid)
 		if !found {
-			vpfilter = s.AddViewportFilter(eid)
+			vpfilter = s.Components.ViewportFilter.Add(eid)
 			vpfilter.Set(mainViewport, true)
 		}
 
@@ -313,12 +315,12 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 
 	// the first viewport is always the main viewport
 	if idx == mainViewport {
-		s.AddMainViewport(viewportEID)
+		s.Components.MainViewport.Add(viewportEID)
 	} else {
-		s.MainViewport.Remove(viewportEID)
+		s.Components.MainViewport.Remove(viewportEID)
 	}
 
-	sfc, found := s.GetTexture(viewportEID)
+	sfc, found := s.Components.Texture.Get(viewportEID)
 	if !found || sfc.Texture == nil {
 		return
 	}
@@ -333,50 +335,44 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 }
 
 func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
-	vpTexture, found := s.GetTexture(viewportEID)
+	vpTexture, found := s.Components.Texture.Get(viewportEID)
 	if !found || vpTexture.Texture == nil {
 		return
 	}
 
-	vpNode, found := s.GetSceneGraphNode(viewportEID)
+	vpNode, found := s.Components.SceneGraphNode.Get(viewportEID)
 	if !found {
-		vpNode = s.AddSceneGraphNode(viewportEID)
+		vpNode = s.Components.SceneGraphNode.Add(viewportEID)
 	}
 
 	// translation, rotation, and scale vec3's
 	vpTrans, vpRot, vpScale := vpNode.Local.Invert().Decompose()
 
-	objTexture, found := s.GetTexture(objectEID)
+	objTexture, found := s.Components.Texture.Get(objectEID)
 	if !found {
 		return
 	}
 
 
-	alpha, found := s.GetAlpha(objectEID)
+	alpha, found := s.Components.Alpha.Get(objectEID)
 	if !found {
-		alpha = s.AddAlpha(objectEID)
+		alpha = s.Components.Alpha.Add(objectEID)
 	}
 
-	origin, found := s.GetOrigin(objectEID)
+	origin, found := s.Components.Origin.Get(objectEID)
 	if !found {
-		origin = s.AddOrigin(objectEID)
+		origin = s.Components.Origin.Add(objectEID)
 	}
 
-	node, found := s.GetSceneGraphNode(objectEID)
-	if !found {
-		node = s.AddSceneGraphNode(objectEID)
-		node.SetParent(s.Graph)
-	}
-
-	drawEffect, found := s.GetDrawEffect(objectEID)
+	drawEffect, found := s.Components.DrawEffect.Get(objectEID)
 	if found {
 		vpTexture.Texture.PushEffect(drawEffect.DrawEffect)
 		defer vpTexture.Texture.Pop()
 	}
 
-	objNode, found := s.GetSceneGraphNode(objectEID)
+	objNode, found := s.Components.SceneGraphNode.Get(objectEID)
 	if !found {
-		objNode = s.AddSceneGraphNode(objectEID)
+		objNode = s.Components.SceneGraphNode.Add(objectEID)
 	}
 
 	// translation, rotation, and scale vec3's
@@ -399,7 +395,7 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 	vpTexture.Texture.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 	defer vpTexture.Texture.Pop()
 
-	segment, found := s.sceneSystems.SpriteFactory.GetSegmentedSprite(objectEID)
+	segment, found := s.Components.SegmentedSprite.Get(objectEID)
 	if found {
 		s.renderSegmentedSprite(vpTexture.Texture, objectEID, segment)
 		return
@@ -411,7 +407,7 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 func (s *BaseScene) renderSegmentedSprite(screen d2interface.Surface, id akara.EID, seg *d2components.SegmentedSprite) {
 	target := screen.Renderer().NewSurface(screen.GetSize())
 
-	animation, found := s.GetSprite(id)
+	sprite, found := s.Components.Sprite.Get(id)
 	if !found {
 		return
 	}
@@ -426,15 +422,15 @@ func (s *BaseScene) renderSegmentedSprite(screen d2interface.Surface, id akara.E
 
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
-			if err := animation.SetCurrentFrame(idx); err != nil {
+			if err := sprite.SetCurrentFrame(idx); err != nil {
 				s.Error("SetCurrentFrame error " + err.Error())
 			}
 
 			target.PushTranslation(x+offsetX, y+offsetY)
-			target.Render(animation.GetCurrentFrameSurface())
+			target.Render(sprite.GetCurrentFrameSurface())
 			target.Pop()
 
-			frameWidth, frameHeight := animation.GetCurrentFrameSize()
+			frameWidth, frameHeight := sprite.GetCurrentFrameSize()
 			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
 			offsetX += frameWidth - 1
 		}
@@ -450,12 +446,12 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 	otherIDs := s.Viewports[mainViewport+1:]
 
 	sort.Slice(otherIDs, func(i, j int) bool {
-		p1, found := s.GetPriority(otherIDs[i])
+		p1, found := s.Components.Priority.Get(otherIDs[i])
 		if !found {
 			return false
 		}
 
-		p2, found := s.GetPriority(otherIDs[j])
+		p2, found := s.Components.Priority.Get(otherIDs[j])
 		if !found {
 			return false
 		}
@@ -463,13 +459,13 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 		return p1.Priority > p2.Priority
 	})
 
-	main, found := s.GetTexture(mainID)
+	main, found := s.Components.Texture.Get(mainID)
 	if !found {
 		return
 	}
 
 	for _, id := range otherIDs {
-		other, found := s.GetTexture(id)
+		other, found := s.Components.Texture.Get(id)
 		if !found {
 			continue
 		}
@@ -480,8 +476,8 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 
 func (s *BaseScene) RegisterTerminalCommand(name, desc string, fn interface{}) {
 	regID := s.NewEntity()
-	reg := s.AddCommandRegistration(regID)
-	s.AddDirty(regID)
+	reg := s.Components.CommandRegistration.Add(regID)
+	s.Components.Dirty.Add(regID)
 
 	reg.Name = name
 	reg.Description = desc

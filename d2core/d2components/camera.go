@@ -49,17 +49,17 @@ func (*Camera) New() akara.Component {
 // CameraFactory is a wrapper for the generic component factory that returns Camera component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Camera.
 type CameraFactory struct {
-	Camera *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddCamera adds a Camera component to the given entity and returns it
-func (m *CameraFactory) AddCamera(id akara.EID) *Camera {
-	return m.Camera.Add(id).(*Camera)
+// Add adds a Camera component to the given entity and returns it
+func (m *CameraFactory) Add(id akara.EID) *Camera {
+	return m.ComponentFactory.Add(id).(*Camera)
 }
 
-// GetCamera returns the Camera component for the given entity, and a bool for whether or not it exists
-func (m *CameraFactory) GetCamera(id akara.EID) (*Camera, bool) {
-	component, found := m.Camera.Get(id)
+// Get returns the Camera component for the given entity, and a bool for whether or not it exists
+func (m *CameraFactory) Get(id akara.EID) (*Camera, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

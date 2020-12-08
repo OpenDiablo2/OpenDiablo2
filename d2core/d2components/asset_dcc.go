@@ -23,17 +23,17 @@ func (*Dcc) New() akara.Component {
 // DccFactory is a wrapper for the generic component factory that returns Dcc component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dcc.
 type DccFactory struct {
-	Dcc *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddDcc adds a Dcc component to the given entity and returns it
-func (m *DccFactory) AddDcc(id akara.EID) *Dcc {
-	return m.Dcc.Add(id).(*Dcc)
+// Add adds a Dcc component to the given entity and returns it
+func (m *DccFactory) Add(id akara.EID) *Dcc {
+	return m.ComponentFactory.Add(id).(*Dcc)
 }
 
-// GetDcc returns the Dcc component for the given entity, and a bool for whether or not it exists
-func (m *DccFactory) GetDcc(id akara.EID) (*Dcc, bool) {
-	component, found := m.Dcc.Get(id)
+// Get returns the Dcc component for the given entity, and a bool for whether or not it exists
+func (m *DccFactory) Get(id akara.EID) (*Dcc, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

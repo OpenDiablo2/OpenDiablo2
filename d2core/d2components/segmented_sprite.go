@@ -28,17 +28,17 @@ func (*SegmentedSprite) New() akara.Component {
 // SegmentedSpriteFactory is a wrapper for the generic component factory that returns SegmentedSprite component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a SegmentedSprite.
 type SegmentedSpriteFactory struct {
-	SegmentedSprite *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddSegmentedSprite adds a SegmentedSprite component to the given entity and returns it
-func (m *SegmentedSpriteFactory) AddSegmentedSprite(id akara.EID) *SegmentedSprite {
-	return m.SegmentedSprite.Add(id).(*SegmentedSprite)
+// Add adds a SegmentedSprite component to the given entity and returns it
+func (m *SegmentedSpriteFactory) Add(id akara.EID) *SegmentedSprite {
+	return m.ComponentFactory.Add(id).(*SegmentedSprite)
 }
 
-// GetSegmentedSprite returns the SegmentedSprite component for the given entity, and a bool for whether or not it exists
-func (m *SegmentedSpriteFactory) GetSegmentedSprite(id akara.EID) (*SegmentedSprite, bool) {
-	component, found := m.SegmentedSprite.Get(id)
+// Get returns the SegmentedSprite component for the given entity, and a bool for whether or not it exists
+func (m *SegmentedSpriteFactory) Get(id akara.EID) (*SegmentedSprite, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

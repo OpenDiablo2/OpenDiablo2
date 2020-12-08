@@ -18,9 +18,9 @@ var _ akara.System = &GameObjectFactory{}
 type GameObjectFactory struct {
 	akara.BaseSystem
 	*d2util.Logger
-	*SpriteFactory
-	*ShapeSystem
-	*UIWidgetFactory
+	Sprites *SpriteFactory
+	Shapes *ShapeSystem
+	UI *UIWidgetFactory
 }
 
 // Init will initialize the Game Object Factory by injecting all of the factory subsystems into the world
@@ -41,14 +41,14 @@ func (t *GameObjectFactory) setupLogger() {
 
 func (t *GameObjectFactory) injectSubSystems() {
 	t.Debug("creating sprite factory")
-	t.SpriteFactory = NewSpriteFactory(t.BaseSystem, t.Logger)
-	t.ShapeSystem = NewShapeSystem(t.BaseSystem, t.Logger)
-	t.UIWidgetFactory = NewUIWidgetFactory(t.BaseSystem, t.Logger, t.SpriteFactory, t.ShapeSystem)
+	t.Sprites = NewSpriteFactory(t.BaseSystem, t.Logger)
+	t.Shapes = NewShapeSystem(t.BaseSystem, t.Logger)
+	t.UI = NewUIWidgetFactory(t.BaseSystem, t.Logger, t.Sprites, t.Shapes)
 }
 
 // Update updates all the sub-sceneSystems
 func (t *GameObjectFactory) Update() {
-	t.SpriteFactory.Update()
-	t.ShapeSystem.Update()
-	t.UIWidgetFactory.Update()
+	t.Sprites.Update()
+	t.Shapes.Update()
+	t.UI.Update()
 }

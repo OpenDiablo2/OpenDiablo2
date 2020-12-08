@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	logPrefixFileHandleResolver = "File Handle Resolver"
+	logPrefixFileHandleResolver = "ComponentFactory Handle Resolver"
 )
 
 // FileHandleResolver is responsible for using file sources to resolve files.
@@ -49,11 +49,13 @@ type FileHandleResolver struct {
 		charset  string
 		language string
 	}
-	d2components.FileFactory
-	d2components.FileTypeFactory
-	d2components.FileSourceFactory
-	d2components.FileHandleFactory
-	d2components.LocaleFactory
+	Components struct {
+		File d2components.FileFactory
+		FileType d2components.FileTypeFactory
+		FileSource d2components.FileSourceFactory
+		FileHandle d2components.FileHandleFactory
+		Locale d2components.LocaleFactory
+	}
 }
 
 // Init initializes the system with the given world
@@ -99,19 +101,19 @@ func (m *FileHandleResolver) setupSubscriptions() {
 		Require(&d2components.Locale{}).
 		Build()
 
-	m.filesToLoad = m.AddSubscription(filesToLoad)
-	m.sourcesToUse = m.AddSubscription(sourcesToUse)
-	m.localesToCheck = m.AddSubscription(localesToCheck)
+	m.filesToLoad = m.World.AddSubscription(filesToLoad)
+	m.sourcesToUse = m.World.AddSubscription(sourcesToUse)
+	m.localesToCheck = m.World.AddSubscription(localesToCheck)
 }
 
 func (m *FileHandleResolver) setupFactories() {
 	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.File{}, &m.File)
-	m.InjectComponent(&d2components.FileType{}, &m.FileType)
-	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
-	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
-	m.InjectComponent(&d2components.Locale{}, &m.Locale)
+	m.InjectComponent(&d2components.File{}, &m.Components.File.ComponentFactory)
+	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
+	m.InjectComponent(&d2components.FileSource{}, &m.Components.FileSource.ComponentFactory)
+	m.InjectComponent(&d2components.FileHandle{}, &m.Components.FileHandle.ComponentFactory)
+	m.InjectComponent(&d2components.Locale{}, &m.Components.Locale.ComponentFactory)
 }
 
 // Update iterates over entities which have not had a file handle resolved.
@@ -124,7 +126,7 @@ func (m *FileHandleResolver) Update() {
 
 	if m.locale.charset == "" && m.locale.language == "" {
 		for _, eid := range locales {
-			locale, _ := m.GetLocale(eid)
+			locale, _ := m.Components.Locale.Get(eid)
 			m.locale.language = locale.String
 			m.locale.charset =  d2resource.GetFontCharset(locale.String)
 			m.RemoveEntity(eid)
@@ -146,22 +148,22 @@ func (m *FileHandleResolver) Update() {
 
 // try to load a file with a source, returns true if loaded
 func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool {
-	fp, found := m.GetFile(fileID)
+	fp, found := m.Components.File.Get(fileID)
 	if !found {
 		return false
 	}
 
-	ft, found := m.GetFileType(fileID)
+	ft, found := m.Components.FileType.Get(fileID)
 	if !found {
 		return false
 	}
 
-	source, found := m.GetFileSource(sourceID)
+	source, found := m.Components.FileSource.Get(sourceID)
 	if !found {
 		return false
 	}
 
-	sourceFp, found := m.GetFile(sourceID)
+	sourceFp, found := m.Components.File.Get(sourceID)
 	if !found {
 		return false
 	}
@@ -175,7 +177,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 
 	cacheKey := m.makeCacheKey(fp.Path, sourceFp.Path)
 	if entry, found := m.cache.Retrieve(cacheKey); found {
-		component := m.AddFileHandle(fileID)
+		component := m.Components.FileHandle.Add(fileID)
 		component.Data = entry.(d2interface.DataStream)
 
 		return true
@@ -198,7 +200,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 
 		cacheKey = m.makeCacheKey(tryPath, sourceFp.Path)
 		if entry, found := m.cache.Retrieve(cacheKey); found {
-			component := m.AddFileHandle(fileID)
+			component := m.Components.FileHandle.Add(fileID)
 			component.Data = entry.(d2interface.DataStream)
 			fp.Path = tryPath
 
@@ -215,7 +217,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 
 	m.Debugf("resolved `%s` with source `%s`", fp.Path, sourceFp.Path)
 
-	component := m.AddFileHandle(fileID)
+	component := m.Components.FileHandle.Add(fileID)
 	component.Data = data
 
 	if err := m.cache.Insert(cacheKey, data, fileHandleCacheEntryWeight); err != nil {

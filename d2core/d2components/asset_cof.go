@@ -23,17 +23,17 @@ func (*Cof) New() akara.Component {
 // CofFactory is a wrapper for the generic component factory that returns Cof component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Cof.
 type CofFactory struct {
-	Cof *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddCof adds a Cof component to the given entity and returns it
-func (m *CofFactory) AddCof(id akara.EID) *Cof {
-	return m.Cof.Add(id).(*Cof)
+// Add adds a Cof component to the given entity and returns it
+func (m *CofFactory) Add(id akara.EID) *Cof {
+	return m.ComponentFactory.Add(id).(*Cof)
 }
 
-// GetCof returns the Cof component for the given entity, and a bool for whether or not it exists
-func (m *CofFactory) GetCof(id akara.EID) (*Cof, bool) {
-	component, found := m.Cof.Get(id)
+// Get returns the Cof component for the given entity, and a bool for whether or not it exists
+func (m *CofFactory) Get(id akara.EID) (*Cof, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

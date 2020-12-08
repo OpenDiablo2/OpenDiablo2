@@ -25,9 +25,11 @@ type InputSystem struct {
 	d2interface.InputService
 	configs      *akara.Subscription
 	interactives *akara.Subscription
-	d2components.GameConfigFactory
-	d2components.InteractiveFactory
 	inputState *d2input.InputVector
+	Components struct {
+		GameConfig d2components.GameConfigFactory
+		Interactive d2components.InteractiveFactory
+	}
 }
 
 // Init initializes the system with the given world, injecting the necessary components
@@ -54,8 +56,8 @@ func (m *InputSystem) setupLogger() {
 func (m *InputSystem) setupFactories() {
 	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
-	m.InjectComponent(&d2components.Interactive{}, &m.Interactive)
+	m.InjectComponent(&d2components.GameConfig{}, &m.Components.GameConfig.ComponentFactory)
+	m.InjectComponent(&d2components.Interactive{}, &m.Components.Interactive.ComponentFactory)
 }
 
 func (m *InputSystem) setupSubscriptions() {
@@ -136,7 +138,7 @@ func (m *InputSystem) updateInputState() {
 }
 
 func (m *InputSystem) applyInputState(id akara.EID) (preventPropagation bool) {
-	v, found := m.GetInteractive(id)
+	v, found := m.Components.Interactive.Get(id)
 	if !found {
 		return false
 	}

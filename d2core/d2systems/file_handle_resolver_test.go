@@ -24,20 +24,19 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 
 	world := akara.NewWorld(cfg)
 
-	filePaths := typeSys.FileFactory
-	fileHandles := handleSys.FileHandleFactory
+	fileHandles := handleSys.Components.FileHandle
 
 	sourceEntity := world.NewEntity()
-	source := filePaths.AddFile(sourceEntity)
+	source := typeSys.Components.File.Add(sourceEntity)
 	source.Path = testDataPath
 
 	fileEntity := world.NewEntity()
-	file := filePaths.AddFile(fileEntity)
+	file := typeSys.Components.File.Add(fileEntity)
 	file.Path = "testfile_a.txt"
 
 	_ = world.Update(0)
 
-	ft, found := typeSys.GetFileType(sourceEntity)
+	ft, found := typeSys.Components.FileType.Get(sourceEntity)
 	if !found {
 		t.Error("file source type not created for entity")
 		return
@@ -48,7 +47,7 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 		return
 	}
 
-	handle, found := fileHandles.GetFileHandle(fileEntity)
+	handle, found := fileHandles.Get(fileEntity)
 	if !found {
 		t.Error("file handle for entity was not found")
 		return

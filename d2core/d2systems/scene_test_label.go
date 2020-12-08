@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	sceneKeyLabelTest = "Label Test Scene"
+	sceneKeyLabelTest = "ComponentFactory Test Scene"
 )
 
 // NewLabelTestScene creates a new main menu scene. This is the first screen that the user
@@ -34,6 +34,7 @@ type LabelTestScene struct {
 	*BaseScene
 	booted   bool
 	labels *akara.Subscription
+	velocity d2components.VelocityFactory
 }
 
 // Init the main menu scene
@@ -42,6 +43,8 @@ func (s *LabelTestScene) Init(world *akara.World) {
 
 	labels := s.World.NewComponentFilter().Require(&d2components.Label{}).Build()
 	s.labels = s.World.AddSubscription(labels)
+
+	s.InjectComponent(&d2components.Velocity{}, &s.velocity.ComponentFactory)
 
 	s.Debug("initializing ...")
 }
@@ -52,16 +55,48 @@ func (s *LabelTestScene) boot() {
 		return
 	}
 
+	s.AddSystem(&MovementSystem{})
+
 	s.createLabels()
 
 	s.booted = true
 }
 
 func (s *LabelTestScene) createLabels() {
-	for idx := 0; idx < 1000; idx++ {
-		l := s.Add.Label("LOLWUT", d2resource.Font24, d2resource.PaletteStatic)
-		trs := s.AddTransform(l)
+	fonts := []string{
+		d2resource.Font6,
+		d2resource.Font8,
+		d2resource.Font16,
+		d2resource.Font24,
+		d2resource.Font30,
+		d2resource.Font42,
+		d2resource.FontFormal12,
+		d2resource.FontFormal11,
+		d2resource.FontFormal10,
+		d2resource.FontExocet10,
+		d2resource.FontExocet8,
+		d2resource.FontSucker,
+		d2resource.FontRediculous,
+	}
+
+	for idx := 0; idx < 100; idx++ {
+		fontIdx := rand.Intn(len(fonts))
+
+		labelEID := s.Add.Label("Open Diablo II", fonts[fontIdx], d2resource.PaletteStatic)
+
+		c := s.Components.Color.Add(labelEID)
+
+		r, g, b, a := uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255))
+		c.Color = color.RGBA{r, g, b, a}
+
+		trs := s.Components.Transform.Add(labelEID)
 		trs.Translation.Set(rand.Float64()*800, rand.Float64()*600, 1)
+
+		v := s.velocity.Add(labelEID)
+
+		rx, ry := (rand.Float64()-0.5)*2, (rand.Float64()-0.5)*2
+
+		v.Set(rx*20, ry*20, v.Z)
 	}
 }
 
@@ -70,43 +105,10 @@ func (s *LabelTestScene) Update() {
 	if s.Paused() {
 		return
 	}
-
-	for _, eid := range s.labels.GetEntities() {
-		//s.setLabelBackground(eid)
-		s.updatePosition(eid)
-	}
-
+	
 	if !s.booted {
 		s.boot()
 	}
 
 	s.BaseScene.Update()
-}
-
-func (s *LabelTestScene) setLabelBackground(eid akara.EID) {
-	label, found := s.GetLabel(eid)
-	if !found {
-		return
-	}
-
-	label.SetBackgroundColor(color.Black)
-}
-
-func (s *LabelTestScene) updatePosition(eid akara.EID) {
-	trs, found := s.GetTransform(eid)
-	if !found {
-		return
-	}
-
-	x, y, z := trs.Translation.AddScalar(1).XYZ()
-
-	if x > 800 {
-		x -= 800
-	}
-
-	if y > 600 {
-		y -= 600
-	}
-
-	trs.Translation.Set(x, y, z)
 }

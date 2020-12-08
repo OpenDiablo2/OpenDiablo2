@@ -23,17 +23,17 @@ func (*Texture) New() akara.Component {
 // TextureFactory is a wrapper for the generic component factory that returns Texture component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Texture.
 type TextureFactory struct {
-	Texture *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddTexture adds a Texture component to the given entity and returns it
-func (m *TextureFactory) AddTexture(id akara.EID) *Texture {
-	return m.Texture.Add(id).(*Texture)
+// Add adds a Texture component to the given entity and returns it
+func (m *TextureFactory) Add(id akara.EID) *Texture {
+	return m.ComponentFactory.Add(id).(*Texture)
 }
 
-// GetTexture returns the Texture component for the given entity, and a bool for whether or not it exists
-func (m *TextureFactory) GetTexture(id akara.EID) (*Texture, bool) {
-	component, found := m.Texture.Get(id)
+// Get returns the Texture component for the given entity, and a bool for whether or not it exists
+func (m *TextureFactory) Get(id akara.EID) (*Texture, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

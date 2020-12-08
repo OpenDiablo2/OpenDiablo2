@@ -25,16 +25,16 @@ const (
 )
 
 const (
-	sceneTestArg = "testscene"
+	sceneTestArg  = "testscene"
 	sceneTestDesc = "test a scene"
 
-	serverArg = "server"
+	serverArg  = "server"
 	serverDesc = "run dedicated server"
 
-	counterArg = "counter"
+	counterArg  = "counter"
 	counterDesc = "print updates/sec"
 
-	skipSplashArg = "nosplash"
+	skipSplashArg  = "nosplash"
 	skipSplashDesc = "skip the ebiten splash screen"
 
 	profilerArg  = "profile"
@@ -51,11 +51,13 @@ type AppBootstrap struct {
 	*d2util.Logger
 	subscribedFiles   *akara.Subscription
 	subscribedConfigs *akara.Subscription
-	d2components.GameConfigFactory
-	d2components.FileFactory
-	d2components.FileTypeFactory
-	d2components.FileHandleFactory
-	d2components.FileSourceFactory
+	Components        struct {
+		GameConfig d2components.GameConfigFactory
+		File       d2components.FileFactory
+		FileType   d2components.FileTypeFactory
+		FileHandle d2components.FileHandleFactory
+		FileSource d2components.FileSourceFactory
+	}
 }
 
 // Init will inject (or use existing) components related to setting up the config sources
@@ -122,11 +124,11 @@ func (m *AppBootstrap) setupSubscriptions() {
 func (m *AppBootstrap) setupFactories() {
 	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
-	m.InjectComponent(&d2components.File{}, &m.File)
-	m.InjectComponent(&d2components.FileType{}, &m.FileType)
-	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
-	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
+	m.InjectComponent(&d2components.GameConfig{}, &m.Components.GameConfig.ComponentFactory)
+	m.InjectComponent(&d2components.File{}, &m.Components.File.ComponentFactory)
+	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
+	m.InjectComponent(&d2components.FileHandle{}, &m.Components.FileHandle.ComponentFactory)
+	m.InjectComponent(&d2components.FileSource{}, &m.Components.FileSource.ComponentFactory)
 }
 
 func (m *AppBootstrap) injectSystems() {
@@ -156,7 +158,7 @@ func (m *AppBootstrap) setupConfigSources() {
 	e1, e2 := m.NewEntity(), m.NewEntity()
 
 	// add file path components to these entities
-	fp1, fp2 := m.AddFile(e1), m.AddFile(e2)
+	fp1, fp2 := m.Components.File.Add(e1), m.Components.File.Add(e2)
 
 	// the first entity gets a filepath for the od2 directory, this one is checked first
 	// eg. if OD2 binary is in `~/src/OpenDiablo2/`, then this directory is checked first for a config file
@@ -179,13 +181,13 @@ func (m *AppBootstrap) setupConfigSources() {
 
 func (m *AppBootstrap) setupConfigFile() {
 	// add an entity that will get picked up by the game config system and loaded
-	m.AddFile(m.NewEntity()).Path = configFileName
+	m.Components.File.Add(m.NewEntity()).Path = configFileName
 	m.Infof("setting up config file `%s` for processing", configFileName)
 }
 
 func (m *AppBootstrap) setupLocaleFile() {
 	// add an entity that will get picked up by the game config system and loaded
-	m.AddFile(m.NewEntity()).Path = d2resource.LocalLanguage
+	m.Components.File.Add(m.NewEntity()).Path = d2resource.LocalLanguage
 	m.Infof("setting up locale file `%s` for processing", d2resource.LocalLanguage)
 }
 
@@ -201,7 +203,7 @@ func (m *AppBootstrap) Update() {
 
 	firstConfigEntityID := configs[0]
 
-	cfg, found := m.GetGameConfig(firstConfigEntityID)
+	cfg, found := m.Components.GameConfig.Get(firstConfigEntityID)
 	if !found {
 		return
 	}
@@ -220,7 +222,7 @@ func (m *AppBootstrap) initMpqSources(cfg *d2components.GameConfig) {
 		m.Infof("adding mpq: %s", fullMpqFilePath)
 
 		// make a new entity for the mpq file source
-		mpqSource := m.AddFile(m.NewEntity())
+		mpqSource := m.Components.File.Add(m.NewEntity())
 		mpqSource.Path = fullMpqFilePath
 	}
 }

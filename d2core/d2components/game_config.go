@@ -93,17 +93,17 @@ func (*GameConfig) New() akara.Component {
 // GameConfigFactory is a wrapper for the generic component factory that returns GameConfig component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a GameConfig.
 type GameConfigFactory struct {
-	GameConfig *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddGameConfig adds a GameConfig component to the given entity and returns it
-func (m *GameConfigFactory) AddGameConfig(id akara.EID) *GameConfig {
-	return m.GameConfig.Add(id).(*GameConfig)
+// Add adds a GameConfig component to the given entity and returns it
+func (m *GameConfigFactory) Add(id akara.EID) *GameConfig {
+	return m.ComponentFactory.Add(id).(*GameConfig)
 }
 
-// GetGameConfig returns the GameConfig component for the given entity, and a bool for whether or not it exists
-func (m *GameConfigFactory) GetGameConfig(id akara.EID) (*GameConfig, bool) {
-	component, found := m.GameConfig.Get(id)
+// Get returns the GameConfig component for the given entity, and a bool for whether or not it exists
+func (m *GameConfigFactory) Get(id akara.EID) (*GameConfig, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

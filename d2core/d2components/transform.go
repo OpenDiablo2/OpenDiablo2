@@ -38,17 +38,17 @@ func (*Transform) New() akara.Component {
 // TransformFactory is a wrapper for the generic component factory that returns Transform component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Transform.
 type TransformFactory struct {
-	Transform *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddTransform adds a Transform component to the given entity and returns it
-func (m *TransformFactory) AddTransform(id akara.EID) *Transform {
-	return m.Transform.Add(id).(*Transform)
+// Add adds a Transform component to the given entity and returns it
+func (m *TransformFactory) Add(id akara.EID) *Transform {
+	return m.ComponentFactory.Add(id).(*Transform)
 }
 
-// GetTransform returns the Transform component for the given entity, and a bool for whether or not it exists
-func (m *TransformFactory) GetTransform(id akara.EID) (*Transform, bool) {
-	component, found := m.Transform.Get(id)
+// Get returns the Transform component for the given entity, and a bool for whether or not it exists
+func (m *TransformFactory) Get(id akara.EID) (*Transform, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

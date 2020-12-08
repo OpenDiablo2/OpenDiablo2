@@ -83,7 +83,7 @@ func (s *TerminalScene) boot() {
 // Update and render the terminal to the terminal viewport
 func (s *TerminalScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityTerminal
+		s.Components.Priority.Add(id).Priority = scenePriorityTerminal
 	}
 
 	if s.Paused() {
@@ -111,7 +111,7 @@ func (s *TerminalScene) processCommandRegistrations() {
 }
 
 func (s *TerminalScene) processCommand(eid akara.EID) {
-	reg, found := s.GetCommandRegistration(eid)
+	reg, found := s.Components.CommandRegistration.Get(eid)
 	if !found {
 		return
 	}
@@ -123,7 +123,7 @@ func (s *TerminalScene) processCommand(eid akara.EID) {
 		s.Error(err.Error())
 	}
 
-	s.Dirty.Remove(eid)
+	s.Components.Dirty.Remove(eid)
 }
 
 func (s *TerminalScene) createTerminal() {
@@ -139,13 +139,13 @@ func (s *TerminalScene) createTerminal() {
 
 	termVP := s.Add.Viewport(viewportTerminal, 800, 600)
 
-	texture, _ := s.GetTexture(termVP)
+	texture, _ := s.Components.Texture.Get(termVP)
 	texture.Texture.Clear(color.Transparent)
 
-	alpha := s.AddAlpha(termVP)
+	alpha := s.Components.Alpha.Add(termVP)
 	alpha.Alpha = 0.5
 
-	vpFilter := s.AddViewportFilter(termVP)
+	vpFilter := s.Components.ViewportFilter.Add(termVP)
 
 	vpFilter.Set(viewportTerminal, true)
 }
@@ -158,7 +158,7 @@ func (s *TerminalScene) updateTerminal() {
 
 	termVP := s.Viewports[viewportTerminal]
 
-	texture, _ := s.GetTexture(termVP)
+	texture, _ := s.Components.Texture.Get(termVP)
 	texture.Texture.Clear(color.Transparent)
 
 	_ = s.Terminal.Render(texture.Texture)

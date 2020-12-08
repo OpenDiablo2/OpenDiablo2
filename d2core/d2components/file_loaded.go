@@ -19,17 +19,17 @@ func (*FileLoaded) New() akara.Component {
 // FileLoadedFactory is a wrapper for the generic component factory that returns FileLoaded component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FileLoaded.
 type FileLoadedFactory struct {
-	FileLoaded *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddFileLoaded adds a FileLoaded component to the given entity and returns it
-func (m *FileLoadedFactory) AddFileLoaded(id akara.EID) *FileLoaded {
-	return m.FileLoaded.Add(id).(*FileLoaded)
+// Add adds a FileLoaded component to the given entity and returns it
+func (m *FileLoadedFactory) Add(id akara.EID) *FileLoaded {
+	return m.ComponentFactory.Add(id).(*FileLoaded)
 }
 
-// GetFileLoaded returns the FileLoaded component for the given entity, and a bool for whether or not it exists
-func (m *FileLoadedFactory) GetFileLoaded(id akara.EID) (*FileLoaded, bool) {
-	component, found := m.FileLoaded.Get(id)
+// Get returns the FileLoaded component for the given entity, and a bool for whether or not it exists
+func (m *FileLoadedFactory) Get(id akara.EID) (*FileLoaded, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

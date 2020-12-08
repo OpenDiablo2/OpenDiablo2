@@ -27,17 +27,17 @@ func (*Origin) New() akara.Component {
 // OriginFactory is a wrapper for the generic component factory that returns Origin component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Origin.
 type OriginFactory struct {
-	Origin *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddOrigin adds a Origin component to the given entity and returns it
-func (m *OriginFactory) AddOrigin(id akara.EID) *Origin {
-	return m.Origin.Add(id).(*Origin)
+// Add adds a Origin component to the given entity and returns it
+func (m *OriginFactory) Add(id akara.EID) *Origin {
+	return m.ComponentFactory.Add(id).(*Origin)
 }
 
-// GetOrigin returns the Origin component for the given entity, and a bool for whether or not it exists
-func (m *OriginFactory) GetOrigin(id akara.EID) (*Origin, bool) {
-	component, found := m.Origin.Get(id)
+// Get returns the Origin component for the given entity, and a bool for whether or not it exists
+func (m *OriginFactory) Get(id akara.EID) (*Origin, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

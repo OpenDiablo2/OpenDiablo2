@@ -24,7 +24,7 @@ const (
 func NewSpriteFactory(b akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
 	sys := &SpriteFactory{
 		Logger: l,
-		cache: d2cache.CreateCache(spriteCacheBudget),
+		cache:  d2cache.CreateCache(spriteCacheBudget),
 	}
 
 	sys.BaseSystem = b
@@ -45,20 +45,22 @@ type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 type SpriteFactory struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	RenderSystem *RenderSystem
-	d2components.FileFactory
-	d2components.TransformFactory
-	d2components.Dc6Factory
-	d2components.DccFactory
-	d2components.PaletteFactory
-	d2components.SpriteFactory
-	d2components.TextureFactory
-	d2components.OriginFactory
-	d2components.SegmentedSpriteFactory
+	RenderSystem    *RenderSystem
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
 	spritesToUpdate *akara.Subscription
-	cache d2interface.Cache
+	cache           d2interface.Cache
+	Components      struct {
+		File            d2components.FileFactory
+		Transform       d2components.TransformFactory
+		Dc6             d2components.Dc6Factory
+		Dcc             d2components.DccFactory
+		Palette         d2components.PaletteFactory
+		Sprite          d2components.SpriteFactory
+		Texture         d2components.TextureFactory
+		Origin          d2components.OriginFactory
+		SegmentedSprite d2components.SegmentedSpriteFactory
+	}
 }
 
 // Init the sprite factory, injecting the necessary components
@@ -74,15 +76,15 @@ func (t *SpriteFactory) Init(world *akara.World) {
 }
 
 func (t *SpriteFactory) setupFactories() {
-	t.InjectComponent(&d2components.File{}, &t.File)
-	t.InjectComponent(&d2components.Transform{}, &t.Transform)
-	t.InjectComponent(&d2components.Dc6{}, &t.Dc6)
-	t.InjectComponent(&d2components.Dcc{}, &t.Dcc)
-	t.InjectComponent(&d2components.Palette{}, &t.Palette)
-	t.InjectComponent(&d2components.Texture{}, &t.Texture)
-	t.InjectComponent(&d2components.Origin{}, &t.Origin)
-	t.InjectComponent(&d2components.Sprite{}, &t.SpriteFactory.Sprite)
-	t.InjectComponent(&d2components.SegmentedSprite{}, &t.SegmentedSpriteFactory.SegmentedSprite)
+	t.InjectComponent(&d2components.File{}, &t.Components.File.ComponentFactory)
+	t.InjectComponent(&d2components.Transform{}, &t.Components.Transform.ComponentFactory)
+	t.InjectComponent(&d2components.Dc6{}, &t.Components.Dc6.ComponentFactory)
+	t.InjectComponent(&d2components.Dcc{}, &t.Components.Dcc.ComponentFactory)
+	t.InjectComponent(&d2components.Palette{}, &t.Components.Palette.ComponentFactory)
+	t.InjectComponent(&d2components.Texture{}, &t.Components.Texture.ComponentFactory)
+	t.InjectComponent(&d2components.Origin{}, &t.Components.Origin.ComponentFactory)
+	t.InjectComponent(&d2components.Sprite{}, &t.Components.Sprite.ComponentFactory)
+	t.InjectComponent(&d2components.SegmentedSprite{}, &t.Components.SegmentedSprite.ComponentFactory)
 }
 
 func (t *SpriteFactory) setupSubscriptions() {
@@ -92,7 +94,7 @@ func (t *SpriteFactory) setupSubscriptions() {
 		Build()
 
 	spritesToUpdate := t.NewComponentFilter().
-		Require(&d2components.Sprite{}).  // we want to process entities that have an sprite ...
+		Require(&d2components.Sprite{}). // we want to process entities that have an sprite ...
 		Require(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
@@ -116,16 +118,16 @@ func (t *SpriteFactory) Update() {
 	}
 }
 
-// Sprite queues a sprite spriteation to be loaded
+// ComponentFactory queues a sprite spriteation to be loaded
 func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	spriteID := t.NewEntity()
 
-	transform := t.AddTransform(spriteID)
+	transform := t.Components.Transform.Add(spriteID)
 	transform.Translation.X, transform.Translation.Y = x, y
 
 	imgID, palID := t.NewEntity(), t.NewEntity()
-	t.AddFile(imgID).Path = imgPath
-	t.AddFile(palID).Path = palPath
+	t.Components.File.Add(imgID).Path = imgPath
+	t.Components.File.Add(palID).Path = palPath
 
 	t.loadQueue[spriteID] = spriteLoadQueueEntry{
 		spriteImage:   imgID,
@@ -135,12 +137,12 @@ func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID 
 	return spriteID
 }
 
-// SegmentedSprite queues a segmented sprite spriteation to be loaded.
+// ComponentFactory queues a segmented sprite spriteation to be loaded.
 // A segmented sprite is a sprite that has many frames that form the entire sprite.
 func (t *SpriteFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	spriteID := t.Sprite(x, y, imgPath, palPath)
 
-	s := t.AddSegmentedSprite(spriteID)
+	s := t.Components.SegmentedSprite.Add(spriteID)
 	s.Xsegments = xseg
 	s.Ysegments = yseg
 	s.FrameOffset = frame
@@ -152,17 +154,17 @@ func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 	entry := t.loadQueue[id]
 	imageID, paletteID := entry.spriteImage, entry.spritePalette
 
-	imageFile, found := t.GetFile(imageID)
+	imageFile, found := t.Components.File.Get(imageID)
 	if !found {
 		return
 	}
 
-	paletteFile, found := t.GetFile(paletteID)
+	paletteFile, found := t.Components.File.Get(paletteID)
 	if !found {
 		return
 	}
 
-	palette, found := t.GetPalette(paletteID)
+	palette, found := t.Components.Palette.Get(paletteID)
 	if !found {
 		return
 	}
@@ -176,12 +178,12 @@ func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 		sprite = iface.(d2interface.Sprite)
 	}
 
-	if dc6, found := t.GetDc6(imageID); found && sprite == nil {
+	if dc6, found := t.Components.Dc6.Get(imageID); found && sprite == nil {
 		sprite, err = t.createDc6Sprite(dc6, palette)
 		_ = t.cache.Insert(cacheKey, sprite, 1)
 	}
 
-	if dcc, found := t.GetDcc(imageID); found && sprite == nil {
+	if dcc, found := t.Components.Dcc.Get(imageID); found && sprite == nil {
 		sprite, err = t.createDccSprite(dcc, palette)
 		_ = t.cache.Insert(cacheKey, sprite, 1)
 	}
@@ -194,7 +196,7 @@ func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 		t.RemoveEntity(paletteID)
 	}
 
-	spriteComponent := t.AddSprite(id)
+	spriteComponent := t.Components.Sprite.Add(id)
 	spriteComponent.Sprite = sprite
 	spriteComponent.SpritePath = imageFile.Path
 	spriteComponent.PalettePath = paletteFile.Path
@@ -211,7 +213,7 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 		return
 	}
 
-	sprite, found := t.GetSprite(eid)
+	sprite, found := t.Components.Sprite.Get(eid)
 	if !found {
 		return
 	}
@@ -224,7 +226,7 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 
 	sfc := sprite.GetCurrentFrameSurface()
 
-	t.AddTexture(eid).Texture = sfc
+	t.Components.Texture.Add(eid).Texture = sfc
 }
 
 func (t *SpriteFactory) updateSprite(eid akara.EID) {
@@ -236,7 +238,7 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 		return
 	}
 
-	sprite, found := t.GetSprite(eid)
+	sprite, found := t.Components.Sprite.Get(eid)
 	if !found {
 		return
 	}
@@ -245,14 +247,14 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 		return
 	}
 
-	texture, found := t.GetTexture(eid)
+	texture, found := t.Components.Texture.Get(eid)
 	if !found {
 		return
 	}
 
-	origin, found := t.GetOrigin(eid)
+	origin, found := t.Components.Origin.Get(eid)
 	if !found {
-		origin = t.AddOrigin(eid)
+		origin = t.Components.Origin.Add(eid)
 	}
 
 	_ = sprite.Sprite.Advance(t.World.TimeDelta)
@@ -262,7 +264,7 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 	ox, oy := sprite.GetCurrentFrameOffset()
 	origin.X, origin.Y = float64(ox), float64(oy)
 
-	if _, isSegmented := t.GetSegmentedSprite(eid); !isSegmented {
+	if _, isSegmented := t.Components.SegmentedSprite.Get(eid); !isSegmented {
 		_, frameHeight := sprite.GetCurrentFrameSize()
 		origin.Y -= float64(frameHeight)
 	}

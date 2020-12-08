@@ -23,17 +23,17 @@ func (*FileHandle) New() akara.Component {
 // FileHandleFactory is a wrapper for the generic component factory that returns FileHandle component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FileHandle.
 type FileHandleFactory struct {
-	FileHandle *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddFileHandle adds a FileHandle component to the given entity and returns it
-func (m *FileHandleFactory) AddFileHandle(id akara.EID) *FileHandle {
-	return m.FileHandle.Add(id).(*FileHandle)
+// Add adds a FileHandle component to the given entity and returns it
+func (m *FileHandleFactory) Add(id akara.EID) *FileHandle {
+	return m.ComponentFactory.Add(id).(*FileHandle)
 }
 
-// GetFileHandle returns the FileHandle component for the given entity, and a bool for whether or not it exists
-func (m *FileHandleFactory) GetFileHandle(id akara.EID) (*FileHandle, bool) {
-	component, found := m.FileHandle.Get(id)
+// Get returns the FileHandle component for the given entity, and a bool for whether or not it exists
+func (m *FileHandleFactory) Get(id akara.EID) (*FileHandle, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

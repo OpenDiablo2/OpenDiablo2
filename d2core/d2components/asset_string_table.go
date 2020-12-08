@@ -23,17 +23,17 @@ func (*StringTable) New() akara.Component {
 // StringTableFactory is a wrapper for the generic component factory that returns StringTable component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a StringTable.
 type StringTableFactory struct {
-	StringTable *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddStringTable adds a StringTable component to the given entity and returns it
-func (m *StringTableFactory) AddStringTable(id akara.EID) *StringTable {
-	return m.StringTable.Add(id).(*StringTable)
+// Add adds a StringTable component to the given entity and returns it
+func (m *StringTableFactory) Add(id akara.EID) *StringTable {
+	return m.ComponentFactory.Add(id).(*StringTable)
 }
 
-// GetStringTable returns the StringTable component for the given entity, and a bool for whether or not it exists
-func (m *StringTableFactory) GetStringTable(id akara.EID) (*StringTable, bool) {
-	component, found := m.StringTable.Get(id)
+// Get returns the StringTable component for the given entity, and a bool for whether or not it exists
+func (m *StringTableFactory) Get(id akara.EID) (*StringTable, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

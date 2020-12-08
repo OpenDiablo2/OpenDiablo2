@@ -16,17 +16,18 @@ type sceneObjectFactory struct {
 }
 
 func (s *sceneObjectFactory) addBasicComponents(id akara.EID) {
-	node := s.AddSceneGraphNode(id)
+	node := s.Components.SceneGraphNode.Add(id)
 	node.SetParent(s.Graph)
 
-	_ = s.AddAlpha(id)
-	_ = s.AddOrigin(id)
+	_ = s.Components.Transform.Add(id)
+	_ = s.Components.Origin.Add(id)
+	_ = s.Components.Alpha.Add(id)
 }
 
 func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	s.Debugf("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.sceneSystems.SpriteFactory.Sprite(x, y, imgPath, palPath)
+	eid := s.sceneSystems.Sprites.Sprite(x, y, imgPath, palPath)
 	s.SceneObjects = append(s.SceneObjects, eid)
 
 	s.addBasicComponents(eid)
@@ -37,7 +38,7 @@ func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara
 func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	s.Debugf("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.sceneSystems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
+	eid := s.sceneSystems.Sprites.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
 	s.SceneObjects = append(s.SceneObjects, eid)
 
 	s.addBasicComponents(eid)
@@ -49,22 +50,22 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 	s.Debugf("creating viewport #%d", priority)
 
 	eid := s.NewEntity()
-	s.AddViewport(eid)
-	s.AddPriority(eid).Priority = priority
+	s.Components.Viewport.Add(eid)
+	s.Components.Priority.Add(eid).Priority = priority
 
 	if priority == mainViewport {
-		s.AddMainViewport(eid)
+		s.Components.MainViewport.Add(eid)
 	}
 
-	camera := s.AddCamera(eid)
+	camera := s.Components.Camera.Add(eid)
 	camera.Size.X = float64(width)
 	camera.Size.Y = float64(height)
 
-	sfc := s.sceneSystems.RenderSystem.renderer.NewSurface(width, height)
+	sfc := s.sceneSystems.Render.renderer.NewSurface(width, height)
 
 	sfc.Clear(color.Transparent)
 
-	s.AddTexture(eid).Texture = sfc
+	s.Components.Texture.Add(eid).Texture = sfc
 
 	s.Viewports = append(s.Viewports, eid)
 
@@ -76,11 +77,11 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 func (s *sceneObjectFactory) Rectangle(x, y, width, height int, c color.Color) akara.EID {
 	s.Debug("creating rectangle")
 
-	eid := s.sceneSystems.ShapeSystem.Rectangle(x, y, width, height, c)
+	eid := s.sceneSystems.Shapes.Rectangle(x, y, width, height, c)
 
 	s.addBasicComponents(eid)
 
-	transform := s.AddTransform(eid)
+	transform := s.Components.Transform.Add(eid)
 	transform.Translation.X, transform.Translation.Y = float64(x), float64(y)
 
 	s.SceneObjects = append(s.SceneObjects, eid)
@@ -91,11 +92,11 @@ func (s *sceneObjectFactory) Rectangle(x, y, width, height int, c color.Color) a
 func (s *sceneObjectFactory) Button(x, y float64, imgPath, palPath string) akara.EID {
 	s.Debug("creating button")
 
-	eid := s.sceneSystems.UIWidgetFactory.Button(x, y, imgPath, palPath)
+	eid := s.sceneSystems.UI.Button(x, y, imgPath, palPath)
 
 	s.addBasicComponents(eid)
 
-	transform := s.AddTransform(eid)
+	transform := s.Components.Transform.Add(eid)
 	transform.Translation.X, transform.Translation.Y = float64(x), float64(y)
 
 	s.SceneObjects = append(s.SceneObjects, eid)
@@ -106,7 +107,7 @@ func (s *sceneObjectFactory) Button(x, y float64, imgPath, palPath string) akara
 func (s *sceneObjectFactory) Label(fontPath, spritePath, palettePath string) akara.EID {
 	s.Debug("creating label")
 
-	eid := s.sceneSystems.UIWidgetFactory.Label(fontPath, spritePath, palettePath)
+	eid := s.sceneSystems.UI.Label(fontPath, spritePath, palettePath)
 
 	s.addBasicComponents(eid)
 

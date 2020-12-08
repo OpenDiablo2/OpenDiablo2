@@ -23,17 +23,17 @@ func (*AnimationData) New() akara.Component {
 // AnimationDataFactory is a wrapper for the generic component factory that returns AnimationData component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a AnimationData.
 type AnimationDataFactory struct {
-	AnimationData *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddAnimationData adds a AnimationData component to the given entity and returns it
-func (m *AnimationDataFactory) AddAnimationData(id akara.EID) *AnimationData {
-	return m.AnimationData.Add(id).(*AnimationData)
+// Add adds a AnimationData component to the given entity and returns it
+func (m *AnimationDataFactory) Add(id akara.EID) *AnimationData {
+	return m.ComponentFactory.Add(id).(*AnimationData)
 }
 
-// GetAnimationData returns the AnimationData component for the given entity, and a bool for whether or not it exists
-func (m *AnimationDataFactory) GetAnimationData(id akara.EID) (*AnimationData, bool) {
-	component, found := m.AnimationData.Get(id)
+// Get returns the AnimationData component for the given entity, and a bool for whether or not it exists
+func (m *AnimationDataFactory) Get(id akara.EID) (*AnimationData, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

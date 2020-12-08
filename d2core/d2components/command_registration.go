@@ -26,17 +26,17 @@ func (*CommandRegistration) New() akara.Component {
 // CommandRegistrationFactory is a wrapper for the generic component factory that returns CommandRegistration component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a CommandRegistration.
 type CommandRegistrationFactory struct {
-	CommandRegistration *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddCommandRegistration adds a CommandRegistration component to the given entity and returns it
-func (m *CommandRegistrationFactory) AddCommandRegistration(id akara.EID) *CommandRegistration {
-	return m.CommandRegistration.Add(id).(*CommandRegistration)
+// Add adds a CommandRegistration component to the given entity and returns it
+func (m *CommandRegistrationFactory) Add(id akara.EID) *CommandRegistration {
+	return m.ComponentFactory.Add(id).(*CommandRegistration)
 }
 
-// GetCommandRegistration returns the CommandRegistration component for the given entity, and a bool for whether or not it exists
-func (m *CommandRegistrationFactory) GetCommandRegistration(id akara.EID) (*CommandRegistration, bool) {
-	component, found := m.CommandRegistration.Get(id)
+// Get returns the CommandRegistration component for the given entity, and a bool for whether or not it exists
+func (m *CommandRegistrationFactory) Get(id akara.EID) (*CommandRegistration, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

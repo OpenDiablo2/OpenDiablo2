@@ -21,16 +21,13 @@ func Test_FileSourceResolution(t *testing.T) {
 
 	world := akara.NewWorld(cfg)
 
-	filePaths := typeSys.FileFactory
-	fileSources := sourceSys.FileSourceFactory
-
 	sourceEntity := world.NewEntity()
-	sourceFp := filePaths.AddFile(sourceEntity)
+	sourceFp := typeSys.Components.File.Add(sourceEntity)
 	sourceFp.Path = testDataPath
 
 	_ = world.Update(0)
 
-	ft, found := typeSys.GetFileType(sourceEntity)
+	ft, found := typeSys.Components.FileType.Get(sourceEntity)
 	if !found {
 		t.Error("file source type not created for entity")
 	}
@@ -39,7 +36,7 @@ func Test_FileSourceResolution(t *testing.T) {
 		t.Error("expected file system source type for entity")
 	}
 
-	fs, found := fileSources.GetFileSource(sourceEntity)
+	fs, found := sourceSys.Components.FileSource.Get(sourceEntity)
 	if !found {
 		t.Error("file source not created for entity")
 	}

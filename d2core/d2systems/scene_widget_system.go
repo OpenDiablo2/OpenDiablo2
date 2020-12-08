@@ -61,15 +61,19 @@ type UIWidgetFactory struct {
 	buttonLoadQueue
 	labelLoadQueue
 	bitmapFontCache d2interface.Cache
-	d2components.FileFactory
-	d2components.TransformFactory
-	d2components.InteractiveFactory
-	d2components.FontTableFactory
-	d2components.PaletteFactory
-	d2components.BitmapFontFactory
-	d2components.LabelFactory
-	labelsToUpdate *akara.Subscription
-	booted bool
+	labelsToUpdate  *akara.Subscription
+	booted          bool
+	Components      struct {
+		File        d2components.FileFactory
+		Transform   d2components.TransformFactory
+		Interactive d2components.InteractiveFactory
+		FontTable   d2components.FontTableFactory
+		Palette     d2components.PaletteFactory
+		BitmapFont  d2components.BitmapFontFactory
+		Label       d2components.LabelFactory
+		Sprite      d2components.SpriteFactory
+		Color      d2components.ColorFactory
+	}
 }
 
 // Init the ui widget factory, injecting the necessary components
@@ -83,13 +87,15 @@ func (t *UIWidgetFactory) Init(world *akara.World) {
 }
 
 func (t *UIWidgetFactory) setupFactories() {
-	t.InjectComponent(&d2components.File{}, &t.File)
-	t.InjectComponent(&d2components.Transform{}, &t.Transform)
-	t.InjectComponent(&d2components.Interactive{}, &t.Interactive)
-	t.InjectComponent(&d2components.FontTable{}, &t.FontTable)
-	t.InjectComponent(&d2components.Palette{}, &t.Palette)
-	t.InjectComponent(&d2components.BitmapFont{}, &t.BitmapFont)
-	t.InjectComponent(&d2components.Label{}, &t.LabelFactory.Label)
+	t.InjectComponent(&d2components.File{}, &t.Components.File.ComponentFactory)
+	t.InjectComponent(&d2components.Transform{}, &t.Components.Transform.ComponentFactory)
+	t.InjectComponent(&d2components.Interactive{}, &t.Components.Interactive.ComponentFactory)
+	t.InjectComponent(&d2components.FontTable{}, &t.Components.FontTable.ComponentFactory)
+	t.InjectComponent(&d2components.Palette{}, &t.Components.Palette.ComponentFactory)
+	t.InjectComponent(&d2components.BitmapFont{}, &t.Components.BitmapFont.ComponentFactory)
+	t.InjectComponent(&d2components.Label{}, &t.Components.Label.ComponentFactory)
+	t.InjectComponent(&d2components.Sprite{}, &t.Components.Sprite.ComponentFactory)
+	t.InjectComponent(&d2components.Color{}, &t.Components.Color.ComponentFactory)
 }
 
 func (t *UIWidgetFactory) setupSubscriptions() {
@@ -129,7 +135,7 @@ func (t *UIWidgetFactory) Update() {
 	}
 }
 
-// Label creates a label widget.
+// ComponentFactory creates a label widget.
 //
 // The font is assumed to be a path for two files, omiting the file extension
 //
@@ -149,24 +155,24 @@ func (t *UIWidgetFactory) Label(text, font, palettePath string) akara.EID {
 	labelEID := t.NewEntity()
 
 	tableEID := t.NewEntity()
-	t.AddFile(tableEID).Path = tablePath
+	t.Components.File.Add(tableEID).Path = tablePath
 
 	spriteEID := t.SpriteFactory.Sprite(0, 0, spritePath, palettePath)
 
 	t.labelLoadQueue[labelEID] = labelLoadQueueEntry{
-		table:   tableEID,
-		sprite:  spriteEID,
+		table:  tableEID,
+		sprite: spriteEID,
 	}
 
-	label := t.AddLabel(labelEID)
+	label := t.Components.Label.Add(labelEID)
 	label.SetText(text)
 
 	return labelEID
 }
 
-// Label creates a label widget
+// ComponentFactory creates a label widget
 func (t *UIWidgetFactory) processLabel(labelEID akara.EID) {
-	bmfComponent, found := t.GetBitmapFont(labelEID)
+	bmfComponent, found := t.Components.BitmapFont.Get(labelEID)
 	if !found {
 		t.addBitmapFontForLabel(labelEID)
 		return
@@ -174,9 +180,9 @@ func (t *UIWidgetFactory) processLabel(labelEID akara.EID) {
 
 	bmfComponent.Sprite.BindRenderer(t.renderer)
 
-	label, found := t.GetLabel(labelEID)
+	label, found := t.Components.Label.Get(labelEID)
 	if !found {
-		label = t.AddLabel(labelEID)
+		label = t.Components.Label.Add(labelEID)
 	}
 
 	label.Font = bmfComponent.BitmapFont
@@ -187,12 +193,12 @@ func (t *UIWidgetFactory) processLabel(labelEID akara.EID) {
 }
 
 func (t *UIWidgetFactory) renderLabel(labelEID akara.EID) {
-	label, found := t.GetLabel(labelEID)
+	label, found := t.Components.Label.Get(labelEID)
 	if !found {
 		return
 	}
 
-	bmf, found := t.GetBitmapFont(labelEID)
+	bmf, found := t.Components.BitmapFont.Get(labelEID)
 	if !found {
 		return
 	}
@@ -201,13 +207,18 @@ func (t *UIWidgetFactory) renderLabel(labelEID akara.EID) {
 		label.Font = bmf.BitmapFont
 	}
 
+	col, found := t.Components.Color.Get(labelEID)
+	if found {
+		label.SetBackgroundColor(col.Color)
+	}
+
 	if !label.IsDirty() {
 		return
 	}
 
-	texture, found := t.RenderSystem.GetTexture(labelEID)
+	texture, found := t.RenderSystem.Components.Texture.Get(labelEID)
 	if !found {
-		texture = t.RenderSystem.AddTexture(labelEID)
+		texture = t.RenderSystem.Components.Texture.Add(labelEID)
 	}
 
 	texture.Texture = t.renderer.NewSurface(label.GetSize())
@@ -223,20 +234,20 @@ func (t *UIWidgetFactory) addBitmapFontForLabel(labelEID akara.EID) {
 	}
 
 	// make sure the components have been loaded (by the asset loader)
-	_, tableFound := t.GetFontTable(entry.table)
-	_, spriteFound := t.GetSprite(entry.sprite)
+	_, tableFound := t.Components.FontTable.Get(entry.table)
+	_, spriteFound := t.Components.Sprite.Get(entry.sprite)
 
 	if !(tableFound && spriteFound) {
 		return
 	}
 
 	// now we check the cache, see if we can just pull a pre-rendered bitmap font
-	tableFile, found := t.GetFile(entry.table)
+	tableFile, found := t.Components.File.Get(entry.table)
 	if !found {
 		return
 	}
 
-	sprite, found := t.GetSprite(entry.sprite)
+	sprite, found := t.Components.Sprite.Get(entry.sprite)
 	if !found {
 		return
 	}
@@ -245,7 +256,7 @@ func (t *UIWidgetFactory) addBitmapFontForLabel(labelEID akara.EID) {
 
 	if iface, found := t.bitmapFontCache.Retrieve(cacheKey); found {
 		// we found it, add the bitmap font component and set the embedded struct to what we retrieved
-		t.AddBitmapFont(labelEID).BitmapFont = iface.(*d2bitmapfont.BitmapFont)
+		t.Components.BitmapFont.Add(labelEID).BitmapFont = iface.(*d2bitmapfont.BitmapFont)
 		delete(t.labelLoadQueue, labelEID)
 
 		return
@@ -261,13 +272,13 @@ func (t *UIWidgetFactory) addBitmapFontForLabel(labelEID akara.EID) {
 		t.Warning(err.Error())
 	}
 
-	t.AddBitmapFont(labelEID).BitmapFont = bmf
+	t.Components.BitmapFont.Add(labelEID).BitmapFont = bmf
 }
 
 func (t *UIWidgetFactory) createBitmapFont(entry labelLoadQueueEntry) *d2bitmapfont.BitmapFont {
 	// make sure the components have been loaded (by the asset loader)
-	table, tableFound := t.GetFontTable(entry.table)
-	sprite, spriteFound := t.GetSprite(entry.sprite)
+	table, tableFound := t.Components.FontTable.Get(entry.table)
+	sprite, spriteFound := t.Components.Sprite.Get(entry.sprite)
 
 	if !(tableFound && spriteFound) || sprite.Sprite == nil || table.Data == nil {
 		return nil
@@ -284,12 +295,12 @@ func fontCacheKey(t, s, p string) string {
 func (t *UIWidgetFactory) Button(x, y float64, imgPath, palPath string) akara.EID {
 	buttonEID := t.NewEntity()
 
-	//transform := t.AddTransform(buttonEID)
+	//transform := t.Components..Add(buttonEID)
 	//transform.Translation.X, transform.Translation.Y = x, y
 	//
 	//imgID, palID := t.NewEntity(), t.NewEntity()
-	//t.AddFile(imgID).Path = imgPath
-	//t.AddFile(palID).Path = palPath
+	//t.Components..Add(imgID).Path = imgPath
+	//t.Components..Add(palID).Path = palPath
 	//
 	//t.buttonLoadQueue[buttonEID] = buttonLoadQueueEntry{
 	//	spriteImage:   imgID,
