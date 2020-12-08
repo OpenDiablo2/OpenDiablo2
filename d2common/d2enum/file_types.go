@@ -21,4 +21,5 @@ const (
 	FileTypeDT1
 	FileTypeWAV
 	FileTypeD2
+	FileTypeLocale
 )

@@ -19,6 +19,8 @@ github.com/gravestench/akara v0.0.0-20201203202918-85b8a01d1130 h1:09fkM2hfORgZJ
 github.com/gravestench/akara v0.0.0-20201203202918-85b8a01d1130/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
 github.com/gravestench/akara v0.0.0-20201206061149-9be03b4110f2 h1:mOIIK6AgIyaEslKsu+tsguzFWaMLGjlMuUKqOlABhGk=
 github.com/gravestench/akara v0.0.0-20201206061149-9be03b4110f2/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
+github.com/gravestench/akara v0.0.0-20201208183338-ab0934060133 h1:P9XM5k63US1EavI+23k9GY84xNRnRtg0sT9rlCr4ew4=
+github.com/gravestench/akara v0.0.0-20201208183338-ab0934060133/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
 github.com/gravestench/pho v0.0.0-20201029002250-f9afbd637e4d h1:CP+/y9SAdv9LifYvicxYdQNmzugykEahAiUhYolMROM=
 github.com/gravestench/pho v0.0.0-20201029002250-f9afbd637e4d/go.mod h1:yi5GHMLLWtHhs9tz3q1csUlgGKz5MhZoJcxV8NFBtkk=
 github.com/hajimehoshi/bitmapfont/v2 v2.1.0/go.mod h1:2BnYrkTQGThpr/CY6LorYtt/zEPNzvE/ND69CRTaHMs=

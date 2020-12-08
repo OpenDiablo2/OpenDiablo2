@@ -34,7 +34,7 @@ type GameConfigSystem struct {
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
 	d2components.GameConfigFactory
-	d2components.FilePathFactory
+	d2components.FileFactory
 	d2components.FileTypeFactory
 	d2components.FileHandleFactory
 	d2components.FileSourceFactory
@@ -48,7 +48,7 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupFactories()
 	m.setupSubscriptions()
@@ -60,9 +60,9 @@ func (m *GameConfigSystem) setupLogger() {
 }
 
 func (m *GameConfigSystem) setupFactories() {
-	m.Info("setting up component factories")
+	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.File{}, &m.File)
 	m.InjectComponent(&d2components.FileType{}, &m.FileType)
 	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
 	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
@@ -71,12 +71,12 @@ func (m *GameConfigSystem) setupFactories() {
 }
 
 func (m *GameConfigSystem) setupSubscriptions() {
-	m.Info("setting up component subscriptions")
+	m.Debug("setting up component subscriptions")
 
 	// we are going to check entities that dont yet have loaded asset types
 	filesToCheck := m.NewComponentFilter().
 		Require(
-			&d2components.FilePath{},
+			&d2components.File{},
 			&d2components.FileType{},
 			&d2components.FileHandle{},
 		).
@@ -112,7 +112,7 @@ func (m *GameConfigSystem) Update() {
 
 func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
 	for _, eid := range entities {
-		fp, found := m.GetFilePath(eid)
+		fp, found := m.GetFile(eid)
 		if !found {
 			continue
 		}

@@ -122,8 +122,8 @@ func (v *Label) SetBackgroundColor(c color.Color) {
 }
 
 func (v *Label) processColorTokens(str string) string {
-	tokenMatch := regexp.MustCompile(colorTokenMatch)
-	tokenStrMatch := regexp.MustCompile(colorStrMatch)
+	tokenMatch := regexp.MustCompile(ColorTokenMatch)
+	tokenStrMatch := regexp.MustCompile(ColorStrMatch)
 	empty := []byte("")
 
 	tokenPosition := 0
@@ -183,15 +183,15 @@ func (v *Label) Advance(elapsed float64) error {
 func getColor(token ColorToken) color.Color {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/823
 	colors := map[ColorToken]color.Color{
-		ColorTokenGrey:   d2util.Color(colorGrey100Alpha),
-		ColorTokenWhite:  d2util.Color(colorWhite100Alpha),
-		ColorTokenBlue:   d2util.Color(colorBlue100Alpha),
-		ColorTokenYellow: d2util.Color(colorYellow100Alpha),
-		ColorTokenGreen:  d2util.Color(colorGreen100Alpha),
-		ColorTokenGold:   d2util.Color(colorGold100Alpha),
-		ColorTokenOrange: d2util.Color(colorOrange100Alpha),
-		ColorTokenRed:    d2util.Color(colorRed100Alpha),
-		ColorTokenBlack:  d2util.Color(colorBlack100Alpha),
+		ColorTokenGrey:   d2util.Color(ColorGrey100Alpha),
+		ColorTokenWhite:  d2util.Color(ColorWhite100Alpha),
+		ColorTokenBlue:   d2util.Color(ColorBlue100Alpha),
+		ColorTokenYellow: d2util.Color(ColorYellow100Alpha),
+		ColorTokenGreen:  d2util.Color(ColorGreen100Alpha),
+		ColorTokenGold:   d2util.Color(ColorGold100Alpha),
+		ColorTokenOrange: d2util.Color(ColorOrange100Alpha),
+		ColorTokenRed:    d2util.Color(ColorRed100Alpha),
+		ColorTokenBlack:  d2util.Color(ColorBlack100Alpha),
 	}
 
 	chosen := colors[token]

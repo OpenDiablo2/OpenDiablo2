@@ -87,3 +87,30 @@ func (s *sceneObjectFactory) Rectangle(x, y, width, height int, c color.Color) a
 
 	return eid
 }
+
+func (s *sceneObjectFactory) Button(x, y float64, imgPath, palPath string) akara.EID {
+	s.Debug("creating button")
+
+	eid := s.sceneSystems.UIWidgetFactory.Button(x, y, imgPath, palPath)
+
+	s.addBasicComponents(eid)
+
+	transform := s.AddTransform(eid)
+	transform.Translation.X, transform.Translation.Y = float64(x), float64(y)
+
+	s.SceneObjects = append(s.SceneObjects, eid)
+
+	return eid
+}
+
+func (s *sceneObjectFactory) Label(fontPath, spritePath, palettePath string) akara.EID {
+	s.Debug("creating label")
+
+	eid := s.sceneSystems.UIWidgetFactory.Label(fontPath, spritePath, palettePath)
+
+	s.addBasicComponents(eid)
+
+	s.SceneObjects = append(s.SceneObjects, eid)
+
+	return eid
+}

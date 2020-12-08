@@ -13,7 +13,7 @@ var _ akara.Component = &FileSource{}
 // AbstractSource is the abstract representation of what a file source is
 type AbstractSource interface {
 	Path() string // the path of the source itself
-	Open(path *FilePath) (d2interface.DataStream, error)
+	Open(path *File) (d2interface.DataStream, error)
 }
 
 // FileSource contains an embedded file source interface, something that can open files

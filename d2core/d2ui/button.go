@@ -768,6 +768,11 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 	}
 }
 
+// GetButtonLayout returns a button layout for the given button type
+func GetButtonLayout(t ButtonType) ButtonLayout {
+	return getButtonLayouts()[t]
+}
+
 // static check to ensure button implements clickable widget
 var _ ClickableWidget = &Button{}
 

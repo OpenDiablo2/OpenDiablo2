@@ -46,7 +46,7 @@ type LoadingScene struct {
 func (s *LoadingScene) Init(world *akara.World) {
 	s.World = world
 
-	s.Info("initializing ...")
+	s.Debug("initializing ...")
 
 	s.backgroundColor = color.Black
 
@@ -54,94 +54,51 @@ func (s *LoadingScene) Init(world *akara.World) {
 }
 
 func (s *LoadingScene) setupSubscriptions() {
-	s.Info("setting up component subscriptions")
+	s.Debug("setting up component subscriptions")
 
 	stage1 := s.NewComponentFilter().
 		Require(
-			&d2components.FilePath{},
+			&d2components.File{},
 		).
 		Forbid( // but we forbid files that are already loaded
-			&d2components.FileType{},
-			&d2components.FileHandle{},
+			&d2components.FileLoaded{},
 			&d2components.FileSource{},
-			&d2components.GameConfig{},
-			&d2components.StringTable{},
-			&d2components.DataDictionary{},
-			&d2components.Palette{},
-			&d2components.PaletteTransform{},
-			&d2components.Cof{},
-			&d2components.Dc6{},
-			&d2components.Dcc{},
-			&d2components.Ds1{},
-			&d2components.Dt1{},
-			&d2components.Wav{},
-			&d2components.AnimationData{},
 		).
 		Build()
 
 	stage2 := s.NewComponentFilter().
 		Require(
-			&d2components.FilePath{},
+			&d2components.File{},
 			&d2components.FileType{},
 		).
 		Forbid( // but we forbid files that are already loaded
-			&d2components.FileHandle{},
+			&d2components.FileLoaded{},
 			&d2components.FileSource{},
-			&d2components.GameConfig{},
-			&d2components.StringTable{},
-			&d2components.DataDictionary{},
-			&d2components.Palette{},
-			&d2components.PaletteTransform{},
-			&d2components.Cof{},
-			&d2components.Dc6{},
-			&d2components.Dcc{},
-			&d2components.Ds1{},
-			&d2components.Dt1{},
-			&d2components.Wav{},
-			&d2components.AnimationData{},
 		).
 		Build()
 
 	stage3 := s.NewComponentFilter().
 		Require(
-			&d2components.FilePath{},
+			&d2components.File{},
 			&d2components.FileType{},
 			&d2components.FileHandle{},
 		).
 		Forbid( // but we forbid files that are already loaded
+			&d2components.FileLoaded{},
 			&d2components.FileSource{},
-			&d2components.GameConfig{},
-			&d2components.StringTable{},
-			&d2components.DataDictionary{},
-			&d2components.Palette{},
-			&d2components.PaletteTransform{},
-			&d2components.Cof{},
-			&d2components.Dc6{},
-			&d2components.Dcc{},
-			&d2components.Ds1{},
-			&d2components.Dt1{},
-			&d2components.Wav{},
-			&d2components.AnimationData{},
 		).
 		Build()
 
 	// we want to know about loaded files, too
 	stage4 := s.NewComponentFilter().
-		RequireOne(
+		Require(
+			&d2components.File{},
+			&d2components.FileType{},
 			&d2components.FileHandle{},
+			&d2components.FileLoaded{},
+		).
+		Forbid( // but we forbid files that are already loaded
 			&d2components.FileSource{},
-			&d2components.GameConfig{},
-			&d2components.StringTable{},
-			&d2components.DataDictionary{},
-			&d2components.Palette{},
-			&d2components.PaletteTransform{},
-			&d2components.Cof{},
-			&d2components.Dc6{},
-			&d2components.Dcc{},
-			&d2components.Ds1{},
-			&d2components.Dt1{},
-			&d2components.Wav{},
-			&d2components.AnimationData{},
 		).
 		Build()
 
@@ -163,7 +120,7 @@ func (s *LoadingScene) boot() {
 }
 
 func (s *LoadingScene) createLoadingScreen() {
-	s.Info("creating loading screen")
+	s.Info("creating loading sprite")
 	s.loadingSprite = s.Add.Sprite(0, 0, d2resource.LoadingScreen, d2resource.PaletteLoading)
 }
 

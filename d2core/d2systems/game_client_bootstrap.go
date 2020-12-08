@@ -26,15 +26,11 @@ func (m *GameClientBootstrap) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.injectSystems()
 
-	m.Info("initialization complete")
-
-	if err := m.World.Update(0); err != nil {
-		m.Error(err.Error())
-	}
+	m.Debug("initialization complete")
 }
 
 func (m *GameClientBootstrap) setupLogger() {
@@ -72,6 +68,6 @@ func (m *GameClientBootstrap) injectSystems() {
 
 // Update does nothing, but exists to satisfy the `akara.System` interface
 func (m *GameClientBootstrap) Update() {
-	m.Info("game client bootstrap complete, deactivating")
+	m.Debug("game client bootstrap complete, deactivating")
 	m.RemoveSystem(m)
 }

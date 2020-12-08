@@ -13,7 +13,7 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 	world := akara.NewWorld(akara.NewWorldConfig().With(typeSys))
 
 	e := world.NewEntity()
-	typeSys.AddFilePath(e).Path = "/some/path/to/a/file.dcc"
+	typeSys.AddFile(e).Path = "/some/path/to/a/file.dcc"
 
 	if len(typeSys.filesToCheck.GetEntities()) != 1 {
 		t.Error("entity with file path not added to file type typeSys subscription")
@@ -41,7 +41,7 @@ func TestNewFileTypeResolver_UnknownType(t *testing.T) {
 
 	e := world.NewEntity()
 
-	fp := typeSys.AddFilePath(e)
+	fp := typeSys.AddFile(e)
 	fp.Path = "/some/path/to/a/file.XYZ"
 
 	_ = world.Update(0)

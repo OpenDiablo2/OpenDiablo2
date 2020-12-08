@@ -110,7 +110,7 @@ func (s *BaseScene) Init(world *akara.World) {
 }
 
 func (s *BaseScene) boot() {
-	s.Info("base scene booting ...")
+	s.Debug("base scene booting ...")
 
 	s.Add = &sceneObjectFactory{
 		BaseScene: s,
@@ -119,47 +119,15 @@ func (s *BaseScene) boot() {
 
 	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
 
-	for idx := range s.Systems {
-		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.sceneSystems.RenderSystem == nil {
-			s.sceneSystems.RenderSystem = rendersys
-			continue
-		}
+	s.bindRequiredSystems()
 
-		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.sceneSystems.InputSystem == nil {
-			s.sceneSystems.InputSystem = inputSys
-			continue
-		}
-
-		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.sceneSystems.GameObjectFactory == nil {
-			s.sceneSystems.GameObjectFactory = objFactory
-			continue
-		}
-	}
-
-	if s.sceneSystems.RenderSystem == nil {
-		s.Info("waiting for render system ...")
-		return
-	}
-
-	if s.sceneSystems.RenderSystem.renderer == nil {
-		s.Info("waiting for renderer instance ...")
-		return
-	}
-
-	if s.sceneSystems.InputSystem == nil {
-		s.Info("waiting for input system")
-		return
-	}
-
-	if s.sceneSystems.GameObjectFactory == nil {
-		s.Info("waiting for game object factory ...")
+	if !s.requiredSystemsPresent() {
 		return
 	}
 
 	s.setupFactories()
 
-	s.sceneSystems.SpriteFactory.RenderSystem = s.sceneSystems.RenderSystem
-	s.sceneSystems.ShapeSystem.RenderSystem = s.sceneSystems.RenderSystem
+	s.setupSceneObjectFactories()
 
 	const (
 		defaultWidth  = 800
@@ -168,12 +136,67 @@ func (s *BaseScene) boot() {
 
 	s.Add.Viewport(mainViewport, defaultWidth, defaultHeight)
 
-	s.Info("base scene booted!")
+	s.Debug("base scene booted!")
 	s.booted = true
 }
 
+func (s *BaseScene) bindRequiredSystems() {
+	for idx := range s.Systems {
+		noRenderSys := s.sceneSystems.RenderSystem == nil
+		noInputSys := s.sceneSystems.InputSystem == nil
+		noObjectFactory := s.sceneSystems.GameObjectFactory == nil
+
+		sys := s.Systems[idx]
+
+		if rendersys, found := sys.(*RenderSystem); found && noRenderSys {
+			s.sceneSystems.RenderSystem = rendersys
+			continue
+		}
+
+		if inputSys, found := sys.(*InputSystem); found && noInputSys {
+			s.sceneSystems.InputSystem = inputSys
+			continue
+		}
+
+		if objFactory, found := sys.(*GameObjectFactory); found && noObjectFactory {
+			s.sceneSystems.GameObjectFactory = objFactory
+			continue
+		}
+	}
+}
+
+func (s *BaseScene) requiredSystemsPresent() bool {
+	if s.sceneSystems.RenderSystem == nil {
+		s.Debug("waiting for render system ...")
+		return false
+	}
+
+	if s.sceneSystems.RenderSystem.renderer == nil {
+		s.Debug("waiting for renderer instance ...")
+		return false
+	}
+
+	if s.sceneSystems.InputSystem == nil {
+		s.Debug("waiting for input system")
+		return false
+	}
+
+	if s.sceneSystems.GameObjectFactory == nil {
+		s.Debug("waiting for game object factory ...")
+		return false
+	}
+
+	return true
+}
+
+func (s *BaseScene) setupSceneObjectFactories() {
+	s.sceneSystems.SpriteFactory.RenderSystem = s.sceneSystems.RenderSystem
+	s.sceneSystems.ShapeSystem.RenderSystem = s.sceneSystems.RenderSystem
+	s.sceneSystems.UIWidgetFactory.RenderSystem = s.sceneSystems.RenderSystem
+}
+
 func (s *BaseScene) setupFactories() {
-	s.Info("setting up component factories")
+	s.Debug("setting up component factories")
 
 	s.InjectComponent(&d2components.MainViewport{}, &s.MainViewport)
 	s.InjectComponent(&d2components.Viewport{}, &s.Viewport)

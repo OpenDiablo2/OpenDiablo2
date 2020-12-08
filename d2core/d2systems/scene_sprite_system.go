@@ -1,6 +1,8 @@
 package d2systems
 
 import (
+	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -13,11 +15,16 @@ const (
 	fmtCreateSpriteErr = "could not create sprite from image `%s` and palette `%s`"
 )
 
-// NewSpriteFactorySubsystem creates a new sprite factory which is intended
+const (
+	spriteCacheBudget = 1024
+)
+
+// NewSpriteFactory creates a new sprite factory which is intended
 // to be embedded in the game object factory system.
-func NewSpriteFactorySubsystem(b akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
+func NewSpriteFactory(b akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
 	sys := &SpriteFactory{
 		Logger: l,
+		cache: d2cache.CreateCache(spriteCacheBudget),
 	}
 
 	sys.BaseSystem = b
@@ -33,13 +40,13 @@ type spriteLoadQueueEntry struct {
 
 type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 
-// SpriteFactory is responsible for queueing sprites to be loaded (as spriteations),
+// SpriteFactory is responsible for queueing sprites to be loaded (as sprites),
 // as well as binding the spriteation to a renderer if one is present (which generates the sprite surfaces).
 type SpriteFactory struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	RenderSystem *RenderSystem
-	d2components.FilePathFactory
+	d2components.FileFactory
 	d2components.TransformFactory
 	d2components.Dc6Factory
 	d2components.DccFactory
@@ -51,13 +58,14 @@ type SpriteFactory struct {
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
 	spritesToUpdate *akara.Subscription
+	cache d2interface.Cache
 }
 
 // Init the sprite factory, injecting the necessary components
 func (t *SpriteFactory) Init(world *akara.World) {
 	t.World = world
 
-	t.Info("initializing sprite factory ...")
+	t.Debug("initializing sprite factory ...")
 
 	t.setupFactories()
 	t.setupSubscriptions()
@@ -66,7 +74,7 @@ func (t *SpriteFactory) Init(world *akara.World) {
 }
 
 func (t *SpriteFactory) setupFactories() {
-	t.InjectComponent(&d2components.FilePath{}, &t.FilePath)
+	t.InjectComponent(&d2components.File{}, &t.File)
 	t.InjectComponent(&d2components.Transform{}, &t.Transform)
 	t.InjectComponent(&d2components.Dc6{}, &t.Dc6)
 	t.InjectComponent(&d2components.Dcc{}, &t.Dcc)
@@ -79,12 +87,12 @@ func (t *SpriteFactory) setupFactories() {
 
 func (t *SpriteFactory) setupSubscriptions() {
 	spritesToRender := t.NewComponentFilter().
-		Require(&d2components.Sprite{}). // we want to process entities that have an spriteation ...
+		Require(&d2components.Sprite{}). // we want to process entities that have an sprite ...
 		Forbid(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
 	spritesToUpdate := t.NewComponentFilter().
-		Require(&d2components.Sprite{}).  // we want to process entities that have an spriteation ...
+		Require(&d2components.Sprite{}).  // we want to process entities that have an sprite ...
 		Require(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
@@ -92,8 +100,8 @@ func (t *SpriteFactory) setupSubscriptions() {
 	t.spritesToUpdate = t.AddSubscription(spritesToUpdate)
 }
 
-// Update processes the load queue which attempting to create spriteations, as well as
-// binding existing spriteations to a renderer if one is present.
+// Update processes the load queue which attempting to create sprites, as well as
+// binding existing sprites to a renderer if one is present.
 func (t *SpriteFactory) Update() {
 	for spriteID := range t.loadQueue {
 		t.tryCreatingSprite(spriteID)
@@ -116,8 +124,8 @@ func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID 
 	transform.Translation.X, transform.Translation.Y = x, y
 
 	imgID, palID := t.NewEntity(), t.NewEntity()
-	t.AddFilePath(imgID).Path = imgPath
-	t.AddFilePath(palID).Path = palPath
+	t.AddFile(imgID).Path = imgPath
+	t.AddFile(palID).Path = palPath
 
 	t.loadQueue[spriteID] = spriteLoadQueueEntry{
 		spriteImage:   imgID,
@@ -144,12 +152,12 @@ func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 	entry := t.loadQueue[id]
 	imageID, paletteID := entry.spriteImage, entry.spritePalette
 
-	imagePath, found := t.GetFilePath(imageID)
+	imageFile, found := t.GetFile(imageID)
 	if !found {
 		return
 	}
 
-	palettePath, found := t.GetFilePath(paletteID)
+	paletteFile, found := t.GetFile(paletteID)
 	if !found {
 		return
 	}
@@ -163,23 +171,33 @@ func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 
 	var err error
 
-	if dc6, found := t.GetDc6(imageID); found {
-		sprite, err = t.createDc6Sprite(dc6, palette)
+	cacheKey := spriteCacheKey(imageFile.Path, paletteFile.Path)
+	if iface, found := t.cache.Retrieve(cacheKey); found {
+		sprite = iface.(d2interface.Sprite)
 	}
 
-	if dcc, found := t.GetDcc(imageID); found {
+	if dc6, found := t.GetDc6(imageID); found && sprite == nil {
+		sprite, err = t.createDc6Sprite(dc6, palette)
+		_ = t.cache.Insert(cacheKey, sprite, 1)
+	}
+
+	if dcc, found := t.GetDcc(imageID); found && sprite == nil {
 		sprite, err = t.createDccSprite(dcc, palette)
+		_ = t.cache.Insert(cacheKey, sprite, 1)
 	}
 
 	if err != nil {
-		t.Errorf(fmtCreateSpriteErr, imagePath.Path, palettePath.Path)
+		t.Errorf(fmtCreateSpriteErr, imageFile.Path, paletteFile.Path)
 
 		t.RemoveEntity(id)
 		t.RemoveEntity(imageID)
 		t.RemoveEntity(paletteID)
 	}
 
-	t.AddSprite(id).Sprite = sprite
+	spriteComponent := t.AddSprite(id)
+	spriteComponent.Sprite = sprite
+	spriteComponent.SpritePath = imageFile.Path
+	spriteComponent.PalettePath = paletteFile.Path
 
 	delete(t.loadQueue, id)
 }
@@ -262,4 +280,8 @@ func (t *SpriteFactory) createDccSprite(
 	pal *d2components.Palette,
 ) (d2interface.Sprite, error) {
 	return d2sprite.NewDCCSprite(dcc.DCC, pal.Palette, 0)
+}
+
+func spriteCacheKey(imgpath, palpath string) string {
+	return fmt.Sprintf("%s::%s", imgpath, palpath)
 }

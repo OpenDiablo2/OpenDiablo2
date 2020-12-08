@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,7 +31,7 @@ type FileTypeResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
-	d2components.FilePathFactory
+	d2components.FileFactory
 	d2components.FileTypeFactory
 }
 
@@ -40,7 +41,7 @@ func (m *FileTypeResolver) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupFactories()
 	m.setupSubscriptions()
@@ -52,7 +53,7 @@ func (m *FileTypeResolver) setupLogger() {
 }
 
 func (m *FileTypeResolver) setupFactories() {
-	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.File{}, &m.File)
 	m.InjectComponent(&d2components.FileType{}, &m.FileType)
 }
 
@@ -60,7 +61,7 @@ func (m *FileTypeResolver) setupSubscriptions() {
 	// we subscribe only to entities that have a filepath
 	// and have not yet been given a file type
 	filesToCheck := m.NewComponentFilter().
-		Require(&d2components.FilePath{}).
+		Require(&d2components.File{}).
 		Forbid(&d2components.FileType{}).
 		Build()
 
@@ -76,14 +77,22 @@ func (m *FileTypeResolver) Update() {
 
 //nolint:gocyclo // this big switch statement is unfortunate, but necessary
 func (m *FileTypeResolver) determineFileType(id akara.EID) {
-	fp, found := m.GetFilePath(id)
+	fp, found := m.GetFile(id)
 	if !found {
 		return
 	}
 
 	ft := m.AddFileType(id)
+
+	// try to immediately load as an mpq
 	if _, err := d2mpq.Load(fp.Path); err == nil {
 		ft.Type = d2enum.FileTypeMPQ
+		return
+	}
+
+	// special case for the locale file
+	if fp.Path == d2resource.LocalLanguage {
+		ft.Type = d2enum.FileTypeLocale
 		return
 	}
 

@@ -33,7 +33,7 @@ func (m *MovementSystem) Init(world *akara.World) {
 	m.Logger = d2util.NewLogger()
 	m.SetPrefix(logPrefixMovementSystem)
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.InjectComponent(&d2components.Transform{}, &m.Transform)
 	m.InjectComponent(&d2components.Velocity{}, &m.Velocity)
