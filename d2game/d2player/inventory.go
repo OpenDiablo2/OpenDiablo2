@@ -32,11 +32,13 @@ func NewInventory(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	l d2util.LogLevel,
 	gold int,
-	record *d2records.InventoryRecord) *Inventory {
+	record *d2records.InventoryRecord) (*Inventory, error) {
 	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
-	itemFactory, _ := diablo2item.NewItemFactory(asset)
+	itemFactory, err := diablo2item.NewItemFactory(asset)
+	if err != nil {
+		return nil, fmt.Errorf("during creating new item factory: %s", err)
+	}
 
 	inventory := &Inventory{
 		asset:       asset,
@@ -54,7 +56,7 @@ func NewInventory(asset *d2asset.AssetManager,
 	inventory.Logger.SetLevel(l)
 	inventory.Logger.SetPrefix(logPrefix)
 
-	return inventory
+	return inventory, nil
 }
 
 // Inventory represents the inventory
