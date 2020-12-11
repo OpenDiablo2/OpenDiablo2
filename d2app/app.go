@@ -943,9 +943,14 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 		fmt.Println(errorMessage)
 		a.ToMainMenu(errorMessage)
 	} else {
-		a.screen.SetNextScreen(d2gamescreen.CreateGame(
+		game, err := d2gamescreen.CreateGame(
 			a, a.asset, a.ui, a.renderer, a.inputManager, a.audio, gameClient, a.terminal, a.config.LogLevel, a.guiManager,
-		))
+		)
+		if err != nil {
+			a.Error(err.Error())
+		}
+
+		a.screen.SetNextScreen(game)
 	}
 }
 
