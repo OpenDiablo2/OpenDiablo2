@@ -110,17 +110,17 @@ func (s *MoveGoldPanel) Load() {
 	s.actionLabel2.SetPosition(moveGoldActionLabelX, moveGoldActionLabelY+moveGoldActionLabelOffsetY)
 	s.panelGroup.AddWidget(s.actionLabel2)
 
-	incrose := s.uiManager.NewButton(d2ui.ButtonTypeUpArrow, d2resource.PaletteSky)
-	incrose.SetPosition(moveGoldUpArrowX, moveGoldUpArrowY)
-	incrose.SetVisible(false)
-	incrose.OnActivated(func() { s.incrose() })
-	s.panelGroup.AddWidget(incrose)
+	increase := s.uiManager.NewButton(d2ui.ButtonTypeUpArrow, d2resource.PaletteSky)
+	increase.SetPosition(moveGoldUpArrowX, moveGoldUpArrowY)
+	increase.SetVisible(false)
+	increase.OnActivated(func() { s.increase() })
+	s.panelGroup.AddWidget(increase)
 
-	decrose := s.uiManager.NewButton(d2ui.ButtonTypeDownArrow, d2resource.PaletteSky)
-	decrose.SetPosition(moveGoldDownArrowX, moveGoldDownArrowY)
-	decrose.SetVisible(false)
-	decrose.OnActivated(func() { s.decrose() })
-	s.panelGroup.AddWidget(decrose)
+	decrease := s.uiManager.NewButton(d2ui.ButtonTypeDownArrow, d2resource.PaletteSky)
+	decrease.SetPosition(moveGoldDownArrowX, moveGoldDownArrowY)
+	decrease.SetVisible(false)
+	decrease.OnActivated(func() { s.decrease() })
+	s.panelGroup.AddWidget(decrease)
 
 	s.setActionText()
 
@@ -142,7 +142,7 @@ func (s *MoveGoldPanel) action() {
 	s.Close()
 }
 
-func (s *MoveGoldPanel) incrose() {
+func (s *MoveGoldPanel) increase() {
 	currentValue, err := strconv.Atoi(s.value.GetText())
 	if err != nil {
 		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
@@ -154,7 +154,7 @@ func (s *MoveGoldPanel) incrose() {
 	}
 }
 
-func (s *MoveGoldPanel) decrose() {
+func (s *MoveGoldPanel) decrease() {
 	currentValue, err := strconv.Atoi(s.value.GetText())
 	if err != nil {
 		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
