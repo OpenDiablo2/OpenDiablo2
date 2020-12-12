@@ -47,12 +47,14 @@ const (
 	ButtonTypeSell               ButtonType = 27
 	ButtonTypeRepair             ButtonType = 28
 	ButtonTypeRepairAll          ButtonType = 29
-	ButtonTypeLeftArrow          ButtonType = 30
-	ButtonTypeRightArrow         ButtonType = 31
-	ButtonTypeQuery              ButtonType = 32
-	ButtonTypeSquelchChat        ButtonType = 33
-	ButtonTypeTabBlank           ButtonType = 34
-	ButtonTypeBlankQuestBtn      ButtonType = 35
+	ButtonTypeUpArrow            ButtonType = 30
+	ButtonTypeDownArrow          ButtonType = 31
+	ButtonTypeLeftArrow          ButtonType = 32
+	ButtonTypeRightArrow         ButtonType = 33
+	ButtonTypeQuery              ButtonType = 34
+	ButtonTypeSquelchChat        ButtonType = 35
+	ButtonTypeTabBlank           ButtonType = 36
+	ButtonTypeBlankQuestBtn      ButtonType = 37
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -150,6 +152,12 @@ const (
 	buttonOkCancelSegmentsX     = 1
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
+
+	buttonUpDownArrowSegmentsX     = 1
+	buttonUpDownArrowSegmentsY     = 1
+	buttonUpDownArrowDisabledFrame = -1
+	buttonUpArrowBaseFrame         = 0
+	buttonDownArrowBaseFrame       = 2
 
 	buttonBuySellSegmentsX     = 1
 	buttonBuySellSegmentsY     = 1
@@ -426,6 +434,36 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Tooltip:          buttonTooltipRepairAll,
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeUpArrow: {
+			XSegments:        buttonUpDownArrowSegmentsX,
+			YSegments:        buttonUpDownArrowSegmentsY,
+			DisabledFrame:    buttonUpDownArrowDisabledFrame,
+			DisabledColor:    whiteAlpha100,
+			BaseFrame:        buttonUpArrowBaseFrame,
+			ResourceName:     d2resource.UpDownArrows,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+		},
+		ButtonTypeDownArrow: {
+			XSegments:        buttonUpDownArrowSegmentsX,
+			YSegments:        buttonUpDownArrowSegmentsY,
+			DisabledFrame:    buttonUpDownArrowDisabledFrame,
+			DisabledColor:    whiteAlpha100,
+			BaseFrame:        buttonDownArrowBaseFrame,
+			ResourceName:     d2resource.UpDownArrows,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
 		},
 		ButtonTypeLeftArrow: {
 			XSegments:        buttonBuySellSegmentsX,
@@ -815,7 +853,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("strClose"))
 	case buttonTooltipOk:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("#971"))
+		t.SetText(v.manager.asset.TranslateLabel(d2enum.OKLabel))
 	case buttonTooltipBuy:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("NPCPurchaseItems"))
