@@ -105,12 +105,6 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		24: 0,
 		25: 0,
 		26: 0,
-		27: 0,
-		28: 0,
-		29: 0,
-		30: 0,
-		31: 0,
-		32: 1,
 	}
 
 	var quests [d2enum.ActsNumber]*d2ui.WidgetGroup

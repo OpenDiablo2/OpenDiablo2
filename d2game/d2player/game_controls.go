@@ -10,7 +10,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -124,7 +123,6 @@ func NewGameControls(
 	inputListener inputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
-	guiManager *d2gui.GuiManager,
 	keyMap *KeyMap,
 	l d2util.LogLevel,
 	isSinglePlayer bool,
@@ -210,7 +208,12 @@ func NewGameControls(
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 	questLog := NewQuestLog(asset, ui, l, hero.Act)
-	inventory := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
+
+	inventory, err := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
+	if err != nil {
+		return nil, err
+	}
+
 	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
 
 	miniPanel := newMiniPanel(asset, ui, l, isSinglePlayer)
@@ -405,10 +408,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.HoldRun:
 		g.hud.onToggleRunButton(true)
 	case d2enum.ToggleHelpScreen:
-		g.hud.miniPanel.openDisabled()
-
-		g.HelpOverlay.Toggle()
-		g.updateLayout()
+		g.toggleHelpOverlay()
 	default:
 		return false
 	}
@@ -474,7 +474,7 @@ func (g *GameControls) onEscKey() {
 	}
 
 	if g.HelpOverlay.IsOpen() {
-		g.HelpOverlay.Toggle()
+		g.HelpOverlay.Close()
 
 		escHandled = true
 	}
@@ -630,10 +630,12 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 }
 
 func (g *GameControls) toggleHeroStatsPanel() {
-	g.questLog.Close()
-	g.heroStatsPanel.Toggle()
-	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
-	g.updateLayout()
+	if !g.HelpOverlay.IsOpen() {
+		g.questLog.Close()
+		g.heroStatsPanel.Toggle()
+		g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
+		g.updateLayout()
+	}
 }
 
 func (g *GameControls) onCloseHeroStatsPanel() {
@@ -642,10 +644,12 @@ func (g *GameControls) onCloseHeroStatsPanel() {
 }
 
 func (g *GameControls) toggleQuestLog() {
-	g.heroStatsPanel.Close()
-	g.questLog.Toggle()
-	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
-	g.updateLayout()
+	if !g.HelpOverlay.IsOpen() {
+		g.heroStatsPanel.Close()
+		g.questLog.Toggle()
+		g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
+		g.updateLayout()
+	}
 }
 
 func (g *GameControls) onCloseQuestLog() {
@@ -653,11 +657,21 @@ func (g *GameControls) onCloseQuestLog() {
 	g.updateLayout()
 }
 
+func (g *GameControls) toggleHelpOverlay() {
+	if !g.inventory.IsOpen() && !g.skilltree.IsOpen() && !g.heroStatsPanel.IsOpen() && !g.questLog.IsOpen() {
+		g.hud.miniPanel.openDisabled()
+		g.HelpOverlay.Toggle()
+		g.updateLayout()
+	}
+}
+
 func (g *GameControls) toggleInventoryPanel() {
-	g.skilltree.Close()
-	g.inventory.Toggle()
-	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
-	g.updateLayout()
+	if !g.HelpOverlay.IsOpen() {
+		g.skilltree.Close()
+		g.inventory.Toggle()
+		g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
+		g.updateLayout()
+	}
 }
 
 func (g *GameControls) onCloseInventory() {
@@ -666,10 +680,12 @@ func (g *GameControls) onCloseInventory() {
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
-	g.inventory.Close()
-	g.skilltree.Toggle()
-	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
-	g.updateLayout()
+	if !g.HelpOverlay.IsOpen() {
+		g.inventory.Close()
+		g.skilltree.Toggle()
+		g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
+		g.updateLayout()
+	}
 }
 
 func (g *GameControls) onCloseSkilltree() {

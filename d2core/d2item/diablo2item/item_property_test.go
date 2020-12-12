@@ -419,9 +419,17 @@ var testAssetManager *d2asset.AssetManager
 var testItemFactory *ItemFactory
 
 func TestSetup(t *testing.T) {
+	var err error
+
 	testAssetManager = &d2asset.AssetManager{}
 	testAssetManager.Records = &d2records.RecordManager{}
-	testItemFactory, _ = NewItemFactory(testAssetManager)
+
+	testItemFactory, err = NewItemFactory(testAssetManager)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	testAssetManager.Records.Item.Stats = itemStatCosts
 	testAssetManager.Records.Character.Stats = charStats
 	testAssetManager.Records.Skill.Details = skillDetails

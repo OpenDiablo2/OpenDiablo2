@@ -1,6 +1,7 @@
 package d2gamescreen
 
 import (
+	"errors"
 	"fmt"
 	"image/color"
 
@@ -47,7 +48,7 @@ func CreateGame(
 	term d2interface.Terminal,
 	l d2util.LogLevel,
 	guiManager *d2gui.GuiManager,
-) *Game {
+) (*Game, error) {
 	// find the local player and its initial location
 	var startX, startY float64
 
@@ -93,10 +94,10 @@ func CreateGame(
 	game.escapeMenu.OnLoad()
 
 	if err := inputManager.BindHandler(game.escapeMenu); err != nil {
-		game.Error("failed to add gameplay screen as event handler")
+		return nil, errors.New("failed to add gameplay screen as event handler")
 	}
 
-	return game
+	return game, nil
 }
 
 // Game represents the Gameplay screen
@@ -303,7 +304,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.logLevel, v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.keyMap, v.logLevel, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err
