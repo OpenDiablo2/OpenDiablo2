@@ -230,7 +230,7 @@ func (v *CharacterSelect) loadHeroTitle() {
 
 func (v *CharacterSelect) loadDeleteCharConfirm() {
 	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(delCharConfLabel), 30), "\n")
+	lines := strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(d2enum.DelCharConfLabel), 29), "\n")
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2ui.HorizontalAlignCenter
 	deleteConfirmX, deleteConfirmY := 400, 185
@@ -308,23 +308,23 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
 
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.ExitLabel))
 	v.exitButton.SetPosition(exitBtnX, exitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 
 	loading.Progress(twentyPercent)
 
-	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(noLabel))
+	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(d2enum.NoLabel))
 	v.deleteCharCancelButton.SetPosition(deleteCancelX, deleteCancelY)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 
-	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(yesLabel))
+	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(d2enum.YesLabel))
 	v.deleteCharOkButton.SetPosition(deleteOkX, deleteOkY)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
 
-	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "OK")
+	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.OKLabel))
 	v.okButton.SetPosition(okBtnX, okBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 }

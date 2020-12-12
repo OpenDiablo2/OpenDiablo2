@@ -416,7 +416,7 @@ func (v *SelectHeroClass) createLabels() {
 	halfFontWidth := fontWidth / half
 
 	v.headingLabel.SetPosition(headingX-halfFontWidth, headingY)
-	v.headingLabel.SetText(v.asset.TranslateLabel(selectHeroClassLabel))
+	v.headingLabel.SetText(v.asset.TranslateLabel(d2enum.SelectHeroClassLabel))
 	v.headingLabel.Alignment = d2ui.HorizontalAlignCenter
 
 	v.heroClassLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
@@ -437,7 +437,7 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.heroNameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.heroNameLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(charNameLabel), d2ui.ColorTokenGold))
+	v.heroNameLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(d2enum.CharNameLabel), d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
@@ -447,16 +447,16 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(hardCoreLabel), d2ui.ColorTokenGold))
+	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(d2enum.HardCoreLabel), d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 
 func (v *SelectHeroClass) createButtons() {
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.ExitLabel))
 	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 
-	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "OK")
+	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.OKLabel))
 	v.okButton.SetPosition(selHeroOkBtnX, selHeroOkBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
@@ -685,22 +685,22 @@ func (v *SelectHeroClass) updateHeroText() {
 		return
 	case d2enum.HeroBarbarian:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharbar"))
-		v.setDescLabels(barbarianDescr, "")
+		v.setDescLabels(d2enum.BarbarianDescr, "")
 	case d2enum.HeroNecromancer:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharnec"))
-		v.setDescLabels(necromancerDescr, "")
+		v.setDescLabels(d2enum.NecromancerDescr, "")
 	case d2enum.HeroPaladin:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharpal"))
-		v.setDescLabels(paladinDescr, "")
+		v.setDescLabels(d2enum.PaladinDescr, "")
 	case d2enum.HeroAssassin:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharass"))
 		v.setDescLabels(0, "#305")
 	case d2enum.HeroSorceress:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharsor"))
-		v.setDescLabels(sorceressDescr, "")
+		v.setDescLabels(d2enum.SorceressDescr, "")
 	case d2enum.HeroAmazon:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharama"))
-		v.setDescLabels(amazonDescr, "")
+		v.setDescLabels(d2enum.AmazonDescr, "")
 	case d2enum.HeroDruid:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partychardru"))
 		// here is a problem with polish language: in polish string table, there are two items with key "#304"

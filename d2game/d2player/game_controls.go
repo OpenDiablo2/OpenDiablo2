@@ -444,6 +444,12 @@ func (g *GameControls) onEscKey() {
 	}
 
 	if g.inventory.IsOpen() {
+		if g.inventory.moveGoldPanel.IsOpen() {
+			g.inventory.moveGoldPanel.Close()
+
+			return
+		}
+
 		g.inventory.Close()
 
 		escHandled = true
@@ -704,6 +710,7 @@ func (g *GameControls) Load() {
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
 	g.hud.Advance(elapsed)
+	g.inventory.Advance(elapsed)
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
@@ -728,7 +735,7 @@ func (g *GameControls) updateLayout() {
 
 func (g *GameControls) isLeftPanelOpen() bool {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/801
-	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen()
+	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
