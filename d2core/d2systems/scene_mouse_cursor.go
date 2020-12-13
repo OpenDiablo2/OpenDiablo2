@@ -90,6 +90,9 @@ func (s *MouseCursorScene) updateCursorTransform() {
 		return
 	}
 
+	node, _ := s.Components.SceneGraphNode.Get(s.cursor)
+	_ = node
+
 	cx, cy := s.Input.CursorPosition()
 	tx, ty := transform.Translation.XY()
 

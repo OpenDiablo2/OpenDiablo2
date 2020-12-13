@@ -441,6 +441,12 @@ func (t *UIWidgetFactory) processButtonStates(buttonEID akara.EID) {
 	pressedToggled = normal
 	disabled = normal
 
+	button.States.Normal = normal
+	button.States.Pressed = pressed
+	button.States.Toggled = toggled
+	button.States.PressedToggled = pressedToggled
+	button.States.Disabled = disabled
+
 	// if it's got other states (most buttons do...), then we handle it
 	if button.Layout.HasImage && button.Layout.AllowFrameChange {
 		pressed = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStatePressed)
@@ -449,16 +455,10 @@ func (t *UIWidgetFactory) processButtonStates(buttonEID akara.EID) {
 
 		// also, not all buttons have a disabled state
 		// this stupid fucking -1 needs to be a constant
-		if button.Layout.DisabledFrame != -1 {
+		if button.Layout.DisabledFrame != isNotSegmented {
 			disabled = t.SegmentedSprite(0, 0, img, pal, sx, sy, button.Layout.DisabledFrame)
 		}
 	}
-
-	button.States.Normal = normal
-	button.States.Pressed = pressed
-	button.States.Toggled = toggled
-	button.States.PressedToggled = pressedToggled
-	button.States.Disabled = disabled
 }
 
 func (t *UIWidgetFactory) renderButtonStates(buttonEID akara.EID) {

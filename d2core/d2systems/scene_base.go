@@ -63,6 +63,7 @@ type sceneComponents struct {
 	Color               d2components.ColorFactory
 	CommandRegistration d2components.CommandRegistrationFactory
 	Dirty               d2components.DirtyFactory
+	GameConfig               d2components.GameConfigFactory
 }
 
 // BaseScene encapsulates common behaviors for systems that are considered "scenes",
@@ -86,6 +87,7 @@ type BaseScene struct {
 	SceneObjects    []akara.EID
 	Graph           *d2scene.Node // the root node
 	backgroundColor color.Color
+	gameConfigs *akara.Subscription
 }
 
 // Booted returns whether or not the scene has booted
@@ -136,6 +138,10 @@ func (s *BaseScene) boot() {
 	s.Add.Viewport(mainViewport, defaultWidth, defaultHeight)
 
 	s.Debug("base scene booted!")
+
+	gameConfigs := s.NewComponentFilter().Require(&d2components.GameConfig{}).Build()
+	s.gameConfigs = s.World.AddSubscription(gameConfigs)
+
 	s.booted = true
 }
 
@@ -215,6 +221,7 @@ func (s *BaseScene) setupFactories() {
 	s.InjectComponent(&d2components.Color{}, &s.Components.Color.ComponentFactory)
 	s.InjectComponent(&d2components.CommandRegistration{}, &s.Components.CommandRegistration.ComponentFactory)
 	s.InjectComponent(&d2components.Dirty{}, &s.Components.Dirty.ComponentFactory)
+	s.InjectComponent(&d2components.GameConfig{}, &s.Components.GameConfig.ComponentFactory)
 }
 
 // Key returns the scene's key
@@ -230,6 +237,19 @@ func (s *BaseScene) Update() {
 
 	if !s.booted {
 		return
+	}
+
+	for _, eid := range s.gameConfigs.GetEntities() {
+		cfg, found := s.Components.GameConfig.Get(eid)
+		if !found {
+			continue
+		}
+
+		s.SetLevel(cfg.LogLevel)
+		s.sceneSystems.Render.SetLevel(cfg.LogLevel)
+		s.sceneSystems.Input.SetLevel(cfg.LogLevel)
+		s.sceneSystems.UI.SetLevel(cfg.LogLevel)
+		s.Add.SetLevel(cfg.LogLevel)
 	}
 
 	s.updateSceneGraph()
@@ -344,7 +364,7 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 	}
 
 	// translation, rotation, and scale vec3's
-	vpTrans, vpRot, vpScale := vpNode.Local.Invert().Decompose()
+	vpTrans, vpRot, vpScale := vpNode.GetWorldMatrix().Invert().Decompose()
 
 	objTexture, found := s.Components.Texture.Get(objectEID)
 	if !found {
@@ -373,7 +393,7 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 	}
 
 	// translation, rotation, and scale vec3's
-	objTrans, objRot, objScale := objNode.Local.Decompose()
+	objTrans, objRot, objScale := objNode.GetWorldMatrix().Decompose()
 
 	ox, oy := origin.X, origin.Y
 	tx, ty := objTrans.Add(vpTrans).XY()

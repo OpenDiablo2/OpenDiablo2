@@ -1,6 +1,9 @@
 package d2scene
 
-import "testing"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"testing"
+)
 
 func TestNewNode(t *testing.T) {
 	n := NewNode()
@@ -44,5 +47,17 @@ func TestNode_SetParent(t *testing.T) {
 }
 
 func TestNode_UpdateWorldMatrix(t *testing.T) {
+	world := NewNode()
+	a := NewNode()
 
+	a.SetParent(world)
+
+	world.Local.SetXYZ(10, 20, 30)
+	world.UpdateWorldMatrix()
+
+	ax, ay, az := d2math.NewVector3(0, 0, 0).ApplyMatrix4(a.GetWorldMatrix()).XYZ()
+
+	if ax != 20 && ay != 40 && az != 30 {
+		t.Error("error updating world matrix")
+	}
 }
