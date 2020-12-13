@@ -37,6 +37,10 @@ const (
 	skipSplashArg  = "nosplash"
 	skipSplashDesc = "skip the ebiten splash screen"
 
+	logLevelArg  = "loglevel"
+	logLevelShort  = 'l'
+	logLevelDesc = "sets the logging level for all loggers at startup"
+
 	profilerArg  = "profile"
 	profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
 )
@@ -58,6 +62,7 @@ type AppBootstrap struct {
 		FileHandle d2components.FileHandleFactory
 		FileSource d2components.FileSourceFactory
 	}
+	logLevel d2util.LogLevel
 }
 
 // Init will inject (or use existing) components related to setting up the config sources
@@ -208,6 +213,8 @@ func (m *AppBootstrap) Update() {
 		return
 	}
 
+	cfg.LogLevel = m.logLevel
+
 	m.Info("adding mpq's from config file")
 	m.initMpqSources(cfg)
 
@@ -232,6 +239,7 @@ func (m *AppBootstrap) parseCommandLineArgs() {
 	sceneTest := kingpin.Flag(sceneTestArg, sceneTestDesc).String()
 	server := kingpin.Flag(serverArg, serverDesc).Bool()
 	enableCounter := kingpin.Flag(counterArg, counterDesc).Bool()
+	logLevel := kingpin.Flag(logLevelArg, logLevelDesc).Short(logLevelShort).Int()
 	_ = kingpin.Flag(skipSplashArg, skipSplashDesc).Bool() // see game client bootstrap
 
 	kingpin.Parse()
@@ -246,6 +254,10 @@ func (m *AppBootstrap) parseCommandLineArgs() {
 		fmt.Println("not yet implemented")
 		os.Exit(0)
 	}
+
+	m.logLevel = *logLevel
+
+	m.SetLevel(m.logLevel)
 
 	m.World.AddSystem(&RenderSystem{})
 	m.World.AddSystem(&InputSystem{})
@@ -270,6 +282,9 @@ func (m *AppBootstrap) parseCommandLineArgs() {
 	case "labels":
 		m.Info("running label test scene")
 		m.World.AddSystem(NewLabelTestScene())
+	case "buttons":
+		m.Info("running button test scene")
+		m.World.AddSystem(NewButtonTestScene())
 	default:
 		m.World.AddSystem(&GameClientBootstrap{})
 	}

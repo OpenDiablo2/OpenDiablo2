@@ -3,6 +3,7 @@ package d2systems
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"io"
+	"time"
 
 	"github.com/gravestench/akara"
 
@@ -32,6 +33,10 @@ const (
 	logPrefixAssetLoader = "Asset Loader System"
 )
 
+const (
+	maxTimePerUpdate = time.Millisecond * 16
+)
+
 var _ akara.System = &AssetLoaderSystem{}
 
 // AssetLoaderSystem is responsible for parsing data from file handles into various structs, like COF or DC6
@@ -40,6 +45,7 @@ type AssetLoaderSystem struct {
 	*d2util.Logger
 	fileSub   *akara.Subscription
 	sourceSub *akara.Subscription
+	gameConfigs *akara.Subscription
 	cache     *d2cache.Cache
 	localeString string // related to file "/data/local/use"
 	Components struct {
@@ -47,6 +53,7 @@ type AssetLoaderSystem struct {
 		FileType d2components.FileTypeFactory
 		FileHandle d2components.FileHandleFactory
 		FileSource d2components.FileSourceFactory
+		GameConfig d2components.GameConfigFactory
 		StringTable d2components.StringTableFactory
 		FontTable d2components.FontTableFactory
 		DataDictionary d2components.DataDictionaryFactory
@@ -106,6 +113,9 @@ func (m *AssetLoaderSystem) setupSubscriptions() {
 
 	m.fileSub = m.World.AddSubscription(filesToLoad)
 	m.sourceSub = m.World.AddSubscription(fileSources)
+
+	gameConfigs := m.NewComponentFilter().Require(&d2components.GameConfig{}).Build()
+	m.gameConfigs = m.World.AddSubscription(gameConfigs)
 }
 
 func (m *AssetLoaderSystem) setupFactories() {
@@ -115,6 +125,7 @@ func (m *AssetLoaderSystem) setupFactories() {
 	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
 	m.InjectComponent(&d2components.FileHandle{}, &m.Components.FileHandle.ComponentFactory)
 	m.InjectComponent(&d2components.FileSource{}, &m.Components.FileSource.ComponentFactory)
+	m.InjectComponent(&d2components.GameConfig{}, &m.Components.GameConfig.ComponentFactory)
 	m.InjectComponent(&d2components.StringTable{}, &m.Components.StringTable.ComponentFactory)
 	m.InjectComponent(&d2components.FontTable{}, &m.Components.FontTable.ComponentFactory)
 	m.InjectComponent(&d2components.DataDictionary{}, &m.Components.DataDictionary.ComponentFactory)
@@ -134,8 +145,22 @@ func (m *AssetLoaderSystem) setupFactories() {
 
 // Update processes all of the Entities in the subscription of file entities that need to be processed
 func (m *AssetLoaderSystem) Update() {
+	start := time.Now()
+
 	for _, eid := range m.fileSub.GetEntities() {
 		m.loadAsset(eid)
+		if time.Since(start) > maxTimePerUpdate {
+			break
+		}
+	}
+
+	for _, eid := range m.gameConfigs.GetEntities() {
+		cfg, found := m.Components.GameConfig.Get(eid)
+		if !found {
+			continue
+		}
+
+		m.SetLevel(cfg.LogLevel)
 	}
 }
 

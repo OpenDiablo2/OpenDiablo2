@@ -22,8 +22,8 @@ func New() *Label {
 // Label represents a user interface label
 type Label struct {
 	dirty           bool // used to flag when to re-render the label
-	text            string
-	rawText         string
+	text            string // has color tokens
+	rawText         string // unmodified text
 	Alignment       d2ui.HorizontalAlign
 	Font            *d2bitmapfont.BitmapFont
 	colors          map[int]color.Color
