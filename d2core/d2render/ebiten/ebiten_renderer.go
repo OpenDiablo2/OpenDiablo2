@@ -23,6 +23,7 @@ const (
 	defaultSkewY      = 0.0
 	defaultScaleX     = 1.0
 	defaultScaleY     = 1.0
+	defaultRotate     = 0.0
 )
 
 type renderCallback = func(surface d2interface.Surface) error
@@ -129,6 +130,7 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 		skewY:      defaultSkewY,
 		scaleX:     defaultScaleX,
 		scaleY:     defaultScaleY,
+		rotate:     defaultRotate,
 	}
 	result := createEbitenSurface(r, img, sfcState)
 

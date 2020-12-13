@@ -1,0 +1,25 @@
+{
+  "MpqLoadOrder": [
+    "patch_d2.mpq",
+    "d2exp.mpq",
+    "d2xmusic.mpq",
+    "d2xtalk.mpq",
+    "d2xvideo.mpq",
+    "d2data.mpq",
+    "d2char.mpq",
+    "d2music.mpq",
+    "d2sfx.mpq",
+    "d2video.mpq",
+    "d2speech.mpq"
+  ],
+  "Language": "ENG",
+  "MpqPath": "/home/dk/mpq",
+  "TicksPerSecond": -1,
+  "FpsCap": 0,
+  "SfxVolume": 1,
+  "BgmVolume": 0.3,
+  "FullScreen": false,
+  "RunInBackground": true,
+  "VsyncEnabled": true,
+  "Backend": "Ebiten"
+}
