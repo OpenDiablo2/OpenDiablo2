@@ -11,8 +11,6 @@ import (
 
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
@@ -42,29 +40,29 @@ var _ akara.System = &BaseScene{}
 
 type sceneSystems struct {
 	Render *RenderSystem
-	Input *InputSystem
+	Input  *InputSystem
 	*GameObjectFactory
 }
 
 type sceneComponents struct {
-	SceneGraphNode d2components.SceneGraphNodeFactory
-	Viewport d2components.ViewportFactory
-	MainViewport d2components.MainViewportFactory
-	ViewportFilter d2components.ViewportFilterFactory
-	Priority d2components.PriorityFactory
-	Camera d2components.CameraFactory
-	Texture d2components.TextureFactory
-	Interactive d2components.InteractiveFactory
-	Transform d2components.TransformFactory
-	Sprite d2components.SpriteFactory
-	SegmentedSprite d2components.SegmentedSpriteFactory
-	Origin d2components.OriginFactory
-	Alpha d2components.AlphaFactory
-	DrawEffect d2components.DrawEffectFactory
-	Rectangle d2components.RectangleFactory
-	Color d2components.ColorFactory
+	SceneGraphNode      d2components.SceneGraphNodeFactory
+	Viewport            d2components.ViewportFactory
+	MainViewport        d2components.MainViewportFactory
+	ViewportFilter      d2components.ViewportFilterFactory
+	Priority            d2components.PriorityFactory
+	Camera              d2components.CameraFactory
+	Texture             d2components.TextureFactory
+	Interactive         d2components.InteractiveFactory
+	Transform           d2components.TransformFactory
+	Sprite              d2components.SpriteFactory
+	SegmentedSprite     d2components.SegmentedSpriteFactory
+	Origin              d2components.OriginFactory
+	Alpha               d2components.AlphaFactory
+	DrawEffect          d2components.DrawEffectFactory
+	Rectangle           d2components.RectangleFactory
+	Color               d2components.ColorFactory
 	CommandRegistration d2components.CommandRegistrationFactory
-	Dirty d2components.DirtyFactory
+	Dirty               d2components.DirtyFactory
 }
 
 // BaseScene encapsulates common behaviors for systems that are considered "scenes",
@@ -76,7 +74,7 @@ type BaseScene struct {
 	*akara.BaseSystem
 	sceneSystems
 	Components sceneComponents
-	Geom struct {
+	Geom       struct {
 		Rectangle rectangle.Namespace
 	}
 	*d2util.Logger
@@ -353,7 +351,6 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 		return
 	}
 
-
 	alpha, found := s.Components.Alpha.Get(objectEID)
 	if !found {
 		alpha = s.Components.Alpha.Add(objectEID)
@@ -395,50 +392,7 @@ func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
 	vpTexture.Texture.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 	defer vpTexture.Texture.Pop()
 
-	segment, found := s.Components.SegmentedSprite.Get(objectEID)
-	if found {
-		s.renderSegmentedSprite(vpTexture.Texture, objectEID, segment)
-		return
-	}
-
 	vpTexture.Texture.Render(objTexture.Texture)
-}
-
-func (s *BaseScene) renderSegmentedSprite(screen d2interface.Surface, id akara.EID, seg *d2components.SegmentedSprite) {
-	target := screen.Renderer().NewSurface(screen.GetSize())
-
-	sprite, found := s.Components.Sprite.Get(id)
-	if !found {
-		return
-	}
-
-	var offsetY int
-
-	segmentsX, segmentsY := seg.Xsegments, seg.Ysegments
-	frameOffset := seg.FrameOffset
-
-	for y := 0; y < segmentsY; y++ {
-		var offsetX, maxFrameHeight int
-
-		for x := 0; x < segmentsX; x++ {
-			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
-			if err := sprite.SetCurrentFrame(idx); err != nil {
-				s.Error("SetCurrentFrame error " + err.Error())
-			}
-
-			target.PushTranslation(x+offsetX, y+offsetY)
-			target.Render(sprite.GetCurrentFrameSurface())
-			target.Pop()
-
-			frameWidth, frameHeight := sprite.GetCurrentFrameSize()
-			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
-			offsetX += frameWidth - 1
-		}
-
-		offsetY += maxFrameHeight - 1
-	}
-
-	screen.Render(target)
 }
 
 func (s *BaseScene) renderViewportsToMainViewport() {

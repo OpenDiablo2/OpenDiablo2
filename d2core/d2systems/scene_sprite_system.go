@@ -3,7 +3,9 @@ package d2systems
 import (
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/gravestench/akara"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2sprite"
@@ -59,6 +61,7 @@ type SpriteFactory struct {
 		Sprite          d2components.SpriteFactory
 		Texture         d2components.TextureFactory
 		Origin          d2components.OriginFactory
+		Ready           d2components.ReadyFactory
 		SegmentedSprite d2components.SegmentedSpriteFactory
 	}
 }
@@ -85,6 +88,7 @@ func (t *SpriteFactory) setupFactories() {
 	t.InjectComponent(&d2components.Origin{}, &t.Components.Origin.ComponentFactory)
 	t.InjectComponent(&d2components.Sprite{}, &t.Components.Sprite.ComponentFactory)
 	t.InjectComponent(&d2components.SegmentedSprite{}, &t.Components.SegmentedSprite.ComponentFactory)
+	t.InjectComponent(&d2components.Ready{}, &t.Components.Ready.ComponentFactory)
 }
 
 func (t *SpriteFactory) setupSubscriptions() {
@@ -105,16 +109,30 @@ func (t *SpriteFactory) setupSubscriptions() {
 // Update processes the load queue which attempting to create sprites, as well as
 // binding existing sprites to a renderer if one is present.
 func (t *SpriteFactory) Update() {
+	start := time.Now()
+
 	for spriteID := range t.loadQueue {
 		t.tryCreatingSprite(spriteID)
+	}
+
+	if time.Since(start) > maxTimePerUpdate {
+		return
 	}
 
 	for _, eid := range t.spritesToUpdate.GetEntities() {
 		t.updateSprite(eid)
 	}
 
+	if time.Since(start) > maxTimePerUpdate {
+		return
+	}
+
 	for _, eid := range t.spritesToRender.GetEntities() {
 		t.tryRenderingSprite(eid)
+	}
+
+	if time.Since(start) > maxTimePerUpdate {
+		return
 	}
 }
 
@@ -224,9 +242,94 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 
 	sprite.BindRenderer(t.RenderSystem.renderer)
 
+	// if it's a segmented sprite, we need to handle that
+	if segmented, isSegmented := t.Components.SegmentedSprite.Get(eid); isSegmented {
+		_, isReady := t.Components.Ready.Get(eid)
+		if !isReady {
+			t.renderSegmentedSprite(eid, segmented)
+		}
+
+		return
+	}
+
+	// otherwise, it's just a normal sprite
 	sfc := sprite.GetCurrentFrameSurface()
 
 	t.Components.Texture.Add(eid).Texture = sfc
+	t.Components.Ready.Add(eid)
+}
+
+func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.SegmentedSprite) {
+	sprite, found := t.Components.Sprite.Get(id)
+	if !found {
+		return
+	}
+
+	var offsetY int
+
+	segmentsX, segmentsY := seg.Xsegments, seg.Ysegments
+	frameOffset := seg.FrameOffset
+	numFrames := sprite.GetFrameCount()
+
+	// find max width+height
+	fullWidth, fullHeight := 0, 0
+
+	// first, we're going to determine the width and height of the texture we need
+	for y := 0; y < segmentsY; y++ {
+		fullWidth = 0
+		for x := 0; x < segmentsX; x++ {
+			idx := x + y*segmentsX + frameOffset
+			if idx >= numFrames {
+				continue
+			}
+
+			if err := sprite.SetCurrentFrame(idx); err != nil {
+				fmtErr := "SetCurrentFrame error %s: \n\tsprite: %v\n\tframe count: %v\n\tframe tried: %v\n\t%v"
+
+				t.Errorf(fmtErr, err.Error(), sprite.SpritePath, sprite.GetFrameCount(), idx, seg)
+			}
+
+			frameWidth, _ := sprite.GetCurrentFrameSize()
+			fullWidth += frameWidth
+		}
+
+		_, frameHeight := sprite.GetCurrentFrameSize()
+		fullHeight += frameHeight
+	}
+
+	target := t.RenderSystem.renderer.NewSurface(fullWidth, fullHeight)
+
+	// now, we'll actually render the sprite to the texture
+	for y := 0; y < segmentsY; y++ {
+		var offsetX, maxFrameHeight int
+
+		for x := 0; x < segmentsX; x++ {
+			idx := x + y*segmentsX + frameOffset
+			if idx >= numFrames {
+				continue
+			}
+
+			if err := sprite.SetCurrentFrame(idx); err != nil {
+				fmtErr := "SetCurrentFrame error %s: \n\tsprite: %v\n\tframe count: %v\n\tframe tried: %v\n\t%v"
+
+				t.Errorf(fmtErr, err.Error(), sprite.SpritePath, sprite.GetFrameCount(), idx, seg)
+			}
+
+			target.PushTranslation(x+offsetX, y+offsetY)
+			target.Render(sprite.GetCurrentFrameSurface())
+			target.Pop()
+
+			frameWidth, frameHeight := sprite.GetCurrentFrameSize()
+			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
+			offsetX += frameWidth - 1
+		}
+
+		offsetY += maxFrameHeight - 1
+	}
+
+	// now, we're putting the texture into the component
+	t.Components.Texture.Add(id).Texture = target
+	t.Components.Ready.Add(id)
 }
 
 func (t *SpriteFactory) updateSprite(eid akara.EID) {
@@ -264,23 +367,21 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 	ox, oy := sprite.GetCurrentFrameOffset()
 	origin.X, origin.Y = float64(ox), float64(oy)
 
-	if _, isSegmented := t.Components.SegmentedSprite.Get(eid); !isSegmented {
-		_, frameHeight := sprite.GetCurrentFrameSize()
-		origin.Y -= float64(frameHeight)
+	if _, isSegmented := t.Components.SegmentedSprite.Get(eid); isSegmented {
+		return
 	}
+
+	// for some shitty reason we need to offset vertically by the sprite height.
+	// this comes from the original implementation, we need to fix this shit.
+	_, frameHeight := sprite.GetCurrentFrameSize()
+	origin.Y -= float64(frameHeight)
 }
 
-func (t *SpriteFactory) createDc6Sprite(
-	dc6 *d2components.Dc6,
-	pal *d2components.Palette,
-) (d2interface.Sprite, error) {
+func (t *SpriteFactory) createDc6Sprite(dc6 *d2components.Dc6, pal *d2components.Palette) (d2interface.Sprite, error) {
 	return d2sprite.NewDC6Sprite(dc6.DC6, pal.Palette, 0)
 }
 
-func (t *SpriteFactory) createDccSprite(
-	dcc *d2components.Dcc,
-	pal *d2components.Palette,
-) (d2interface.Sprite, error) {
+func (t *SpriteFactory) createDccSprite(dcc *d2components.Dcc, pal *d2components.Palette) (d2interface.Sprite, error) {
 	return d2sprite.NewDCCSprite(dcc.DCC, pal.Palette, 0)
 }
 

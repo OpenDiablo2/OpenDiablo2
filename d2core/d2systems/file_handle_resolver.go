@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	logPrefixFileHandleResolver = "ComponentFactory Handle Resolver"
+	logPrefixFileHandleResolver = "File Handle Resolver"
 )
 
 // FileHandleResolver is responsible for using file sources to resolve files.
