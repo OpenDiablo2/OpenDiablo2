@@ -45,7 +45,7 @@ func (m *Matrix4) Decompose() (t, r, s *Vector3) {
 	rotmat.Values[9] /= s.Y
 	rotmat.Values[10] /= s.Z
 
-	e.SetFromRotationMatrix(rotmat, EulerOrderZYX)
+	e.SetFromRotationMatrix(rotmat, EulerOrderXYZ)
 
 	r = NewVector3(e.XYZ())
 

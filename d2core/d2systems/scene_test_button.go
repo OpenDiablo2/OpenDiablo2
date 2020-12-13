@@ -74,5 +74,18 @@ func (s *ButtonTestScene) Update() {
 		s.boot()
 	}
 
+	for _,  eid := range s.buttons.GetEntities() {
+		s.updateButtonPosition(eid)
+	}
+
 	s.BaseScene.Update()
+}
+
+func (s *ButtonTestScene) updateButtonPosition(eid akara.EID) {
+	trs, found := s.Components.Transform.Get(eid)
+	if !found {
+		return
+	}
+
+	trs.Translation.AddScalar(1)
 }
