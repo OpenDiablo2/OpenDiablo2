@@ -45,7 +45,7 @@ func (n *Node) removeChild(m *Node) *Node {
 		return n
 	}
 
-	for idx := len(m.children); idx >= 0; idx-- {
+	for idx := len(n.children)-1; idx >= 0; idx-- {
 		if n.children[idx] != m {
 			continue
 		}
@@ -64,15 +64,20 @@ func (n *Node) UpdateWorldMatrix(args ...*d2math.Matrix4) *Node {
 		parentWorldMatrix = args[0]
 	}
 
-	n.World = n.Local.Clone()
-
-	if parentWorldMatrix != nil {
-		n.World.Multiply(parentWorldMatrix)
-	}
+	n.World = parentWorldMatrix
 
 	for idx := range n.children {
-		n.children[idx].UpdateWorldMatrix(n.World)
+		n.children[idx].UpdateWorldMatrix(n.GetWorldMatrix())
 	}
 
 	return n
+}
+
+// GetWorldMatrix applies the local transform to the world matrix and returns it
+func (n *Node) GetWorldMatrix() *d2math.Matrix4 {
+	if n.World == nil {
+		return n.Local.Clone()
+	}
+
+	return n.World.Clone().Multiply(n.Local)
 }

@@ -25,5 +25,15 @@ func Intersection(a, b, output *Rectangle) *Rectangle {
 		output.SetEmpty()
 	}
 
+	if output.Width < 0 {
+		output.X += output.Width
+		output.Width *= -1
+	}
+
+	if output.Height < 0 {
+		output.Y += output.Height
+		output.Height *= -1
+	}
+
 	return output
 }

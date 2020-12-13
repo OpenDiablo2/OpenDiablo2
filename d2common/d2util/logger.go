@@ -98,7 +98,7 @@ func (l *Logger) Info(msg string) {
 		return
 	}
 
-	l.print(LogLevelInfo, msg)
+	go l.print(LogLevelInfo, msg)
 }
 
 // Infof formats and then logs an info message
@@ -112,7 +112,7 @@ func (l *Logger) Warning(msg string) {
 		return
 	}
 
-	l.print(LogLevelWarning, msg)
+	go l.print(LogLevelWarning, msg)
 }
 
 // Warningf formats and then logs a warning message
@@ -126,7 +126,7 @@ func (l *Logger) Error(msg string) {
 		return
 	}
 
-	l.print(LogLevelError, msg)
+	go l.print(LogLevelError, msg)
 }
 
 // Errorf formats and then logs a error message
@@ -140,7 +140,7 @@ func (l *Logger) Fatal(msg string) {
 		return
 	}
 
-	l.print(LogLevelFatal, msg)
+	go l.print(LogLevelFatal, msg)
 	os.Exit(1)
 }
 
@@ -155,7 +155,7 @@ func (l *Logger) Debug(msg string) {
 		return
 	}
 
-	l.print(LogLevelDebug, msg)
+	go l.print(LogLevelDebug, msg)
 }
 
 // Debugf formats and then logs a debug message

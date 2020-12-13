@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	sceneKeyLabelTest = "ComponentFactory Test Scene"
+	sceneKeyLabelTest = "Label Test Scene"
 )
 
 // NewLabelTestScene creates a new main menu scene. This is the first screen that the user
@@ -79,7 +79,7 @@ func (s *LabelTestScene) createLabels() {
 		d2resource.FontRediculous,
 	}
 
-	for idx := 0; idx < 100; idx++ {
+	for idx := 0; idx < 1000; idx++ {
 		fontIdx := rand.Intn(len(fonts))
 
 		labelEID := s.Add.Label("Open Diablo II", fonts[fontIdx], d2resource.PaletteStatic)
@@ -105,7 +105,7 @@ func (s *LabelTestScene) Update() {
 	if s.Paused() {
 		return
 	}
-	
+
 	if !s.booted {
 		s.boot()
 	}

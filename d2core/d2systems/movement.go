@@ -50,10 +50,8 @@ func (m *MovementSystem) Init(world *akara.World) {
 
 // Update positions of all entities with their velocities
 func (m *MovementSystem) Update() {
-	entities := m.movableEntities.GetEntities()
-
-	for entIdx := range entities {
-		m.move(entities[entIdx])
+	for _, entityID := range m.movableEntities.GetEntities() {
+		m.move(entityID)
 	}
 }
 

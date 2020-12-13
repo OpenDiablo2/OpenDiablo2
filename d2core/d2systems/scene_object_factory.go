@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
 	"image/color"
 	"path/filepath"
 
@@ -89,25 +90,35 @@ func (s *sceneObjectFactory) Rectangle(x, y, width, height int, c color.Color) a
 	return eid
 }
 
-func (s *sceneObjectFactory) Button(x, y float64, imgPath, palPath string) akara.EID {
+func (s *sceneObjectFactory) Button(x, y float64, btnType d2button.ButtonType, text string) akara.EID {
 	s.Debug("creating button")
 
-	eid := s.sceneSystems.UI.Button(x, y, imgPath, palPath)
+	buttonEID := s.sceneSystems.UI.Button(x, y, btnType, "")
 
-	s.addBasicComponents(eid)
+	s.SceneObjects = append(s.SceneObjects, buttonEID)
 
-	transform := s.Components.Transform.Add(eid)
-	transform.Translation.X, transform.Translation.Y = float64(x), float64(y)
+	layout := d2button.GetLayout(btnType)
 
-	s.SceneObjects = append(s.SceneObjects, eid)
+	s.addBasicComponents(buttonEID)
 
-	return eid
+	btnTRS := s.Components.Transform.Add(buttonEID)
+	btnTRS.Translation.X, btnTRS.Translation.Y = float64(x), float64(y)
+
+	btnNode := s.Components.SceneGraphNode.Add(buttonEID)
+
+	if text != "" {
+		labelEID := s.Label(text, layout.FontPath, layout.PalettePath)
+		labelNode := s.Components.SceneGraphNode.Add(labelEID)
+		labelNode.SetParent(btnNode.Node)
+	}
+
+	return buttonEID
 }
 
-func (s *sceneObjectFactory) Label(fontPath, spritePath, palettePath string) akara.EID {
+func (s *sceneObjectFactory) Label(text, fontSpritePath, palettePath string) akara.EID {
 	s.Debug("creating label")
 
-	eid := s.sceneSystems.UI.Label(fontPath, spritePath, palettePath)
+	eid := s.sceneSystems.UI.Label(text, fontSpritePath, palettePath)
 
 	s.addBasicComponents(eid)
 
