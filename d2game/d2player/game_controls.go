@@ -659,6 +659,7 @@ func (g *GameControls) onCloseQuestLog() {
 
 func (g *GameControls) toggleHelpOverlay() {
 	if !g.inventory.IsOpen() && !g.skilltree.IsOpen() && !g.heroStatsPanel.IsOpen() && !g.questLog.IsOpen() {
+		g.HelpOverlay.updateKeyMap(g.keyMap)
 		g.hud.miniPanel.openDisabled()
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
