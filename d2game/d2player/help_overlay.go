@@ -337,9 +337,6 @@ func (h *HelpOverlay) setupTitleAndButton() {
 
 func (h *HelpOverlay) updateBulletText() {
 	// Bullets
-	// the hotkeys displayed here should be pulled from a mapping of input events to game events
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/793
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/794
 	callouts := []struct{ text string }{
 		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(
@@ -430,7 +427,7 @@ func (h *HelpOverlay) setupLabelsWithLines() {
 		DotY:      newSkillDotY,
 	})
 
-	// Some of the help fonts require mulktiple lines.
+	// Some of the help fonts require multiple lines.
 	h.createLabel(callout{
 		LabelText: h.asset.TranslateString("StrHelp10"), // "Left Mouse-"
 		LabelX:    leftMouseLabelX,
