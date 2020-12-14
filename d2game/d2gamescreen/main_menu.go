@@ -239,32 +239,32 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2ui.HorizontalAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
-	v.versionLabel.Color[0] = rgbaColor(white)
+	v.versionLabel.Color[0] = d2util.Color(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
 	v.commitLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.commitLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.commitLabel.SetText(v.buildInfo.Commit)
-	v.commitLabel.Color[0] = rgbaColor(white)
+	v.commitLabel.Color[0] = d2util.Color(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 
 	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel.SetText(v.asset.TranslateLabel(d2enum.CopyrightLabel))
-	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
+	v.copyrightLabel.Color[0] = d2util.Color(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText(v.asset.TranslateLabel(d2enum.AllRightsReservedLabel))
-	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
+	v.copyrightLabel2.Color[0] = d2util.Color(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
 	v.openDiabloLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.openDiabloLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
-	v.openDiabloLabel.Color[0] = rgbaColor(lightYellow)
+	v.openDiabloLabel.Color[0] = d2util.Color(lightYellow)
 	v.openDiabloLabel.SetPosition(od2LabelX, od2LabelY)
 	loading.Progress(fiftyPercent)
 
@@ -276,19 +276,19 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.tcpJoinGameLabel.SetText(strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(d2enum.TCPIPEnterHostIPLabel), 27), "\n"))
-	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
+	v.tcpJoinGameLabel.Color[0] = d2util.Color(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
 	v.machineIP.SetText(v.asset.TranslateLabel(d2enum.TCPIPYourIPLabel) + "\n" + v.getLocalIP())
-	v.machineIP.Color[0] = rgbaColor(lightYellow)
+	v.machineIP.Color[0] = d2util.Color(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
 	if v.errorLabel != nil {
 		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
 		v.errorLabel.Alignment = d2ui.HorizontalAlignCenter
-		v.errorLabel.Color[0] = rgbaColor(red)
+		v.errorLabel.Color[0] = d2util.Color(red)
 	}
 }
 
