@@ -1002,11 +1002,8 @@ func (v *Button) Render(target d2interface.Surface) {
 
 		if v.toggled {
 			target.Render(v.toggledSurface)
-		} else {
-			// it allows to use SetEnabled(false) for non-image budons
-			if v.buttonLayout.HasImage {
-				target.Render(v.disabledSurface)
-			}
+		} else if v.buttonLayout.HasImage { // it allows to use SetEnabled(false) for non-image budons
+			target.Render(v.disabledSurface)
 		}
 	case v.toggled && v.pressed:
 		target.Render(v.pressedToggledSurface)

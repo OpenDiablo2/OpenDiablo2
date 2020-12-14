@@ -348,25 +348,15 @@ func parseActionParams(actionType reflect.Type, actionParams []string) ([]reflec
 }
 
 func (t *terminal) OutputRaw(text string, category d2enum.TermCategory) {
-	var line string
+	lines := d2util.SplitIntoLinesWithMaxWidth(text, termColCountMax)
 
-	for _, word := range strings.Split(text, " ") {
-		if len(line) > 0 {
-			line += " "
-		}
+	for _, line := range lines {
+		// removes color token (this token ends with [0m )
+		l := strings.Split(line, "[0m ")
+		line = l[len(l)-1]
 
-		lineLength := len(line)
-		wordLength := len(word)
-
-		if lineLength+wordLength >= termColCountMax {
-			t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
-			line = word
-		} else {
-			line += word
-		}
+		t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
 	}
-
-	t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
 }
 
 func (t *terminal) Outputf(format string, params ...interface{}) {

@@ -285,6 +285,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	var icon *d2ui.Sprite
 
 	for n := 0; n < questsInAct; n++ {
+		cw := n
 		x, y := s.getPositionForSocket(n)
 
 		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
@@ -297,8 +298,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 
 		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
 		button.SetPosition(x+questOffsetX, y+questOffsetY)
-		cw := n
-		button.SetEnabled(!(s.questStatus[s.cordsToQuestID(act, cw)] == d2enum.QuestStatusNotStarted))
+		button.SetEnabled(s.questStatus[s.cordsToQuestID(act, cw)] != d2enum.QuestStatusNotStarted)
 		buttons = append(buttons, button)
 
 		icon, err = s.makeQuestIconForAct(act, n)
