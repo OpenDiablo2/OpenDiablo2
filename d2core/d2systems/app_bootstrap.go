@@ -79,6 +79,7 @@ func (m *AppBootstrap) Init(world *akara.World) {
 	m.setupConfigSources()
 	m.setupConfigFile()
 	m.setupLocaleFile()
+	m.setupStringTableFiles()
 	m.parseCommandLineArgs()
 
 	m.Debug("... initialization complete!")
@@ -188,6 +189,18 @@ func (m *AppBootstrap) setupConfigFile() {
 	// add an entity that will get picked up by the game config system and loaded
 	m.Components.File.Add(m.NewEntity()).Path = configFileName
 	m.Infof("setting up config file `%s` for processing", configFileName)
+}
+
+
+func (m *AppBootstrap) setupStringTableFiles() {
+	// add an entity that will get picked up by the game config system and loaded
+	m.Components.File.Add(m.NewEntity()).Path = d2resource.ExpansionStringTable
+	m.Components.File.Add(m.NewEntity()).Path = d2resource.StringTable
+	m.Components.File.Add(m.NewEntity()).Path = d2resource.PatchStringTable
+
+	m.Infof("setting up string table file `%s` for processing", d2resource.ExpansionStringTable)
+	m.Infof("setting up string table file `%s` for processing", d2resource.StringTable)
+	m.Infof("setting up string table file `%s` for processing", d2resource.PatchStringTable)
 }
 
 func (m *AppBootstrap) setupLocaleFile() {
