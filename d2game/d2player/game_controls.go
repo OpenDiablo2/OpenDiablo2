@@ -214,7 +214,7 @@ func NewGameControls(
 		return nil, err
 	}
 
-	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
+	skilltree := newSkillTree(hero.Skills, hero.Class, hero.Stats, asset, l, ui)
 
 	miniPanel := newMiniPanel(asset, ui, l, isSinglePlayer)
 
