@@ -15,7 +15,7 @@ type HeroStatsState struct {
 	Dexterity int `json:"dexterity"`
 	Vitality  int `json:"vitality"`
 	// there are stats and skills points remaining to add.
-	StatPoints  int `json:"statPoints"`
+	StatsPoints int `json:"statsPoints"`
 	SkillPoints int `json:"skillPoints"`
 
 	Health     int     `json:"health"`
@@ -39,7 +39,7 @@ func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStat
 		Dexterity:    classStats.InitDex,
 		Vitality:     classStats.InitVit,
 		Energy:       classStats.InitEne,
-		StatPoints:   0,
+		StatsPoints:  0,
 		SkillPoints:  0,
 
 		MaxHealth:  classStats.InitVit * classStats.LifePerVit,

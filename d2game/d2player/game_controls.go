@@ -224,7 +224,7 @@ func NewGameControls(
 	}
 
 	helpOverlay := NewHelpOverlay(asset, ui, l, keyMap)
-	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
+	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, hero.Stats, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
 

@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
@@ -70,6 +71,11 @@ const (
 	whiteAlpha100     = 0xffffffff
 )
 
+const (
+	addStatsButtonX, addStatsButtonY = 206, 561
+	addSkillButtonX, addSkillButtonY = 563, 561
+)
+
 // HUD represents the always visible user interface of the game
 type HUD struct {
 	actionableRegions  []actionableRegion
@@ -77,6 +83,7 @@ type HUD struct {
 	uiManager          *d2ui.UIManager
 	mapEngine          *d2mapengine.MapEngine
 	mapRenderer        *d2maprenderer.MapRenderer
+	heroStats          *d2hero.HeroStatsState
 	lastMouseX         int
 	lastMouseY         int
 	hero               *d2mapentity.Player
@@ -103,6 +110,8 @@ type HUD struct {
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
 	panelBackground    *d2ui.CustomWidget
+	addStatsButton     *d2ui.Button
+	addSkillButton     *d2ui.Button
 	panelGroup         *d2ui.WidgetGroup
 	*d2util.Logger
 }
@@ -115,6 +124,7 @@ func NewHUD(
 	miniPanel *miniPanel,
 	actionableRegions []actionableRegion,
 	mapEngine *d2mapengine.MapEngine,
+	heroStats *d2hero.HeroStatsState,
 	l d2util.LogLevel,
 	mapRenderer *d2maprenderer.MapRenderer,
 ) *HUD {
@@ -149,6 +159,7 @@ func NewHUD(
 		zoneChangeText:    zoneLabel,
 		healthGlobe:       healthGlobe,
 		manaGlobe:         manaGlobe,
+		heroStats:         heroStats,
 	}
 
 	hud.Logger = d2util.NewLogger()
@@ -177,7 +188,23 @@ func (h *HUD) Load() {
 	h.loadCustomWidgets()
 	h.loadUIButtons()
 
+	h.addStatsButton = h.uiManager.NewButton(d2ui.ButtonTypeAddSkill, "")
+	h.addStatsButton.SetPosition(addStatsButtonX, addStatsButtonY)
+	h.addStatsButton.SetVisible(false)
+	h.panelGroup.AddWidget(h.addStatsButton)
+
+	h.addSkillButton = h.uiManager.NewButton(d2ui.ButtonTypeAddSkill, "")
+	h.addSkillButton.SetPosition(addSkillButtonX, addSkillButtonY)
+	h.addSkillButton.SetVisible(false)
+	h.panelGroup.AddWidget(h.addSkillButton)
+
 	h.panelGroup.SetVisible(true)
+	h.setAddButtonsVisible()
+}
+
+func (h *HUD) setAddButtonsVisible() {
+	h.addStatsButton.SetVisible(h.heroStats.StatsPoints > 0)
+	h.addSkillButton.SetVisible(h.heroStats.SkillPoints > 0)
 }
 
 func (h *HUD) loadCustomWidgets() {
