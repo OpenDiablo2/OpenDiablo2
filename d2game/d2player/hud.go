@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
@@ -83,7 +82,6 @@ type HUD struct {
 	uiManager          *d2ui.UIManager
 	mapEngine          *d2mapengine.MapEngine
 	mapRenderer        *d2maprenderer.MapRenderer
-	heroStats          *d2hero.HeroStatsState
 	lastMouseX         int
 	lastMouseY         int
 	hero               *d2mapentity.Player
@@ -113,6 +111,8 @@ type HUD struct {
 	addStatsButton     *d2ui.Button
 	addSkillButton     *d2ui.Button
 	panelGroup         *d2ui.WidgetGroup
+	gameControls       *GameControls
+
 	*d2util.Logger
 }
 
@@ -124,8 +124,8 @@ func NewHUD(
 	miniPanel *miniPanel,
 	actionableRegions []actionableRegion,
 	mapEngine *d2mapengine.MapEngine,
-	heroStats *d2hero.HeroStatsState,
 	l d2util.LogLevel,
+	gameControls *GameControls,
 	mapRenderer *d2maprenderer.MapRenderer,
 ) *HUD {
 	nameLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
@@ -159,7 +159,7 @@ func NewHUD(
 		zoneChangeText:    zoneLabel,
 		healthGlobe:       healthGlobe,
 		manaGlobe:         manaGlobe,
-		heroStats:         heroStats,
+		gameControls:      gameControls,
 	}
 
 	hud.Logger = d2util.NewLogger()
@@ -199,12 +199,6 @@ func (h *HUD) Load() {
 	h.panelGroup.AddWidget(h.addSkillButton)
 
 	h.panelGroup.SetVisible(true)
-	h.setAddButtonsVisible()
-}
-
-func (h *HUD) setAddButtonsVisible() {
-	h.addStatsButton.SetVisible(h.heroStats.StatsPoints > 0)
-	h.addSkillButton.SetVisible(h.heroStats.SkillPoints > 0)
 }
 
 func (h *HUD) loadCustomWidgets() {

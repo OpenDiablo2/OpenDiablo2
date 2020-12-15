@@ -750,6 +750,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeAddSkill: {
 			XSegments:        1,
 			YSegments:        1,
+			DisabledFrame:    2,
 			DisabledColor:    whiteAlpha100,
 			ResourceName:     d2resource.AddSkillButton,
 			PaletteName:      d2resource.PaletteSky,
