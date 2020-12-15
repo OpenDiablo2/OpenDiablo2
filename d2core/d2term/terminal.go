@@ -14,6 +14,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (
@@ -347,25 +348,15 @@ func parseActionParams(actionType reflect.Type, actionParams []string) ([]reflec
 }
 
 func (t *terminal) OutputRaw(text string, category d2enum.TermCategory) {
-	var line string
+	lines := d2util.SplitIntoLinesWithMaxWidth(text, termColCountMax)
 
-	for _, word := range strings.Split(text, " ") {
-		if len(line) > 0 {
-			line += " "
-		}
+	for _, line := range lines {
+		// removes color token (this token ends with [0m )
+		l := strings.Split(line, "[0m ")
+		line = l[len(l)-1]
 
-		lineLength := len(line)
-		wordLength := len(word)
-
-		if lineLength+wordLength >= termColCountMax {
-			t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
-			line = word
-		} else {
-			line += word
-		}
+		t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
 	}
-
-	t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
 }
 
 func (t *terminal) Outputf(format string, params ...interface{}) {
@@ -491,39 +482,14 @@ func parseCommand(command string) []string {
 	return params
 }
 
-func rgbaColor(rgba uint32) color.RGBA {
-	result := color.RGBA{}
-	a, b, g, r := 0, 1, 2, 3
-	byteWidth := 8
-	byteMask := 0xff
-
-	for idx := 0; idx < 4; idx++ {
-		shift := idx * byteWidth
-		component := uint8(rgba>>shift) & uint8(byteMask)
-
-		switch idx {
-		case a:
-			result.A = component
-		case b:
-			result.B = component
-		case g:
-			result.G = component
-		case r:
-			result.R = component
-		}
-	}
-
-	return result
-}
-
 func createTerminal() (*terminal, error) {
 	terminal := &terminal{
 		lineCount:    termRowCount,
-		bgColor:      rgbaColor(darkGrey),
-		fgColor:      rgbaColor(lightGrey),
-		infoColor:    rgbaColor(lightBlue),
-		warningColor: rgbaColor(yellow),
-		errorColor:   rgbaColor(red),
+		bgColor:      d2util.Color(darkGrey),
+		fgColor:      d2util.Color(lightGrey),
+		infoColor:    d2util.Color(lightBlue),
+		warningColor: d2util.Color(yellow),
+		errorColor:   d2util.Color(red),
 		actions:      make(map[string]termActionEntry),
 	}
 

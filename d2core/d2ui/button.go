@@ -180,7 +180,7 @@ const (
 
 	blankQuestButtonXSegments      = 1
 	blankQuestButtonYSegments      = 1
-	blankQuestButtonDisabledFrames = -1
+	blankQuestButtonDisabledFrames = 0
 
 	buttonMinipanelCharacterBaseFrame = 0
 	buttonMinipanelInventoryBaseFrame = 2
@@ -900,7 +900,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	label.SetPosition(xOffset, textY)
 	label.Render(v.normalSurface)
 
-	if !btnLayout.HasImage || !btnLayout.AllowFrameChange {
+	if !btnLayout.AllowFrameChange {
 		return
 	}
 
@@ -1002,7 +1002,7 @@ func (v *Button) Render(target d2interface.Surface) {
 
 		if v.toggled {
 			target.Render(v.toggledSurface)
-		} else {
+		} else if v.buttonLayout.HasImage { // it allows to use SetEnabled(false) for non-image budons
 			target.Render(v.disabledSurface)
 		}
 	case v.toggled && v.pressed:
