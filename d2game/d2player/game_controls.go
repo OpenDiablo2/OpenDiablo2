@@ -715,7 +715,7 @@ func (g *GameControls) Load() {
 	g.HelpOverlay.Load()
 
 	g.loadAddButtons()
-	g.SetAddButtons()
+	g.setAddButtons()
 
 	miniPanelActions := &miniPanelActions{
 		characterToggle: g.toggleHeroStatsPanel,
@@ -735,6 +735,10 @@ func (g *GameControls) Advance(elapsed float64) error {
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
+	}
+
+	if g.heroStatsPanel.IsOpen() || g.skilltree.IsOpen() {
+		g.setAddButtons()
 	}
 
 	return nil
@@ -1104,7 +1108,7 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 	return nil
 }
 
-func (g *GameControls) SetAddButtons() {
+func (g *GameControls) setAddButtons() {
 	g.hud.addStatsButton.SetEnabled(g.hero.Stats.StatsPoints > 0)
 	g.hud.addSkillButton.SetEnabled(g.hero.Stats.SkillPoints > 0)
 }

@@ -200,6 +200,10 @@ const (
 	buttonGoldCoinSegmentsY     = 1
 	buttonGoldCoinDisabledFrame = -1
 
+	buttonAddSkillSegmentsX     = 1
+	buttonAddSkillSegmentsY     = 1
+	buttonAddSkillDisabledFrame = 2
+
 	pressedButtonOffset = 2
 )
 
@@ -748,9 +752,9 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			LabelColor:       whiteAlpha100,
 		},
 		ButtonTypeAddSkill: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    2,
+			XSegments:        buttonAddSkillSegmentsX,
+			YSegments:        buttonAddSkillSegmentsY,
+			DisabledFrame:    buttonAddSkillDisabledFrame,
 			DisabledColor:    whiteAlpha100,
 			ResourceName:     d2resource.AddSkillButton,
 			PaletteName:      d2resource.PaletteSky,

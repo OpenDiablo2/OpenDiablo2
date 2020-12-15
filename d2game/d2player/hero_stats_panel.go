@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -55,6 +56,15 @@ const (
 
 const (
 	heroStatsCloseButtonX, heroStatsCloseButtonY = 208, 453
+	addStatSocketOffsetX, addStatSocketOffsetY   = -3, 34
+)
+
+const (
+	newStatsRemainingPointsFieldX, newStatsRemainingPointsFieldY = 83, 430
+	newStatsRemainingPointsLabelX                                = 92
+	newStatsRemainingPointsLabel1Y                               = 411
+	newStatsRemainingPointsLabel2Y                               = 418
+	newStatsRemainingPointsValueX, newStatsRemainingPointsValueY = 188, 411
 )
 
 // PanelText represents text on the panel
@@ -113,15 +123,17 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager,
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
-	asset      *d2asset.AssetManager
-	uiManager  *d2ui.UIManager
-	panel      *d2ui.Sprite
-	heroState  *d2hero.HeroStatsState
-	heroName   string
-	heroClass  d2enum.Hero
-	labels     *StatsPanelLabels
-	onCloseCb  func()
-	panelGroup *d2ui.WidgetGroup
+	asset           *d2asset.AssetManager
+	uiManager       *d2ui.UIManager
+	panel           *d2ui.Sprite
+	heroState       *d2hero.HeroStatsState
+	heroName        string
+	heroClass       d2enum.Hero
+	labels          *StatsPanelLabels
+	onCloseCb       func()
+	panelGroup      *d2ui.WidgetGroup
+	newStatPoints   *d2ui.WidgetGroup
+	remainingPoints *d2ui.Label
 
 	originX int
 	originY int
@@ -135,6 +147,7 @@ func (s *HeroStatsPanel) Load() {
 	var err error
 
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	s.newStatPoints = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
@@ -154,8 +167,89 @@ func (s *HeroStatsPanel) Load() {
 	closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(closeButton)
 
+	s.loadNewStatPoints()
+	s.setLayout()
+
 	s.initStatValueLabels()
 	s.panelGroup.SetVisible(false)
+}
+
+func (s *HeroStatsPanel) loadNewStatPoints() {
+	field, err := s.uiManager.NewSprite(d2resource.HeroStatsPanelStatsPoints, d2resource.PaletteSky)
+	if err != nil {
+		s.Error(err.Error())
+	}
+
+	field.SetPosition(newStatsRemainingPointsFieldX, newStatsRemainingPointsFieldY)
+	s.newStatPoints.AddWidget(field)
+
+	label1 := s.uiManager.NewLabel(d2resource.Font6, d2resource.PaletteSky)
+	label1.SetPosition(newStatsRemainingPointsLabelX, newStatsRemainingPointsLabel1Y)
+	label1.SetText(s.asset.TranslateString("strchrstat"))
+	label1.Color[0] = d2util.Color(d2gui.ColorRed)
+	s.newStatPoints.AddWidget(label1)
+
+	label2 := s.uiManager.NewLabel(d2resource.Font6, d2resource.PaletteSky)
+	label2.SetPosition(newStatsRemainingPointsLabelX, newStatsRemainingPointsLabel2Y)
+	label2.SetText(s.asset.TranslateString("strchrrema"))
+	label2.Color[0] = d2util.Color(d2gui.ColorRed)
+	s.newStatPoints.AddWidget(label2)
+
+	s.remainingPoints = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	s.remainingPoints.SetText(strconv.Itoa(s.heroState.StatsPoints))
+	s.remainingPoints.SetPosition(newStatsRemainingPointsValueX, newStatsRemainingPointsValueY)
+	s.remainingPoints.Alignment = d2ui.HorizontalAlignCenter
+	s.newStatPoints.AddWidget(s.remainingPoints)
+
+	buttons := []struct {
+		x  int
+		y  int
+		cb func()
+	}{
+		{205, 140, func() {
+			s.heroState.Strength++
+		}},
+		{205, 201, func() {
+			s.heroState.Dexterity++
+		}},
+		{205, 286, func() {
+			s.heroState.Vitality++
+		}},
+		{205, 347, func() {
+			s.heroState.Energy++
+		}},
+	}
+
+	var socket *d2ui.Sprite
+
+	var button *d2ui.Button
+
+	for _, i := range buttons {
+		currentValue := i
+
+		socket, err = s.uiManager.NewSprite(d2resource.HeroStatsPanelSocket, d2resource.PaletteSky)
+		if err != nil {
+			s.Error(err.Error())
+		}
+
+		socket.SetPosition(i.x+addStatSocketOffsetX, i.y+addStatSocketOffsetY)
+		s.newStatPoints.AddWidget(socket)
+
+		button = s.uiManager.NewButton(d2ui.ButtonTypeAddSkill, d2resource.PaletteSky)
+		button.SetPosition(i.x, i.y)
+		button.OnActivated(func() {
+			currentValue.cb()
+			s.heroState.StatsPoints--
+			s.remainingPoints.SetText(strconv.Itoa(s.heroState.StatsPoints))
+			s.setStatValues()
+			s.setLayout()
+		})
+		s.newStatPoints.AddWidget(button)
+	}
+}
+
+func (s *HeroStatsPanel) setLayout() {
+	s.newStatPoints.SetVisible(s.heroState.StatsPoints > 0 && s.IsOpen())
 }
 
 // IsOpen returns true if the hero status panel is open
@@ -176,12 +270,14 @@ func (s *HeroStatsPanel) Toggle() {
 func (s *HeroStatsPanel) Open() {
 	s.isOpen = true
 	s.panelGroup.SetVisible(true)
+	s.setLayout()
 }
 
 // Close closed the hero status panel
 func (s *HeroStatsPanel) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
+	s.setLayout()
 	s.onCloseCb()
 }
 
