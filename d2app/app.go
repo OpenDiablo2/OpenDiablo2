@@ -85,11 +85,10 @@ type App struct {
 
 // Options is used to store all of the app options that can be set with arguments
 type Options struct {
-	printVersion *bool
-	Debug        *bool
-	profiler     *string
-	Server       *d2networking.ServerOptions
-	LogLevel     *d2util.LogLevel
+	Debug    *bool
+	profiler *string
+	Server   *d2networking.ServerOptions
+	LogLevel *d2util.LogLevel
 }
 
 type bindTerminalEntry struct {
@@ -206,10 +205,6 @@ func (a *App) loadEngine() error {
 	a.ui = uiManager
 	a.tAllocSamples = createZeroedRing(nSamplesTAlloc)
 
-	if a.gitBranch == "" {
-		a.gitBranch = "Local Build"
-	}
-
 	return nil
 }
 
@@ -228,16 +223,28 @@ func (a *App) parseArguments() {
 
 	a.Options.profiler = flag.String("profile", "", descProfile)
 	a.Options.Server.Dedicated = flag.Bool("dedicated", false, "Starts a dedicated server")
-	a.Options.printVersion = flag.Bool("v", false, "Prints the version of the app")
 	a.Options.Server.MaxPlayers = flag.Int("players", 0, descPlayers)
 	a.Options.LogLevel = flag.Int("l", d2util.LogLevelDefault, descLogging)
+	showVersion := flag.Bool("v", false, "Show version")
 	showHelp := flag.Bool("h", false, "Show help")
 
-	flag.Parse()
-
-	if *showHelp {
+	flag.Usage = func() {
 		fmt.Printf("usage: %s [<flags>]\n\nFlags:\n", os.Args[0])
 		flag.PrintDefaults()
+	}
+	flag.Parse()
+
+	if *a.Options.LogLevel >= d2util.LogLevelUnspecified {
+		*a.Options.LogLevel = d2util.LogLevelDefault
+	}
+
+	if *showVersion {
+		a.Infof("version: OpenDiablo2 (%s %s)", a.gitBranch, a.gitCommit)
+		os.Exit(0)
+	}
+
+	if *showHelp {
+		flag.Usage()
 		os.Exit(0)
 	}
 }
@@ -292,22 +299,6 @@ func (a *App) Run() error {
 	a.config = config
 
 	a.asset.SetLogLevel(config.LogLevel)
-
-	// print version and exit if `--version` was supplied
-	if *a.Options.printVersion {
-		fmtVersion := "OpenDiablo2 (%s %s)"
-
-		if a.gitBranch == "" {
-			a.gitBranch = "local"
-		}
-
-		if a.gitCommit == "" {
-			a.gitCommit = "build"
-		}
-
-		fmt.Printf(fmtVersion, a.gitBranch, a.gitCommit)
-		os.Exit(0)
-	}
 
 	logLevel := *a.Options.LogLevel
 	if logLevel == d2util.LogLevelUnspecified {
