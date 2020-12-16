@@ -193,6 +193,7 @@ const (
 	QuestLogQDescrBtn       = "/data/global/ui/MENU/questlast.dc6"
 	QuestLogSocket          = "/data/global/ui/MENU/questsockets.dc6"
 	QuestLogAQuestAnimation = "/data/global/ui/MENU/a%dq%d.dc6"
+	QuestLogDoneSfx         = "cursor/questdone.wav"
 
 	// --- Mouse Pointers ---
 

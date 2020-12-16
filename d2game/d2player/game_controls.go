@@ -124,6 +124,7 @@ func NewGameControls(
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	keyMap *KeyMap,
+	audioProvider d2interface.AudioProvider,
 	l d2util.LogLevel,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
@@ -207,7 +208,7 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
-	questLog := NewQuestLog(asset, ui, l, hero.Act)
+	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
 	inventory, err := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
 	if err != nil {
@@ -728,6 +729,7 @@ func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
 	g.hud.Advance(elapsed)
 	g.inventory.Advance(elapsed)
+	g.questLog.Advance(elapsed)
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err

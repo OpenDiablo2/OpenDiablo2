@@ -71,6 +71,7 @@ func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
 func NewQuestLog(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	l d2util.LogLevel,
+	audioProvider d2interface.AudioProvider,
 	act int) *QuestLog {
 	originX := 0
 	originY := 0
@@ -106,9 +107,9 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		26: 0,
 	}
 
-	var quests [d2enum.ActsNumber]*d2ui.WidgetGroup
+	var quests [d2enum.ActsNumber]*questEntire
 	for i := 0; i < d2enum.ActsNumber; i++ {
-		quests[i] = ui.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
+		quests[i] = &questEntire{WidgetGroup: ui.NewWidgetGroup(d2ui.RenderPriorityQuestLog)}
 	}
 
 	var tabs [d2enum.ActsNumber]questLogTab
@@ -129,6 +130,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		quests:        quests,
 		questStatus:   qs,
 		maxPlayersAct: mpa,
+		audioProvider: audioProvider,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -149,10 +151,12 @@ type QuestLog struct {
 	selectedQuest int
 	act           int
 	tab           [d2enum.ActsNumber]questLogTab
+	audioProvider d2interface.AudioProvider
+	completeSound d2interface.SoundEffect
 
 	questName     *d2ui.Label
 	questDescr    *d2ui.Label
-	quests        [d2enum.ActsNumber]*d2ui.WidgetGroup
+	quests        [d2enum.ActsNumber]*questEntire
 	questStatus   map[int]int
 	maxPlayersAct int
 
@@ -161,6 +165,11 @@ type QuestLog struct {
 	isOpen  bool
 
 	*d2util.Logger
+}
+
+type questEntire struct {
+	*d2ui.WidgetGroup
+	icons []*d2ui.Sprite
 }
 
 /* questIconTab returns path to quest animation using its
@@ -186,6 +195,8 @@ type questLogTab struct {
 // Load the data for the hero status panel
 func (s *QuestLog) Load() {
 	var err error
+
+	s.completeSound, err = s.audioProvider.LoadSound(d2resource.QuestLogDoneSfx, false, false)
 
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
@@ -228,7 +239,8 @@ func (s *QuestLog) Load() {
 	s.loadTabs()
 
 	for i := 0; i < d2enum.ActsNumber; i++ {
-		s.quests[i] = s.loadQuestIconsForAct(i + 1)
+		item, icons := s.loadQuestIconsForAct(i + 1)
+		s.quests[i] = &questEntire{item, icons}
 	}
 
 	s.panelGroup.SetVisible(false)
@@ -268,7 +280,7 @@ func (s *QuestLog) loadTabs() {
 	s.setTab(s.act - 1)
 }
 
-func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
+func (s *QuestLog) loadQuestIconsForAct(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite) {
 	wg := s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	var questsInAct int
@@ -281,6 +293,8 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	var sockets []*d2ui.Sprite
 
 	var buttons []*d2ui.Button
+
+	var icons []*d2ui.Sprite
 
 	var icon *d2ui.Sprite
 
@@ -307,7 +321,8 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		}
 
 		icon.SetPosition(x+questOffsetX, y+questOffsetY+iconOffsetY)
-		wg.AddWidget(icon)
+
+		icons = append(icons, icon)
 	}
 
 	for i := 0; i < questsInAct; i++ {
@@ -338,9 +353,13 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		wg.AddWidget(b)
 	}
 
+	for _, i := range icons {
+		wg.AddWidget(i)
+	}
+
 	wg.SetVisible(false)
 
-	return wg
+	return wg, icons
 }
 
 func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
@@ -355,16 +374,6 @@ func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
 	case d2enum.QuestStatusCompleted:
 		err = icon.SetCurrentFrame(completedFrame)
 	case d2enum.QuestStatusCompleting:
-		// that's not complet now
-		err = icon.SetCurrentFrame(0)
-		if err != nil {
-			s.Error(err.Error())
-		}
-
-		icon.PlayForward()
-		icon.SetPlayLoop(false)
-		err = icon.SetCurrentFrame(completedFrame)
-		s.questStatus[s.cordsToQuestID(act, n)] = d2enum.QuestStatusCompleted
 	case d2enum.QuestStatusNotStarted:
 		err = icon.SetCurrentFrame(notStartedFrame)
 	default:
@@ -372,6 +381,26 @@ func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
 	}
 
 	return icon, err
+}
+
+func (s *QuestLog) playQuestAnimations() {
+	var err error
+
+	for j, i := range s.quests[s.selectedTab].icons {
+		questID := s.cordsToQuestID(s.selectedTab+1, j)
+		if s.questStatus[questID] == d2enum.QuestStatusCompleting {
+			s.completeSound.Play()
+			err = i.SetCurrentFrame(0)
+			if err != nil {
+				s.Error(err.Error())
+			}
+
+			i.SetPlayLength(3)
+			i.PlayForward()
+			i.SetPlayLoop(false)
+			s.questStatus[questID] = d2enum.QuestStatusCompleted
+		}
+	}
 }
 
 func (s *QuestLog) setQuestLabel() {
@@ -466,6 +495,7 @@ func (s *QuestLog) Open() {
 	s.isOpen = true
 	s.panelGroup.SetVisible(true)
 	s.setTab(s.selectedTab)
+	s.playQuestAnimations()
 }
 
 // Close closed the hero status panel
@@ -487,7 +517,15 @@ func (s *QuestLog) SetOnCloseCb(cb func()) {
 
 // Advance updates labels on the panel
 func (s *QuestLog) Advance(elapsed float64) {
-	//
+	if !s.IsOpen() {
+		return
+	}
+
+	for _, i := range s.quests[s.selectedTab].icons {
+		if err := i.Advance(elapsed); err != nil {
+			s.Error(err.Error())
+		}
+	}
 }
 
 func (s *QuestLog) renderStaticMenu(target d2interface.Surface) {
