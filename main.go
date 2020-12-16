@@ -16,6 +16,7 @@ var GitCommit string = "build"
 
 func main() {
 	log.SetFlags(log.Lshortfile)
+	
 	instance := d2app.Create(GitBranch, GitCommit)
 
 	if err := instance.Run(); err != nil {
