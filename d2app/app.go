@@ -233,12 +233,11 @@ func (a *App) parseArguments() {
 		loggingShort = 'l'
 		loggingDesc  = "Enables verbose logging. Log levels will include those below it. " +
 			"0 disables log messages, " +
-			"1 shows fatal errors, " +
-			"2 shows errors, " +
-			"3 shows warnings, " +
-			"4 shows info, " +
-			"5 shows debug" +
-			"6 uses value from config file (default)"
+			"1 shows errors, " +
+			"2 shows warnings, " +
+			"3 shows info, " +
+			"4 shows debug" +
+			"5 uses value from config file (default)"
 	)
 
 	a.Options.profiler = kingpin.Flag(profilerArg, profilerDesc).String()
@@ -316,7 +315,7 @@ func (a *App) Run() error {
 			a.gitCommit = "build"
 		}
 
-		a.Errorf(fmtVersion, a.gitBranch, a.gitCommit)
+		fmt.Printf(fmtVersion, a.gitBranch, a.gitCommit)
 		os.Exit(0)
 	}
 
@@ -740,7 +739,7 @@ func (a *App) doCaptureFrame(target d2interface.Surface) error {
 		return err
 	}
 
-	a.Infof("saved frame to %s", a.capturePath)
+	a.Info(fmt.Sprintf("saved frame to %s", a.capturePath))
 
 	return nil
 }
@@ -800,7 +799,7 @@ func (a *App) convertFramesToGif() error {
 		return err
 	}
 
-	a.Infof("saved animation to %s", a.capturePath)
+	a.Info(fmt.Sprintf("saved animation to %s", a.capturePath))
 
 	return nil
 }
@@ -938,7 +937,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 
 	if err = gameClient.Open(host, filePath); err != nil {
 		errorMessage := fmt.Sprintf("can not connect to the host: %s", host)
-		a.Error(errorMessage)
+		fmt.Println(errorMessage)
 		a.ToMainMenu(errorMessage)
 	} else {
 		game, err := d2gamescreen.CreateGame(
@@ -957,7 +956,7 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 	characterSelect, err := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
 		a.audio, a.ui, connType, a.config.LogLevel, connHost)
 	if err != nil {
-		a.Errorf("unable to create character select screen: %s", err)
+		fmt.Printf("unable to create character select screen: %s", err)
 	}
 
 	a.screen.SetNextScreen(characterSelect)
