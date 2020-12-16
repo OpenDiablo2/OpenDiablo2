@@ -109,7 +109,6 @@ const (
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
-	assetManager, assetError := d2asset.NewAssetManager()
 	logger := d2util.NewLogger()
 	logger.SetPrefix(appLoggerPrefix)
 
@@ -120,14 +119,14 @@ func Create(gitBranch, gitCommit string) *App {
 		Options: &Options{
 			Server: &d2networking.ServerOptions{},
 		},
-		asset:        assetManager,
-		errorMessage: assetError,
 	}
 	app.Infof("OpenDiablo2 - Open source Diablo 2 engine")
 
 	app.parseArguments()
 
 	app.SetLevel(*app.Options.LogLevel)
+
+	app.asset, app.errorMessage = d2asset.NewAssetManager(*app.Options.LogLevel)
 
 	return app
 }
