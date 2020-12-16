@@ -374,6 +374,8 @@ func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
 	case d2enum.QuestStatusCompleted:
 		err = icon.SetCurrentFrame(completedFrame)
 	case d2enum.QuestStatusCompleting:
+		// animation will be played after quest-log panel is opened (see s.playQuestAnimation)
+		err = icon.SetCurrentFrame(0)
 	case d2enum.QuestStatusNotStarted:
 		err = icon.SetCurrentFrame(notStartedFrame)
 	default:
@@ -398,7 +400,6 @@ func (s *QuestLog) playQuestAnimations() {
 			i.SetPlayLength(3)
 			i.PlayForward()
 			i.SetPlayLoop(false)
-			s.questStatus[questID] = d2enum.QuestStatusCompleted
 		}
 	}
 }
@@ -521,9 +522,15 @@ func (s *QuestLog) Advance(elapsed float64) {
 		return
 	}
 
-	for _, i := range s.quests[s.selectedTab].icons {
-		if err := i.Advance(elapsed); err != nil {
-			s.Error(err.Error())
+	for j, i := range s.quests[s.selectedTab].icons {
+		questID := s.cordsToQuestID(s.selectedTab+1, j)
+		if s.questStatus[questID] == d2enum.QuestStatusCompleting {
+			if err := i.Advance(elapsed); err != nil {
+				s.Error(err.Error())
+			}
+			if i.GetCurrentFrame() == completedFrame {
+				s.questStatus[questID] = d2enum.QuestStatusCompleted
+			}
 		}
 	}
 }
