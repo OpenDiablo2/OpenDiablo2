@@ -10,23 +10,28 @@ type HeroStatsState struct {
 	Level      int `json:"level"`
 	Experience int `json:"experience"`
 
-	Strength  int `json:"strength"`
-	Energy    int `json:"energy"`
-	Dexterity int `json:"dexterity"`
 	Vitality  int `json:"vitality"`
-	// there are stats and skills points remaining to add.
-	StatPoints  int `json:"statPoints"`
-	SkillPoints int `json:"skillPoints"`
+	Energy    int `json:"energy"`
+	Strength  int `json:"strength"`
+	Dexterity int `json:"dexterity"`
 
-	Health     int     `json:"health"`
-	MaxHealth  int     `json:"maxHealth"`
-	Mana       int     `json:"mana"`
-	MaxMana    int     `json:"maxMana"`
-	Stamina    float64 `json:"-"` // only MaxStamina is saved, Stamina gets reset on entering world
-	MaxStamina int     `json:"maxStamina"`
+	AttackRating  int `json:"attackRating"`
+	DefenseRating int `json:"defenseRating"`
+
+	MaxStamina int `json:"maxStamina"`
+	Health     int `json:"health"`
+	MaxHealth  int `json:"maxHealth"`
+	Mana       int `json:"mana"`
+	MaxMana    int `json:"maxMana"`
+
+	FireResistance      int `json:"fireResistance"`
+	ColdResistance      int `json:"coldResistance"`
+	LightningResistance int `json:"lightningResistance"`
+	PoisonResistance    int `json:"poisonResistance"`
 
 	// values which are not saved/loaded(computed)
-	NextLevelExp int `json:"-"`
+	Stamina      float64 `json:"-"` // only MaxStamina is saved, Stamina gets reset on entering world
+	NextLevelExp int     `json:"-"`
 }
 
 // CreateHeroStatsState generates a running state from a hero stats.
@@ -39,8 +44,6 @@ func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStat
 		Dexterity:    classStats.InitDex,
 		Vitality:     classStats.InitVit,
 		Energy:       classStats.InitEne,
-		StatPoints:   0,
-		SkillPoints:  0,
 
 		MaxHealth:  classStats.InitVit * classStats.LifePerVit,
 		MaxMana:    classStats.InitEne * classStats.ManaPerEne,
