@@ -110,20 +110,24 @@ const (
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
 	assetManager, assetError := d2asset.NewAssetManager()
+	logger := d2util.NewLogger()
+	logger.SetPrefix(appLoggerPrefix)
 
 	app := &App{
+		Logger:    logger,
 		gitBranch: gitBranch,
 		gitCommit: gitCommit,
-		asset:     assetManager,
 		Options: &Options{
 			Server: &d2networking.ServerOptions{},
 		},
+		asset:        assetManager,
 		errorMessage: assetError,
 	}
+	app.Infof("OpenDiablo2 - Open source Diablo 2 engine")
 
-	app.Logger = d2util.NewLogger()
-	app.Logger.SetPrefix(appLoggerPrefix)
-	app.Logger.SetLevel(d2util.LogLevelNone)
+	app.parseArguments()
+
+	app.SetLevel(*app.Options.LogLevel)
 
 	return app
 }
@@ -139,7 +143,7 @@ func (a *App) startDedicatedServer() error {
 	srvChanIn := make(chan int)
 	srvChanLog := make(chan string)
 
-	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, a.config.LogLevel, maxPlayers)
+	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, *a.Options.LogLevel, maxPlayers)
 	if srvErr != nil {
 		return srvErr
 	}
@@ -172,15 +176,7 @@ func (a *App) loadEngine() error {
 		return a.renderer.Run(a.updateInitError, updateNOOP, 800, 600, "OpenDiablo2")
 	}
 
-	// if the log level was specified at the command line, use it
-	logLevel := *a.Options.LogLevel
-	if logLevel == d2util.LogLevelUnspecified {
-		logLevel = a.config.LogLevel
-	}
-
-	a.asset.SetLogLevel(logLevel)
-
-	audio := ebiten2.CreateAudio(a.config.LogLevel, a.asset)
+	audio := ebiten2.CreateAudio(*a.Options.LogLevel, a.asset)
 
 	inputManager := d2input.NewInputManager()
 
@@ -196,7 +192,7 @@ func (a *App) loadEngine() error {
 
 	scriptEngine := d2script.CreateScriptEngine()
 
-	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, a.config.LogLevel, audio)
+	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, *a.Options.LogLevel, audio)
 
 	a.inputManager = inputManager
 	a.terminal = term
@@ -284,28 +280,14 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 }
 
 // Run executes the application and kicks off the entire game process
-func (a *App) Run() error {
-	a.parseArguments()
-
+func (a *App) Run() (err error) {
 	// add our possible config directories
 	_, _ = a.asset.AddSource(filepath.Dir(d2config.LocalConfigPath()))
 	_, _ = a.asset.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
 
-	config, err := a.LoadConfig()
-	if err != nil {
+	if a.config, err = a.LoadConfig(); err != nil {
 		return err
 	}
-
-	a.config = config
-
-	a.asset.SetLogLevel(config.LogLevel)
-
-	logLevel := *a.Options.LogLevel
-	if logLevel == d2util.LogLevelUnspecified {
-		logLevel = a.config.LogLevel
-	}
-
-	a.asset.SetLogLevel(logLevel)
 
 	// start profiler if argument was supplied
 	if len(*a.Options.profiler) > 0 {
@@ -392,14 +374,14 @@ func (a *App) initialize() error {
 		}
 	}
 
-	gui, err := d2gui.CreateGuiManager(a.asset, a.config.LogLevel, a.inputManager)
+	gui, err := d2gui.CreateGuiManager(a.asset, *a.Options.LogLevel, a.inputManager)
 	if err != nil {
 		return err
 	}
 
 	a.guiManager = gui
 
-	a.screen = d2screen.NewScreenManager(a.ui, a.config.LogLevel, a.guiManager)
+	a.screen = d2screen.NewScreenManager(a.ui, *a.Options.LogLevel, a.guiManager)
 
 	a.audio.SetVolumes(a.config.BgmVolume, a.config.SfxVolume)
 
@@ -823,7 +805,7 @@ func (a *App) quitGame() {
 }
 
 func (a *App) enterGuiPlayground() {
-	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer, a.guiManager, a.config.LogLevel, a.asset))
+	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer, a.guiManager, *a.Options.LogLevel, a.asset))
 }
 
 func createZeroedRing(n int) *ring.Ring {
@@ -892,7 +874,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
 	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo,
-		a.config.LogLevel, errorMessageOptional...)
+		*a.Options.LogLevel, errorMessageOptional...)
 	if err != nil {
 		a.Error(err.Error())
 		return
@@ -903,7 +885,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, a.config.LogLevel, host)
+	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, *a.Options.LogLevel, host)
 	if err != nil {
 		a.Error(err.Error())
 		return
@@ -914,7 +896,7 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, err := d2client.Create(connType, a.asset, a.config.LogLevel, a.scriptEngine)
+	gameClient, err := d2client.Create(connType, a.asset, *a.Options.LogLevel, a.scriptEngine)
 	if err != nil {
 		a.Error(err.Error())
 	}
@@ -925,7 +907,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 		a.ToMainMenu(errorMessage)
 	} else {
 		game, err := d2gamescreen.CreateGame(
-			a, a.asset, a.ui, a.renderer, a.inputManager, a.audio, gameClient, a.terminal, a.config.LogLevel, a.guiManager,
+			a, a.asset, a.ui, a.renderer, a.inputManager, a.audio, gameClient, a.terminal, *a.Options.LogLevel, a.guiManager,
 		)
 		if err != nil {
 			a.Error(err.Error())
@@ -938,7 +920,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
 	characterSelect, err := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
-		a.audio, a.ui, connType, a.config.LogLevel, connHost)
+		a.audio, a.ui, connType, *a.Options.LogLevel, connHost)
 	if err != nil {
 		fmt.Printf("unable to create character select screen: %s", err)
 	}
@@ -949,7 +931,7 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
 	met, err := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer, a.inputManager, a.audio,
-		a.config.LogLevel, a.screen)
+		*a.Options.LogLevel, a.screen)
 	if err != nil {
 		a.Error(err.Error())
 		return
@@ -960,10 +942,10 @@ func (a *App) ToMapEngineTest(region, level int) {
 
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, a.config.LogLevel, a.ui))
+	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, *a.Options.LogLevel, a.ui))
 }
 
 // ToCinematics forces the game to transition to the cinematics menu
 func (a *App) ToCinematics() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.audio, a.config.LogLevel, a.ui))
+	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.audio, *a.Options.LogLevel, a.ui))
 }

@@ -16,8 +16,6 @@ var GitCommit string = "build"
 
 func main() {
 	log.SetFlags(log.Lshortfile)
-	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
-
 	instance := d2app.Create(GitBranch, GitCommit)
 
 	if err := instance.Run(); err != nil {
