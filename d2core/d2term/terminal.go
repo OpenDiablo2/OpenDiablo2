@@ -352,7 +352,7 @@ func (t *terminal) OutputRaw(text string, category d2enum.TermCategory) {
 
 	for _, line := range lines {
 		// removes color token (this token ends with [0m )
-		l := strings.Split(line, "[0m ")
+		l := strings.Split(line, "\033[0m")
 		line = l[len(l)-1]
 
 		t.outputHistory = append(t.outputHistory, termHistoryEntry{line, category})
