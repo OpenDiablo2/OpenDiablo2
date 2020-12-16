@@ -6,6 +6,7 @@ import (
 	"container/ring"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"image"
 	"image/gif"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
-	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
@@ -215,41 +215,31 @@ func (a *App) loadEngine() error {
 
 func (a *App) parseArguments() {
 	const (
-		versionArg   = "version"
-		versionShort = 'v'
-		versionDesc  = "Prints the version of the app"
-
-		profilerArg  = "profile"
-		profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
-
-		serverArg   = "dedicated"
-		serverShort = 'd'
-		serverDesc  = "Starts a dedicated server"
-
-		playersArg  = "players"
-		playersDesc = "Sets the number of max players for the dedicated server"
-
-		loggingArg   = "loglevel"
-		loggingShort = 'l'
-		loggingDesc  = "Enables verbose logging. Log levels will include those below it. " +
-			"0 disables log messages, " +
-			"1 shows errors, " +
-			"2 shows warnings, " +
-			"3 shows info, " +
-			"4 shows debug" +
-			"5 uses value from config file (default)"
+		descProfile = "Profiles the program,\none of (cpu, mem, block, goroutine, trace, thread, mutex)"
+		descPlayers = "Sets the number of max players for the dedicated server"
+		descLogging = "Enables verbose logging. Log levels will include those below it.\n" +
+			" 0 disables log messages\n" +
+			" 1 shows fatal\n" +
+			" 2 shows error\n" +
+			" 3 shows warning\n" +
+			" 4 shows info\n" +
+			" 5 shows debug\n"
 	)
 
-	a.Options.profiler = kingpin.Flag(profilerArg, profilerDesc).String()
-	a.Options.Server.Dedicated = kingpin.Flag(serverArg, serverDesc).Short(serverShort).Bool()
-	a.Options.printVersion = kingpin.Flag(versionArg, versionDesc).Short(versionShort).Bool()
-	a.Options.Server.MaxPlayers = kingpin.Flag(playersArg, playersDesc).Int()
-	a.Options.LogLevel = kingpin.Flag(loggingArg, loggingDesc).
-		Short(loggingShort).
-		Default(strconv.Itoa(d2util.LogLevelUnspecified)).
-		Int()
+	a.Options.profiler = flag.String("profile", "", descProfile)
+	a.Options.Server.Dedicated = flag.Bool("dedicated", false, "Starts a dedicated server")
+	a.Options.printVersion = flag.Bool("v", false, "Prints the version of the app")
+	a.Options.Server.MaxPlayers = flag.Int("players", 0, descPlayers)
+	a.Options.LogLevel = flag.Int("l", d2util.LogLevelDefault, descLogging)
+	showHelp := flag.Bool("h", false, "Show help")
 
-	kingpin.Parse()
+	flag.Parse()
+
+	if *showHelp {
+		fmt.Printf("usage: %s [<flags>]\n\nFlags:\n", os.Args[0])
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
 }
 
 // LoadConfig loads the OpenDiablo2 config file
