@@ -124,7 +124,7 @@ func Create(gitBranch, gitCommit string) *App {
 
 	app.Logger = d2util.NewLogger()
 	app.Logger.SetPrefix(appLoggerPrefix)
-	app.Logger.SetLevel(d2util.LogLevelNone)
+	app.Logger.SetLevel(d2util.LogLevelDefault)
 
 	return app
 }
@@ -320,9 +320,6 @@ func (a *App) Run() error {
 	}
 
 	logLevel := *a.Options.LogLevel
-	if logLevel == d2util.LogLevelUnspecified {
-		logLevel = a.config.LogLevel
-	}
 
 	a.asset.SetLogLevel(logLevel)
 
