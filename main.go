@@ -8,15 +8,14 @@ import (
 
 // GitBranch is set by the CI build process to the name of the branch
 //nolint:gochecknoglobals // This is filled in by the build system
-var GitBranch string
+var GitBranch string = "local"
 
 // GitCommit is set by the CI build process to the commit hash
 //nolint:gochecknoglobals // This is filled in by the build system
-var GitCommit string
+var GitCommit string = "build"
 
 func main() {
 	log.SetFlags(log.Lshortfile)
-	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
 	instance := d2app.Create(GitBranch, GitCommit)
 
