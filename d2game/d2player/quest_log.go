@@ -85,7 +85,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		2:  -2,
 		3:  0,
 		4:  1,
-		5:  2,
+		5:  4,
 		6:  3,
 		7:  -1,
 		8:  0,
@@ -205,12 +205,13 @@ type questLogTab struct {
 func (s *QuestLog) Load() {
 	var err error
 
+	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
+
+	// quest completion sound.
 	s.completeSound, err = s.audioProvider.LoadSound(d2resource.QuestLogDoneSfx, false, false)
 	if err != nil {
 		s.Error(err.Error())
 	}
-
-	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
@@ -221,7 +222,7 @@ func (s *QuestLog) Load() {
 	}
 
 	w, h := frame.GetSize()
-	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
+	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticPanelFrames, w, h)
 	s.panelGroup.AddWidget(staticPanel)
 
 	closeButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
@@ -259,11 +260,13 @@ func (s *QuestLog) Load() {
 	s.panelGroup.SetVisible(false)
 }
 
+// loadTabs loads quest log tabs
 func (s *QuestLog) loadTabs() {
 	var err error
 
 	tabsResource := d2resource.WPTabs
 
+	// create tabs only for 'discovered' acts
 	for i := 0; i < s.maxPlayersAct; i++ {
 		currentValue := i
 
@@ -272,7 +275,8 @@ func (s *QuestLog) loadTabs() {
 			s.Error(err.Error())
 		}
 
-		// nolint:gomnd // it's constant
+		// nolint:gomnd // it's constant.
+		// each tab has two frames (active / inactive)
 		frame := 2 * currentValue
 
 		err := s.tab[i].sprite.SetCurrentFrame(frame)
@@ -290,27 +294,21 @@ func (s *QuestLog) loadTabs() {
 		s.panelGroup.AddWidget(s.tab[i].invisibleButton)
 	}
 
+	// sets tab to current player's act.
 	s.setTab(s.act - 1)
 }
 
 // loadQuestBoard creates quest fields (socket, button, icon) for specified act
-func (s *QuestLog) loadQuestBoard(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite, []*d2ui.Button, []*d2ui.Sprite) {
-	wg := s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
+func (s *QuestLog) loadQuestBoard(act int) (wg *d2ui.WidgetGroup, icons []*d2ui.Sprite, buttons []*d2ui.Button, sockets []*d2ui.Sprite) {
+	wg = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
+	// sets number of quests in act (for act 4 it's only 3, else 6)
 	var questsInAct int
 	if act == d2enum.Act4 {
 		questsInAct = d2enum.HalfQuestsNumber
 	} else {
 		questsInAct = d2enum.NormalActQuestsNumber
 	}
-
-	var sockets []*d2ui.Sprite
-
-	var buttons []*d2ui.Button
-
-	var icons []*d2ui.Sprite
-
-	var icon *d2ui.Sprite
 
 	for n := 0; n < questsInAct; n++ {
 		cw := n
@@ -324,7 +322,7 @@ func (s *QuestLog) loadQuestBoard(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite, [
 		socket.SetPosition(x, y+iconOffsetY+questOffsetY)
 		sockets = append(sockets, socket)
 
-		icon, err = s.makeQuestIconForAct(act, n, x, y)
+		icon, err := s.makeQuestIconForAct(act, n, x, y)
 		if err != nil {
 			s.Error(err.Error())
 		}
@@ -335,11 +333,11 @@ func (s *QuestLog) loadQuestBoard(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite, [
 		button.SetPosition(x+questOffsetX, y+questOffsetY)
 		button.SetEnabled(s.questStatus[s.cordsToQuestID(act, cw)] != d2enum.QuestStatusNotStarted)
 		buttons = append(buttons, button)
-
 	}
 
 	for i := 0; i < questsInAct; i++ {
 		currentQuest := i
+
 		// creates callback for quest button
 		buttons[i].OnActivated(func() {
 			var err error
@@ -352,12 +350,13 @@ func (s *QuestLog) loadQuestBoard(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite, [
 				}
 			}
 
-			// highlights appropiate socket
+			// highlights appropriate socket
 			err = sockets[currentQuest].SetCurrentFrame(socketHighlightedFrame)
 			if err != nil {
 				s.Error(err.Error())
 			}
 
+			// sets quest labels
 			s.onQuestClicked(currentQuest + 1)
 		})
 	}
@@ -382,7 +381,7 @@ func (s *QuestLog) loadQuestBoard(act int) (*d2ui.WidgetGroup, []*d2ui.Sprite, [
 	return wg, icons, buttons, sockets
 }
 
-func (s *QuestLog) makeQuestIconForAct(act, n int, x, y int) (*d2ui.Sprite, error) {
+func (s *QuestLog) makeQuestIconForAct(act, n, x, y int) (*d2ui.Sprite, error) {
 	iconResource := s.questIconsTable(act, n)
 
 	icon, err := s.uiManager.NewSprite(iconResource, d2resource.PaletteSky)
@@ -409,8 +408,6 @@ func (s *QuestLog) makeQuestIconForAct(act, n int, x, y int) (*d2ui.Sprite, erro
 
 // playQuestAnimations plays animations for quests (when status=questStatusCompleting)
 func (s *QuestLog) playQuestAnimations() {
-	var err error
-
 	for j, i := range s.quests[s.selectedTab].icons {
 		questID := s.cordsToQuestID(s.selectedTab+1, j)
 		if s.questStatus[questID] == d2enum.QuestStatusCompleting {
@@ -419,14 +416,26 @@ func (s *QuestLog) playQuestAnimations() {
 			// quest should be highlighted and it's label should be displayed
 			s.quests[s.selectedTab].buttons[j].Activate()
 
-			err = i.SetCurrentFrame(0)
-			if err != nil {
-				s.Error(err.Error())
-			}
-
 			i.SetPlayLength(questCompleteAnimationDuration)
 			i.PlayForward()
 			i.SetPlayLoop(false)
+		}
+	}
+}
+
+// stopPlayedAnimation stops currently played animations and sets quests in
+// completing state to completed (should be used, when quest log is closing)
+func (s *QuestLog) stopPlayedAnimations() {
+	// stops all played animations
+	for j, i := range s.quests[s.selectedTab].icons {
+		questID := s.cordsToQuestID(s.selectedTab+1, j)
+		if s.questStatus[questID] == d2enum.QuestStatusCompleting {
+			s.questStatus[questID] = d2enum.QuestStatusCompleted
+
+			err := i.SetCurrentFrame(completedFrame)
+			if err != nil {
+				s.Error(err.Error())
+			}
 		}
 	}
 }
@@ -455,17 +464,23 @@ func (s *QuestLog) setQuestLabel() {
 	case d2enum.QuestStatusNotStarted:
 		s.questDescr.SetText("")
 	default:
-		s.questDescr.SetText(strings.Join(
-			d2util.SplitIntoLinesWithMaxWidth(
-				s.asset.TranslateString(
-					fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status),
-				),
-				questDescriptionLenght),
-			"\n"),
-		)
+		str := fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status)
+		descr := s.asset.TranslateString(str)
+
+		// if description not found
+		if str == descr {
+			s.questDescr.SetText("")
+		} else {
+			s.questDescr.SetText(strings.Join(
+				d2util.SplitIntoLinesWithMaxWidth(
+					descr, questDescriptionLenght),
+				"\n"),
+			)
+		}
 	}
 }
 
+// switch all socket (in current tab) to normal state
 func (s *QuestLog) clearHighlightment() {
 	for _, i := range s.quests[s.selectedTab].sockets {
 		err := i.SetCurrentFrame(socketNormalFrame)
@@ -487,19 +502,23 @@ func (s *QuestLog) setTab(tab int) {
 	s.setQuestLabel()
 	s.playQuestAnimations()
 
+	// displays appropriate quests board
 	for i := 0; i < s.maxPlayersAct; i++ {
 		s.quests[i].SetVisible(tab == i)
 	}
 
+	// "highlights" appropriate tab
 	for i := 0; i < s.maxPlayersAct; i++ {
 		cv := i
 
+		// converts bool to 1/0
 		if cv == s.selectedTab {
 			mod = 0
 		} else {
 			mod = 1
 		}
 
+		// sets tab sprite to highlighted/non-highlighted
 		err := s.tab[cv].sprite.SetCurrentFrame(2*cv + mod)
 		if err != nil {
 			s.Error(err.Error())
@@ -513,8 +532,9 @@ func (s *QuestLog) onQuestClicked(number int) {
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
+//
 func (s *QuestLog) onDescrClicked() {
-	//
+	s.Info("Quest description button clicked")
 }
 
 // IsOpen returns true if the hero status panel is open
@@ -553,21 +573,6 @@ func (s *QuestLog) Close() {
 	s.onCloseCb()
 }
 
-func (s *QuestLog) stopPlayedAnimations() {
-	// stops all played animations
-	for j, i := range s.quests[s.selectedTab].icons {
-		questID := s.cordsToQuestID(s.selectedTab+1, j)
-		if s.questStatus[questID] == d2enum.QuestStatusCompleting {
-			s.questStatus[questID] = d2enum.QuestStatusCompleted
-
-			err := i.SetCurrentFrame(completedFrame)
-			if err != nil {
-				s.Error(err.Error())
-			}
-		}
-	}
-}
-
 // SetOnCloseCb the callback run on closing the HeroStatsPanel
 func (s *QuestLog) SetOnCloseCb(cb func()) {
 	s.onCloseCb = cb
@@ -591,10 +596,6 @@ func (s *QuestLog) Advance(elapsed float64) {
 			}
 		}
 	}
-}
-
-func (s *QuestLog) renderStaticMenu(target d2interface.Surface) {
-	s.renderStaticPanelFrames(target)
 }
 
 // nolint:dupl // I think it is OK, to duplicate this function
@@ -640,26 +641,4 @@ func (s *QuestLog) cordsToQuestID(act, number int) int {
 	}
 
 	return key
-}
-
-//nolint:deadcode,unused // I think, it will be used, if not, we can just remove it
-func (s *QuestLog) questIDToCords(id int) (act, number int) {
-	act = 1
-
-	for i := 0; i < d2enum.ActsNumber; i++ {
-		if id < d2enum.NormalActQuestsNumber {
-			break
-		}
-
-		act++
-
-		id -= d2enum.NormalActQuestsNumber
-	}
-
-	number = id
-	if act > d2enum.Act4 {
-		number -= d2enum.HalfQuestsNumber
-	}
-
-	return act, number
 }
