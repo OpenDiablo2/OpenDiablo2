@@ -214,7 +214,7 @@ func NewGameControls(
 		return nil, err
 	}
 
-	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
+	skilltree := newSkillTree(hero.Skills, hero.Class, hero.Stats, asset, l, ui)
 
 	miniPanel := newMiniPanel(asset, ui, l, isSinglePlayer)
 
@@ -224,12 +224,8 @@ func NewGameControls(
 	}
 
 	helpOverlay := NewHelpOverlay(asset, ui, l, keyMap)
-	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
-
-	hoverLabel := hud.nameLabel
-	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc := &GameControls{
 		asset:          asset,
@@ -246,7 +242,6 @@ func NewGameControls(
 		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
-		hud:            hud,
 		bottomMenuRect: &d2geom.Rectangle{
 			Left:   menuBottomRectX,
 			Top:    menuBottomRectY,
@@ -270,6 +265,12 @@ func NewGameControls(
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
 	}
+
+	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, gc, mapRenderer)
+	gc.hud = hud
+
+	hoverLabel := hud.nameLabel
+	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
 	gc.questLog.SetOnCloseCb(gc.onCloseQuestLog)
@@ -713,6 +714,9 @@ func (g *GameControls) Load() {
 	g.questLog.Load()
 	g.HelpOverlay.Load()
 
+	g.loadAddButtons()
+	g.setAddButtons()
+
 	miniPanelActions := &miniPanelActions{
 		characterToggle: g.toggleHeroStatsPanel,
 		inventoryToggle: g.toggleInventoryPanel,
@@ -731,6 +735,10 @@ func (g *GameControls) Advance(elapsed float64) error {
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
+	}
+
+	if g.heroStatsPanel.IsOpen() || g.skilltree.IsOpen() {
+		g.setAddButtons()
 	}
 
 	return nil
@@ -1098,4 +1106,14 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 	}
 
 	return nil
+}
+
+func (g *GameControls) setAddButtons() {
+	g.hud.addStatsButton.SetEnabled(g.hero.Stats.StatsPoints > 0)
+	g.hud.addSkillButton.SetEnabled(g.hero.Stats.SkillPoints > 0)
+}
+
+func (g *GameControls) loadAddButtons() {
+	g.hud.addStatsButton.OnActivated(func() { g.toggleHeroStatsPanel() })
+	g.hud.addSkillButton.OnActivated(func() { g.toggleSkilltreePanel() })
 }

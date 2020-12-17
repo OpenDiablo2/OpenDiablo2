@@ -55,6 +55,7 @@ const (
 	ButtonTypeSquelchChat        ButtonType = 35
 	ButtonTypeTabBlank           ButtonType = 36
 	ButtonTypeBlankQuestBtn      ButtonType = 37
+	ButtonTypeAddSkill           ButtonType = 38
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -198,6 +199,10 @@ const (
 	buttonGoldCoinSegmentsX     = 1
 	buttonGoldCoinSegmentsY     = 1
 	buttonGoldCoinDisabledFrame = -1
+
+	buttonAddSkillSegmentsX     = 1
+	buttonAddSkillSegmentsY     = 1
+	buttonAddSkillDisabledFrame = 2
 
 	pressedButtonOffset = 2
 )
@@ -745,6 +750,20 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeAddSkill: {
+			XSegments:        buttonAddSkillSegmentsX,
+			YSegments:        buttonAddSkillSegmentsY,
+			DisabledFrame:    buttonAddSkillDisabledFrame,
+			DisabledColor:    whiteAlpha100,
+			ResourceName:     d2resource.AddSkillButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
 		},
 	}
 }

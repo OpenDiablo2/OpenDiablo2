@@ -70,6 +70,11 @@ const (
 	whiteAlpha100     = 0xffffffff
 )
 
+const (
+	addStatsButtonX, addStatsButtonY = 206, 561
+	addSkillButtonX, addSkillButtonY = 563, 561
+)
+
 // HUD represents the always visible user interface of the game
 type HUD struct {
 	actionableRegions  []actionableRegion
@@ -103,7 +108,11 @@ type HUD struct {
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
 	panelBackground    *d2ui.CustomWidget
+	addStatsButton     *d2ui.Button
+	addSkillButton     *d2ui.Button
 	panelGroup         *d2ui.WidgetGroup
+	gameControls       *GameControls
+
 	*d2util.Logger
 }
 
@@ -116,6 +125,7 @@ func NewHUD(
 	actionableRegions []actionableRegion,
 	mapEngine *d2mapengine.MapEngine,
 	l d2util.LogLevel,
+	gameControls *GameControls,
 	mapRenderer *d2maprenderer.MapRenderer,
 ) *HUD {
 	nameLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
@@ -149,6 +159,7 @@ func NewHUD(
 		zoneChangeText:    zoneLabel,
 		healthGlobe:       healthGlobe,
 		manaGlobe:         manaGlobe,
+		gameControls:      gameControls,
 	}
 
 	hud.Logger = d2util.NewLogger()
@@ -176,6 +187,16 @@ func (h *HUD) Load() {
 	h.loadSkillResources()
 	h.loadCustomWidgets()
 	h.loadUIButtons()
+
+	h.addStatsButton = h.uiManager.NewButton(d2ui.ButtonTypeAddSkill, "")
+	h.addStatsButton.SetPosition(addStatsButtonX, addStatsButtonY)
+	h.addStatsButton.SetVisible(false)
+	h.panelGroup.AddWidget(h.addStatsButton)
+
+	h.addSkillButton = h.uiManager.NewButton(d2ui.ButtonTypeAddSkill, "")
+	h.addSkillButton.SetPosition(addSkillButtonX, addSkillButtonY)
+	h.addSkillButton.SetVisible(false)
+	h.panelGroup.AddWidget(h.addSkillButton)
 
 	h.panelGroup.SetVisible(true)
 }
