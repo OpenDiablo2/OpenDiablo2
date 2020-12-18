@@ -10,7 +10,7 @@ func monsterStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(MonStats)
 
 	for d.Next() {
-		record := &MonStatsRecord{
+		record := &MonStatRecord{
 			Key:                            d.String("Id"),
 			ID:                             d.Number("hcIdx"),
 			BaseKey:                        d.String("BaseId"),

@@ -180,7 +180,7 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 }
 
 // NewNPC creates a new NPC and returns a pointer to it.
-func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, direction int) (*NPC, error) {
+func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatRecord, direction int) (*NPC, error) {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/803
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),

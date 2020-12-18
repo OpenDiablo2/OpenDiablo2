@@ -297,7 +297,7 @@ var skillDetails = map[int]*d2records.SkillRecord{
 }
 
 // nolint:gochecknoglobals // just a test
-var monStats = map[string]*d2records.MonStatsRecord{
+var monStats = map[string]*d2records.MonStatRecord{
 	"Specter": {NameString: "Specter", ID: 40},
 }
 
