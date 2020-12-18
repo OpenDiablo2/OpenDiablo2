@@ -43,12 +43,18 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 		Logger:     ui.Logger,
 	}
 
+	sprite.SetVisible(false)
+
+	ui.addWidget(sprite)
+
 	return sprite, nil
 }
 
 // Render renders the sprite on the given surface
 func (s *Sprite) Render(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
+
+	s.width, s.height = s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
@@ -97,7 +103,7 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 
 // GetSize returns the size of the current frame
 func (s *Sprite) GetSize() (width, height int) {
-	return s.GetCurrentFrameSize()
+	return s.width, s.height
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
@@ -152,7 +158,9 @@ func (s *Sprite) GetDirection() int {
 
 // SetCurrentFrame sets animation at a specific frame
 func (s *Sprite) SetCurrentFrame(frameIndex int) error {
-	return s.animation.SetCurrentFrame(frameIndex)
+	err := s.animation.SetCurrentFrame(frameIndex)
+	s.width, s.height = s.animation.GetCurrentFrameSize()
+	return err
 }
 
 // Rewind sprite to beginning
