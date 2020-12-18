@@ -9,7 +9,7 @@ func soundDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(SoundDetails)
 
 	for d.Next() {
-		entry := &SoundDetailsRecord{
+		entry := &SoundDetailRecord{
 			Handle:    d.String("Sound"),
 			Index:     d.Number("Index"),
 			FileName:  d.String("FileName"),

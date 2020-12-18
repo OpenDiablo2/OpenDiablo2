@@ -433,7 +433,7 @@ func (r *RecordManager) lookupObject(act, typ, id int) *ObjectLookupRecord {
 }
 
 // SelectSoundByIndex selects a sound by its ID
-func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailsRecord {
+func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailRecord {
 	for idx := range r.Sound.Details {
 		if r.Sound.Details[idx].Index == index {
 			return r.Sound.Details[idx]

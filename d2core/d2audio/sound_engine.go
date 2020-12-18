@@ -31,7 +31,7 @@ const originalFPS float64 = 25
 // A Sound that can be started and stopped
 type Sound struct {
 	effect  d2interface.SoundEffect
-	entry   *d2records.SoundDetailsRecord
+	entry   *d2records.SoundDetailRecord
 	volume  float64
 	vTarget float64
 	vRate   float64
