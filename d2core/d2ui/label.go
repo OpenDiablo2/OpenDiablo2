@@ -99,11 +99,6 @@ func (v *Label) Render(target d2interface.Surface) {
 	target.Pop()
 }
 
-// GetSize returns the size of the label
-func (v *Label) GetSize() (width, height int) {
-	return v.width, v.height
-}
-
 // GetTextMetrics returns the width and height of the enclosing rectangle in Pixels.
 func (v *Label) GetTextMetrics(text string) (width, height int) {
 	return v.font.GetTextMetrics(text)

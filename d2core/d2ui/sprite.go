@@ -101,11 +101,6 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 	}
 }
 
-// GetSize returns the size of the current frame
-func (s *Sprite) GetSize() (width, height int) {
-	return s.width, s.height
-}
-
 // GetFrameSize gets the Size(width, height) of a indexed frame.
 func (s *Sprite) GetFrameSize(frameIndex int) (x, y int, err error) {
 	return s.animation.GetFrameSize(frameIndex)
