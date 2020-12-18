@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
-// LoadMonStats2 loads MonStats2Records from monstats2.txt
+// LoadMonStats2 loads MonStat2Records from monstats2.txt
 //nolint:funlen //just a big data loader
 func monsterStats2Loader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(MonStats2)
@@ -18,7 +18,7 @@ func monsterStats2Loader(r *RecordManager, d *d2txt.DataDictionary) error {
 			return err
 		}
 
-		record := &MonStats2Record{
+		record := &MonStat2Record{
 			Key:             d.String("Id"),
 			Height:          d.Number("Height"),
 			OverlayHeight:   d.Number("OverlayHeight"),

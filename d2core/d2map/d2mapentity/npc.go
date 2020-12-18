@@ -22,8 +22,8 @@ type NPC struct {
 	action        int
 	path          int
 	repetitions   int
-	monstatEx     *d2records.MonStats2Record
 	monstatRecord *d2records.MonStatRecord
+	monstatEx     *d2records.MonStat2Record
 	HasPaths      bool
 	isDone        bool
 }
