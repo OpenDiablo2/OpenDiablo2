@@ -153,9 +153,7 @@ func (s *Sprite) GetDirection() int {
 
 // SetCurrentFrame sets animation at a specific frame
 func (s *Sprite) SetCurrentFrame(frameIndex int) error {
-	err := s.animation.SetCurrentFrame(frameIndex)
-	s.width, s.height = s.animation.GetCurrentFrameSize()
-	return err
+	return s.animation.SetCurrentFrame(frameIndex)
 }
 
 // Rewind sprite to beginning
