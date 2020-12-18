@@ -20,7 +20,7 @@ type Object struct {
 	composite *d2asset.Composite
 	highlight bool
 	// nameLabel    d2ui.Label
-	objectRecord *d2records.ObjectDetailsRecord
+	objectRecord *d2records.ObjectDetailRecord
 	drawLayer    int
 	name         string
 }

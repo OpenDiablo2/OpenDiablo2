@@ -1,10 +1,10 @@
 package d2records
 
 // ObjectDetails stores all of the ObjectDetailRecords
-type ObjectDetails map[int]*ObjectDetailsRecord
+type ObjectDetails map[int]*ObjectDetailRecord
 
-// ObjectDetailsRecord represents the settings for one type of object from objects.txt
-type ObjectDetailsRecord struct {
+// ObjectDetailRecord represents the settings for one type of object from objects.txt
+type ObjectDetailRecord struct {
 	Index         int    // Line number in file, this is the actual index used for objects
 	FrameCount    [8]int // how many frames does this mode have, 0 = skip
 	FrameDelta    [8]int // what rate is the animation played at (256 = 100% speed)

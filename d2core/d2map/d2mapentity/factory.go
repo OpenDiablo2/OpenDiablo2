@@ -263,7 +263,7 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 }
 
 // NewObject creates an instance of AnimatedComposite
-func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetailsRecord,
+func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetailRecord,
 	palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
