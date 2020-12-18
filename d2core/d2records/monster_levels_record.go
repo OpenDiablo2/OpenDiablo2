@@ -52,7 +52,7 @@ func monsterLevelsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d MonsterLevel records", len(records))
+	r.Debugf("Loaded %d MonsterLevel records", len(records))
 
 	r.Monster.Levels = records
 

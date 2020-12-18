@@ -136,7 +136,7 @@ func charStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d CharStats records", len(records))
+	r.Debugf("Loaded %d CharStat records", len(records))
 
 	r.Character.Stats = records
 

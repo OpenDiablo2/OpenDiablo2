@@ -23,7 +23,7 @@ func objectTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d object types", len(records))
+	r.Debugf("Loaded %d ObjectType records", len(records))
 
 	r.Object.Types = records
 

@@ -102,7 +102,7 @@ func beltsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d belts", len(records))
+	r.Debugf("Loaded %d Belt records", len(records))
 
 	r.Item.Belts = records
 

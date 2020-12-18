@@ -161,7 +161,7 @@ func monsterStats2Loader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	r.Logger.Infof("Loaded %d MonStats2 records", len(records))
+	r.Debugf("Loaded %d MonStat2 records", len(records))
 
 	r.Monster.Stats2 = records
 

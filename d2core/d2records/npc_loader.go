@@ -64,7 +64,7 @@ func npcLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.NPCs = records
 
-	r.Logger.Infof("Loaded %d NPC records", len(records))
+	r.Debugf("Loaded %d NPC records", len(records))
 
 	return nil
 }

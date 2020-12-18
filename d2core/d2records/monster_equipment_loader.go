@@ -49,7 +49,7 @@ func monsterEquipmentLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		length += len(records[k])
 	}
 
-	r.Logger.Infof("Loaded %d MonsterEquipment records", length)
+	r.Debugf("Loaded %d MonsterEquipment records", length)
 
 	r.Monster.Equipment = records
 

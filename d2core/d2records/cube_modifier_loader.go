@@ -22,7 +22,7 @@ func cubeModifierLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Cube.Modifiers = records
 
-	r.Logger.Infof("Loaded %d Cube Modifier records", len(records))
+	r.Debugf("Loaded %d CubeModifier records", len(records))
 
 	return nil
 }
