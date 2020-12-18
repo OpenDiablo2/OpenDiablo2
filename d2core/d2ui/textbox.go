@@ -11,8 +11,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
-// static check that TextBox implements widget
+// static check that TextBox implements widget and ClickableWIdget
 var _ Widget = &TextBox{}
+var _ ClickableWidget = &TextBox{}
 
 // TextBox represents a text input box
 type TextBox struct {

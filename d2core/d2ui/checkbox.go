@@ -6,8 +6,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
-// static check that Checkbox implements Widget
+// static check that Checkbox implements Widget and ClickableWidget
 var _ Widget = &Checkbox{}
+var _ ClickableWidget = &Checkbox{}
 
 // Checkbox represents a checkbox UI element
 type Checkbox struct {

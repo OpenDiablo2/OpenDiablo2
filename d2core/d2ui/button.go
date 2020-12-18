@@ -768,7 +768,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 	}
 }
 
-var _ Widget = &Button{} // static check to ensure button implements widget
+var _ Widget = &Button{}          // static check to ensure button implements widget
+var _ ClickableWidget = &Button{} // static check to ensure button implemented clickable widget
 
 // Button defines a standard wide UI button
 type Button struct {

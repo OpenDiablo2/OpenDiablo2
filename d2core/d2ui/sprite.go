@@ -11,6 +11,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
+// static check if Sprite implemented Widget
+var _ Widget = &Sprite{}
+
 // Sprite is a positioned visual object.
 type Sprite struct {
 	*BaseWidget
@@ -34,11 +37,13 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 
 	base := NewBaseWidget(ui)
 
-	return &Sprite{
+	sprite := &Sprite{
 		BaseWidget: base,
 		animation:  animation,
 		Logger:     ui.Logger,
-	}, nil
+	}
+
+	return sprite, nil
 }
 
 // Render renders the sprite on the given surface

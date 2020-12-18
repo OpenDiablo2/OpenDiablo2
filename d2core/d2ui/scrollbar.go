@@ -13,8 +13,9 @@ const (
 	scrollbarWidth         = 10
 )
 
-// static check that Scrollbar implements widget
+// static check that Scrollbar implements widget and ClickableWIdget
 var _ Widget = &Scrollbar{}
+var _ ClickableWidget = &Scrollbar{}
 
 // Scrollbar is a vertical slider ui element
 type Scrollbar struct {
