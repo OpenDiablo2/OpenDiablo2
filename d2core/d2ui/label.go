@@ -43,6 +43,10 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 
 	result.bindManager(ui)
 
+	result.SetVisible(false)
+
+	ui.addWidget(result)
+
 	return result
 }
 
@@ -93,11 +97,6 @@ func (v *Label) Render(target d2interface.Surface) {
 	target.Pop()
 }
 
-// GetSize returns the size of the label
-func (v *Label) GetSize() (width, height int) {
-	return v.font.GetTextMetrics(v.text)
-}
-
 // GetTextMetrics returns the width and height of the enclosing rectangle in Pixels.
 func (v *Label) GetTextMetrics(text string) (width, height int) {
 	return v.font.GetTextMetrics(text)
@@ -106,6 +105,7 @@ func (v *Label) GetTextMetrics(text string) (width, height int) {
 // SetText sets the label's text
 func (v *Label) SetText(newText string) {
 	v.text = v.processColorTokens(newText)
+	v.BaseWidget.width, v.BaseWidget.height = v.font.GetTextMetrics(v.text)
 }
 
 // GetText returns label text
