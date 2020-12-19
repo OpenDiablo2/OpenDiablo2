@@ -11,6 +11,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
+// static check if Label implemented Widget
+var _ Widget = &Label{}
+
 // Label represents a user interface label
 type Label struct {
 	*BaseWidget
