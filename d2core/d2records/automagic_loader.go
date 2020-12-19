@@ -79,7 +79,7 @@ func autoMagicLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d AutoMagic records", len(records))
+	r.Debugf("Loaded %d AutoMagic records", len(records))
 
 	r.Item.AutoMagic = records
 

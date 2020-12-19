@@ -20,7 +20,7 @@ func elemTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d ElemType records", len(records))
+	r.Debugf("Loaded %d ElemType records", len(records))
 
 	r.ElemTypes = records
 

@@ -70,7 +70,7 @@ func loadAffixDictionary(
 	}
 
 	name := getAffixString(superType, subType)
-	r.Logger.Infof("Loaded %d %s records", len(records), name)
+	r.Debugf("Loaded %d %s records", len(records), name)
 
 	return records, groups, nil
 }

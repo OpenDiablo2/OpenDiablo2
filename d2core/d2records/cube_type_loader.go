@@ -22,7 +22,7 @@ func cubeTypeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Cube.Types = records
 
-	r.Logger.Infof("Loaded %d Cube Type records", len(records))
+	r.Debugf("Loaded %d CubeType records", len(records))
 
 	return nil
 }

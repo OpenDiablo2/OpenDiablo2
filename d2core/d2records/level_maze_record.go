@@ -1,11 +1,11 @@
 package d2records
 
-// LevelMazeDetails stores all of the LevelMazeDetailsRecords
-type LevelMazeDetails map[int]*LevelMazeDetailsRecord
+// LevelMazeDetails stores all of the LevelMazeDetailRecords
+type LevelMazeDetails map[int]*LevelMazeDetailRecord
 
-// LevelMazeDetailsRecord is a representation of a row from lvlmaze.txt
+// LevelMazeDetailRecord is a representation of a row from lvlmaze.txt
 // these records define the parameters passed to the maze level generator
-type LevelMazeDetailsRecord struct {
+type LevelMazeDetailRecord struct {
 	// descriptive, not loaded in game. Corresponds with Name field in
 	// Levels.txt
 	Name string // Name

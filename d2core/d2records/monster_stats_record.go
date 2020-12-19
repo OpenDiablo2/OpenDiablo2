@@ -4,13 +4,13 @@ import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 // https://d2mods.info/forum/kb/viewarticle?a=360
 
-// MonStats stores all of the MonStat Records
-type MonStats map[string]*MonStatsRecord
+// MonStats stores all of the MonStatRecords
+type MonStats map[string]*MonStatRecord
 
 type (
-	// MonStatsRecord represents a single row from `data/global/excel/monstats.txt` in the MPQ files.
+	// MonStatRecord represents a single row from `data/global/excel/monstats.txt` in the MPQ files.
 	// These records are used for creating monsters.
-	MonStatsRecord struct {
+	MonStatRecord struct {
 
 		// Key contains the pointer that will be used in other txt files
 		// such as levels.txt and superuniques.txt.

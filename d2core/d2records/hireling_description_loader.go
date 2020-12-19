@@ -22,7 +22,7 @@ func hirelingDescriptionLoader(r *RecordManager, d *d2txt.DataDictionary) error 
 
 	r.Hireling.Descriptions = records
 
-	r.Logger.Infof("Loaded %d Hireling Descriptions records", len(records))
+	r.Debugf("Loaded %d HirelingDescription records", len(records))
 
 	return nil
 }

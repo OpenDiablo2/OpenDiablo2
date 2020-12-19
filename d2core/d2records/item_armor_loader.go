@@ -16,7 +16,7 @@ func armorLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return err
 	}
 
-	r.Logger.Infof("Loaded %d armors", len(records))
+	r.Debugf("Loaded %d Armor Item records", len(records))
 
 	r.Item.Armors = records
 

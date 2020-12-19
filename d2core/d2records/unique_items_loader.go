@@ -128,7 +128,7 @@ func uniqueItemsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Unique = records
 
-	r.Logger.Infof("Loaded %d unique items", len(records))
+	r.Debugf("Loaded %d UniqueItem records", len(records))
 
 	return nil
 }

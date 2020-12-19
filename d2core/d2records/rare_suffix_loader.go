@@ -10,7 +10,7 @@ func rareItemSuffixLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return err
 	}
 
-	r.Logger.Infof("Loaded %d RareSuffix records", len(records))
+	r.Debugf("Loaded %d RareSuffix records", len(records))
 
 	r.Item.Rare.Suffix = records
 
