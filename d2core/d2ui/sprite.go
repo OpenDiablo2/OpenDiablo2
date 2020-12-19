@@ -11,6 +11,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
+// static check if Sprite implemented Widget
+var _ Widget = &Sprite{}
+
 // Sprite is a positioned visual object.
 type Sprite struct {
 	*BaseWidget
