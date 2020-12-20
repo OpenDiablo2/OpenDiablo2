@@ -37,24 +37,16 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 
 	base := NewBaseWidget(ui)
 
-	sprite := &Sprite{
+	return &Sprite{
 		BaseWidget: base,
 		animation:  animation,
 		Logger:     ui.Logger,
-	}
-
-	sprite.SetVisible(false)
-
-	ui.addWidget(sprite)
-
-	return sprite, nil
+	}, nil
 }
 
 // Render renders the sprite on the given surface
 func (s *Sprite) Render(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
-
-	s.width, s.height = s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
@@ -99,6 +91,11 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 
 		currentY += maxFrameHeight
 	}
+}
+
+// GetSize returns the size of the current frame
+func (s *Sprite) GetSize() (width, height int) {
+	return s.GetCurrentFrameSize()
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
