@@ -633,6 +633,8 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) toggleHeroStatsPanel() {
 	if !g.HelpOverlay.IsOpen() {
+		g.hud.skillSelectMenu.LeftPanel.Close()
+		g.hud.skillSelectMenu.RightPanel.Close()
 		g.questLog.Close()
 		g.heroStatsPanel.Toggle()
 		g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
@@ -645,9 +647,31 @@ func (g *GameControls) onCloseHeroStatsPanel() {
 	g.updateLayout()
 }
 
+func (g *GameControls) toggleLeftSkillPanel() {
+	if !g.HelpOverlay.IsOpen() {
+		g.inventory.Close()
+		g.skilltree.Close()
+		g.questLog.Close()
+		g.heroStatsPanel.Close()
+		g.hud.skillSelectMenu.ToggleLeftPanel()
+	}
+}
+
+func (g *GameControls) toggleRightSkillPanel() {
+	if !g.HelpOverlay.IsOpen() {
+		g.inventory.Close()
+		g.skilltree.Close()
+		g.questLog.Close()
+		g.heroStatsPanel.Close()
+		g.hud.skillSelectMenu.ToggleRightPanel()
+	}
+}
+
 func (g *GameControls) toggleQuestLog() {
 	if !g.HelpOverlay.IsOpen() {
 		g.heroStatsPanel.Close()
+		g.hud.skillSelectMenu.LeftPanel.Close()
+		g.hud.skillSelectMenu.RightPanel.Close()
 		g.questLog.Toggle()
 		g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
 		g.updateLayout()
@@ -662,6 +686,8 @@ func (g *GameControls) onCloseQuestLog() {
 func (g *GameControls) toggleHelpOverlay() {
 	if !g.inventory.IsOpen() && !g.skilltree.IsOpen() && !g.heroStatsPanel.IsOpen() && !g.questLog.IsOpen() {
 		g.HelpOverlay.updateKeyMap(g.keyMap)
+		g.hud.skillSelectMenu.LeftPanel.Close()
+		g.hud.skillSelectMenu.RightPanel.Close()
 		g.hud.miniPanel.openDisabled()
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
@@ -670,6 +696,8 @@ func (g *GameControls) toggleHelpOverlay() {
 
 func (g *GameControls) toggleInventoryPanel() {
 	if !g.HelpOverlay.IsOpen() {
+		g.hud.skillSelectMenu.LeftPanel.Close()
+		g.hud.skillSelectMenu.RightPanel.Close()
 		g.skilltree.Close()
 		g.inventory.Toggle()
 		g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
@@ -685,6 +713,8 @@ func (g *GameControls) onCloseInventory() {
 func (g *GameControls) toggleSkilltreePanel() {
 	if !g.HelpOverlay.IsOpen() {
 		g.inventory.Close()
+		g.hud.skillSelectMenu.LeftPanel.Close()
+		g.hud.skillSelectMenu.RightPanel.Close()
 		g.skilltree.Toggle()
 		g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
 		g.updateLayout()
@@ -888,7 +918,7 @@ func (g *GameControls) onHoverActionable(item actionableType) {
 func (g *GameControls) onClickActionable(item actionableType) {
 	actionMap := map[actionableType]func(){
 		leftSkill: func() {
-			g.hud.skillSelectMenu.ToggleLeftPanel()
+			g.toggleLeftSkillPanel()
 		},
 
 		newStats: func() {
@@ -912,7 +942,7 @@ func (g *GameControls) onClickActionable(item actionableType) {
 		},
 
 		rightSkill: func() {
-			g.hud.skillSelectMenu.ToggleRightPanel()
+			g.toggleRightSkillPanel()
 		},
 
 		hpGlobe: func() {
