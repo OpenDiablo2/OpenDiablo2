@@ -990,11 +990,9 @@ func (g *GameControls) commandSetLeftSkill(term d2interface.Terminal) func(args 
 			return nil
 		}
 
-		skillRecord := g.asset.Records.Skill.Details[id]
-		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
-
+		skill, err := g.heroSkillByID(id)
 		if err != nil {
-			term.Errorf("cannot create skill with ID of %d, error: %s", id, err)
+			term.Errorf(err.Error())
 			return nil
 		}
 
@@ -1012,11 +1010,9 @@ func (g *GameControls) commandSetRightSkill(term d2interface.Terminal) func(args
 			return nil
 		}
 
-		skillRecord := g.asset.Records.Skill.Details[id]
-		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
-
+		skill, err := g.heroSkillByID(id)
 		if err != nil {
-			term.Errorf("cannot create skill with ID of %d, error: %s", id, err)
+			term.Errorf(err.Error())
 			return nil
 		}
 
@@ -1034,30 +1030,32 @@ func (g *GameControls) commandLearnSkillID(term d2interface.Terminal) func(args 
 			return nil
 		}
 
-		skillRecord := g.asset.Records.Skill.Details[id]
-		if skillRecord == nil {
-			term.Errorf("cannot find a skill record for ID: %d", id)
-			return nil
-		}
-
-		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
-		if skill == nil {
-			term.Errorf("cannot create skill: %s", skillRecord.Skill)
+		skill, err := g.heroSkillByID(id)
+		if err != nil {
+			term.Errorf(err.Error())
 			return nil
 		}
 
 		g.hero.Skills[skill.ID] = skill
-
-		if err != nil {
-			term.Errorf("cannot learn skill for class, error: %s", err)
-			return nil
-		}
-
 		g.hud.skillSelectMenu.RegenerateImageCache()
 		g.Infof("Learned skill: " + skill.Skill)
 
 		return nil
 	}
+}
+
+func (g *GameControls) heroSkillByID(id int) (*d2hero.HeroSkill, error) {
+	skillRecord := g.asset.Records.Skill.Details[id]
+	if skillRecord == nil {
+		return nil, fmt.Errorf("cannot find a skill record for ID: %d", id)
+	}
+
+	skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create skill with ID of %d", id)
+	}
+
+	return skill, nil
 }
 
 func (g *GameControls) commandLearnSkills(term d2interface.Terminal) func(args []string) error {

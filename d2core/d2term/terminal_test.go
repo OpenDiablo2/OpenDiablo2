@@ -18,8 +18,13 @@ func TestTerminal(t *testing.T) {
 		t.Fatalf("got %d expected %d", lenOutput, expected1)
 	}
 
-	term.Execute("clear")
-	term.Execute("ls")
+	if err := term.Execute("clear"); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := term.Execute("ls"); err != nil {
+		t.Fatal(err)
+	}
 
 	lenOutput = len(term.outputHistory)
 
@@ -58,9 +63,15 @@ func TestUnbind(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	term.Unbind("clear")
+	if err := term.Unbind("clear"); err != nil {
+		t.Fatal(err)
+	}
+
 	term.Clear()
-	term.Execute("ls")
+
+	if err := term.Execute("ls"); err != nil {
+		t.Fatal(err)
+	}
 
 	lenOutput := len(term.outputHistory)
 
