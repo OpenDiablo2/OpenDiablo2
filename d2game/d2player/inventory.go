@@ -104,7 +104,7 @@ func (g *Inventory) Load() {
 
 	g.panelGroup = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityInventory)
 
-	frame := g.uiManager.NewUIFrame(g.asset, d2ui.FrameRight)
+	frame := g.uiManager.NewUIFrame(d2ui.FrameRight)
 	g.panelGroup.AddWidget(frame)
 
 	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)

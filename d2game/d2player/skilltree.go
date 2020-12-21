@@ -127,7 +127,6 @@ type skillTree struct {
 	skills          map[int]*d2hero.HeroSkill
 	skillIcons      []*skillIcon
 	heroClass       d2enum.Hero
-	frame           *d2ui.UIFrame
 	availSPLabel    *d2ui.Label
 	closeButton     *d2ui.Button
 	tab             [numTabs]*skillTreeTab
@@ -153,8 +152,8 @@ func (s *skillTree) load() {
 	s.panel = s.uiManager.NewCustomWidget(s.Render, 400, 600)
 	s.panelGroup.AddWidget(s.panel)
 
-	s.frame = s.uiManager.NewUIFrame(s.asset, d2ui.FrameRight)
-	s.panelGroup.AddWidget(s.frame)
+	frame := s.uiManager.NewUIFrame(d2ui.FrameRight)
+	s.panelGroup.AddWidget(frame)
 
 	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	s.closeButton.SetVisible(false)

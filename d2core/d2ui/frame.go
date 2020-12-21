@@ -4,7 +4,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // static check that UIFrame implements Widget
@@ -42,10 +41,7 @@ const (
 )
 
 // NewUIFrame creates a new Frame instance
-func (ui *UIManager) NewUIFrame(
-	asset *d2asset.AssetManager,
-	frameOrientation frameOrientation,
-) *UIFrame {
+func (ui *UIManager) NewUIFrame(frameOrientation frameOrientation) *UIFrame {
 	var originX, originY = 0, 0
 
 	switch frameOrientation {
