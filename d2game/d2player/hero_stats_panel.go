@@ -149,7 +149,7 @@ func (s *HeroStatsPanel) Load() {
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 	s.newStatPoints = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
-	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
+	frame := s.uiManager.NewUIFrame(s.asset, d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
