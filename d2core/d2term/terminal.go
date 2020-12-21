@@ -57,8 +57,6 @@ type commandEntry struct {
 	fn          func([]string) error
 }
 
-}
-
 // Terminal handles the in-game terminal
 type Terminal struct {
 	outputHistory []historyEntry
