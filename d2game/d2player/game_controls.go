@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -936,59 +937,137 @@ func (g *GameControls) onClickActionable(item actionableType) {
 	action()
 }
 
-func (g *GameControls) bindFreeCamCommand(term d2interface.Terminal) error {
-	return term.BindAction("freecam", "toggle free camera movement", func() {
-		g.FreeCam = !g.FreeCam
-	})
+func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
+	if err := term.Bind("freecam", "toggle free camera movement", nil, g.commandFreeCam); err != nil {
+		return err
+	}
+
+	if err := term.Bind("setleftskill", "set skill to fire on left click", []string{"id"}, g.commandSetLeftSkill(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("setrightskill", "set skill to fire on right click", []string{"id"}, g.commandSetRightSkill(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("learnskills", "learn all skills for the a given class", []string{"token"}, g.commandLearnSkills(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("learnskillid", "learn a skill by a given ID", []string{"id"}, g.commandLearnSkillID(term)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (g *GameControls) bindSetLeftSkillCommand(term d2interface.Terminal) error {
-	setLeftSkill := func(id int) {
+// UnbindTerminalCommands unbinds commands from the terminal
+func (g *GameControls) UnbindTerminalCommands(term d2interface.Terminal) error {
+	return term.Unbind("freecam", "setleftskill", "setrightskill", "learnskills", "learnskillid")
+}
+
+func (g *GameControls) setAddButtons() {
+	g.hud.addStatsButton.SetEnabled(g.hero.Stats.StatsPoints > 0)
+	g.hud.addSkillButton.SetEnabled(g.hero.Stats.SkillPoints > 0)
+}
+
+func (g *GameControls) loadAddButtons() {
+	g.hud.addStatsButton.OnActivated(func() { g.toggleHeroStatsPanel() })
+	g.hud.addSkillButton.OnActivated(func() { g.toggleSkilltreePanel() })
+}
+
+func (g *GameControls) commandFreeCam([]string) error {
+	g.FreeCam = !g.FreeCam
+
+	return nil
+}
+
+func (g *GameControls) commandSetLeftSkill(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			term.Errorf("invalid argument")
+			return nil
+		}
+
 		skillRecord := g.asset.Records.Skill.Details[id]
 		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
 
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
+			term.Errorf("cannot create skill with ID of %d, error: %s", id, err)
+			return nil
 		}
 
 		g.hero.LeftSkill = skill
-	}
 
-	return term.BindAction(
-		"setleftskill",
-		"set skill to fire on left click",
-		setLeftSkill,
-	)
+		return nil
+	}
 }
 
-func (g *GameControls) bindSetRightSkillCommand(term d2interface.Terminal) error {
-	setRightSkill := func(id int) {
+func (g *GameControls) commandSetRightSkill(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			term.Errorf("invalid argument")
+			return nil
+		}
+
 		skillRecord := g.asset.Records.Skill.Details[id]
 		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
 
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
+			term.Errorf("cannot create skill with ID of %d, error: %s", id, err)
+			return nil
 		}
 
 		g.hero.RightSkill = skill
-	}
 
-	return term.BindAction(
-		"setrightskill",
-		"set skill to fire on right click",
-		setRightSkill,
-	)
+		return nil
+	}
 }
 
-const classTokenLength = 3
+func (g *GameControls) commandLearnSkillID(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			term.Errorf("invalid argument")
+			return nil
+		}
 
-func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
-	learnSkills := func(token string) {
+		skillRecord := g.asset.Records.Skill.Details[id]
+		if skillRecord == nil {
+			term.Errorf("cannot find a skill record for ID: %d", id)
+			return nil
+		}
+
+		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+		if skill == nil {
+			term.Errorf("cannot create skill: %s", skillRecord.Skill)
+			return nil
+		}
+
+		g.hero.Skills[skill.ID] = skill
+
+		if err != nil {
+			term.Errorf("cannot learn skill for class, error: %s", err)
+			return nil
+		}
+
+		g.hud.skillSelectMenu.RegenerateImageCache()
+		g.Infof("Learned skill: " + skill.Skill)
+
+		return nil
+	}
+}
+
+func (g *GameControls) commandLearnSkills(term d2interface.Terminal) func(args []string) error {
+	const classTokenLength = 3
+
+	return func(args []string) error {
+		token := args[0]
 		if len(token) < classTokenLength {
-			term.OutputErrorf("The given class token should be at least 3 characters")
-			return
+			term.Errorf("The given class token should be at least 3 characters")
+			return nil
 		}
 
 		validPrefixes := []string{"ama", "ass", "nec", "bar", "sor", "dru", "pal"}
@@ -1004,9 +1083,9 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 
 		if !isValidToken {
 			fmtInvalid := "Invalid class, must be a value starting with(case insensitive): %s"
-			term.OutputErrorf(fmtInvalid, strings.Join(validPrefixes, ", "))
+			term.Errorf(fmtInvalid, strings.Join(validPrefixes, ", "))
 
-			return
+			return nil
 		}
 
 		var err error
@@ -1042,80 +1121,10 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 		g.Infof("Learned %d skills", learnedSkillsCount)
 
 		if err != nil {
-			term.OutputErrorf("cannot learn skill for class, error: %s", err)
-			return
-		}
-	}
-
-	return term.BindAction(
-		"learnskills",
-		"learn all skills for the a given class",
-		learnSkills,
-	)
-}
-
-func (g *GameControls) bindLearnSkillByIDCommand(term d2interface.Terminal) error {
-	learnByID := func(id int) {
-		skillRecord := g.asset.Records.Skill.Details[id]
-		if skillRecord == nil {
-			term.OutputErrorf("cannot find a skill record for ID: %d", id)
-			return
+			term.Errorf("cannot learn skill for class, error: %s", err)
+			return nil
 		}
 
-		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
-		if skill == nil {
-			term.OutputErrorf("cannot create skill: %s", skillRecord.Skill)
-			return
-		}
-
-		g.hero.Skills[skill.ID] = skill
-
-		if err != nil {
-			term.OutputErrorf("cannot learn skill for class, error: %s", err)
-			return
-		}
-
-		g.hud.skillSelectMenu.RegenerateImageCache()
-		g.Info("Learned skill: " + skill.Skill)
+		return nil
 	}
-
-	return term.BindAction(
-		"learnskillid",
-		"learn a skill by a given ID",
-		learnByID,
-	)
-}
-
-func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
-	if err := g.bindFreeCamCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindSetLeftSkillCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindSetRightSkillCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindLearnSkillsCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindLearnSkillByIDCommand(term); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (g *GameControls) setAddButtons() {
-	g.hud.addStatsButton.SetEnabled(g.hero.Stats.StatsPoints > 0)
-	g.hud.addSkillButton.SetEnabled(g.hero.Stats.SkillPoints > 0)
-}
-
-func (g *GameControls) loadAddButtons() {
-	g.hud.addStatsButton.OnActivated(func() { g.toggleHeroStatsPanel() })
-	g.hud.addSkillButton.OnActivated(func() { g.toggleSkilltreePanel() })
 }
