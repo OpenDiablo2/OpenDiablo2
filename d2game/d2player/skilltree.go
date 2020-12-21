@@ -153,7 +153,7 @@ func (s *skillTree) load() {
 	s.panel = s.uiManager.NewCustomWidget(s.Render, 400, 600)
 	s.panelGroup.AddWidget(s.panel)
 
-	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameRight)
+	s.frame = s.uiManager.NewUIFrame(s.asset, d2ui.FrameRight)
 	s.panelGroup.AddWidget(s.frame)
 
 	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
