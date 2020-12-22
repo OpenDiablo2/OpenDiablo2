@@ -418,11 +418,8 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 	gameEvent := g.keyMap.getGameEvent(event.Key())
 
-	switch gameEvent {
-	case d2enum.HoldRun:
+	if gameEvent == d2enum.HoldRun {
 		g.hud.onToggleRunButton(true)
-	default:
-		return false
 	}
 
 	return false
@@ -438,15 +435,15 @@ func (g *GameControls) onEscKey() {
 	escHandled = g.hasOpenPanels() || g.HelpOverlay.IsOpen() || g.hud.skillSelectMenu.IsOpen()
 	g.clearScreen()
 
-	switch escHandled {
-	case true:
+	if escHandled {
 		g.updateLayout()
-	case false:
-		if g.escapeMenu.IsOpen() {
-			g.escapeMenu.OnEscKey()
-		} else {
-			g.openEscMenu()
-		}
+		return
+	}
+
+	if g.escapeMenu.IsOpen() {
+		g.escapeMenu.OnEscKey()
+	} else {
+		g.openEscMenu()
 	}
 }
 
@@ -747,7 +744,7 @@ func (g *GameControls) updateLayout() {
 		g.mapRenderer.ViewportDefault()
 	case isRightPanelOpen:
 		g.mapRenderer.ViewportToLeft()
-	default:
+	case isLeftPanelOpen:
 		g.mapRenderer.ViewportToRight()
 	}
 }
