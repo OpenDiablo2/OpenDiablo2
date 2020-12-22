@@ -91,12 +91,6 @@ type Options struct {
 	LogLevel *d2util.LogLevel
 }
 
-type bindTerminalEntry struct {
-	name        string
-	description string
-	action      interface{}
-}
-
 const (
 	bytesToMegabyte = 1024 * 1024
 	nSamplesTAlloc  = 100
@@ -180,11 +174,6 @@ func (a *App) loadEngine() error {
 	inputManager := d2input.NewInputManager()
 
 	term, err := d2term.New(inputManager)
-	if err != nil {
-		return err
-	}
-
-	err = a.asset.BindTerminalCommands(term)
 	if err != nil {
 		return err
 	}
@@ -351,25 +340,28 @@ func (a *App) initialize() error {
 	a.renderer.SetWindowIcon("d2logo.png")
 	a.terminal.BindLogger()
 
-	terminalActions := [...]bindTerminalEntry{
-		{"dumpheap", "dumps the heap to pprof/heap.pprof", a.dumpHeap},
-		{"fullscreen", "toggles fullscreen", a.toggleFullScreen},
-		{"capframe", "captures a still frame", a.setupCaptureFrame},
-		{"capgifstart", "captures an animation (start)", a.startAnimationCapture},
-		{"capgifstop", "captures an animation (stop)", a.stopAnimationCapture},
-		{"vsync", "toggles vsync", a.toggleVsync},
-		{"fps", "toggle fps counter", a.toggleFpsCounter},
-		{"timescale", "set scalar for elapsed time", a.setTimeScale},
-		{"quit", "exits the game", a.quitGame},
-		{"screen-gui", "enters the gui playground screen", a.enterGuiPlayground},
-		{"js", "eval JS scripts", a.evalJS},
+	terminalCommands := []struct {
+		name string
+		desc string
+		args []string
+		fn   func(args []string) error
+	}{
+		{"dumpheap", "dumps the heap to pprof/heap.pprof", nil, a.dumpHeap},
+		{"fullscreen", "toggles fullscreen", nil, a.toggleFullScreen},
+		{"capframe", "captures a still frame", []string{"filename"}, a.setupCaptureFrame},
+		{"capgifstart", "captures an animation (start)", []string{"filename"}, a.startAnimationCapture},
+		{"capgifstop", "captures an animation (stop)", nil, a.stopAnimationCapture},
+		{"vsync", "toggles vsync", nil, a.toggleVsync},
+		{"fps", "toggle fps counter", nil, a.toggleFpsCounter},
+		{"timescale", "set scalar for elapsed time", []string{"float"}, a.setTimeScale},
+		{"quit", "exits the game", nil, a.quitGame},
+		{"screen-gui", "enters the gui playground screen", nil, a.enterGuiPlayground},
+		{"js", "eval JS scripts", []string{"code"}, a.evalJS},
 	}
 
-	for idx := range terminalActions {
-		action := &terminalActions[idx]
-
-		if err := a.terminal.BindAction(action.name, action.description, action.action); err != nil {
-			a.Fatal(err.Error())
+	for _, cmd := range terminalCommands {
+		if err := a.terminal.Bind(cmd.name, cmd.desc, cmd.args, cmd.fn); err != nil {
+			a.Fatalf("failed to bind action %q: %v", cmd.name, err.Error())
 		}
 	}
 
@@ -644,7 +636,7 @@ func (a *App) allocRate(totalAlloc uint64, fps float64) float64 {
 	return deltaAllocPerFrame * fps / bytesToMegabyte
 }
 
-func (a *App) dumpHeap() {
+func (a *App) dumpHeap([]string) error {
 	if _, err := os.Stat("./pprof/"); os.IsNotExist(err) {
 		if err := os.Mkdir("./pprof/", 0750); err != nil {
 			a.Fatal(err.Error())
@@ -663,48 +655,56 @@ func (a *App) dumpHeap() {
 	if err := fileOut.Close(); err != nil {
 		a.Fatal(err.Error())
 	}
+
+	return nil
 }
 
-func (a *App) evalJS(code string) {
-	val, err := a.scriptEngine.Eval(code)
+func (a *App) evalJS(args []string) error {
+	val, err := a.scriptEngine.Eval(args[0])
 	if err != nil {
-		a.terminal.OutputErrorf("%s", err)
-		return
+		a.terminal.Errorf(err.Error())
+		return nil
 	}
 
 	a.Info("%s" + val)
+
+	return nil
 }
 
-func (a *App) toggleFullScreen() {
+func (a *App) toggleFullScreen([]string) error {
 	fullscreen := !a.renderer.IsFullScreen()
 	a.renderer.SetFullScreen(fullscreen)
-	a.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
+	a.terminal.Infof("fullscreen is now: %v", fullscreen)
+
+	return nil
 }
 
-func (a *App) setupCaptureFrame(path string) {
+func (a *App) setupCaptureFrame(args []string) error {
 	a.captureState = captureStateFrame
-	a.capturePath = path
+	a.capturePath = args[0]
 	a.captureFrames = nil
+
+	return nil
 }
 
 func (a *App) doCaptureFrame(target d2interface.Surface) error {
 	fp, err := os.Create(a.capturePath)
 	if err != nil {
+		a.terminal.Errorf("failed to create %q", a.capturePath)
 		return err
 	}
-
-	defer func() {
-		if err := fp.Close(); err != nil {
-			a.Fatal(err.Error())
-		}
-	}()
 
 	screenshot := target.Screenshot()
 	if err := png.Encode(fp, screenshot); err != nil {
 		return err
 	}
 
-	a.Infof("saved frame to %s", a.capturePath)
+	if err := fp.Close(); err != nil {
+		a.terminal.Errorf("failed to create %q", a.capturePath)
+		return nil
+	}
+
+	a.terminal.Infof("saved frame to %s", a.capturePath)
 
 	return nil
 }
@@ -769,42 +769,56 @@ func (a *App) convertFramesToGif() error {
 	return nil
 }
 
-func (a *App) startAnimationCapture(path string) {
+func (a *App) startAnimationCapture(args []string) error {
 	a.captureState = captureStateGif
-	a.capturePath = path
+	a.capturePath = args[0]
 	a.captureFrames = nil
+
+	return nil
 }
 
-func (a *App) stopAnimationCapture() {
+func (a *App) stopAnimationCapture([]string) error {
 	a.captureState = captureStateNone
+
+	return nil
 }
 
-func (a *App) toggleVsync() {
+func (a *App) toggleVsync([]string) error {
 	vsync := !a.renderer.GetVSyncEnabled()
 	a.renderer.SetVSyncEnabled(vsync)
-	a.terminal.OutputInfof("vsync is now: %v", vsync)
+	a.terminal.Infof("vsync is now: %v", vsync)
+
+	return nil
 }
 
-func (a *App) toggleFpsCounter() {
+func (a *App) toggleFpsCounter([]string) error {
 	a.showFPS = !a.showFPS
-	a.terminal.OutputInfof("fps counter is now: %v", a.showFPS)
+	a.terminal.Infof("fps counter is now: %v", a.showFPS)
+
+	return nil
 }
 
-func (a *App) setTimeScale(timeScale float64) {
-	if timeScale <= 0 {
-		a.terminal.OutputErrorf("invalid time scale value")
-	} else {
-		a.terminal.OutputInfof("timescale changed from %f to %f", a.timeScale, timeScale)
-		a.timeScale = timeScale
+func (a *App) setTimeScale(args []string) error {
+	timeScale, err := strconv.ParseFloat(args[0], 64)
+	if err != nil || timeScale <= 0 {
+		a.terminal.Errorf("invalid time scale value")
+		return nil
 	}
+
+	a.terminal.Infof("timescale changed from %f to %f", a.timeScale, timeScale)
+	a.timeScale = timeScale
+
+	return nil
 }
 
-func (a *App) quitGame() {
+func (a *App) quitGame([]string) error {
 	os.Exit(0)
+	return nil
 }
 
-func (a *App) enterGuiPlayground() {
+func (a *App) enterGuiPlayground([]string) error {
 	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer, a.guiManager, *a.Options.LogLevel, a.asset))
+	return nil
 }
 
 func createZeroedRing(n int) *ring.Ring {
