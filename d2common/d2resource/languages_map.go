@@ -70,7 +70,7 @@ func GetLabelModifier(language string) int {
 		"DEU": 0, // (German) // checked
 		"FRA": 0, // (French)
 		"POR": 0, // (Portuguese)
-		"ITA": 0, // (Italian)
+		"ITA": 0, // (Italian) // checked
 		"JPN": 0, // (Japanese)
 		"KOR": 0, // (Korean)
 		"SIN": 0, //
