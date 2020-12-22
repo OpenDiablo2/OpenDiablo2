@@ -274,7 +274,7 @@ func NewGameControls(
 	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
-	gc.questLog.SetOnCloseCb(gc.onCloseHeroQuestLog)
+	gc.questLog.SetOnCloseCb(gc.onCloseQuestLog)
 	gc.inventory.SetOnCloseCb(gc.onCloseInventory)
 	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
 
@@ -604,10 +604,6 @@ func (g *GameControls) clearRightScreenSide() {
 	g.updateLayout()
 }
 
-func (g *GameControls) hasOpenPanels() bool {
-	return g.isRightPanelOpen() || g.isLeftPanelOpen() || g.hud.skillSelectMenu.IsOpen()
-}
-
 func (g *GameControls) clearScreen() {
 	g.clearRightScreenSide()
 	g.clearLeftScreenSide()
@@ -618,8 +614,9 @@ func (g *GameControls) clearScreen() {
 func (g *GameControls) openLeftPanel(panel Panel) {
 	if !g.HelpOverlay.IsOpen() {
 		isOpen := panel.IsOpen()
-		fmt.Println(isOpen)
+
 		g.clearLeftScreenSide()
+
 		if !isOpen {
 			panel.Open()
 			g.hud.miniPanel.SetMovedRight(true)
@@ -631,8 +628,9 @@ func (g *GameControls) openLeftPanel(panel Panel) {
 func (g *GameControls) openRightPanel(panel Panel) {
 	if !g.HelpOverlay.IsOpen() {
 		isOpen := panel.IsOpen()
-		fmt.Println(isOpen)
+
 		g.clearRightScreenSide()
+
 		if !isOpen {
 			panel.Open()
 			g.hud.miniPanel.SetMovedLeft(true)
@@ -664,6 +662,9 @@ func (g *GameControls) toggleRightSkillPanel() {
 
 func (g *GameControls) toggleQuestLog() {
 	g.openLeftPanel(g.questLog)
+}
+
+func (g *GameControls) onCloseQuestLog() {
 }
 
 func (g *GameControls) toggleHelpOverlay() {
@@ -757,6 +758,10 @@ func (g *GameControls) isLeftPanelOpen() bool {
 
 func (g *GameControls) isRightPanelOpen() bool {
 	return g.inventory.IsOpen() || g.skilltree.IsOpen()
+}
+
+func (g *GameControls) hasOpenPanels() bool {
+	return g.isRightPanelOpen() || g.isLeftPanelOpen() || g.hud.skillSelectMenu.IsOpen()
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
