@@ -863,8 +863,6 @@ type buttonStateDescriptor struct {
 
 func (v *Button) createTooltip() {
 	var t *Tooltip
-	// this is also related with https://github.com/OpenDiablo2/OpenDiablo2/issues/944
-	// all strings starting with "#" could be wrong translated to another locales
 	switch v.buttonLayout.Tooltip {
 	case buttonTooltipNone:
 		return
@@ -885,7 +883,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("NPCRepairItems"))
 	case buttonTooltipRepairAll:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("#128"))
+		t.SetText(v.manager.asset.TranslateLabel(d2enum.RepairAll))
 	case buttonTooltipLeftArrow:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("KeyLeft"))
