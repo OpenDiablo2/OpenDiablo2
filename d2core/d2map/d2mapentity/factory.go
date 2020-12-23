@@ -64,7 +64,7 @@ func NewAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntit
 // NewPlayer creates a new player entity and returns a pointer to it.
 func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
 	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment *d2inventory.CharacterEquipment,
-	leftSkill, rightSkill int, gold int) *Player {
+	leftSkill, rightSkill, gold int) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
 		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
