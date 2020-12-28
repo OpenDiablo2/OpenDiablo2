@@ -1,4 +1,4 @@
-package d2netpacket
+package d2netpacket //nolint:dupl // ServerClosed and Ping just happen to be very similar packets
 
 import (
 	"encoding/json"
