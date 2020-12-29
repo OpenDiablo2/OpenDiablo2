@@ -1,0 +1,40 @@
+package d2enum
+
+// MonUModConstIndex is used as an index into d2datadict.MonsterUniqueModifierConstants
+type MonUModConstIndex int
+
+// Unique monster modifier constants
+const (
+	ChampionChance MonUModConstIndex = iota
+	MinionHPBonus
+	MinionHPBonusNightmare
+	MinionHPBonusHell
+	ChampionHPBonus
+	ChampionHPBonusNightmare
+	ChampionHPBonusHell
+	UniqueHPBonus
+	UniqueHPBonusNightmare
+	UniqueHPBonusHell
+	ChampionAttackRatingBonus
+	ChampionDamageBonus
+	StrongMinionAttackRatingBonus
+	StrongMinionDamageBonus
+	MinionElementalDamageMinBonus
+	MinionElementalDamageMinBonusNightmare
+	MinionElementalDamageMinBonusHell
+	MinionElementalDamageMaxBonus
+	MinionElementalDamageMaxBonusNightmare
+	MinionElementalDamageMaxBonusHell
+	ChampionElementalDamageMinBonus
+	ChampionElementalDamageMinBonusNightmare
+	ChampionElementalDamageMinBonusHell
+	ChampionElementalDamageMaxBonus
+	ChampionElementalDamageMaxBonusNightmare
+	ChampionElementalDamageMaxBonusHell
+	UniqueElementalDamageMinBonus
+	UniqueElementalDamageMinBonusNightmare
+	UniqueElementalDamageMinBonusHell
+	UniqueElementalDamageMaxBonus
+	UniqueElementalDamageMaxBonusNightmare
+	UniqueElementalDamageMaxBonusHell
+)

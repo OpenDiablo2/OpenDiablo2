@@ -1,8 +1,16 @@
 **/*__debug_bin
 .vscode/**/*
+!.vscode/extensions.json
 **/Client.exe
 **/Client
 .idea/**/*
 .vs/**/*
 /OpenDiablo2.exe
+/OpenDiablo2
 **/*.pprof
+*.swp
+.*.swp
+tags
+heap.out
+heap.pdf
+.DS_Store

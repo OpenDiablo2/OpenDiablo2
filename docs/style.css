@@ -31,13 +31,13 @@ hr {
 	margin: 0;
 	padding: 0;
 	border-color: #000;
-	box-shadow: 0px 0px 4px #f00;
+	box-shadow: 0 0 4px #f00;
 }
 
 h1 {
 	font-family:'Diablo Heavy';
 	font-size: 5em;
-	text-shadow: 0px 0px 6px #c00;
+	text-shadow: 0 0 6px #c00;
 }
 
 h1 span {
@@ -50,12 +50,12 @@ h1 span {
 h2 {
 	font-family:'Diablo Heavy';
 	font-size: 2.5em;
-	text-shadow: 0px 0px 4px #c00;
+	text-shadow: 0 0 4px #c00;
 }
 
 img.imgFrame {
 	display: inline-block;
-	clear: bloth;
+	clear: both;
 	border-radius: 6px;
 	box-shadow: 0 0 8px #000;
 	margin: 6px;
@@ -122,7 +122,7 @@ a.btnMedium {
 	min-width: 128px;
 	min-height:3px;
 	display:inline-block;
-	padding: 9px 0 10px 0;
+	padding: 9px 0 10px;
 	margin: 0;
 	border: none;
 	font-family:'Diablo Heavy';

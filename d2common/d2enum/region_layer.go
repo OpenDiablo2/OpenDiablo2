@@ -1,9 +1,11 @@
 package d2enum
 
+// RegionLayerType represents a region layer
 type RegionLayerType int
 
+// Region layer types
 const (
-	RegionLayerTypeFloors  RegionLayerType = 0
-	RegionLayerTypeWalls   RegionLayerType = 1
-	RegionLayerTypeShadows RegionLayerType = 2
+	RegionLayerTypeFloors RegionLayerType = iota
+	RegionLayerTypeWalls
+	RegionLayerTypeShadows
 )

@@ -1,0 +1,1 @@
+package diablo2stats

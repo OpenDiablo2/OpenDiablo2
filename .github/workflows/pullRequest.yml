@@ -1,0 +1,37 @@
+---
+name: pull_request
+"on": [pull_request]
+jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        continue-on-error: true
+        steps:
+            -   name: Set up Go 1.14
+                uses: actions/setup-go@v2.1.3
+                with:
+                    go-version: 1.14
+                id: go
+
+            -   name: Check out code
+                uses: actions/checkout@v2.3.4
+
+            -   name: Install dependencies
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y xvfb libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+
+            -   name: Run golangci-lint
+                continue-on-error: false
+                uses: golangci/golangci-lint-action@v2.3.0
+                with:
+                    version: v1.32
+
+            -   name: Run tests
+                env:
+                    DISPLAY: ":99.0"
+                run: |
+                    xvfb-run --auto-servernum go test -v -race ./...
+
+            -   name: Build binary
+                run: go build .

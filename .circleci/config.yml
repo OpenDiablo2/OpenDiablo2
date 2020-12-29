@@ -1,0 +1,12 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/golang:1.14
+        working_directory: /go/src/github.com/OpenDiablo2/OpenDiablo2
+        steps:
+            - checkout
+            - run: sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+            - run: go get -v -t -d ./...
+            - run: go build .
+#- run: go test -v ./...

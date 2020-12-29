@@ -1,60 +1,25 @@
 package main
 
 import (
-	"image"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
-
-	"github.com/hajimehoshi/ebiten/ebitenutil"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
-var GitBranch string
+//nolint:gochecknoglobals // This is filled in by the build system
+var GitBranch string = "local"
 
 // GitCommit is set by the CI build process to the commit hash
-var GitCommit string
-var d2Engine d2core.Engine
+//nolint:gochecknoglobals // This is filled in by the build system
+var GitCommit string = "build"
 
 func main() {
-	//defer profile.Start(profile.CPUProfile).Stop()
-	//runtime.LockOSThread()
-	//defer runtime.UnlockOSThread()
-	if len(GitBranch) == 0 {
-		GitBranch = "Local Build"
-		GitCommit = ""
-	}
-	d2common.SetBuildInfo(GitBranch, GitCommit)
-	log.SetFlags(log.Ldate | log.LUTC | log.Lmicroseconds | log.Llongfile)
-	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
-	_, iconImage, err := ebitenutil.NewImageFromFile("d2logo.png", ebiten.FilterLinear)
-	if err == nil {
-		ebiten.SetWindowIcon([]image.Image{iconImage})
-	}
-	d2mpq.InitializeCryptoBuffer()
-	d2Engine = d2core.CreateEngine()
-	d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
-	ebiten.SetCursorVisible(false)
-	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
-	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)
-	ebiten.SetVsyncEnabled(d2Engine.Settings.VsyncEnabled)
-	ebiten.SetMaxTPS(d2Engine.Settings.TicksPerSecond)
-	if err := ebiten.Run(update, 800, 600, d2Engine.Settings.Scale, "OpenDiablo 2 ("+GitBranch+")"); err != nil {
-		log.Fatal(err)
-	}
-}
+	log.SetFlags(log.Lshortfile)
 
-func update(screen *ebiten.Image) error {
-	d2Engine.Update()
-	if ebiten.IsDrawingSkipped() {
-		return nil
+	instance := d2app.Create(GitBranch, GitCommit)
+
+	if err := instance.Run(); err != nil {
+		return
 	}
-	d2Engine.Draw(screen)
-	return nil
 }

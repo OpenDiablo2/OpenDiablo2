@@ -1,11 +1,13 @@
 package d2enum
 
+// AnimationFrame represents a single frame of animation.
 type AnimationFrame int
 
+// AnimationFrame types
 const (
-	AnimationFrameNoEvent AnimationFrame = 0
-	AnimationFrameAttack  AnimationFrame = 1
-	AnimationFrameMissile AnimationFrame = 2
-	AnimationFrameSound   AnimationFrame = 3
-	AnimationFrameSkill   AnimationFrame = 4
+	AnimationFrameNoEvent AnimationFrame = iota
+	AnimationFrameAttack
+	AnimationFrameMissile
+	AnimationFrameSound
+	AnimationFrameSkill
 )
