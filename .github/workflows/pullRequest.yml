@@ -1,16 +1,15 @@
----
 name: pull_request
 on:
-	push:
-		branches:
-			- main
-	pull_request:
-		branches:
-			- main
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
 
 jobs:
     build:
-        name: build
+        name: ''
         runs-on: self-hosted
         continue-on-error: true
         steps:
