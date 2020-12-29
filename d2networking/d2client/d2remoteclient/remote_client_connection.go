@@ -3,6 +3,7 @@ package d2remoteclient
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 
@@ -131,12 +132,10 @@ func (r *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 // SendPacketToServer compresses the JSON encoding of a NetPacket and
 // sends it to the server.
 func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	data, err := json.Marshal(packet)
-	if err != nil {
-		return err
-	}
+	encoder := json.NewEncoder(r.tcpConnection)
 
-	if _, err = r.tcpConnection.Write(data); err != nil {
+	err := encoder.Encode(packet)
+	if err != nil {
 		return err
 	}
 
@@ -146,15 +145,21 @@ func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 // serverListener runs a while loop, reading from the GameServer's TCP
 // connection.
 func (r *RemoteClientConnection) serverListener() {
-	var packet d2netpacket.NetPacket
-
 	decoder := json.NewDecoder(r.tcpConnection)
 
 	for {
+		var packet d2netpacket.NetPacket
+
 		err := decoder.Decode(&packet)
 		if err != nil {
-			r.Errorf("failed to decode the packet, err: %v\n", err)
-			return
+			switch err {
+			case io.EOF:
+				break // the other side closed the connection
+			default:
+				r.Errorf("failed to decode the packet, err: %v\n", err)
+			}
+
+			return // allow the connection to close
 		}
 
 		p, err := r.decodeToPacket(packet.PacketType, string(packet.PacketData))
@@ -186,102 +191,29 @@ func (r *RemoteClientConnection) bytesToJSON(buffer []byte) (string, d2netpacket
 func (r *RemoteClientConnection) decodeToPacket(
 	t d2netpackettype.NetPacketType,
 	data string) (d2netpacket.NetPacket, error) {
-	var np = d2netpacket.NetPacket{}
-
-	var err error
+	var (
+		np  = d2netpacket.NetPacket{}
+		err error
+		p   interface{}
+	)
 
 	switch t {
 	case d2netpackettype.GenerateMap:
-		var p d2netpacket.GenerateMapPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalGenerateMap([]byte(data))
 	case d2netpackettype.MovePlayer:
-		var p d2netpacket.MovePlayerPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalMovePlayer([]byte(data))
 	case d2netpackettype.UpdateServerInfo:
-		var p d2netpacket.UpdateServerInfoPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalUpdateServerInfo([]byte(data))
 	case d2netpackettype.AddPlayer:
-		var p d2netpacket.AddPlayerPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalAddPlayer([]byte(data))
 	case d2netpackettype.CastSkill:
-		var p d2netpacket.CastPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalCast([]byte(data))
 	case d2netpackettype.Ping:
-		var p d2netpacket.PingPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalPing([]byte(data))
 	case d2netpackettype.PlayerDisconnectionNotification:
-		var p d2netpacket.PlayerDisconnectRequestPacket
-		if err = json.Unmarshal([]byte(data), &p); err != nil {
-			break
-		}
-
-		mp, marshalErr := d2netpacket.MarshalPacket(p)
-		if marshalErr != nil {
-			r.Errorf("MarshalPacket: %v", marshalErr)
-		}
-
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
-
+		p, err = d2netpacket.UnmarshalPlayerDisconnectionRequest([]byte(data))
+	case d2netpackettype.ServerClosed:
+		p, err = d2netpacket.UnmarshalServerClosed([]byte(data))
 	default:
 		err = fmt.Errorf("RemoteClientConnection: unrecognized packet type: %v", t)
 	}
@@ -289,6 +221,13 @@ func (r *RemoteClientConnection) decodeToPacket(
 	if err != nil {
 		return np, err
 	}
+
+	mp, marshalErr := d2netpacket.MarshalPacket(p)
+	if marshalErr != nil {
+		r.Errorf("MarshalPacket: %v", marshalErr)
+	}
+
+	np = d2netpacket.NetPacket{PacketType: t, PacketData: mp}
 
 	return np, nil
 }
