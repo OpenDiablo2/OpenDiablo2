@@ -28,7 +28,6 @@ const (
 // Panel represents the panel at the bottom of the game screen
 type Panel interface {
 	IsOpen() bool
-	Toggle()
 	Open()
 	Close()
 }
@@ -392,11 +391,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 
 	switch gameEvent {
 	case d2enum.ClearScreen:
-		g.inventory.Close()
-		g.skilltree.Close()
-		g.heroStatsPanel.Close()
-		g.questLog.Close()
-		g.HelpOverlay.Close()
+		g.clearScreen()
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
 		g.toggleInventoryPanel()
@@ -423,11 +418,8 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 	gameEvent := g.keyMap.getGameEvent(event.Key())
 
-	switch gameEvent {
-	case d2enum.HoldRun:
+	if gameEvent == d2enum.HoldRun {
 		g.hud.onToggleRunButton(true)
-	default:
-		return false
 	}
 
 	return false
@@ -440,57 +432,18 @@ func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 func (g *GameControls) onEscKey() {
 	escHandled := false
 
-	if g.hud.skillSelectMenu.IsOpen() {
-		g.hud.skillSelectMenu.ClosePanels()
+	escHandled = g.hasOpenPanels() || g.HelpOverlay.IsOpen() || g.hud.skillSelectMenu.IsOpen()
+	g.clearScreen()
 
-		escHandled = true
-	}
-
-	if g.inventory.IsOpen() {
-		if g.inventory.moveGoldPanel.IsOpen() {
-			g.inventory.moveGoldPanel.Close()
-
-			return
-		}
-
-		g.inventory.Close()
-
-		escHandled = true
-	}
-
-	if g.skilltree.IsOpen() {
-		g.skilltree.Close()
-
-		escHandled = true
-	}
-
-	if g.heroStatsPanel.IsOpen() {
-		g.heroStatsPanel.Close()
-
-		escHandled = true
-	}
-
-	if g.questLog.IsOpen() {
-		g.questLog.Close()
-
-		escHandled = true
-	}
-
-	if g.HelpOverlay.IsOpen() {
-		g.HelpOverlay.Close()
-
-		escHandled = true
-	}
-
-	switch escHandled {
-	case true:
+	if escHandled {
 		g.updateLayout()
-	case false:
-		if g.escapeMenu.IsOpen() {
-			g.escapeMenu.OnEscKey()
-		} else {
-			g.openEscMenu()
-		}
+		return
+	}
+
+	if g.escapeMenu.IsOpen() {
+		g.escapeMenu.OnEscKey()
+	} else {
+		g.openEscMenu()
 	}
 }
 
@@ -632,63 +585,89 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-func (g *GameControls) toggleHeroStatsPanel() {
+func (g *GameControls) clearLeftScreenSide() {
+	g.heroStatsPanel.Close()
+	g.questLog.Close()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.hud.miniPanel.SetMovedRight(false)
+	g.updateLayout()
+}
+
+func (g *GameControls) clearRightScreenSide() {
+	g.inventory.Close()
+	g.skilltree.Close()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.hud.miniPanel.SetMovedLeft(false)
+	g.updateLayout()
+}
+
+func (g *GameControls) clearScreen() {
+	g.clearRightScreenSide()
+	g.clearLeftScreenSide()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.HelpOverlay.Close()
+}
+
+func (g *GameControls) openLeftPanel(panel Panel) {
 	if !g.HelpOverlay.IsOpen() {
-		g.hud.skillSelectMenu.LeftPanel.Close()
-		g.hud.skillSelectMenu.RightPanel.Close()
-		g.questLog.Close()
-		g.heroStatsPanel.Toggle()
-		g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
-		g.updateLayout()
+		isOpen := panel.IsOpen()
+
+		g.clearLeftScreenSide()
+
+		if !isOpen {
+			panel.Open()
+			g.hud.miniPanel.SetMovedRight(true)
+			g.updateLayout()
+		}
 	}
 }
 
+func (g *GameControls) openRightPanel(panel Panel) {
+	if !g.HelpOverlay.IsOpen() {
+		isOpen := panel.IsOpen()
+
+		g.clearRightScreenSide()
+
+		if !isOpen {
+			panel.Open()
+			g.hud.miniPanel.SetMovedLeft(true)
+			g.updateLayout()
+		}
+	}
+}
+
+func (g *GameControls) toggleHeroStatsPanel() {
+	g.openLeftPanel(g.heroStatsPanel)
+}
+
 func (g *GameControls) onCloseHeroStatsPanel() {
-	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) toggleLeftSkillPanel() {
 	if !g.HelpOverlay.IsOpen() {
-		g.inventory.Close()
-		g.skilltree.Close()
-		g.questLog.Close()
-		g.heroStatsPanel.Close()
+		g.clearScreen()
 		g.hud.skillSelectMenu.ToggleLeftPanel()
 	}
 }
 
 func (g *GameControls) toggleRightSkillPanel() {
 	if !g.HelpOverlay.IsOpen() {
-		g.inventory.Close()
-		g.skilltree.Close()
-		g.questLog.Close()
-		g.heroStatsPanel.Close()
+		g.clearScreen()
 		g.hud.skillSelectMenu.ToggleRightPanel()
 	}
 }
 
 func (g *GameControls) toggleQuestLog() {
-	if !g.HelpOverlay.IsOpen() {
-		g.heroStatsPanel.Close()
-		g.hud.skillSelectMenu.LeftPanel.Close()
-		g.hud.skillSelectMenu.RightPanel.Close()
-		g.questLog.Toggle()
-		g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
-		g.updateLayout()
-	}
+	g.openLeftPanel(g.questLog)
 }
 
 func (g *GameControls) onCloseQuestLog() {
-	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) toggleHelpOverlay() {
-	if !g.inventory.IsOpen() && !g.skilltree.IsOpen() && !g.heroStatsPanel.IsOpen() && !g.questLog.IsOpen() {
+	if !g.isRightPanelOpen() || g.isLeftPanelOpen() {
 		g.HelpOverlay.updateKeyMap(g.keyMap)
-		g.hud.skillSelectMenu.LeftPanel.Close()
-		g.hud.skillSelectMenu.RightPanel.Close()
+		g.hud.skillSelectMenu.ClosePanels()
 		g.hud.miniPanel.openDisabled()
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
@@ -696,42 +675,21 @@ func (g *GameControls) toggleHelpOverlay() {
 }
 
 func (g *GameControls) toggleInventoryPanel() {
-	if !g.HelpOverlay.IsOpen() {
-		g.hud.skillSelectMenu.LeftPanel.Close()
-		g.hud.skillSelectMenu.RightPanel.Close()
-		g.skilltree.Close()
-		g.inventory.Toggle()
-		g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
-		g.updateLayout()
-	}
+	g.openRightPanel(g.inventory)
 }
 
 func (g *GameControls) onCloseInventory() {
-	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
-	if !g.HelpOverlay.IsOpen() {
-		g.inventory.Close()
-		g.hud.skillSelectMenu.LeftPanel.Close()
-		g.hud.skillSelectMenu.RightPanel.Close()
-		g.skilltree.Toggle()
-		g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
-		g.updateLayout()
-	}
+	g.openRightPanel(g.skilltree)
 }
 
 func (g *GameControls) onCloseSkilltree() {
-	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) openEscMenu() {
-	g.inventory.Close()
-	g.skilltree.Close()
-	g.heroStatsPanel.Close()
-	g.questLog.Close()
+	g.clearScreen()
 	g.hud.miniPanel.closeDisabled()
 	g.escapeMenu.open()
 	g.updateLayout()
@@ -786,18 +744,21 @@ func (g *GameControls) updateLayout() {
 		g.mapRenderer.ViewportDefault()
 	case isRightPanelOpen:
 		g.mapRenderer.ViewportToLeft()
-	default:
+	case isLeftPanelOpen:
 		g.mapRenderer.ViewportToRight()
 	}
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/801
 	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
 	return g.inventory.IsOpen() || g.skilltree.IsOpen()
+}
+
+func (g *GameControls) hasOpenPanels() bool {
+	return g.isRightPanelOpen() || g.isLeftPanelOpen() || g.hud.skillSelectMenu.IsOpen()
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
