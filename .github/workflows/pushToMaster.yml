@@ -1,12 +1,12 @@
 ---
 name: build
-# "on":
-#     push:
-#         branches:
-#             - master
+"on":
+    push:
+        branches:
+            - master
 jobs:
     build:
-        name: Build
+        name: 'Push to Master'
         runs-on: self-hosted
         steps:
             -   name: Set up Go 1.14

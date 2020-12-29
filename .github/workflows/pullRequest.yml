@@ -1,8 +1,9 @@
 ---
 name: pull_request
+"on": [pull_request]
 jobs:
     build:
-        name: Build
+        name: 'Pull Request'
         runs-on: self-hosted
         continue-on-error: true
         steps:
