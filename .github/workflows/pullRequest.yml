@@ -1,6 +1,5 @@
 ---
 name: pull_request
-"on": [pull_request]
 jobs:
     build:
         name: Build
