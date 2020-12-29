@@ -2,8 +2,10 @@ package d2maprenderer
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -86,20 +88,11 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
-	var err error
-	err = term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
-		result.mapDebugVisLevel = level
-	})
-
-	if err != nil {
+	if err := term.Bind("mapdebugvis", "set map debug visualization level", nil, result.commandMapDebugVis); err != nil {
 		result.Errorf("could not bind the mapdebugvis action, err: %v", err)
 	}
 
-	err = term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
-		result.entityDebugVisLevel = level
-	})
-
-	if err != nil {
+	if err := term.Bind("entitydebugvis", "set entity debug visualization level", nil, result.commandEntityDebugVis); err != nil {
 		result.Errorf("could not bind the entitydebugvis action, err: %v", err)
 	}
 
@@ -108,6 +101,33 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	}
 
 	return result
+}
+
+// UnbindTerminalCommands unbinds commands from the terminal
+func (mr *MapRenderer) UnbindTerminalCommands(term d2interface.Terminal) error {
+	return term.Unbind("mapdebugvis", "entitydebugvis")
+}
+
+func (mr *MapRenderer) commandMapDebugVis(args []string) error {
+	level, err := strconv.Atoi(args[0])
+	if err != nil {
+		return fmt.Errorf("invalid argument supplied")
+	}
+
+	mr.mapDebugVisLevel = level
+
+	return nil
+}
+
+func (mr *MapRenderer) commandEntityDebugVis(args []string) error {
+	level, err := strconv.Atoi(args[0])
+	if err != nil {
+		return fmt.Errorf("invalid argument supplied")
+	}
+
+	mr.entityDebugVisLevel = level
+
+	return nil
 }
 
 // RegenerateTileCache calls MapRenderer.generateTileCache().
