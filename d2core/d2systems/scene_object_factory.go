@@ -2,6 +2,7 @@ package d2systems
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2checkbox"
 	"image/color"
 	"path/filepath"
 
@@ -125,4 +126,31 @@ func (s *sceneObjectFactory) Label(text, fontSpritePath, palettePath string) aka
 	s.SceneObjects = append(s.SceneObjects, eid)
 
 	return eid
+}
+
+// Checkbox creates a Checkbox in the scene, with an attached Label
+func (s *sceneObjectFactory) Checkbox(x, y float64, checkedState bool, enabled bool, text string, callback func(akara.Component) bool) akara.EID {
+	checkboxEID := s.sceneSystems.UI.Checkbox(x, y, checkedState, enabled, callback)
+	s.SceneObjects = append(s.SceneObjects, checkboxEID)
+
+	s.addBasicComponents(checkboxEID)
+
+	checkboxNode := s.Components.SceneGraphNode.Add(checkboxEID)
+
+	// create a Label as a child of the Checkbox if text was given
+	if text != "" {
+		layout := d2checkbox.GetDefaultLayout()
+		labelEID := s.Label(text, layout.FontPath, layout.PalettePath)
+		labelNode := s.Components.SceneGraphNode.Add(labelEID)
+		labelNode.SetParent(checkboxNode.Node)
+
+		labelTrs := s.Components.Transform.Add(labelEID)
+		labelTrs.Translation.X = layout.TextOffset
+
+		label, _ := s.Components.Label.Get(labelEID)
+		checkbox, _ := s.Components.Checkbox.Get(checkboxEID)
+		checkbox.Label = label.Label
+	}
+
+	return checkboxEID
 }

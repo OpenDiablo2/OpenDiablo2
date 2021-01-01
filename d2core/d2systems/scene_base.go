@@ -60,10 +60,12 @@ type sceneComponents struct {
 	Alpha               d2components.AlphaFactory
 	DrawEffect          d2components.DrawEffectFactory
 	Rectangle           d2components.RectangleFactory
+	Label               d2components.LabelFactory
+	Checkbox            d2components.CheckboxFactory
 	Color               d2components.ColorFactory
 	CommandRegistration d2components.CommandRegistrationFactory
 	Dirty               d2components.DirtyFactory
-	GameConfig               d2components.GameConfigFactory
+	GameConfig          d2components.GameConfigFactory
 }
 
 // BaseScene encapsulates common behaviors for systems that are considered "scenes",
@@ -87,7 +89,7 @@ type BaseScene struct {
 	SceneObjects    []akara.EID
 	Graph           *d2scene.Node // the root node
 	backgroundColor color.Color
-	gameConfigs *akara.Subscription
+	gameConfigs     *akara.Subscription
 }
 
 // Booted returns whether or not the scene has booted
@@ -218,6 +220,8 @@ func (s *BaseScene) setupFactories() {
 	s.InjectComponent(&d2components.Sprite{}, &s.Components.Sprite.ComponentFactory)
 	s.InjectComponent(&d2components.SegmentedSprite{}, &s.Components.SegmentedSprite.ComponentFactory)
 	s.InjectComponent(&d2components.Rectangle{}, &s.Components.Rectangle.ComponentFactory)
+	s.InjectComponent(&d2components.Checkbox{}, &s.Components.Checkbox.ComponentFactory)
+	s.InjectComponent(&d2components.Label{}, &s.Components.Label.ComponentFactory)
 	s.InjectComponent(&d2components.Color{}, &s.Components.Color.ComponentFactory)
 	s.InjectComponent(&d2components.CommandRegistration{}, &s.Components.CommandRegistration.ComponentFactory)
 	s.InjectComponent(&d2components.Dirty{}, &s.Components.Dirty.ComponentFactory)

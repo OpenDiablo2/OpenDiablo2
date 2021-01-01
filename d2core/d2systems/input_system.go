@@ -25,9 +25,9 @@ type InputSystem struct {
 	d2interface.InputService
 	configs      *akara.Subscription
 	interactives *akara.Subscription
-	inputState *d2input.InputVector
-	Components struct {
-		GameConfig d2components.GameConfigFactory
+	inputState   *d2input.InputVector
+	Components   struct {
+		GameConfig  d2components.GameConfigFactory
 		Interactive d2components.InteractiveFactory
 	}
 }
@@ -143,8 +143,17 @@ func (m *InputSystem) applyInputState(id akara.EID) (preventPropagation bool) {
 		return false
 	}
 
+	// verify that the current inputState matches the state specified in the InputVector
 	if !v.Enabled || !m.inputState.Contains(v.InputVector) {
 		return false
+	}
+
+	// check if this Interactive specified a particular cursor position that the input must occur in
+	if v.CursorPosition != nil {
+		cursorX, cursorY := m.CursorPosition()
+		if !v.CursorPosition.Contains(float64(cursorX), float64(cursorY)) {
+			return false
+		}
 	}
 
 	return v.Callback()

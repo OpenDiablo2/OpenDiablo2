@@ -39,8 +39,10 @@ type Sprite interface {
 	SetPlaySpeed(playSpeed time.Duration)
 	SetPlayLength(playLength time.Duration)
 	SetColorMod(colorMod color.Color)
+	GetColorMod() color.Color
 	GetPlayedCount() int
 	ResetPlayedCount()
 	SetEffect(effect d2enum.DrawEffect)
+	GetEffect() d2enum.DrawEffect
 	SetShadow(shadow bool)
 }

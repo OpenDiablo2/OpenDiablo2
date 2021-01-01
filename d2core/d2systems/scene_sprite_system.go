@@ -98,7 +98,7 @@ func (t *SpriteFactory) setupSubscriptions() {
 		Build()
 
 	spritesToUpdate := t.NewComponentFilter().
-		Require(&d2components.Sprite{}). // we want to process entities that have an sprite ...
+		Require(&d2components.Sprite{}).  // we want to process entities that have an sprite ...
 		Require(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
@@ -316,8 +316,15 @@ func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.Se
 			}
 
 			target.PushTranslation(x+offsetX, y+offsetY)
+			// TODO: PushEffect and PushColor don't seem to be working?
+			// 		 see d2sprite/sprite.go for old implementation
+			//target.PushEffect(sprite.GetEffect())
+			//target.PushColor(sprite.GetColorMod())
+
 			target.Render(sprite.GetCurrentFrameSurface())
 			target.Pop()
+			//target.Pop()
+			//target.Pop()
 
 			frameWidth, frameHeight := sprite.GetCurrentFrameSize()
 			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)

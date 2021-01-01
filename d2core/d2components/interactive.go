@@ -1,6 +1,7 @@
 package d2components
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom/rectangle"
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
@@ -13,19 +14,21 @@ func noop() bool {
 	return false
 }
 
-// Interactive is used to flag file entities with a file type
+// Interactive is used to define an input state and a callback function to execute when that state is reached
 type Interactive struct {
 	Enabled bool
 	*d2input.InputVector
-	Callback func() (preventPropagation bool)
+	CursorPosition *rectangle.Rectangle
+	Callback       func() (preventPropagation bool)
 }
 
 // New returns a Interactive component. By default, it contains a nil instance.
 func (*Interactive) New() akara.Component {
 	return &Interactive{
-		Enabled:     true,
-		InputVector: d2input.NewInputVector(),
-		Callback:    noop,
+		Enabled:        true,
+		InputVector:    d2input.NewInputVector(),
+		CursorPosition: nil,
+		Callback:       noop,
 	}
 }
 

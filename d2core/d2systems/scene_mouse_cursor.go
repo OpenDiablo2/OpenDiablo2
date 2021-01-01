@@ -98,13 +98,6 @@ func (s *MouseCursorScene) updateCursorTransform() {
 
 	if int(tx) != cx || int(ty) != cy {
 		s.lastTimeMoved = time.Now()
-
-		switch s.debug.enabled {
-		case true:
-			s.Infof("transform: (%d, %d)", int(tx), int(ty))
-		default:
-			s.Debugf("transform: (%d, %d)", int(tx), int(ty))
-		}
 	}
 
 	transform.Translation.X, transform.Translation.Y = float64(cx), float64(cy)

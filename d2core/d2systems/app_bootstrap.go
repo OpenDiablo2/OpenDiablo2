@@ -37,9 +37,9 @@ const (
 	skipSplashArg  = "nosplash"
 	skipSplashDesc = "skip the ebiten splash screen"
 
-	logLevelArg  = "loglevel"
-	logLevelShort  = 'l'
-	logLevelDesc = "sets the logging level for all loggers at startup"
+	logLevelArg   = "loglevel"
+	logLevelShort = 'l'
+	logLevelDesc  = "sets the logging level for all loggers at startup"
 
 	profilerArg  = "profile"
 	profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
@@ -285,6 +285,9 @@ func (m *AppBootstrap) parseCommandLineArgs() {
 	case "buttons":
 		m.Info("running button test scene")
 		m.World.AddSystem(NewButtonTestScene())
+	case "checkbox":
+		m.Info("running checkbox test scene")
+		m.World.AddSystem(NewCheckboxTestScene())
 	default:
 		m.World.AddSystem(&GameClientBootstrap{})
 	}

@@ -395,6 +395,10 @@ func (a *Sprite) SetColorMod(colorMod color.Color) {
 	a.colorMod = colorMod
 }
 
+func (a *Sprite) GetColorMod() color.Color {
+	return a.colorMod
+}
+
 // GetPlayedCount gets the number of times the application played
 func (a *Sprite) GetPlayedCount() int {
 	return a.playedCount
@@ -408,6 +412,10 @@ func (a *Sprite) ResetPlayedCount() {
 // SetEffect sets the draw effect for the sprite
 func (a *Sprite) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
+}
+
+func (a *Sprite) GetEffect() d2enum.DrawEffect {
+	return a.effect
 }
 
 // SetShadow sets bool for whether or not to draw a shadow
