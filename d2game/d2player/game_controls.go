@@ -795,11 +795,11 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 
 // Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
-	if err := g.renderPanels(target); err != nil {
+	if err := g.hud.Render(target); err != nil {
 		return err
 	}
 
-	if err := g.hud.Render(target); err != nil {
+	if err := g.renderPanels(target); err != nil {
 		return err
 	}
 
