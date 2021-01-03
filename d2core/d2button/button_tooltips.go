@@ -1,7 +1,7 @@
 package d2button
 
 const (
-	buttonTooltipNone int = iota
+	buttonTooltipNone int = iota // nolint:varcheck,deadcode // will be used eventually
 	buttonTooltipClose
 	buttonTooltipOk
 	buttonTooltipBuy

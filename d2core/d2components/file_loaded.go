@@ -9,7 +9,7 @@ import (
 var _ akara.Component = &FileLoaded{}
 
 // FileLoaded is used to flag file entities as having been loaded. it is an empty struct.
-type FileLoaded struct {}
+type FileLoaded struct{}
 
 // New returns a FileLoaded component. By default, it contains an empty string.
 func (*FileLoaded) New() akara.Component {

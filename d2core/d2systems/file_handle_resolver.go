@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -41,20 +42,20 @@ const (
 type FileHandleResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	cache        *d2cache.Cache
-	filesToLoad  *akara.Subscription
-	sourcesToUse *akara.Subscription
-	localesToCheck  *akara.Subscription
-	locale struct {
+	cache          *d2cache.Cache
+	filesToLoad    *akara.Subscription
+	sourcesToUse   *akara.Subscription
+	localesToCheck *akara.Subscription
+	locale         struct {
 		charset  string
 		language string
 	}
 	Components struct {
-		File d2components.FileFactory
-		FileType d2components.FileTypeFactory
+		File       d2components.FileFactory
+		FileType   d2components.FileTypeFactory
 		FileSource d2components.FileSourceFactory
 		FileHandle d2components.FileHandleFactory
-		Locale d2components.LocaleFactory
+		Locale     d2components.LocaleFactory
 	}
 }
 
@@ -106,6 +107,7 @@ func (m *FileHandleResolver) setupSubscriptions() {
 	m.localesToCheck = m.World.AddSubscription(localesToCheck)
 }
 
+// nolint:dupl // setting up component factories looks very similar across different systems
 func (m *FileHandleResolver) setupFactories() {
 	m.Debug("setting up component factories")
 
@@ -128,7 +130,7 @@ func (m *FileHandleResolver) Update() {
 		for _, eid := range locales {
 			locale, _ := m.Components.Locale.Get(eid)
 			m.locale.language = locale.String
-			m.locale.charset =  d2resource.GetFontCharset(locale.String)
+			m.locale.charset = d2resource.GetFontCharset(locale.String)
 			m.RemoveEntity(eid)
 		}
 
@@ -146,8 +148,10 @@ func (m *FileHandleResolver) Update() {
 	}
 }
 
-// try to load a file with a source, returns true if loaded
+// try to load a file with a source, returns true if successfully loaded from either
+// the filesystem or from the cache
 func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool {
+	// verify file and source exist
 	fp, found := m.Components.File.Get(fileID)
 	if !found {
 		return false
@@ -175,11 +179,17 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		fp.Path = strings.ReplaceAll(fp.Path, d2resource.LanguageTableToken, m.locale.language)
 	}
 
-	cacheKey := m.makeCacheKey(fp.Path, sourceFp.Path)
-	if entry, found := m.cache.Retrieve(cacheKey); found {
-		component := m.Components.FileHandle.Add(fileID)
-		component.Data = entry.(d2interface.DataStream)
+	if m.loadFile(fileID, ft, fp, sourceFp, source) {
+		return true
+	}
 
+	return true
+}
+
+func (m *FileHandleResolver) loadFile(fileID akara.EID, fileType *d2components.FileType,
+	fp, sourceFp *d2components.File, source *d2components.FileSource) bool {
+	// check the cache first
+	if m.fileIsLoaded(fileID, fp.Path, sourceFp.Path) {
 		return true
 	}
 
@@ -187,7 +197,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 	if err != nil {
 		// HACK: sound environment stuff doesnt specify the path, just the filename
 		// so we gotta check this edge case
-		if ft.Type != d2enum.FileTypeWAV {
+		if fileType.Type != d2enum.FileTypeWAV {
 			return false
 		}
 
@@ -198,12 +208,8 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		tryPath := strings.ReplaceAll(fp.Path, "sfx", "music")
 		tmpComponent := &d2components.File{Path: tryPath}
 
-		cacheKey = m.makeCacheKey(tryPath, sourceFp.Path)
-		if entry, found := m.cache.Retrieve(cacheKey); found {
-			component := m.Components.FileHandle.Add(fileID)
-			component.Data = entry.(d2interface.DataStream)
+		if m.fileIsLoaded(fileID, tryPath, sourceFp.Path) {
 			fp.Path = tryPath
-
 			return true
 		}
 
@@ -220,6 +226,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 	component := m.Components.FileHandle.Add(fileID)
 	component.Data = data
 
+	cacheKey := m.makeCacheKey(fp.Path, sourceFp.Path)
 	if err := m.cache.Insert(cacheKey, data, fileHandleCacheEntryWeight); err != nil {
 		m.Error(err.Error())
 	}
@@ -230,4 +237,17 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 func (m *FileHandleResolver) makeCacheKey(path, source string) string {
 	const sep = "->"
 	return strings.Join([]string{source, path}, sep)
+}
+
+// check if the given file is already cached
+func (m *FileHandleResolver) fileIsLoaded(fileID akara.EID, path, source string) bool {
+	cacheKey := m.makeCacheKey(path, source)
+	if entry, found := m.cache.Retrieve(cacheKey); found {
+		component := m.Components.FileHandle.Add(fileID)
+		component.Data = entry.(d2interface.DataStream)
+
+		return true
+	}
+
+	return false
 }

@@ -33,13 +33,13 @@ type GameConfigSystem struct {
 	*d2util.Logger
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
-	Components struct {
+	Components   struct {
 		GameConfig d2components.GameConfigFactory
-		File d2components.FileFactory
-		FileType d2components.FileTypeFactory
+		File       d2components.FileFactory
+		FileType   d2components.FileTypeFactory
 		FileHandle d2components.FileHandleFactory
 		FileSource d2components.FileSourceFactory
-		Dirty d2components.DirtyFactory
+		Dirty      d2components.DirtyFactory
 	}
 	activeConfig *d2components.GameConfig
 }

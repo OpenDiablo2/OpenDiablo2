@@ -2,8 +2,9 @@
 package d2components
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2checkbox"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2checkbox"
 )
 
 // static check that Checkbox implements Component

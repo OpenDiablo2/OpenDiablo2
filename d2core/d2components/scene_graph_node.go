@@ -1,3 +1,4 @@
+//nolint:dupl,golint,stylecheck // component declarations are supposed to look the same
 package d2components
 
 import (

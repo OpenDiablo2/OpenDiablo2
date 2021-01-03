@@ -26,6 +26,7 @@ func (m *Matrix3) Clone() *Matrix3 {
 }
 
 // Copy the values of a given Matrix into this Matrix.
+//nolint:dupl // functions are similar but they are for different things
 func (m *Matrix3) Copy(other *Matrix3) *Matrix3 {
 	m.Values[0] = other.Values[0]
 	m.Values[1] = other.Values[1]
@@ -61,6 +62,7 @@ func (m *Matrix3) Identity() *Matrix3 {
 }
 
 // FromMatrix4 copies the values of a given Matrix4 into this Matrix3.
+//nolint:dupl // functions are similar but they are for different things
 func (m *Matrix3) FromMatrix4(m4 *Matrix4) *Matrix3 {
 	m.Values[0] = m4.Values[0]
 	m.Values[1] = m4.Values[1]

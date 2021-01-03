@@ -7,8 +7,9 @@ import (
 	"github.com/gravestench/pho/phomath"
 )
 
-// Calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
+// GetRandomPointOutside calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
 // Rectangle. The inner Rectangle must be fully contained within the outer rectangle.
+//nolint:gosec // not crypto/security-related, it's okay if we use a weak random number generator
 func GetRandomPointOutside(outer, inner *Rectangle, out *point.Point) *point.Point {
 	if out == nil {
 		out = point.New(0, 0)

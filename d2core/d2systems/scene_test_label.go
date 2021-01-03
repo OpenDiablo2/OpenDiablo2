@@ -33,7 +33,7 @@ var _ d2interface.Scene = &LabelTestScene{}
 type LabelTestScene struct {
 	*BaseScene
 	booted   bool
-	labels *akara.Subscription
+	labels   *akara.Subscription
 	velocity d2components.VelocityFactory
 }
 
@@ -62,6 +62,7 @@ func (s *LabelTestScene) boot() {
 	s.booted = true
 }
 
+//nolint:gosec,gomnd // test scene, weak RNG is fine
 func (s *LabelTestScene) createLabels() {
 	fonts := []string{
 		d2resource.Font6,
@@ -86,11 +87,15 @@ func (s *LabelTestScene) createLabels() {
 
 		c := s.Components.Color.Add(labelEID)
 
-		r, g, b, a := uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255))
+		r, g, b, a := uint8(rand.Intn(255)), uint8(rand.Intn(255)),
+			uint8(rand.Intn(255)), uint8(rand.Intn(255))
 		c.Color = color.RGBA{r, g, b, a}
 
+		windowWidth, windowHeight := s.Render.renderer.GetWindowSize()
 		trs := s.Components.Transform.Add(labelEID)
-		trs.Translation.Set(rand.Float64()*800, rand.Float64()*600, 1)
+		trs.Translation.Set(rand.Float64()*float64(windowWidth),
+			rand.Float64()*float64(windowHeight),
+			1)
 
 		v := s.velocity.Add(labelEID)
 

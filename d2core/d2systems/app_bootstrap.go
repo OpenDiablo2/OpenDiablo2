@@ -2,12 +2,14 @@ package d2systems
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/pkg/profile"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/pkg/profile"
+	"gopkg.in/alecthomas/kingpin.v2"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/gravestench/akara"
 
@@ -126,6 +128,7 @@ func (m *AppBootstrap) setupSubscriptions() {
 	m.subscribedConfigs = m.World.AddSubscription(gameConfigs)
 }
 
+// nolint:dupl // setting up component factories looks very similar across different systems
 func (m *AppBootstrap) setupFactories() {
 	m.Debug("setting up component factories")
 

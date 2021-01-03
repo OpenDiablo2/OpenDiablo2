@@ -29,13 +29,13 @@ type ShapeSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	RenderSystem *RenderSystem
-	Components struct {
+	Components   struct {
 		Transform d2components.TransformFactory
-		Color d2components.ColorFactory
+		Color     d2components.ColorFactory
 		Rectangle d2components.RectangleFactory
-		Texture d2components.TextureFactory
-		Size d2components.SizeFactory
-		Origin d2components.OriginFactory
+		Texture   d2components.TextureFactory
+		Size      d2components.SizeFactory
+		Origin    d2components.OriginFactory
 	}
 	loadQueue      spriteLoadQueue
 	shapesToRender *akara.Subscription
@@ -90,8 +90,8 @@ func (t *ShapeSystem) Update() {
 	}
 }
 
-// ComponentFactory queues a sprite spriteation to be loaded
-func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akara.EID {
+// Rectangle creates a rectangle to be rendered in the scene
+func (t *ShapeSystem) Rectangle(x, y, width, height int, rectangleColor color.Color) akara.EID {
 	t.Debug("creating rectangle")
 
 	eid := t.NewEntity()
@@ -101,7 +101,7 @@ func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akar
 	r.Width, r.Height = float64(width), float64(height)
 
 	c := t.Components.Color.Add(eid)
-	c.Color = color
+	c.Color = rectangleColor
 
 	texture := t.Components.Texture.Add(eid)
 	texture.Texture = t.RenderSystem.renderer.NewSurface(width, height)

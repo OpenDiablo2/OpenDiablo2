@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
+// New creates a new BitmapFont
 func New(s d2interface.Sprite, table []byte, col color.Color) *BitmapFont {
 	return &BitmapFont{
 		Sprite: s,
@@ -17,6 +18,7 @@ func New(s d2interface.Sprite, table []byte, col color.Color) *BitmapFont {
 	}
 }
 
+// Glyph is an abstraction of one glyph
 type Glyph struct {
 	frame  int
 	width  int

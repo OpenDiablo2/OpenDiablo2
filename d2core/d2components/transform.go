@@ -13,8 +13,8 @@ var _ akara.Component = &Transform{}
 // Transform contains a vec3 for Translation, Rotation, and Scale
 type Transform struct {
 	Translation *d2math.Vector3
-	Rotation *d2math.Vector3
-	Scale *d2math.Vector3
+	Rotation    *d2math.Vector3
+	Scale       *d2math.Vector3
 }
 
 func (t *Transform) GetMatrix() *d2math.Matrix4 {
@@ -30,8 +30,8 @@ func (t *Transform) GetMatrix() *d2math.Matrix4 {
 func (*Transform) New() akara.Component {
 	return &Transform{
 		Translation: d2math.NewVector3(0, 0, 0),
-		Rotation: d2math.NewVector3(0, 0, 0),
-		Scale: d2math.NewVector3(1, 1, 1),
+		Rotation:    d2math.NewVector3(0, 0, 0),
+		Scale:       d2math.NewVector3(1, 1, 1),
 	}
 }
 

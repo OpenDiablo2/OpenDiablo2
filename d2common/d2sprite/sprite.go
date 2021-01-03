@@ -266,7 +266,8 @@ func (a *Sprite) GetCurrentFrameSize() (width, height int) {
 	return width, height
 }
 
-func (a *Sprite) GetCurrentFrameOffset() (int, int) {
+// GetCurrentFrameOffset returns the X and Y offsets of the sprite's current frame
+func (a *Sprite) GetCurrentFrameOffset() (x, y int) {
 	f := a.directions[a.directionIndex].frames[a.frameIndex]
 	return f.offsetX, f.offsetY
 }
@@ -395,6 +396,7 @@ func (a *Sprite) SetColorMod(colorMod color.Color) {
 	a.colorMod = colorMod
 }
 
+// GetColorMod returns the Sprite's color mod
 func (a *Sprite) GetColorMod() color.Color {
 	return a.colorMod
 }
@@ -414,6 +416,7 @@ func (a *Sprite) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
 }
 
+// GetEffect returns the Sprite's current DrawEffect
 func (a *Sprite) GetEffect() d2enum.DrawEffect {
 	return a.effect
 }

@@ -7,18 +7,18 @@ import (
 
 // ButtonLayout defines the type of buttons
 type ButtonLayout struct {
-	SpritePath    string
-	PalettePath   string
-	FontPath      string
-	ClickableRect *rectangle.Rectangle
-	XSegments     int
-	YSegments     int
-	BaseFrame     int
-	DisabledFrame int
-	DisabledColor uint32
-	TextOffset    int
-	FixedWidth    int
-	FixedHeight   int
+	SpritePath       string
+	PalettePath      string
+	FontPath         string
+	ClickableRect    *rectangle.Rectangle
+	XSegments        int
+	YSegments        int
+	BaseFrame        int
+	DisabledFrame    int
+	DisabledColor    uint32
+	TextOffset       int
+	FixedWidth       int
+	FixedHeight      int
 	LabelColor       uint32
 	Toggleable       bool
 	AllowFrameChange bool
@@ -94,17 +94,12 @@ const (
 	buttonGoldCoinSegmentsY     = 1
 	buttonGoldCoinDisabledFrame = -1
 
-	pressedButtonOffset = 2
+	pressedButtonOffset = 1 // nolint:varcheck,deadcode,unused // will be used eventually
 )
 
-// nolint:funlen // cant reduce
+// GetLayout is a wrapper around GetLayouts for retrieving a specific layout (note: not necessary, can be removed)
+// nolint:funlen // will not be hard-coded in here forever, can't really reduce this right now
 func GetLayout(t ButtonType) ButtonLayout {
-	layouts := GetLayouts()
-
-	return layouts[t]
-}
-
-func GetLayouts() map[ButtonType]ButtonLayout {
 	const (
 		buyButtonBaseFrame         = 2  // base frame offset of the "buy" button dc6
 		sellButtonBaseFrame        = 4  // base frame offset of the "sell" button dc6
@@ -118,7 +113,7 @@ func GetLayouts() map[ButtonType]ButtonLayout {
 		squelchChatButtonBaseFrame = 20 // base frame offset of the "?" button dc6
 	)
 
-	return map[ButtonType]ButtonLayout{
+	layouts := map[ButtonType]ButtonLayout{
 		ButtonTypeWide: {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
@@ -631,4 +626,6 @@ func GetLayouts() map[ButtonType]ButtonLayout {
 			LabelColor:       whiteAlpha100,
 		},
 	}
+
+	return layouts[t]
 }

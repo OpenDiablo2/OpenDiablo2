@@ -7,6 +7,7 @@ import (
 )
 
 // GetRandomPoint returns a random point within the Rectangle's bounds.
+//nolint:gosec // not crypto/security-related, it's okay if we use a weak random number generator
 func GetRandomPoint(r *Rectangle, p *point.Point) *point.Point {
 	if p == nil {
 		p = point.New(0, 0)

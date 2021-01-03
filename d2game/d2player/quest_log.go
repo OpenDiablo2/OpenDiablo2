@@ -562,7 +562,7 @@ func (s *QuestLog) cordsToQuestID(act, number int) int {
 	return key
 }
 
-//nolint:deadcode,unused // I think, it will be used, if not, we can just remove it
+//nolint:varcheck,unused // I think, it will be used, if not, we can just remove it
 func (s *QuestLog) questIDToCords(id int) (act, number int) {
 	act = 1
 

@@ -452,6 +452,7 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 	}
 }
 
+// RegisterTerminalCommand registers a command that can be executed from the terminal
 func (s *BaseScene) RegisterTerminalCommand(name, desc string, fn interface{}) {
 	regID := s.NewEntity()
 	reg := s.Components.CommandRegistration.Add(regID)

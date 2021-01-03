@@ -16,9 +16,9 @@ const (
 
 const (
 	fadeTimeout = time.Second * 4
-	fadeTime    = time.Second
 )
 
+// NewMouseCursorScene creates a mouse cursor scene
 func NewMouseCursorScene() *MouseCursorScene {
 	scene := &MouseCursorScene{
 		BaseScene: NewBaseScene(sceneKeyMouseCursor),
@@ -30,17 +30,18 @@ func NewMouseCursorScene() *MouseCursorScene {
 // static check that MouseCursorScene implements the scene interface
 var _ d2interface.Scene = &MouseCursorScene{}
 
+// MouseCursorScene is a scene that renders a mouse cursor in the window
 type MouseCursorScene struct {
-	*BaseScene
-	booted        bool
-	cursor        akara.EID
 	lastTimeMoved time.Time
-	debug         struct {
+	*BaseScene
+	cursor akara.EID
+	booted bool
+	debug  struct {
 		enabled bool
 	}
-	test bool
 }
 
+// Init does basic scene initialization
 func (s *MouseCursorScene) Init(world *akara.World) {
 	s.World = world
 
@@ -65,6 +66,7 @@ func (s *MouseCursorScene) createMouseCursor() {
 	s.cursor = s.Add.Sprite(0, 0, d2resource.CursorDefault, d2resource.PaletteUnits)
 }
 
+// Update updates the state of the scene
 func (s *MouseCursorScene) Update() {
 	for _, id := range s.Viewports {
 		s.Components.Priority.Add(id).Priority = scenePriorityMouseCursor
@@ -109,15 +111,15 @@ func (s *MouseCursorScene) handleCursorFade() {
 		return
 	}
 
-	shouldFadeOut := time.Now().Sub(s.lastTimeMoved) > fadeTimeout
+	shouldFadeOut := time.Since(s.lastTimeMoved) > fadeTimeout
 
 	if shouldFadeOut {
-		alpha.Alpha = math.Max(alpha.Alpha*0.825, 0)
+		alpha.Alpha = math.Max(alpha.Alpha*0.825, 0) // nolint:gomnd // arbitrary example number for test scene
 	} else {
-		alpha.Alpha = math.Min(alpha.Alpha+0.125, 1)
+		alpha.Alpha = math.Min(alpha.Alpha+0.125, 1) // nolint:gomnd // arbitrary example number for test scene
 	}
 
-	if alpha.Alpha > 1e-1 && alpha.Alpha < 1 {
+	if alpha.Alpha > 1e-1 && alpha.Alpha < 1 { // nolint:gomnd // arbitrary example number for test scene
 		switch s.debug.enabled {
 		case true:
 			s.Infof("fading %.2f", alpha.Alpha)

@@ -18,7 +18,7 @@ func New(x, y, w, h float64) *Rectangle {
 	}
 }
 
-// Encapsulates a 2D rectangle defined by its corner point in the top-left and its extends
+// Rectangle encapsulates a 2D rectangle defined by its corner point in the top-left and its extends
 // in x (width) and y (height)
 type Rectangle struct {
 	Type          geom.ShapeType
@@ -45,6 +45,7 @@ func (r *Rectangle) SetLeft(value float64) *Rectangle {
 	}
 
 	r.X = value
+
 	return r
 }
 
@@ -98,21 +99,25 @@ func (r *Rectangle) SetBottom(value float64) *Rectangle {
 	return r
 }
 
+// CenterX returns the X-coordinate of the center of the rectangle
 func (r *Rectangle) CenterX() float64 {
-	return r.X + r.Width/2
+	return r.X + r.Width/2 //nolint:gomnd // just halving things...
 }
 
+// SetCenterX sets the rectangle's position so that the X-coordinate of the center matches the given value
 func (r *Rectangle) SetCenterX(value float64) *Rectangle {
-	r.X = value - r.Width/2
+	r.X = value - r.Width/2 //nolint:gomnd // just halving things...
 	return r
 }
 
+// CenterY returns the Y-coordinate of the center of the rectangle
 func (r *Rectangle) CenterY() float64 {
-	return r.Y + r.Height/2
+	return r.Y + r.Height/2 //nolint:gomnd // just halving things...
 }
 
+// SetCenterY sets the rectangle's position so that the Y-coordinate of the center matches the given value
 func (r *Rectangle) SetCenterY(value float64) *Rectangle {
-	r.Y = value - r.Height/2
+	r.Y = value - r.Height/2 //nolint:gomnd // just halving things...
 
 	return r
 }
@@ -155,7 +160,7 @@ func (r *Rectangle) SetEmpty() *Rectangle {
 	return r.SetTo(0, 0, 0, 0)
 }
 
-//  SetPosition sets the position of the rectangle.
+// SetPosition sets the position of the rectangle.
 func (r *Rectangle) SetPosition(x, y float64) *Rectangle {
 	r.X, r.Y = x, y
 	return r
@@ -243,7 +248,7 @@ func (r *Rectangle) ContainsPoint(p *point.Point) bool {
 	return Contains(r, p.X, p.Y)
 }
 
-// ContainsRect checks if a given point is inside a Rectangle's bounds.
+// ContainsRectangle checks if a given point is inside a Rectangle's bounds.
 func (r *Rectangle) ContainsRectangle(other *Rectangle) bool {
 	return ContainsRectangle(r, other)
 }
@@ -265,7 +270,7 @@ func (r *Rectangle) Equals(other *Rectangle) bool {
 	return Equals(r, other)
 }
 
-// Adjusts rectangle, changing its width, height and position,
+// FitInside adjusts rectangle, changing its width, height and position,
 // so that it fits inside the area of the source rectangle, while maintaining its original
 // aspect ratio.
 func (r *Rectangle) FitInside(other *Rectangle) *Rectangle {
@@ -283,11 +288,14 @@ func (r *Rectangle) GetSize() *point.Point {
 	return GetSize(r)
 }
 
+// Inflate increases the size of a Rectangle by a specified amount.
+// The center of the Rectangle stays the same. The amounts are added to each side,
+// so the actual increase in width or height is two times bigger than the respective argument.
 func (r *Rectangle) Inflate(x, y float64) *Rectangle {
 	return Inflate(r, x, y)
 }
 
-// Takes two Rectangles and first checks to see if they intersect.
+// Intersection takes two Rectangles and first checks to see if they intersect.
 // If they intersect it will return the area of intersection in the `out` Rectangle.
 // If they do not intersect, the `out` Rectangle will have a width and height of zero.
 // The given `intersect` rectangle will be assigned the intsersect values and returned.
@@ -325,7 +333,7 @@ func (r *Rectangle) OffsetPoint(p *point.Point) *Rectangle {
 	return OffsetPoint(r, p)
 }
 
-// Checks if this Rectangle overlaps with another rectangle.
+// Overlaps checks if this Rectangle overlaps with another rectangle.
 func (r *Rectangle) Overlaps(other *Rectangle) bool {
 	return Overlaps(r, other)
 }
@@ -335,7 +343,7 @@ func (r *Rectangle) PerimeterPoint(angle float64, p *point.Point) *point.Point {
 	return PerimeterPoint(r, angle, p)
 }
 
-// Calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
+// GetRandomPointOutside calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
 // Rectangle. The inner Rectangle must be fully contained within the outer rectangle.
 func (r *Rectangle) GetRandomPointOutside(other *Rectangle, out *point.Point) *point.Point {
 	var outer, inner *Rectangle

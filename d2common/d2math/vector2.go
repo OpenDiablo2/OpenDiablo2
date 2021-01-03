@@ -33,7 +33,7 @@ func (v *Vector2) Clone() *Vector2 {
 	return NewVector2(v.X, v.Y)
 }
 
-// Copy makes a clone of this Vector2.
+// Copy copies the values from the given vector into this vector
 func (v *Vector2) Copy(source *Vector2) *Vector2 {
 	return v.Set(source.X, source.Y)
 }
@@ -136,7 +136,7 @@ func (v *Vector2) LengthSquared() float64 {
 	return v.X*v.X + v.Y*v.Y
 }
 
-// Length calculates the length (or magnitude) of this Vector.
+// SetLength sets the length of the vector and returns the length (or magnitude) of this Vector.
 func (v *Vector2) SetLength(l float64) *Vector2 {
 	return v.Normalize().Scale(l)
 }
@@ -205,6 +205,7 @@ func (v *Vector2) Limit(l float64) *Vector2 {
 }
 
 // Reflect this Vector off a line defined by a normal.
+//nolint:gomnd // math
 func (v *Vector2) Reflect(other *Vector2) *Vector2 {
 	normal := other.Clone().Normalize()
 

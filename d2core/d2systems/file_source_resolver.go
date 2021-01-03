@@ -25,10 +25,10 @@ const (
 type FileSourceResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	filesToCheck   *akara.Subscription
-	Components struct {
-		File d2components.FileFactory
-		FileType d2components.FileTypeFactory
+	filesToCheck *akara.Subscription
+	Components   struct {
+		File       d2components.FileFactory
+		FileType   d2components.FileTypeFactory
 		FileSource d2components.FileSourceFactory
 	}
 }

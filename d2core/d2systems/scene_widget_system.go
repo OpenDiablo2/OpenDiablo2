@@ -2,6 +2,11 @@ package d2systems
 
 import (
 	"fmt"
+	"image/color"
+	"time"
+
+	"github.com/gravestench/akara"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom/rectangle"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
@@ -11,16 +16,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2bitmapfont"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
-	"github.com/gravestench/akara"
-	"image/color"
-	"time"
 )
 
 const (
 	fontCacheBudget = 64
 )
 
-// NewWidgetFactory creates a new ui widget factory which is intended
+// NewUIWidgetFactory creates a new ui widget factory which is intended
 // to be embedded in the game object factory system.
 func NewUIWidgetFactory(
 	b akara.BaseSystem,
@@ -441,6 +443,7 @@ func (t *UIWidgetFactory) processButton(buttonEID akara.EID) {
 	sprite, found := t.Components.Sprite.Get(spriteEID)
 	if found {
 		button.Sprite = sprite.Sprite
+
 		t.Components.SceneGraphNode.Add(spriteEID).SetParent(buttonNode.Node)
 	}
 
@@ -466,32 +469,24 @@ func (t *UIWidgetFactory) processButtonStates(buttonEID akara.EID) {
 	img, pal := button.Layout.SpritePath, button.Layout.PalettePath
 	sx, sy := button.Layout.XSegments, button.Layout.YSegments
 
-	var normal, pressed, toggled, pressedToggled, disabled akara.EID
-
-	normal = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame)
-
 	// by default, all other states are whatever the normal state is
-	pressed = normal
-	toggled = normal
-	pressedToggled = normal
-	disabled = normal
-
+	normal := t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame)
 	button.States.Normal = normal
-	button.States.Pressed = pressed
-	button.States.Toggled = toggled
-	button.States.PressedToggled = pressedToggled
-	button.States.Disabled = disabled
+	button.States.Pressed = normal
+	button.States.Toggled = normal
+	button.States.PressedToggled = normal
+	button.States.Disabled = normal
 
 	// if it's got other states (most buttons do...), then we handle it
 	if button.Layout.HasImage && button.Layout.AllowFrameChange {
-		pressed = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStatePressed)
-		toggled = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStateToggled)
-		pressedToggled = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStatePressedToggled)
+		button.States.Pressed = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStatePressed)
+		button.States.Toggled = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStateToggled)
+		button.States.PressedToggled = t.SegmentedSprite(0, 0, img, pal, sx, sy, baseFrame+d2button.ButtonStatePressedToggled)
 
 		// also, not all buttons have a disabled state
 		// this stupid fucking -1 needs to be a constant
 		if button.Layout.DisabledFrame != isNotSegmented {
-			disabled = t.SegmentedSprite(0, 0, img, pal, sx, sy, button.Layout.DisabledFrame)
+			button.States.Disabled = t.SegmentedSprite(0, 0, img, pal, sx, sy, button.Layout.DisabledFrame)
 		}
 	}
 }
@@ -549,7 +544,7 @@ func (t *UIWidgetFactory) updateButton(buttonEID akara.EID) {
 
 // Checkbox creates a checkbox ui widget. A Checkbox widget is composed of a Checkbox component that tracks the logic,
 // and a SegmentedSprite to be displayed in the scene.
-func (t *UIWidgetFactory) Checkbox(x, y float64, checkedState bool, enabled bool, callback func(akara.Component) bool) akara.EID {
+func (t *UIWidgetFactory) Checkbox(x, y float64, checkedState, enabled bool, callback func(akara.Component) bool) akara.EID {
 	checkboxEID := t.NewEntity()
 
 	checkbox := t.Components.Checkbox.Add(checkboxEID)
@@ -603,6 +598,7 @@ func (t *UIWidgetFactory) processCheckbox(checkboxEID akara.EID) {
 	sprite, found := t.Components.Sprite.Get(spriteEID)
 	if found {
 		checkbox.Sprite = sprite.Sprite
+
 		t.Components.SceneGraphNode.Add(spriteEID).SetParent(checkboxNode.Node)
 	}
 

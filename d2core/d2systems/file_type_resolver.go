@@ -1,10 +1,11 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -31,8 +32,8 @@ type FileTypeResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
-	Components struct {
-		File d2components.FileFactory
+	Components   struct {
+		File     d2components.FileFactory
 		FileType d2components.FileTypeFactory
 	}
 }

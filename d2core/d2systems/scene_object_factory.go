@@ -1,10 +1,11 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2checkbox"
 	"image/color"
 	"path/filepath"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2checkbox"
 
 	"github.com/gravestench/akara"
 
@@ -53,6 +54,7 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 
 	eid := s.NewEntity()
 	s.Components.Viewport.Add(eid)
+
 	s.Components.Priority.Add(eid).Priority = priority
 
 	if priority == mainViewport {
@@ -103,7 +105,7 @@ func (s *sceneObjectFactory) Button(x, y float64, btnType d2button.ButtonType, t
 	s.addBasicComponents(buttonEID)
 
 	btnTRS := s.Components.Transform.Add(buttonEID)
-	btnTRS.Translation.X, btnTRS.Translation.Y = float64(x), float64(y)
+	btnTRS.Translation.X, btnTRS.Translation.Y = x, y
 
 	btnNode := s.Components.SceneGraphNode.Add(buttonEID)
 
@@ -129,7 +131,8 @@ func (s *sceneObjectFactory) Label(text, fontSpritePath, palettePath string) aka
 }
 
 // Checkbox creates a Checkbox in the scene, with an attached Label
-func (s *sceneObjectFactory) Checkbox(x, y float64, checkedState bool, enabled bool, text string, callback func(akara.Component) bool) akara.EID {
+func (s *sceneObjectFactory) Checkbox(x, y float64, checkedState, enabled bool,
+	text string, callback func(akara.Component) bool) akara.EID {
 	checkboxEID := s.sceneSystems.UI.Checkbox(x, y, checkedState, enabled, callback)
 	s.SceneObjects = append(s.SceneObjects, checkboxEID)
 

@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -26,9 +27,9 @@ var _ akara.System = &TimeScaleSystem{}
 type TimeScaleSystem struct {
 	akara.BaseSystem
 	*d2util.Logger
-	scale     float64
+	scale      float64
 	Components struct {
-		Dirty d2components.DirtyFactory
+		Dirty               d2components.DirtyFactory
 		CommandRegistration d2components.CommandRegistrationFactory
 	}
 }

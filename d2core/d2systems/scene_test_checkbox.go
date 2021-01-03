@@ -1,11 +1,13 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
-	"github.com/gravestench/akara"
 	"image/color"
 	"log"
+
+	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 const (
@@ -53,20 +55,27 @@ func (s *CheckboxTestScene) boot() {
 		return
 	}
 
+	viewport, found := s.Components.Viewport.Get(s.Viewports[0])
+	if !found {
+		return
+	}
+
 	s.AddSystem(NewMouseCursorScene())
 
-	s.Add.Rectangle(0, 0, 640, 480, color.RGBA{R: 0xcc, G: 0xcc, B: 0xcc, A: 0xff})
+	s.Add.Rectangle(0, 0, viewport.Width, viewport.Height, color.White)
 
 	s.createCheckboxes()
 
 	s.booted = true
 }
 
+//nolint:gomnd // arbitrary example numbers for test
 func (s *CheckboxTestScene) createCheckboxes() {
 	s.Add.Checkbox(100, 100, true, true, "Expansion character", checkboxClickCallback)
 	s.Add.Checkbox(100, 120, false, true, "Hardcore", checkboxClickCallback)
 	s.Add.Checkbox(100, 140, true, false, "disabled checked test", checkboxClickCallback)
-	s.Add.Checkbox(100, 160, false, false, "disabled unchecked test", checkboxClickCallback)
+	s.Add.Checkbox(100, 160, false, false, "disabled unchecked test",
+		checkboxClickCallback)
 }
 
 // Update the main menu scene
@@ -86,6 +95,7 @@ func checkboxClickCallback(thisComponent akara.Component) bool {
 	this := thisComponent.(*d2components.Checkbox)
 	if this.Checkbox.GetEnabled() {
 		text := this.Checkbox.Label.GetText()
+
 		if this.Checkbox.GetPressed() {
 			log.Printf("%s enabled", text)
 		} else {

@@ -41,6 +41,7 @@ const (
 	ColorTokenCharacterType = ColorTokenGreen
 )
 
+// nolint:golint // these constants are self-explanatory
 const (
 	ColorGrey100Alpha   = 0x69_69_69_ff
 	ColorWhite100Alpha  = 0xff_ff_ff_ff

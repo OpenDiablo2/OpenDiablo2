@@ -2,10 +2,12 @@ package d2systems
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/gravestench/akara"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
-	"github.com/gravestench/akara"
-	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2sprite"
@@ -136,7 +138,7 @@ func (t *SpriteFactory) Update() {
 	}
 }
 
-// ComponentFactory queues a sprite spriteation to be loaded
+// Sprite creates a sprite to be rendered in the scene
 func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	spriteID := t.NewEntity()
 
@@ -155,7 +157,7 @@ func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID 
 	return spriteID
 }
 
-// ComponentFactory queues a segmented sprite spriteation to be loaded.
+// SegmentedSprite queues a segmented sprite spriteation to be loaded.
 // A segmented sprite is a sprite that has many frames that form the entire sprite.
 func (t *SpriteFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	spriteID := t.Sprite(x, y, imgPath, palPath)
@@ -260,6 +262,8 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 }
 
 func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.SegmentedSprite) {
+	fmtErr := "SetCurrentFrame error %s: \n\tsprite: %v\n\tframe count: %v\n\tframe tried: %v\n\t%v"
+
 	sprite, found := t.Components.Sprite.Get(id)
 	if !found {
 		return
@@ -277,6 +281,7 @@ func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.Se
 	// first, we're going to determine the width and height of the texture we need
 	for y := 0; y < segmentsY; y++ {
 		fullWidth = 0
+
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset
 			if idx >= numFrames {
@@ -284,8 +289,6 @@ func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.Se
 			}
 
 			if err := sprite.SetCurrentFrame(idx); err != nil {
-				fmtErr := "SetCurrentFrame error %s: \n\tsprite: %v\n\tframe count: %v\n\tframe tried: %v\n\t%v"
-
 				t.Errorf(fmtErr, err.Error(), sprite.SpritePath, sprite.GetFrameCount(), idx, seg)
 			}
 
@@ -310,21 +313,13 @@ func (t *SpriteFactory) renderSegmentedSprite(id akara.EID, seg *d2components.Se
 			}
 
 			if err := sprite.SetCurrentFrame(idx); err != nil {
-				fmtErr := "SetCurrentFrame error %s: \n\tsprite: %v\n\tframe count: %v\n\tframe tried: %v\n\t%v"
-
 				t.Errorf(fmtErr, err.Error(), sprite.SpritePath, sprite.GetFrameCount(), idx, seg)
 			}
 
 			target.PushTranslation(x+offsetX, y+offsetY)
-			// TODO: PushEffect and PushColor don't seem to be working?
-			// 		 see d2sprite/sprite.go for old implementation
-			//target.PushEffect(sprite.GetEffect())
-			//target.PushColor(sprite.GetColorMod())
 
 			target.Render(sprite.GetCurrentFrameSurface())
 			target.Pop()
-			//target.Pop()
-			//target.Pop()
 
 			frameWidth, frameHeight := sprite.GetCurrentFrameSize()
 			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)

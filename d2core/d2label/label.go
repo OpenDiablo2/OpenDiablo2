@@ -1,10 +1,11 @@
 package d2label
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"image/color"
 	"regexp"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2bitmapfont"
@@ -14,14 +15,14 @@ import (
 // New creates a new label, initializing the unexported fields
 func New() *Label {
 	return &Label{
-		colors: map[int]color.Color{0: color.White},
+		colors:          map[int]color.Color{0: color.White},
 		backgroundColor: color.Transparent,
 	}
 }
 
 // Label represents a user interface label
 type Label struct {
-	dirty           bool // used to flag when to re-render the label
+	dirty           bool   // used to flag when to re-render the label
 	text            string // has color tokens
 	rawText         string // unmodified text
 	Alignment       d2ui.HorizontalAlign
@@ -30,6 +31,7 @@ type Label struct {
 	backgroundColor color.Color
 }
 
+// Render renders the label on the given Surface
 func (v *Label) Render(target d2interface.Surface) {
 	lines := strings.Split(v.text, "\n")
 	yOffset := 0
@@ -107,7 +109,7 @@ func (v *Label) SetBackgroundColor(c color.Color) {
 	r1, g1, b1, a1 := c.RGBA()
 	r2, g2, b2, a2 := v.backgroundColor.RGBA()
 
-	if (r1==r2) && (g1==g2) && (b1==b2) && (a1==a2) {
+	if (r1 == r2) && (g1 == g2) && (b1 == b2) && (a1 == a2) {
 		return
 	}
 
@@ -155,6 +157,7 @@ func (v *Label) processColorTokens(str string) string {
 	return withoutTokens
 }
 
+// GetAlignOffset returns the offset necessary to render the label with its set alignment
 func (v *Label) GetAlignOffset(textWidth int) int {
 	switch v.Alignment {
 	case d2ui.HorizontalAlignLeft:

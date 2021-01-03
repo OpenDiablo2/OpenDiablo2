@@ -4,6 +4,7 @@ import "github.com/gravestench/pho/geom/point"
 
 // GetPoint calculates the coordinates of a point at a certain `position` on the
 // Rectangle's perimeter, assigns to and returns the given point, or creates a point if nil.
+//nolint:gomnd // math
 func GetPoint(r *Rectangle, position float64, p *point.Point) *point.Point {
 	if p == nil {
 		p = point.New(0, 0)
@@ -16,7 +17,8 @@ func GetPoint(r *Rectangle, position float64, p *point.Point) *point.Point {
 
 	perimeter := Perimeter(r) * position
 
-	if position > 0.5 {
+	switch {
+	case position > 0.5:
 		perimeter -= r.Width + r.Height
 
 		if perimeter <= r.Width {
@@ -26,10 +28,10 @@ func GetPoint(r *Rectangle, position float64, p *point.Point) *point.Point {
 			// face 4
 			p.X, p.Y = r.X, r.Bottom()-(perimeter-r.Width)
 		}
-	} else if position <= r.Width {
+	case position <= r.Width:
 		// face 1
 		p.X, p.Y = r.X+perimeter, r.Y
-	} else {
+	default:
 		// face 2
 		p.X, p.Y = r.Right(), r.Y+(perimeter-r.Width)
 	}

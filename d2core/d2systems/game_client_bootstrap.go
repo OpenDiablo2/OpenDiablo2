@@ -1,9 +1,10 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/gravestench/akara"
 	"gopkg.in/alecthomas/kingpin.v2"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (

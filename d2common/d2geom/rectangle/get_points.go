@@ -4,6 +4,8 @@ import (
 	"github.com/gravestench/pho/geom/point"
 )
 
+// ByStepRate is a special value that tells GetPoints to use the stepRate instead of quantity
+// for generating perimeter points
 const ByStepRate = -1
 
 // GetPoints returns a slice of points from the perimeter of the Rectangle,

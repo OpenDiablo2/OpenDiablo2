@@ -2,6 +2,7 @@ package d2math
 
 import "math"
 
+// Vector4Like is a generic interface for things like are like a Vector4
 type Vector4Like interface {
 	Vector2Like
 	Vector3Like
@@ -26,8 +27,8 @@ type Vector4 struct {
 	X, Y, Z, W float64
 }
 
-// XYZ returns the x and y components of the vector
-func (v *Vector4) XY() (float64, float64) {
+// XY returns the x and y components of the vector
+func (v *Vector4) XY() (x, y float64) {
 	return v.X, v.Y
 }
 

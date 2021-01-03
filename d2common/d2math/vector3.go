@@ -166,7 +166,9 @@ func (v *Vector3) SetFromMatrix4(m *Matrix4) *Vector3 {
 // SetFromMatrix4Column sets the components of this Vector3 from the column of the given Matrix4.
 func (v *Vector3) SetFromMatrix4Column(m *Matrix4, column int) *Vector3 {
 	const m4order = 4
+
 	column = int(Clamp(float64(column), 0, m4order-1))
+
 	return v.SetFromSlice(m.Values[:], column*m4order)
 }
 
@@ -227,7 +229,7 @@ func (v *Vector3) Distance(other *Vector3) float64 {
 	return math.Sqrt(v.DistanceSquared(other))
 }
 
-// Length calculates the length (or magnitude) of this Vector, squared.
+// LengthSquared calculates the length (or magnitude) of this Vector, squared.
 func (v *Vector3) LengthSquared() float64 {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
 }
@@ -391,6 +393,7 @@ func (v *Vector3) UnprojectViewMatrix(projection, world *Matrix4) *Vector3 {
 // be combined, i.e. projection * view * model.
 // After this operation, this vector's (x, y, z) components will
 // represent the unprojected 3D coordinate.
+//nolint:gomnd // math
 func (v *Vector3) Unproject(viewport *Vector4, invProjectionView *Matrix4) *Vector3 {
 	viewX := viewport.X
 	viewY := viewport.Y

@@ -2,8 +2,9 @@
 package d2components
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // static check that Size implements Component

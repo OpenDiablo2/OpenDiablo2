@@ -1,3 +1,4 @@
+//nolint:dupl,golint,stylecheck // component declarations are supposed to look the same
 package d2components
 
 import (
@@ -39,4 +40,3 @@ func (m *BitmapFontFactory) Get(id akara.EID) (*BitmapFont, bool) {
 
 	return component.(*BitmapFont), found
 }
-

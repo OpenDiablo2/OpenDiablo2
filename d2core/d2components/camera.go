@@ -12,7 +12,7 @@ const (
 	defaultCameraHeight = 600
 	defaultCameraNear   = -100
 	defaultCameraFar    = 100
-	defaultCameraZ      = -200
+	defaultCameraZ      = -200 //nolint:varcheck,deadcode // unused for now
 )
 
 // static check that Camera implements Component
@@ -30,8 +30,8 @@ type Camera struct {
 // The camera defaults to position (0,0), 800x600 resolution, and zoom of 1.0
 func (*Camera) New() akara.Component {
 	c := &Camera{
-		Size:     d2math.NewVector2(defaultCameraWidth, defaultCameraHeight),
-		Clip:     d2math.NewVector2(defaultCameraNear, defaultCameraFar),
+		Size: d2math.NewVector2(defaultCameraWidth, defaultCameraHeight),
+		Clip: d2math.NewVector2(defaultCameraNear, defaultCameraFar),
 	}
 
 	w, h := c.Size.XY()
@@ -39,7 +39,7 @@ func (*Camera) New() akara.Component {
 
 	c.PerspectiveMatrix = d2math.NewMatrix4(nil).PerspectiveLH(w, h, n, f)
 
-	l, r, t, b := -(w / 2), w/2, -(h / 2), h/2
+	l, r, t, b := -(w / 2), w/2, -(h / 2), h/2 //nolint:gomnd // halving things
 
 	c.OrthogonalMatrix = d2math.NewMatrix4(nil).Ortho(l, r, t, b, n, f)
 
