@@ -183,7 +183,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		return true
 	}
 
-	return true
+	return false
 }
 
 func (m *FileHandleResolver) loadFile(fileID akara.EID, fileType *d2components.FileType,
