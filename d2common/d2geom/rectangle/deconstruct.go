@@ -10,10 +10,8 @@ func Deconstruct(r *Rectangle, to []*point.Point) []*point.Point {
 		to = make([]*point.Point, 0)
 	}
 
-	to = append(to, point.New(r.X, r.Y))
-	to = append(to, point.New(r.Right(), r.Y))
-	to = append(to, point.New(r.Right(), r.Bottom()))
-	to = append(to, point.New(r.X, r.Bottom()))
+	to = append(to, point.New(r.X, r.Y), point.New(r.Right(), r.Y),
+		point.New(r.Right(), r.Bottom()), point.New(r.X, r.Bottom()))
 
 	return to
 }

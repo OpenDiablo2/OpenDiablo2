@@ -10,7 +10,7 @@ var _ akara.Component = &Locale{}
 
 // Locale represents a file as a path
 type Locale struct {
-	Code byte
+	Code   byte
 	String string
 }
 

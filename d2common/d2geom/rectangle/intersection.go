@@ -6,7 +6,7 @@ import (
 	"github.com/gravestench/pho/geom/intersects"
 )
 
-// Takes two Rectangles and first checks to see if they intersect.
+// Intersection takes two Rectangles and first checks to see if they intersect.
 // If they intersect it will return the area of intersection in the `out` Rectangle.
 // If they do not intersect, the `out` Rectangle will have a width and height of zero.
 // The given `output` rectangle will be assigned the intsersect values and returned.

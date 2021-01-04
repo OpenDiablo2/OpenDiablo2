@@ -2,6 +2,7 @@ package d2math
 
 import "math"
 
+// define the different euler orders
 const (
 	EulerOrderXYZ = iota
 	EulerOrderYXZ
@@ -12,6 +13,7 @@ const (
 	numEulerOrders
 )
 
+// and define the default
 const (
 	EulerOrderDefault = EulerOrderXYZ
 )
@@ -21,6 +23,7 @@ func eulerNoop(_ *Euler) { /* do nothing */ }
 // static check that euler is Vector3Like
 var _ Vector3Like = &Euler{}
 
+// NewEuler creates a Euler
 func NewEuler(x, y, z float64, order int) *Euler {
 	return &Euler{
 		X:                x,
@@ -31,6 +34,7 @@ func NewEuler(x, y, z float64, order int) *Euler {
 	}
 }
 
+// Euler is an abstraction of a Euler angle
 type Euler struct {
 	X, Y, Z          float64
 	Order            int
@@ -38,7 +42,7 @@ type Euler struct {
 }
 
 // XY returns the x and y components of the quaternion
-func (e *Euler) XY() (float64, float64) {
+func (e *Euler) XY() (x, y float64) {
 	return e.X, e.Y
 }
 
@@ -47,22 +51,27 @@ func (e *Euler) XYZ() (x, y, z float64) {
 	return e.X, e.Y, e.Z
 }
 
+// SetX sets the x component
 func (e *Euler) SetX(v float64) *Euler {
 	return e.Set(v, e.Y, e.Z, e.Order)
 }
 
+// SetY sets the y component
 func (e *Euler) SetY(v float64) *Euler {
 	return e.Set(e.X, v, e.Z, e.Order)
 }
 
+// SetZ sets the z component
 func (e *Euler) SetZ(v float64) *Euler {
 	return e.Set(e.X, e.Y, v, e.Order)
 }
 
+// SetOrder sets the order of the components
 func (e *Euler) SetOrder(v int) *Euler {
 	return e.Set(e.X, e.Y, e.Z, v)
 }
 
+// Set sets the x, y, and z components, as well as the order
 func (e *Euler) Set(x, y, z float64, order int) *Euler {
 	order = int(Clamp(float64(order), 0, numEulerOrders-1))
 	e.X, e.Y, e.Z, e.Order = x, y, z, order
@@ -72,10 +81,12 @@ func (e *Euler) Set(x, y, z float64, order int) *Euler {
 	return e
 }
 
+// Copy copies the values and order from the given Euler into this one
 func (e *Euler) Copy(other *Euler) *Euler {
 	return e.Set(other.X, other.Y, other.Z, other.Order)
 }
 
+// SetFromQuaternion sets the values from a Quarternion in the specified order
 func (e *Euler) SetFromQuaternion(q *Quaternion, order int) *Euler {
 	tmpMat4 := NewMatrix4(nil)
 
@@ -84,6 +95,7 @@ func (e *Euler) SetFromQuaternion(q *Quaternion, order int) *Euler {
 	return e.SetFromRotationMatrix(tmpMat4, order)
 }
 
+// SetFromRotationMatrix sets the values from a matrix in the specified order
 func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 	m := m4.Values
 
@@ -100,6 +112,7 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 	switch e.Order {
 	case EulerOrderYXZ:
 		x = math.Asin(-Clamp(m23, -1, 1))
+
 		if math.Abs(m23) < epsilon {
 			y = math.Atan2(m13, m33)
 			z = math.Atan2(m21, m22)
@@ -108,6 +121,7 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 		}
 	case EulerOrderZXY:
 		x = math.Asin(Clamp(m32, -1, 1))
+
 		if math.Abs(m32) < epsilon {
 			y = math.Atan2(-m31, m33)
 			z = math.Atan2(-m12, m22)
@@ -116,6 +130,7 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 		}
 	case EulerOrderZYX:
 		y = math.Asin(-Clamp(m31, -1, 1))
+
 		if math.Abs(m31) < epsilon {
 			x = math.Atan2(m32, m33)
 			z = math.Atan2(m21, m11)
@@ -124,6 +139,7 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 		}
 	case EulerOrderYZX:
 		z = math.Asin(Clamp(m21, -1, 1))
+
 		if math.Abs(m21) < epsilon {
 			x = math.Atan2(-m23, m22)
 			y = math.Atan2(-m31, m11)
@@ -132,6 +148,7 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 		}
 	case EulerOrderXZY:
 		z = math.Asin(-Clamp(m12, -1, 1))
+
 		if math.Abs(m12) < epsilon {
 			x = math.Atan2(m32, m22)
 			y = math.Atan2(m13, m11)
@@ -139,9 +156,10 @@ func (e *Euler) SetFromRotationMatrix(m4 *Matrix4, order int) *Euler {
 			x = math.Atan2(-m23, m33)
 		}
 	case EulerOrderXYZ:
-		fallthrough
+		fallthrough //nolint:gocritic // it's better to be explicit and include the fallthrough to default
 	default:
 		y = math.Asin(Clamp(m13, -1, 1))
+
 		if math.Abs(m13) < epsilon {
 			x = math.Atan2(-m23, m33)
 			z = math.Atan2(-m12, m11)

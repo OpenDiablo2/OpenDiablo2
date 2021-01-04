@@ -17,11 +17,10 @@ type Button struct {
 		PressedToggled d2interface.Surface
 		Disabled       d2interface.Surface
 	}
-	callback      buttonCallback
-	width, height int
-	enabled       bool
-	pressed       bool
-	toggled       bool
+	callback buttonCallback
+	enabled  bool
+	pressed  bool
+	toggled  bool
 }
 
 // New creates an instance of Button
@@ -30,31 +29,10 @@ func New() *Button {
 		enabled: true,
 	}
 
-	//buttonLayout := GetLayout(t)
-	//btn.Layout = buttonLayout
-	//
-	//btn.normalSurface = ui.renderer.NewSurface(btn.width, btn.height)
-	//
-	//buttonSprite.SetPosition(0, 0)
-	//buttonSprite.SetEffect(d2enum.DrawEffectModulate)
-	//
-	//btn.createTooltip()
-	//
-	//ui.addWidget(btn) // important that this comes before prerenderStates!
-	//
-	//btn.prerenderStates(buttonSprite, &buttonLayout, lbl)
-
 	return btn
 }
 
-type buttonStateDescriptor struct {
-	baseFrame            int
-	offsetX, offsetY     int
-	prerenderdestination *d2interface.Surface
-	fmtErr               string
-}
-
-// this is some jank shit, and if things go wrong you should suspect this func first
+// GetButtonSize - this is some jank shit, and if things go wrong you should suspect this func first
 func (v *Button) GetButtonSize() (w, h int) {
 	if v.Sprite == nil {
 		return 0, 0
@@ -117,7 +95,7 @@ func (v *Button) GetToggled() bool {
 	return v.toggled
 }
 
-// Advance advances the button state
+// GetCurrentTexture returns the relevant Surface, depending on the button's state
 func (v *Button) GetCurrentTexture() d2interface.Surface {
 	if !v.enabled {
 		return v.Surfaces.Disabled

@@ -1,9 +1,10 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"io"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/gravestench/akara"
 
@@ -43,32 +44,32 @@ var _ akara.System = &AssetLoaderSystem{}
 type AssetLoaderSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	fileSub   *akara.Subscription
-	sourceSub *akara.Subscription
-	gameConfigs *akara.Subscription
-	cache     *d2cache.Cache
+	fileSub      *akara.Subscription
+	sourceSub    *akara.Subscription
+	gameConfigs  *akara.Subscription
+	cache        *d2cache.Cache
 	localeString string // related to file "/data/local/use"
-	Components struct {
-		File d2components.FileFactory
-		FileType d2components.FileTypeFactory
-		FileHandle d2components.FileHandleFactory
-		FileSource d2components.FileSourceFactory
-		GameConfig d2components.GameConfigFactory
-		StringTable d2components.StringTableFactory
-		FontTable d2components.FontTableFactory
-		DataDictionary d2components.DataDictionaryFactory
-		Palette d2components.PaletteFactory
+	Components   struct {
+		File             d2components.FileFactory
+		FileType         d2components.FileTypeFactory
+		FileHandle       d2components.FileHandleFactory
+		FileSource       d2components.FileSourceFactory
+		GameConfig       d2components.GameConfigFactory
+		StringTable      d2components.StringTableFactory
+		FontTable        d2components.FontTableFactory
+		DataDictionary   d2components.DataDictionaryFactory
+		Palette          d2components.PaletteFactory
 		PaletteTransform d2components.PaletteTransformFactory
-		Cof d2components.CofFactory
-		Dc6 d2components.Dc6Factory
-		Dcc d2components.DccFactory
-		Ds1 d2components.Ds1Factory
-		Dt1 d2components.Dt1Factory
-		Wav d2components.WavFactory
-		AnimationData d2components.AnimationDataFactory
-		Locale d2components.LocaleFactory
-		BitmapFont d2components.BitmapFontFactory
-		FileLoaded d2components.FileLoadedFactory
+		Cof              d2components.CofFactory
+		Dc6              d2components.Dc6Factory
+		Dcc              d2components.DccFactory
+		Ds1              d2components.Ds1Factory
+		Dt1              d2components.Dt1Factory
+		Wav              d2components.WavFactory
+		AnimationData    d2components.AnimationDataFactory
+		Locale           d2components.LocaleFactory
+		BitmapFont       d2components.BitmapFontFactory
+		FileLoaded       d2components.FileLoadedFactory
 	}
 }
 
@@ -149,6 +150,7 @@ func (m *AssetLoaderSystem) Update() {
 
 	for _, eid := range m.fileSub.GetEntities() {
 		m.loadAsset(eid)
+
 		if time.Since(start) > maxTimePerUpdate {
 			break
 		}
@@ -249,7 +251,7 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 	return found
 }
 
-//nolint:gocyclo // this big switch statement is unfortunate, but necessary
+//nolint:gocyclo,funlen // this big switch statement is unfortunate, but necessary
 func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) {
 	switch t {
 	case d2enum.FileTypeStringTable:

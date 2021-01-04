@@ -9,7 +9,7 @@ import (
 var _ akara.Component = &Dirty{}
 
 // Dirty is a flag component that is used to denote a "dirty" state
-type Dirty struct {}
+type Dirty struct{}
 
 // New creates a new Dirty. By default, IsDirty is false.
 func (*Dirty) New() akara.Component {

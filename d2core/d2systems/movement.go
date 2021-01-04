@@ -22,9 +22,9 @@ type MovementSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	movableEntities *akara.Subscription
-	Components struct {
+	Components      struct {
 		Transform d2components.TransformFactory
-		Velocity d2components.VelocityFactory
+		Velocity  d2components.VelocityFactory
 	}
 }
 

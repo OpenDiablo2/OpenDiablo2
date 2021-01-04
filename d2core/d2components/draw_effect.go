@@ -1,8 +1,10 @@
+//nolint:dupl,golint,stylecheck // component declarations are supposed to look the same
 package d2components
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // static check that DrawEffect implements Component

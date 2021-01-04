@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
@@ -29,7 +30,7 @@ var _ d2interface.Scene = &ButtonTestScene{}
 // or start the map engine test.
 type ButtonTestScene struct {
 	*BaseScene
-	booted   bool
+	booted  bool
 	buttons *akara.Subscription
 }
 
@@ -61,7 +62,7 @@ func (s *ButtonTestScene) boot() {
 }
 
 func (s *ButtonTestScene) createButtons() {
-	s.Add.Button(100, 100, d2button.ButtonTypeBuy, "Test")
+	s.Add.Button(100, 100, d2button.ButtonTypeBuy, "Test") //nolint:gomnd // arbitrary example numbers for test scene
 }
 
 // Update the main menu scene
@@ -74,7 +75,7 @@ func (s *ButtonTestScene) Update() {
 		s.boot()
 	}
 
-	for _,  eid := range s.buttons.GetEntities() {
+	for _, eid := range s.buttons.GetEntities() {
 		s.updateButtonPosition(eid)
 	}
 

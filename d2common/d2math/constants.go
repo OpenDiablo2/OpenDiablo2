@@ -2,6 +2,7 @@ package d2math
 
 import "math"
 
+// set up some constants for easy access
 const (
 	PI               = math.Pi
 	PI2              = PI * 2

@@ -19,8 +19,8 @@ type GameObjectFactory struct {
 	akara.BaseSystem
 	*d2util.Logger
 	Sprites *SpriteFactory
-	Shapes *ShapeSystem
-	UI *UIWidgetFactory
+	Shapes  *ShapeSystem
+	UI      *UIWidgetFactory
 }
 
 // Init will initialize the Game Object Factory by injecting all of the factory subsystems into the world

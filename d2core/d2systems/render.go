@@ -221,6 +221,7 @@ func (m *RenderSystem) updateWorld() error {
 	return m.World.Update(elapsed)
 }
 
+// StartGameLoop starts the game loop
 func (m *RenderSystem) StartGameLoop() error {
 	m.Info("starting game loop ...")
 

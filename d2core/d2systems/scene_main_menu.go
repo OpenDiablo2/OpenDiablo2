@@ -15,6 +15,7 @@ const (
 	sceneKeyMainMenu = "Main Menu"
 )
 
+//nolint:varcheck,deadcode,unused // unused for now
 const (
 	viewportMainBackground = iota + 1
 	viewportTrademark
@@ -111,6 +112,7 @@ func (s *MainMenuScene) createButtons() {
 	s.Debug("creating buttons")
 }
 
+//nolint:gomnd // arbitrary numbers for test scene
 func (s *MainMenuScene) createTrademarkScreen() {
 	s.Debug("creating trademark screen")
 
@@ -134,12 +136,14 @@ func (s *MainMenuScene) createTrademarkScreen() {
 		alpha := s.Components.Alpha.Add(s.sprites.trademark)
 
 		go func() {
+			minAlphaThreshold := 1e-3
 			alpha.Alpha = 1.0
 
 			for alpha.Alpha > 0 {
 				alpha.Alpha *= 0.725
 
-				if alpha.Alpha <= 1e-3 {
+				if alpha.Alpha <= minAlphaThreshold {
+					// if it's close enough to zero, just set it to zero
 					alpha.Alpha = 0
 					return
 				}

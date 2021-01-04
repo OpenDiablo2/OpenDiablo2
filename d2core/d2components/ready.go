@@ -10,7 +10,7 @@ var _ akara.Component = &Ready{}
 
 // Ready is used to signify when a UI component is ready to be used.
 // (files are loaded, surfaces rendered)
-type Ready struct {}
+type Ready struct{}
 
 // New returns a Ready component. This component is an empty tag component.
 func (*Ready) New() akara.Component {

@@ -64,6 +64,7 @@ func (m *Matrix4) Copy(other *Matrix4) *Matrix4 {
 	}
 
 	a := other.Values
+
 	return m.SetValues(
 		a[0], a[1], a[2], a[3],
 		a[4], a[5], a[6], a[7],
@@ -385,6 +386,7 @@ func (m *Matrix4) MultiplyMatrices(a, b *Matrix4) *Matrix4 {
 	b43 := b.Values[11]
 	b44 := b.Values[15]
 
+	//nolint:dupl // similar to another line in this file...
 	return m.SetValues(
 		a11*b11+a12*b21+a13*b31+a14*b41,
 		a21*b11+a22*b21+a23*b31+a24*b41,
@@ -493,6 +495,7 @@ func (m *Matrix4) Rotate(radians float64, axis Vector3Like) *Matrix4 {
 }
 
 // RotateX rotates this matrix on its X axis.
+//nolint:dupl // RotateX, RotateY, and RotateZ are similar, but not duplicates
 func (m *Matrix4) RotateX(radians float64) *Matrix4 {
 	c, s := math.Cos(radians), math.Sin(radians)
 
@@ -513,6 +516,7 @@ func (m *Matrix4) RotateX(radians float64) *Matrix4 {
 }
 
 // RotateY rotates this matrix on its X axis.
+//nolint:dupl // RotateX, RotateY, and RotateZ are similar, but not duplicates
 func (m *Matrix4) RotateY(radians float64) *Matrix4 {
 	c, s := math.Cos(radians), math.Sin(radians)
 
@@ -533,6 +537,7 @@ func (m *Matrix4) RotateY(radians float64) *Matrix4 {
 }
 
 // RotateZ rotates this matrix on its X axis.
+//nolint:dupl // RotateX, RotateY, and RotateZ are similar, but not duplicates
 func (m *Matrix4) RotateZ(radians float64) *Matrix4 {
 	c, s := math.Cos(radians), math.Sin(radians)
 
@@ -601,7 +606,7 @@ func (m *Matrix4) Frustum(left, right, bottom, top, near, far float64) *Matrix4 
 
 // Perspective generates a perspective projection matrix with the given bounds.
 func (m *Matrix4) Perspective(fovy, aspect, near, far float64) *Matrix4 {
-	f, nf := 1/math.Tan(fovy/2), 1/(near-far)
+	f, nf := 1/math.Tan(fovy/2), 1/(near-far) //nolint:gomnd // halving things
 
 	return m.SetValues(
 		f/aspect, 0, 0, 0,
@@ -638,6 +643,7 @@ func (m *Matrix4) Ortho(left, right, bottom, top, near, far float64) *Matrix4 {
 		nf = 1 / nf
 	}
 
+	//nolint:gomnd // it's math
 	return m.SetValues(
 		-2*lr, 0, 0, 0,
 		0, -2*bt, 0, 0,
@@ -688,7 +694,7 @@ func (m *Matrix4) LookAtRightHanded(eye, target, up *Vector3) *Matrix4 {
 	return m
 }
 
-//  LookAt generates a look-at matrix with the given eye position, target, and up axis.
+// LookAt generates a look-at matrix with the given eye position, target, and up axis.
 func (m *Matrix4) LookAt(eye, target, up *Vector3) *Matrix4 {
 	ex, ey, ez := eye.XYZ()
 	tx, ty, tz := target.XYZ()
@@ -802,6 +808,7 @@ func (m *Matrix4) MultiplyToMatrix4(src, out *Matrix4) *Matrix4 {
 		sv[8], sv[9], sv[10], sv[11],
 		sv[12], sv[13], sv[14], sv[15]
 
+	//nolint:dupl // similar to another line in this file...
 	return out.SetValues(
 		b00*a00+b01*a10+b02*a20+b03*a30,
 		b01*a01+b01*a11+b02*a21+b03*a31,

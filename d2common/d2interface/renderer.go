@@ -23,4 +23,5 @@ type Renderer interface {
 	ShowPanicScreen(message string)
 	Print(target *ebiten.Image, str string) error
 	PrintAt(target *ebiten.Image, str string, x, y int)
+	GetWindowSize() (int, int)
 }

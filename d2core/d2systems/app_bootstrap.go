@@ -2,12 +2,14 @@ package d2systems
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/pkg/profile"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/pkg/profile"
+	"gopkg.in/alecthomas/kingpin.v2"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/gravestench/akara"
 
@@ -37,9 +39,9 @@ const (
 	skipSplashArg  = "nosplash"
 	skipSplashDesc = "skip the ebiten splash screen"
 
-	logLevelArg  = "loglevel"
-	logLevelShort  = 'l'
-	logLevelDesc = "sets the logging level for all loggers at startup"
+	logLevelArg   = "loglevel"
+	logLevelShort = 'l'
+	logLevelDesc  = "sets the logging level for all loggers at startup"
 
 	profilerArg  = "profile"
 	profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
@@ -126,6 +128,7 @@ func (m *AppBootstrap) setupSubscriptions() {
 	m.subscribedConfigs = m.World.AddSubscription(gameConfigs)
 }
 
+// nolint:dupl // setting up component factories looks very similar across different systems
 func (m *AppBootstrap) setupFactories() {
 	m.Debug("setting up component factories")
 
@@ -285,6 +288,9 @@ func (m *AppBootstrap) parseCommandLineArgs() {
 	case "buttons":
 		m.Info("running button test scene")
 		m.World.AddSystem(NewButtonTestScene())
+	case "checkbox":
+		m.Info("running checkbox test scene")
+		m.World.AddSystem(NewCheckboxTestScene())
 	default:
 		m.World.AddSystem(&GameClientBootstrap{})
 	}

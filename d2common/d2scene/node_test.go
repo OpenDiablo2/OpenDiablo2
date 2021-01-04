@@ -1,8 +1,9 @@
 package d2scene
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"testing"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 func TestNewNode(t *testing.T) {

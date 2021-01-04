@@ -2,7 +2,8 @@ package rectangle
 
 import "github.com/gravestench/pho/geom/point"
 
-type RectangleNamespace interface {
+// Interface defines the generic interface for a Rectangle
+type Interface interface {
 	New(x, y, w, h float64) *Rectangle
 	Contains(r *Rectangle, x, y float64) bool
 	GetPoint(r *Rectangle, position float64, p *point.Point) *point.Point
@@ -28,6 +29,7 @@ type RectangleNamespace interface {
 	Union(r *Rectangle, other *Rectangle) *Rectangle
 }
 
+// Namespace implements rectangle.Interface
 type Namespace struct{}
 
 // New creates a new Rectangle instance.
@@ -75,7 +77,7 @@ func (*Namespace) ContainsPoint(r *Rectangle, p *point.Point) bool {
 	return Contains(r, p.X, p.Y)
 }
 
-// ContainsRect checks if a given point is inside a Rectangle's bounds.
+// ContainsRectangle checks if a given point is inside a Rectangle's bounds.
 func (*Namespace) ContainsRectangle(r, other *Rectangle) bool {
 	return ContainsRectangle(r, other)
 }
@@ -97,18 +99,21 @@ func (*Namespace) Equals(a, b *Rectangle) bool {
 	return Equals(a, b)
 }
 
-// Adjusts rectangle, changing its width, height and position,
+// FitInside adjusts rectangle, changing its width, height and position,
 // so that it fits inside the area of the source rectangle, while maintaining its original
 // aspect ratio.
 func (*Namespace) FitInside(inner, outer *Rectangle) *Rectangle {
 	return FitInside(inner, outer)
 }
 
+// Inflate increases the size of a Rectangle by a specified amount.
+// The center of the Rectangle stays the same. The amounts are added to each side,
+// so the actual increase in width or height is two times bigger than the respective argument.
 func (*Namespace) Inflate(r *Rectangle, x, y float64) *Rectangle {
 	return Inflate(r, x, y)
 }
 
-// Takes two Rectangles and first checks to see if they intersect.
+// Intersection takes two Rectangles and first checks to see if they intersect.
 // If they intersect it will return the area of intersection in the `out` Rectangle.
 // If they do not intersect, the `out` Rectangle will have a width and height of zero.
 // The given `intersect` rectangle will be assigned the intsersect values and returned.
@@ -125,7 +130,7 @@ func (*Namespace) MergePoints(r *Rectangle, points []*point.Point) *Rectangle {
 
 // MergeRectangle merges the given rectangle into this rectangle and returns this rectangle.
 // Neither rectangle should have a negative width or height.
-func (*Namespace) MergeRectangle(r *Rectangle, other *Rectangle) *Rectangle {
+func (*Namespace) MergeRectangle(r, other *Rectangle) *Rectangle {
 	return MergeRectangle(r, other)
 }
 
@@ -146,8 +151,8 @@ func (*Namespace) OffsetPoint(r *Rectangle, p *point.Point) *Rectangle {
 	return OffsetPoint(r, p)
 }
 
-// Checks if this Rectangle overlaps with another rectangle.
-func (*Namespace) Overlaps(r *Rectangle, other *Rectangle) bool {
+// Overlaps checks if this Rectangle overlaps with another rectangle.
+func (*Namespace) Overlaps(r, other *Rectangle) bool {
 	return Overlaps(r, other)
 }
 
@@ -156,7 +161,7 @@ func (*Namespace) PerimeterPoint(r *Rectangle, angle float64, p *point.Point) *p
 	return PerimeterPoint(r, angle, p)
 }
 
-// Calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
+// GetRandomPointOutside calculates a random point that lies within the `outer` Rectangle, but outside of the `inner`
 // Rectangle. The inner Rectangle must be fully contained within the outer rectangle.
 func (*Namespace) GetRandomPointOutside(r, other *Rectangle, out *point.Point) *point.Point {
 	var outer, inner *Rectangle
@@ -183,6 +188,6 @@ func (*Namespace) Scale(r *Rectangle, x, y float64) *Rectangle {
 
 // Union creates a new Rectangle or repositions and/or resizes an existing Rectangle so that it
 // encompasses the two given Rectangles, i.e. calculates their union.
-func (*Namespace) Union(r *Rectangle, other *Rectangle) *Rectangle {
+func (*Namespace) Union(r, other *Rectangle) *Rectangle {
 	return Union(r, other, r)
 }

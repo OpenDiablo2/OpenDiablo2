@@ -45,7 +45,7 @@ func (n *Node) removeChild(m *Node) *Node {
 		return n
 	}
 
-	for idx := len(n.children)-1; idx >= 0; idx-- {
+	for idx := len(n.children) - 1; idx >= 0; idx-- {
 		if n.children[idx] != m {
 			continue
 		}

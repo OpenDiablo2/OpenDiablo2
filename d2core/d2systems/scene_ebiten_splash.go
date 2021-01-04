@@ -1,10 +1,12 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
-	"github.com/gravestench/akara"
 	"image/color"
 	"math"
+
+	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
@@ -15,7 +17,7 @@ const (
 
 const (
 	splashDelaySeconds = 0.5
-	splashTimeout = 3
+	splashTimeout      = 3
 )
 
 // static check that EbitenSplashScene implements the scene interface
@@ -26,7 +28,7 @@ var _ d2interface.Scene = &EbitenSplashScene{}
 func NewEbitenSplashScene() *EbitenSplashScene {
 	scene := &EbitenSplashScene{
 		BaseScene: NewBaseScene(sceneKeyEbitenSplash),
-		delay: splashDelaySeconds,
+		delay:     splashDelaySeconds,
 	}
 
 	scene.backgroundColor = color.Black
@@ -37,10 +39,10 @@ func NewEbitenSplashScene() *EbitenSplashScene {
 // EbitenSplashScene represents the in-game terminal for typing commands
 type EbitenSplashScene struct {
 	*BaseScene
-	booted  bool
-	squares []akara.EID
+	booted      bool
+	squares     []akara.EID
 	timeElapsed float64
-	delay float64
+	delay       float64
 }
 
 // Init the terminal
@@ -105,7 +107,7 @@ func (s *EbitenSplashScene) createSplash() {
 	size := 10
 
 	totalW, totalH := len(flags[0])*size, len(flags)*size
-	ox, oy := (800-totalW)/2, (600-totalH)/2
+	ox, oy := (800-totalW)/2, (600-totalH)/2 //nolint:gomnd // halving things...
 
 	for y, row := range flags {
 		for x, col := range row {
@@ -148,6 +150,7 @@ func (s *EbitenSplashScene) updateSplash() {
 	if s.timeElapsed >= splashTimeout {
 		vpAlpha, _ := s.Components.Alpha.Get(s.Viewports[0])
 		vpAlpha.Alpha -= 0.0425
+
 		if vpAlpha.Alpha <= 0 {
 			vpAlpha.Alpha = 0
 
@@ -161,8 +164,9 @@ func (s *EbitenSplashScene) updateSplash() {
 
 	// fade all of the squares
 	for idx, id := range s.squares {
-		a := math.Sin(s.timeElapsed*2 + -90 + (float64(idx)/numSquares))
-		a = (a+1)/2 // clamp between 0..1
+		a := math.Sin(s.timeElapsed*2 + -90 + (float64(idx) / numSquares))
+		// clamp between 0..1
+		a = (a + 1) / 2 //nolint:gomnd // halving things
 
 		alpha, found := s.Components.Alpha.Get(id)
 		if !found {

@@ -4,6 +4,7 @@ import "math"
 
 func qNoop(_ *Quaternion) { /* no operation, the default OnChangeCallback */ }
 
+// NewQuaternion returns a new Quaternion
 func NewQuaternion(x, y, z, w float64) *Quaternion {
 	return &Quaternion{
 		X:                x,
@@ -24,7 +25,7 @@ type Quaternion struct {
 }
 
 // XY returns the x and y components of the quaternion
-func (q *Quaternion) XY() (float64, float64) {
+func (q *Quaternion) XY() (x, y float64) {
 	return q.X, q.Y
 }
 
@@ -147,7 +148,8 @@ func (q *Quaternion) Lerp(other *Quaternion, t float64) *Quaternion {
 func (q *Quaternion) RotationTo(a, b *Vector3) *Quaternion {
 	dot := a.Dot(b)
 
-	if dot < (-1 + Epsilon) {
+	switch {
+	case dot < (-1 + Epsilon):
 		tmpVec, xunit, yunit := NewVector3(0, 0, 0), NewVector3Right(), NewVector3Down()
 
 		if tmpVec.Copy(xunit).Cross(a).Length() < Epsilon {
@@ -157,9 +159,9 @@ func (q *Quaternion) RotationTo(a, b *Vector3) *Quaternion {
 		tmpVec.Normalize()
 
 		return q.SetAxisAngle(tmpVec, PI)
-	} else if dot > (1 - Epsilon) {
+	case dot > (1 - Epsilon):
 		return q.Identity()
-	} else {
+	default:
 		tmpVec := NewVector3(0, 0, 0).Copy(a).Cross(b)
 
 		q.Set(
@@ -201,7 +203,7 @@ func (q *Quaternion) Identity() *Quaternion {
 
 // SetAxisAngle sets the axis angle of this Quaternion.
 func (q *Quaternion) SetAxisAngle(axis *Vector3, radians float64) *Quaternion {
-	radians = radians / 2
+	radians /= 2
 	s := math.Sin(radians)
 
 	return q.Set(
@@ -246,8 +248,10 @@ func (q *Quaternion) Slerp(other Vector4Like, t float64) *Quaternion {
 	// calculate coefficients
 	if (1 - cosom) > Epsilon {
 		// standard case (slerp)
-		var omega = math.Acos(cosom)
-		var sinom = math.Sin(omega)
+		var (
+			omega = math.Acos(cosom)
+			sinom = math.Sin(omega)
+		)
 
 		scale0 = math.Sin((1.0-t)*omega) / sinom
 		scale1 = math.Sin(t*omega) / sinom
@@ -323,6 +327,7 @@ func (q *Quaternion) CalculateW() *Quaternion {
 }
 
 // SetFromEuler sets this Quaternion from the given Euler, based on Euler order.
+//nolint:gomnd // math
 func (q *Quaternion) SetFromEuler(e *Euler) *Quaternion {
 	x, y, z := e.X/2, e.Y/2, e.Z/2
 	c1, c2, c3 := math.Cos(x), math.Cos(y), math.Cos(z)
@@ -365,7 +370,7 @@ func (q *Quaternion) SetFromEuler(e *Euler) *Quaternion {
 			c1*c2*c3+s1*s2*s3,
 		)
 	case EulerOrderXYZ:
-		fallthrough
+		fallthrough //nolint:gocritic // it's better to be explicit and include the fallthrough to default
 	default:
 		q.Set(
 			s1*c2*c3+c1*s2*s3,
@@ -379,7 +384,10 @@ func (q *Quaternion) SetFromEuler(e *Euler) *Quaternion {
 }
 
 // SetFromRotationMatrix sets the rotation of this Quaternion from the given Matrix4.
+//nolint:gomnd // math
 func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
+	var s float64
+
 	m11 := m4.Values[0]
 	m12 := m4.Values[4]
 	m13 := m4.Values[8]
@@ -391,9 +399,9 @@ func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
 	m33 := m4.Values[10]
 
 	trace := m11 + m22 + m33
-	var s float64
 
-	if trace > 0 {
+	switch {
+	case trace > 0:
 		s = 0.5 / math.Sqrt(trace+1.0)
 
 		return q.Set(
@@ -402,7 +410,7 @@ func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
 			(m21-m12)*s,
 			0.25/s,
 		)
-	} else if m11 > m22 && m11 > m33 {
+	case m11 > m22 && m11 > m33:
 		s = 2.0 * math.Sqrt(1.0+m11-m22-m33)
 
 		return q.Set(
@@ -411,7 +419,7 @@ func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
 			(m13+m31)/s,
 			(m32-m23)/s,
 		)
-	} else if m22 > m33 {
+	case m22 > m33:
 		s = 2.0 * math.Sqrt(1.0+m22-m11-m33)
 
 		return q.Set(
@@ -430,14 +438,15 @@ func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
 		0.25*s,
 		(m21-m12)/s,
 	)
-
 }
 
 // FromMatrix3 converts the given Matrix into this Quaternion.
+//nolint:gomnd // math
 func (q *Quaternion) FromMatrix3(m3 *Matrix3) *Quaternion {
+	var fRoot float64
+
 	m := m3.Values
 	fTrace := m[0] + m[4] + m[8]
-	var fRoot float64
 
 	siNext, tmp := []int{1, 2, 0}, []float64{0, 0, 0}
 

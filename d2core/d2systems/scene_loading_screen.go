@@ -155,6 +155,7 @@ func (s *LoadingScene) updateLoadProgress() {
 	s.progress = 1 - ((untyped + unhandled + unparsed) / 3 / loaded)
 }
 
+//nolint:gomnd // arbitrary numbers for test scene
 func (s *LoadingScene) updateViewportAlpha() {
 	if len(s.Viewports) < 1 {
 		return
@@ -196,15 +197,15 @@ func (s *LoadingScene) updateLoadingSpritePosition() {
 		return
 	}
 
-	centerX, centerY := viewport.Width/2, viewport.Height/2
+	centerX, centerY := viewport.Width/2, viewport.Height/2 //nolint:gomnd // divide by two to get half, self-explanatory
 	frameW, frameH := sprite.GetCurrentFrameSize()
 
 	// we add the frameH in the Y because sprites are supposed to be drawn from bottom to top
 	transform.Translation.Set(
-		float64(centerX-(frameW/2)),
-		float64(centerY+(frameH/2)),
+		float64(centerX-(frameW/2)), //nolint:gomnd // halving things...
+		float64(centerY+(frameH/2)), //nolint:gomnd // halving things...
 		transform.Translation.Z,
-		)
+	)
 }
 
 func (s *LoadingScene) updateLoadingSpriteFrame() {

@@ -183,3 +183,8 @@ func (r *Renderer) ShowPanicScreen(message string) {
 		panic(err)
 	}
 }
+
+// GetWindowSize returns the current window resolution
+func (r *Renderer) GetWindowSize() (w, h int) {
+	return ebiten.WindowSize()
+}
