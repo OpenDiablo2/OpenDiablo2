@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"math"
 	"time"
 
@@ -35,7 +36,7 @@ type MouseCursorScene struct {
 	lastTimeMoved time.Time
 	*BaseScene
 	cursor akara.EID
-	booted bool
+	state  d2enum.SceneState
 	debug  struct {
 		enabled bool
 	}
@@ -49,7 +50,7 @@ func (s *MouseCursorScene) Init(world *akara.World) {
 }
 
 func (s *MouseCursorScene) boot() {
-	if !s.BaseScene.booted {
+	if !s.BaseScene.Booted() {
 		s.BaseScene.boot()
 		return
 	}
@@ -58,7 +59,7 @@ func (s *MouseCursorScene) boot() {
 
 	s.createMouseCursor()
 
-	s.booted = true
+	s.state = d2enum.SceneStateBooted
 }
 
 func (s *MouseCursorScene) createMouseCursor() {
@@ -76,8 +77,12 @@ func (s *MouseCursorScene) Update() {
 		return
 	}
 
-	if !s.booted {
+	if s.state == d2enum.SceneStateUninitialized {
 		s.boot()
+	}
+
+	if s.state != d2enum.SceneStateBooted {
+		return
 	}
 
 	s.updateCursorTransform()

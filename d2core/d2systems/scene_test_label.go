@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"math/rand"
 
@@ -32,7 +33,7 @@ var _ d2interface.Scene = &LabelTestScene{}
 // or start the map engine test.
 type LabelTestScene struct {
 	*BaseScene
-	booted   bool
+	state    d2enum.SceneState
 	labels   *akara.Subscription
 	velocity d2components.VelocityFactory
 }
@@ -50,7 +51,7 @@ func (s *LabelTestScene) Init(world *akara.World) {
 }
 
 func (s *LabelTestScene) boot() {
-	if !s.BaseScene.booted {
+	if !s.BaseScene.Booted() {
 		s.BaseScene.boot()
 		return
 	}
@@ -59,7 +60,7 @@ func (s *LabelTestScene) boot() {
 
 	s.createLabels()
 
-	s.booted = true
+	s.state = d2enum.SceneStateBooted
 }
 
 //nolint:gosec,gomnd // test scene, weak RNG is fine
@@ -111,8 +112,12 @@ func (s *LabelTestScene) Update() {
 		return
 	}
 
-	if !s.booted {
+	if s.state == d2enum.SceneStateUninitialized {
 		s.boot()
+	}
+
+	if s.state != d2enum.SceneStateBooted {
+		return
 	}
 
 	s.BaseScene.Update()

@@ -332,7 +332,7 @@ func (a *Sprite) GetDirection() int {
 
 // SetCurrentFrame sets sprite at a specific frame
 func (a *Sprite) SetCurrentFrame(frameIndex int) error {
-	if frameIndex >= a.GetFrameCount() {
+	if frameIndex >= a.GetFrameCount() || frameIndex < 0 {
 		return errors.New("invalid frame index")
 	}
 

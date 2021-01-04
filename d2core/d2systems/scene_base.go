@@ -2,6 +2,7 @@ package d2systems
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"sort"
 
@@ -82,7 +83,7 @@ type BaseScene struct {
 	}
 	*d2util.Logger
 	key             string
-	booted          bool
+	state           d2enum.SceneState
 	paused          bool
 	Add             *sceneObjectFactory
 	Viewports       []akara.EID
@@ -92,9 +93,14 @@ type BaseScene struct {
 	gameConfigs     *akara.Subscription
 }
 
+// State returns the scene's current state
+func (s *BaseScene) State() d2enum.SceneState {
+	return s.state
+}
+
 // Booted returns whether or not the scene has booted
 func (s *BaseScene) Booted() bool {
-	return s.booted
+	return s.state == d2enum.SceneStateBooted
 }
 
 // Paused returns whether or not the scene is paused
@@ -113,16 +119,19 @@ func (s *BaseScene) Init(world *akara.World) {
 }
 
 func (s *BaseScene) boot() {
-	s.Debug("base scene booting ...")
+	if s.state == d2enum.SceneStateUninitialized {
+		s.Debug("base scene booting ...")
 
-	s.Add = &sceneObjectFactory{
-		BaseScene: s,
-		Logger:    d2util.NewLogger(),
+		s.Add = &sceneObjectFactory{
+			BaseScene: s,
+			Logger:    d2util.NewLogger(),
+		}
+
+		s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
+
+		s.bindRequiredSystems()
+		s.state = d2enum.SceneStateBooting
 	}
-
-	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
-
-	s.bindRequiredSystems()
 
 	if !s.requiredSystemsPresent() {
 		return
@@ -144,7 +153,7 @@ func (s *BaseScene) boot() {
 	gameConfigs := s.NewComponentFilter().Require(&d2components.GameConfig{}).Build()
 	s.gameConfigs = s.World.AddSubscription(gameConfigs)
 
-	s.booted = true
+	s.state = d2enum.SceneStateBooted
 }
 
 func (s *BaseScene) bindRequiredSystems() {
@@ -205,23 +214,23 @@ func (s *BaseScene) setupSceneObjectFactories() {
 func (s *BaseScene) setupFactories() {
 	s.Debug("setting up component factories")
 
-	s.InjectComponent(&d2components.MainViewport{}, &s.Components.MainViewport.ComponentFactory)
+	s.InjectComponent(&d2components.SceneGraphNode{}, &s.Components.SceneGraphNode.ComponentFactory)
 	s.InjectComponent(&d2components.Viewport{}, &s.Components.Viewport.ComponentFactory)
+	s.InjectComponent(&d2components.MainViewport{}, &s.Components.MainViewport.ComponentFactory)
 	s.InjectComponent(&d2components.ViewportFilter{}, &s.Components.ViewportFilter.ComponentFactory)
-	s.InjectComponent(&d2components.Camera{}, &s.Components.Camera.ComponentFactory)
 	s.InjectComponent(&d2components.Priority{}, &s.Components.Priority.ComponentFactory)
+	s.InjectComponent(&d2components.Camera{}, &s.Components.Camera.ComponentFactory)
 	s.InjectComponent(&d2components.Texture{}, &s.Components.Texture.ComponentFactory)
 	s.InjectComponent(&d2components.Interactive{}, &s.Components.Interactive.ComponentFactory)
 	s.InjectComponent(&d2components.Transform{}, &s.Components.Transform.ComponentFactory)
-	s.InjectComponent(&d2components.Origin{}, &s.Components.Origin.ComponentFactory)
-	s.InjectComponent(&d2components.Alpha{}, &s.Components.Alpha.ComponentFactory)
-	s.InjectComponent(&d2components.SceneGraphNode{}, &s.Components.SceneGraphNode.ComponentFactory)
-	s.InjectComponent(&d2components.DrawEffect{}, &s.Components.DrawEffect.ComponentFactory)
 	s.InjectComponent(&d2components.Sprite{}, &s.Components.Sprite.ComponentFactory)
 	s.InjectComponent(&d2components.SegmentedSprite{}, &s.Components.SegmentedSprite.ComponentFactory)
+	s.InjectComponent(&d2components.Origin{}, &s.Components.Origin.ComponentFactory)
+	s.InjectComponent(&d2components.Alpha{}, &s.Components.Alpha.ComponentFactory)
+	s.InjectComponent(&d2components.DrawEffect{}, &s.Components.DrawEffect.ComponentFactory)
 	s.InjectComponent(&d2components.Rectangle{}, &s.Components.Rectangle.ComponentFactory)
-	s.InjectComponent(&d2components.Checkbox{}, &s.Components.Checkbox.ComponentFactory)
 	s.InjectComponent(&d2components.Label{}, &s.Components.Label.ComponentFactory)
+	s.InjectComponent(&d2components.Checkbox{}, &s.Components.Checkbox.ComponentFactory)
 	s.InjectComponent(&d2components.Color{}, &s.Components.Color.ComponentFactory)
 	s.InjectComponent(&d2components.CommandRegistration{}, &s.Components.CommandRegistration.ComponentFactory)
 	s.InjectComponent(&d2components.Dirty{}, &s.Components.Dirty.ComponentFactory)
@@ -235,11 +244,8 @@ func (s *BaseScene) Key() string {
 
 // Update performs scene boot and renders the scene viewports
 func (s *BaseScene) Update() {
-	if !s.booted {
+	if !s.Booted() {
 		s.boot()
-	}
-
-	if !s.booted {
 		return
 	}
 

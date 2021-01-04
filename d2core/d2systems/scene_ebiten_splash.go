@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"math"
 
@@ -39,7 +40,7 @@ func NewEbitenSplashScene() *EbitenSplashScene {
 // EbitenSplashScene represents the in-game terminal for typing commands
 type EbitenSplashScene struct {
 	*BaseScene
-	booted      bool
+	state       d2enum.SceneState
 	squares     []akara.EID
 	timeElapsed float64
 	delay       float64
@@ -53,14 +54,14 @@ func (s *EbitenSplashScene) Init(world *akara.World) {
 }
 
 func (s *EbitenSplashScene) boot() {
-	if !s.BaseScene.booted {
+	if !s.BaseScene.Booted() {
 		s.BaseScene.boot()
 		return
 	}
 
 	s.createSplash()
 
-	s.booted = true
+	s.state = d2enum.SceneStateBooted
 }
 
 // Update and render the terminal to the terminal viewport
@@ -73,11 +74,11 @@ func (s *EbitenSplashScene) Update() {
 		return
 	}
 
-	if !s.booted {
+	if s.state == d2enum.SceneStateUninitialized {
 		s.boot()
 	}
 
-	if !s.booted {
+	if s.state != d2enum.SceneStateBooted {
 		return
 	}
 
