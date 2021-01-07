@@ -237,7 +237,6 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 		return nil, err
 	}
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/767
 	animation.Rewind()
 	animation.ResetPlayedCount()
 

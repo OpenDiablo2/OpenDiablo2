@@ -258,7 +258,6 @@ func (h *HUD) loadCustomWidgets() {
 }
 
 func (h *HUD) loadSkillResources() {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 	if err != nil {
 		h.Error(err.Error())
@@ -376,7 +375,6 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 	h.hero.ToggleRunWalk()
 	h.updateRunTooltipText()
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	h.hero.SetIsRunning(h.hero.IsRunToggled())
 }
 
