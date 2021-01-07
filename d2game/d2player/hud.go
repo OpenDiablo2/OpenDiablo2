@@ -373,7 +373,6 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 	h.hero.ToggleRunWalk()
 	h.updateRunTooltipText()
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	h.hero.SetIsRunning(h.hero.IsRunToggled())
 }
 
