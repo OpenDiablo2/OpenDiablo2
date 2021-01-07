@@ -136,7 +136,6 @@ func (f *InventoryItemFactory) GetMiscItemByCode(code string) (*InventoryItemMis
 
 // GetWeaponItemByCode returns the weapon item for the given code
 func (f *InventoryItemFactory) GetWeaponItemByCode(code string) (*InventoryItemWeapon, error) {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/796
 	result := f.asset.Records.Item.Weapons[code]
 	if result == nil {
 		return nil, fmt.Errorf("could not find weapon entry for code '%s'", code)
