@@ -213,7 +213,7 @@ func (s *QuestLog) Load() {
 		s.Error(err.Error())
 	}
 
-	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
+	frame := s.uiManager.NewUIFrame(d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.QuestLogBg, d2resource.PaletteSky)
