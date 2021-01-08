@@ -38,7 +38,7 @@ func CheckSourceType(path string) SourceType {
 	// on MacOS, the MPQ's from blizzard don't have file extensions
 	// so we just attempt to init the file as an mpq
 	if mpq, err := d2mpq.New(path); err == nil {
-		mpq.Close()
+		_ = mpq.Close()
 		return AssetSourceMPQ
 	}
 

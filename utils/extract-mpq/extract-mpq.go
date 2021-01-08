@@ -33,13 +33,13 @@ func main() {
 	}
 
 	filename := flag.Arg(0)
-	mpq, err := d2mpq.Load(filename)
 
+	mpq, err := d2mpq.FromFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	list, err := mpq.GetFileList()
+	list, err := mpq.Listfile()
 	if err != nil {
 		log.Fatal(err)
 	}
