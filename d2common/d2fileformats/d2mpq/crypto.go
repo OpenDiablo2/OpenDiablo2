@@ -111,6 +111,7 @@ func hashString(key string, hashType uint32) uint32 {
 	return seed1
 }
 
+//nolint:unused,deadcode // will use this for creating mpq's
 func encrypt(data []uint32, seed uint32) {
 	seed2 := uint32(0xeeeeeeee) //nolint:gomnd // Decryption magic
 
