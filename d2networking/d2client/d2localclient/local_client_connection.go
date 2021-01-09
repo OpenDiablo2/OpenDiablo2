@@ -87,18 +87,15 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 
 // Close disconnects from the server and destroys it.
 func (l *LocalClientConnection) Close() error {
-	sc, err := d2netpacket.CreateServerClosedPacket()
+	disconnectRequest, err := d2netpacket.CreatePlayerDisconnectRequestPacket(l.uniqueID)
 	if err != nil {
 		return err
 	}
 
-	err = l.SendPacketToServer(sc)
+	err = l.SendPacketToServer(disconnectRequest)
 	if err != nil {
 		return err
 	}
-
-	l.gameServer.OnClientDisconnected(l)
-	l.gameServer.Stop()
 
 	return nil
 }

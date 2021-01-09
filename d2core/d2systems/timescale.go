@@ -1,6 +1,8 @@
 package d2systems
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
@@ -62,15 +64,21 @@ func (t *TimeScaleSystem) Update() {
 
 func (t *TimeScaleSystem) registerCommands() {
 	e := t.NewEntity()
-
 	reg := t.Components.CommandRegistration.Add(e)
-
 	t.Components.Dirty.Add(e)
 
 	reg.Name = "timescale"
 	reg.Description = "set the time scale of the game (default is 1.0)"
-	reg.Callback = func(scale float64) {
-		t.Infof("setting time scale to %.1f", scale)
-		t.scale = scale
+	reg.Args = []string{"scale"}
+	reg.Callback = func(args []string) error {
+		val, err := strconv.ParseFloat(args[0], 64)
+		if err != nil {
+			return fmt.Errorf("invalid argument")
+		}
+
+		t.Infof("setting time scale to %.1f", val)
+		t.scale = val
+
+		return nil
 	}
 }

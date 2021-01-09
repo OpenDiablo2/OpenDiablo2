@@ -22,7 +22,7 @@ func compositeTypeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Animation.Token.Composite = records
 
-	r.Logger.Infof("Loaded %d Composite Type records", len(records))
+	r.Debugf("Loaded %d CompositeType records", len(records))
 
 	return nil
 }

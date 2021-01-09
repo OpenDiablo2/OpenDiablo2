@@ -130,7 +130,7 @@ func inventoryLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d Inventory Panel records", len(records))
+	r.Debugf("Loaded %d Inventory records", len(records))
 
 	r.Layout.Inventory = records
 

@@ -6,8 +6,8 @@ import (
 )
 
 // New creates and initializes the terminal
-func New(inputManager d2interface.InputManager) (d2interface.Terminal, error) {
-	term, err := createTerminal()
+func New(inputManager d2interface.InputManager) (*Terminal, error) {
+	term, err := NewTerminal()
 	if err != nil {
 		return nil, err
 	}

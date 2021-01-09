@@ -19,7 +19,7 @@ func componentCodesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d ComponentCode records", len(records))
+	r.Debugf("Loaded %d ComponentCode records", len(records))
 
 	r.ComponentCodes = records
 

@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
@@ -75,11 +77,11 @@ type UIWidgetFactory struct {
 	buttonLoadQueue
 	checkboxLoadQueue
 	labelLoadQueue
+	state              d2enum.SceneState
 	bitmapFontCache    d2interface.Cache
 	labelsToUpdate     *akara.Subscription
 	buttonsToUpdate    *akara.Subscription
 	checkboxesToUpdate *akara.Subscription
-	booted             bool
 	Components         struct {
 		File           d2components.FileFactory
 		Transform      d2components.TransformFactory
@@ -155,7 +157,7 @@ func (t *UIWidgetFactory) boot() {
 		return
 	}
 
-	t.booted = true
+	t.state = d2enum.SceneStateBooted
 }
 
 // Update processes the load queues and update the widgets. The load queues are necessary because
@@ -163,7 +165,7 @@ func (t *UIWidgetFactory) boot() {
 func (t *UIWidgetFactory) Update() {
 	start := time.Now()
 
-	if !t.booted {
+	if t.state != d2enum.SceneStateBooted {
 		t.boot()
 		return
 	}

@@ -68,7 +68,7 @@ func newGlobeWidget(ui *d2ui.UIManager,
 	asset *d2asset.AssetManager,
 	x, y int,
 	gtype globeType,
-	value *int, valueMax *int,
+	value, valueMax *int,
 	l d2util.LogLevel) *globeWidget {
 	var globe, overlap *globeFrame
 

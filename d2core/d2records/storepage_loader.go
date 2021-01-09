@@ -21,7 +21,7 @@ func storePagesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.StorePages = records
 
-	r.Logger.Infof("Loaded %d StorePage records", len(records))
+	r.Debugf("Loaded %d StorePage records", len(records))
 
 	return nil
 }

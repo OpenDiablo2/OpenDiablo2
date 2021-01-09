@@ -44,7 +44,7 @@ func soundEnvironmentLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Sound.Environment = records
 
-	r.Logger.Infof("Loaded %d SoundEnviron records", len(records))
+	r.Debugf("Loaded %d SoundEnviron records", len(records))
 
 	return nil
 }

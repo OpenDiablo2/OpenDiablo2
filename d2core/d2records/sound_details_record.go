@@ -1,10 +1,10 @@
 package d2records
 
 // SoundDetails is a map of the SoundEntries
-type SoundDetails map[string]*SoundDetailsRecord
+type SoundDetails map[string]*SoundDetailRecord
 
-// SoundDetailsRecord represents a sound entry
-type SoundDetailsRecord struct {
+// SoundDetailRecord represents a sound entry
+type SoundDetailRecord struct {
 	Handle    string
 	FileName  string
 	Index     int

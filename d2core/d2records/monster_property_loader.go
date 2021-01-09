@@ -57,7 +57,7 @@ func monsterPropertiesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d MonProp records", len(records))
+	r.Debugf("Loaded %d MonProp records", len(records))
 
 	r.Monster.Props = records
 

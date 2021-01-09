@@ -2,11 +2,11 @@ package d2records
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-// MonStats2 stores all of the MonStats2Records
-type MonStats2 map[string]*MonStats2Record
+// MonStats2 stores all of the MonStat2Records
+type MonStats2 map[string]*MonStat2Record
 
-// MonStats2Record is a representation of a row from monstats2.txt
-type MonStats2Record struct {
+// MonStat2Record is a representation of a row from monstats2.txt
+type MonStat2Record struct {
 	// Available options for equipment
 	// randomly selected from
 	EquipmentOptions [16][]string

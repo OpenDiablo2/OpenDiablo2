@@ -323,7 +323,7 @@ func (a *Animation) GetDirection() int {
 
 // SetCurrentFrame sets animation at a specific frame
 func (a *Animation) SetCurrentFrame(frameIndex int) error {
-	if frameIndex >= a.GetFrameCount() {
+	if frameIndex >= a.GetFrameCount() || frameIndex < 0 {
 		return errors.New("invalid frame index")
 	}
 

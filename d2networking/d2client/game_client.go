@@ -160,8 +160,9 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 			g.Errorf("GameClient: error responding to server ping: %s", err)
 		}
 	case d2netpackettype.PlayerDisconnectionNotification:
-		// Not implemented
-		g.Infof("RemoteClientConnection: received disconnect: %s", packet.PacketData)
+		if err := g.handlePlayerDisconnectionPacket(packet); err != nil {
+			return err
+		}
 	case d2netpackettype.ServerClosed:
 		// https://github.com/OpenDiablo2/OpenDiablo2/issues/802
 		g.Infof("Server has been closed")
@@ -442,6 +443,19 @@ func (g *GameClient) handlePingPacket() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (g *GameClient) handlePlayerDisconnectionPacket(packet d2netpacket.NetPacket) error {
+	disconnectPacket, err := d2netpacket.UnmarshalPlayerDisconnectionRequest(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
+	player := g.Players[disconnectPacket.ID]
+	g.MapEngine.RemoveEntity(player)
+	delete(g.Players, disconnectPacket.ID)
 
 	return nil
 }

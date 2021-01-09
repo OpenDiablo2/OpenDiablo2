@@ -13,17 +13,17 @@ type Terminal interface {
 	OnKeyChars(event KeyCharsEvent) bool
 	Render(surface Surface) error
 	Execute(command string) error
-	OutputRaw(text string, category d2enum.TermCategory)
-	Outputf(format string, params ...interface{})
-	OutputInfof(format string, params ...interface{})
-	OutputWarningf(format string, params ...interface{})
-	OutputErrorf(format string, params ...interface{})
-	OutputClear()
-	IsVisible() bool
+	Rawf(category d2enum.TermCategory, format string, params ...interface{})
+	Printf(format string, params ...interface{})
+	Infof(format string, params ...interface{})
+	Warningf(format string, params ...interface{})
+	Errorf(format string, params ...interface{})
+	Clear()
+	Visible() bool
 	Hide()
 	Show()
-	BindAction(name, description string, action interface{}) error
-	UnbindAction(name string) error
+	Bind(name, description string, arguments []string, fn func(args []string) error) error
+	Unbind(name ...string) error
 }
 
 // TerminalLogger is used tomake the Terminal write out

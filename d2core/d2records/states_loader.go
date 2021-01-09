@@ -89,7 +89,7 @@ func statesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.States = records
 
-	r.Logger.Infof("Loaded %d State records", len(records))
+	r.Debugf("Loaded %d State records", len(records))
 
 	return nil
 }

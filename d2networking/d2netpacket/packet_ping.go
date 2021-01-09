@@ -1,4 +1,4 @@
-package d2netpacket
+package d2netpacket //nolint:dupl // ServerClosed and Ping just happen to be very similar packets
 
 import (
 	"encoding/json"
@@ -29,4 +29,14 @@ func CreatePingPacket() (NetPacket, error) {
 		PacketType: d2netpackettype.Ping,
 		PacketData: b,
 	}, nil
+}
+
+// UnmarshalPing unmarshals the given data to a PingPacket struct
+func UnmarshalPing(packet []byte) (PingPacket, error) {
+	var p PingPacket
+	if err := json.Unmarshal(packet, &p); err != nil {
+		return p, err
+	}
+
+	return p, nil
 }
