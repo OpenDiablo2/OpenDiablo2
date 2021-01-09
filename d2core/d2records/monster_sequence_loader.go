@@ -31,7 +31,7 @@ func monsterSequencesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d MonsterSequence records", len(records))
+	r.Logger.Infof("Loaded %d MonsterSequence records", len(records))
 
 	r.Monster.Sequences = records
 

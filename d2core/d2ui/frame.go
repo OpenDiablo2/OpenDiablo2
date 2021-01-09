@@ -3,7 +3,7 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // static check that UIFrame implements Widget
@@ -21,9 +21,9 @@ const (
 // when it is visible.
 type UIFrame struct {
 	*BaseWidget
+	asset            *d2asset.AssetManager
 	frame            *Sprite
 	frameOrientation frameOrientation
-	*d2util.Logger
 }
 
 // frame indices into dc6 images for panels
@@ -41,7 +41,11 @@ const (
 )
 
 // NewUIFrame creates a new Frame instance
-func (ui *UIManager) NewUIFrame(frameOrientation frameOrientation) *UIFrame {
+func NewUIFrame(
+	asset *d2asset.AssetManager,
+	uiManager *UIManager,
+	frameOrientation frameOrientation,
+) *UIFrame {
 	var originX, originY = 0, 0
 
 	switch frameOrientation {
@@ -53,27 +57,30 @@ func (ui *UIManager) NewUIFrame(frameOrientation frameOrientation) *UIFrame {
 		originY = 0
 	}
 
-	base := NewBaseWidget(ui)
-	base.SetVisible(false)
+	base := NewBaseWidget(uiManager)
 	base.SetPosition(originX, originY)
 
 	frame := &UIFrame{
 		BaseWidget:       base,
+		asset:            asset,
 		frameOrientation: frameOrientation,
-		Logger:           ui.Logger,
 	}
+	frame.Load()
 
-	sprite, err := ui.NewSprite(d2resource.Frame, d2resource.PaletteSky)
-	if err != nil {
-		frame.Error(err.Error())
-	}
-
-	frame.frame = sprite
-	frame.calculateSize()
-
-	ui.addWidget(frame)
+	frame.asset.Logger.SetPrefix(logPrefix) // workaround
 
 	return frame
+}
+
+// Load the necessary frame resources
+func (u *UIFrame) Load() {
+	sprite, err := u.manager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	if err != nil {
+		u.asset.Logger.Error(err.Error())
+	}
+
+	u.frame = sprite
+	u.calculateSize()
 }
 
 func (u *UIFrame) calculateSize() {
@@ -104,7 +111,7 @@ func (u *UIFrame) calculateSize() {
 	for i := range framesWidth {
 		w, _, err := u.frame.GetFrameSize(framesWidth[i])
 		if err != nil {
-			u.Error(err.Error())
+			u.asset.Logger.Error(err.Error())
 		}
 
 		u.width += w
@@ -113,7 +120,7 @@ func (u *UIFrame) calculateSize() {
 	for i := range framesHeight {
 		_, h, err := u.frame.GetFrameSize(framesHeight[i])
 		if err != nil {
-			u.Error(err.Error())
+			u.asset.Logger.Error(err.Error())
 		}
 
 		u.height += h
@@ -125,11 +132,11 @@ func (u *UIFrame) Render(target d2interface.Surface) {
 	switch u.frameOrientation {
 	case FrameLeft:
 		if err := u.renderLeft(target); err != nil {
-			u.Error("Render error" + err.Error())
+			u.asset.Logger.Error("Render error" + err.Error())
 		}
 	case FrameRight:
 		if err := u.renderRight(target); err != nil {
-			u.Error("Render error" + err.Error())
+			u.asset.Logger.Error("Render error" + err.Error())
 		}
 	}
 }

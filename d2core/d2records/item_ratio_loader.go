@@ -55,7 +55,7 @@ func itemRatioLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d ItemRatio records", len(records))
+	r.Logger.Infof("Loaded %d ItemRatio records", len(records))
 
 	r.Item.Ratios = records
 

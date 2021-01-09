@@ -42,7 +42,7 @@ func levelPresetLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		records[record.DefinitionID] = record
 	}
 
-	r.Debugf("Loaded %d LevelPresets records", len(records))
+	r.Logger.Infof("Loaded %d level presets", len(records))
 
 	if d.Err != nil {
 		return d.Err

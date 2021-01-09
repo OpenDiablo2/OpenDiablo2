@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
-	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -131,36 +130,58 @@ type Game struct {
 func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
 
-	commands := []struct {
-		name string
-		desc string
-		args []string
-		fn   func([]string) error
-	}{
-		{"spawnitem", "spawns an item at the local player position",
-			[]string{"code1", "code2", "code3", "code4", "code5"}, v.commandSpawnItem},
-		{"spawnitemat", "spawns an item at the x,y coordinates",
-			[]string{"x", "y", "code1", "code2", "code3", "code4", "code5"}, v.commandSpawnItemAt},
-		{"spawnmon", "spawn monster at the local player position", []string{"name"}, v.commandSpawnMon},
+	err := v.terminal.BindAction(
+		"spawnitem",
+		"spawns an item at the local player position",
+		func(code1, code2, code3, code4, code5 string) {
+			codes := []string{code1, code2, code3, code4, code5}
+			v.debugSpawnItemAtPlayer(codes...)
+		},
+	)
+	if err != nil {
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnitem", err)
 	}
 
-	for _, cmd := range commands {
-		if err := v.terminal.Bind(cmd.name, cmd.desc, cmd.args, cmd.fn); err != nil {
-			v.Errorf(err.Error())
-		}
+	err = v.terminal.BindAction(
+		"spawnitemat",
+		"spawns an item at the x,y coordinates",
+		func(x, y int, code1, code2, code3, code4, code5 string) {
+			codes := []string{code1, code2, code3, code4, code5}
+			v.debugSpawnItemAtLocation(x, y, codes...)
+		},
+	)
+	if err != nil {
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnitemat", err)
 	}
 
-	if err := v.asset.BindTerminalCommands(v.terminal); err != nil {
-		v.Errorf(err.Error())
+	err = v.terminal.BindAction(
+		"spawnmon",
+		"spawn monster at the local player position",
+		func(name string) {
+			x := int(v.localPlayer.Position.X())
+			y := int(v.localPlayer.Position.Y())
+			monstat := v.asset.Records.Monster.Stats[name]
+			if monstat == nil {
+				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
+				return
+			}
+
+			monster, npcErr := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
+			if npcErr != nil {
+				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, npcErr)
+				return
+			}
+
+			v.gameClient.MapEngine.AddEntity(monster)
+		},
+	)
+	if err != nil {
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnmon", err)
 	}
 }
 
 // OnUnload releases the resources of Gameplay screen
 func (v *Game) OnUnload() error {
-	if err := v.gameControls.UnbindTerminalCommands(v.terminal); err != nil {
-		return err
-	}
-
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/792
 	if err := v.inputManager.UnbindHandler(v.gameControls); err != nil {
 		return err
@@ -171,7 +192,11 @@ func (v *Game) OnUnload() error {
 		return err
 	}
 
-	if err := v.terminal.Unbind("spawnitemat", "spawnitem", "spawnmon"); err != nil {
+	if err := v.terminal.UnbindAction("spawnItemAt"); err != nil {
+		return err
+	}
+
+	if err := v.terminal.UnbindAction("spawnItem"); err != nil {
 		return err
 	}
 
@@ -180,18 +205,6 @@ func (v *Game) OnUnload() error {
 	}
 
 	if err := v.gameClient.Close(); err != nil {
-		return err
-	}
-
-	if err := v.asset.UnbindTerminalCommands(v.terminal); err != nil {
-		return err
-	}
-
-	if err := v.mapRenderer.UnbindTerminalCommands(v.terminal); err != nil {
-		return err
-	}
-
-	if err := v.soundEngine.UnbindTerminalCommands(v.terminal); err != nil {
 		return err
 	}
 
@@ -291,8 +304,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.keyMap, v.audioProvider, v.logLevel,
-			v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.keyMap, v.logLevel, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err
@@ -381,48 +393,4 @@ func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
 	if err != nil {
 		v.Errorf(spawnItemErrStr, x, y, codes)
 	}
-}
-
-func (v *Game) commandSpawnItem(args []string) error {
-	v.debugSpawnItemAtPlayer(args...)
-
-	return nil
-}
-
-func (v *Game) commandSpawnItemAt(args []string) error {
-	x, err := strconv.Atoi(args[0])
-	if err != nil {
-		return fmt.Errorf("invalid argument")
-	}
-
-	y, err := strconv.Atoi(args[0])
-	if err != nil {
-		return fmt.Errorf("invalid argument")
-	}
-
-	v.debugSpawnItemAtLocation(x, y, args[2:]...)
-
-	return nil
-}
-
-func (v *Game) commandSpawnMon(args []string) error {
-	name := args[0]
-	x := int(v.localPlayer.Position.X())
-	y := int(v.localPlayer.Position.Y())
-
-	monstat := v.asset.Records.Monster.Stats[name]
-	if monstat == nil {
-		v.terminal.Errorf("no monstat entry for \"%s\"", name)
-		return nil
-	}
-
-	monster, npcErr := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
-	if npcErr != nil {
-		v.terminal.Errorf("error generating monster \"%s\": %v", name, npcErr)
-		return nil
-	}
-
-	v.gameClient.MapEngine.AddEntity(monster)
-
-	return nil
 }

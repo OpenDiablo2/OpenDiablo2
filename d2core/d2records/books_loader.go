@@ -8,7 +8,7 @@ func booksLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(Books)
 
 	for d.Next() {
-		record := &BookRecord{
+		record := &BooksRecord{
 			Name:            d.String("Name"),
 			Namco:           d.String("Namco"),
 			Completed:       d.String("Completed"),
@@ -28,7 +28,7 @@ func booksLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	r.Debugf("Loaded %d Book records", len(records))
+	r.Logger.Infof("Loaded %d book items", len(records))
 
 	r.Item.Books = records
 

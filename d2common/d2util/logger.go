@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"sync"
 )
 
 // LogLevel determines how verbose the logging is (higher is more verbose)
@@ -52,7 +51,6 @@ func NewLogger() *Logger {
 	l := &Logger{
 		level:        LogLevelDefault,
 		colorEnabled: true,
-		mutex:        sync.Mutex{},
 	}
 
 	l.Writer = log.Writer()
@@ -66,7 +64,6 @@ type Logger struct {
 	io.Writer
 	level        LogLevel
 	colorEnabled bool
-	mutex        sync.Mutex
 }
 
 // SetPrefix sets a prefix for the message.
@@ -74,17 +71,11 @@ type Logger struct {
 // 		logger.SetPrefix("XYZ")
 // 		logger.Debug("ABC") will print "[XYZ] [DEBUG] ABC"
 func (l *Logger) SetPrefix(s string) {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	l.prefix = s
 }
 
 // SetLevel sets the log level
 func (l *Logger) SetLevel(level LogLevel) {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	if level == LogLevelUnspecified {
 		level = LogLevelDefault
 	}
@@ -94,9 +85,6 @@ func (l *Logger) SetLevel(level LogLevel) {
 
 // SetColorEnabled adds color escape-sequences to the logging output
 func (l *Logger) SetColorEnabled(b bool) {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	if runtime.GOOS == "windows" {
 		b = false
 	}
@@ -106,6 +94,10 @@ func (l *Logger) SetColorEnabled(b bool) {
 
 // Info logs an info message
 func (l *Logger) Info(msg string) {
+	if l == nil || l.level < LogLevelInfo {
+		return
+	}
+
 	go l.print(LogLevelInfo, msg)
 }
 
@@ -116,6 +108,10 @@ func (l *Logger) Infof(fmtMsg string, args ...interface{}) {
 
 // Warning logs a warning message
 func (l *Logger) Warning(msg string) {
+	if l == nil || l.level < LogLevelWarning {
+		return
+	}
+
 	go l.print(LogLevelWarning, msg)
 }
 
@@ -126,6 +122,10 @@ func (l *Logger) Warningf(fmtMsg string, args ...interface{}) {
 
 // Error logs an error message
 func (l *Logger) Error(msg string) {
+	if l == nil || l.level < LogLevelError {
+		return
+	}
+
 	go l.print(LogLevelError, msg)
 }
 
@@ -136,6 +136,10 @@ func (l *Logger) Errorf(fmtMsg string, args ...interface{}) {
 
 // Fatal logs an fatal error message and exits programm
 func (l *Logger) Fatal(msg string) {
+	if l == nil || l.level < LogLevelFatal {
+		return
+	}
+
 	go l.print(LogLevelFatal, msg)
 	os.Exit(1)
 }
@@ -147,6 +151,10 @@ func (l *Logger) Fatalf(fmtMsg string, args ...interface{}) {
 
 // Debug logs a debug message
 func (l *Logger) Debug(msg string) {
+	if l == nil || l.level < LogLevelDebug {
+		return
+	}
+
 	go l.print(LogLevelDebug, msg)
 }
 
@@ -156,10 +164,7 @@ func (l *Logger) Debugf(fmtMsg string, args ...interface{}) {
 }
 
 func (l *Logger) print(level LogLevel, msg string) {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
-	if l.level < level {
+	if l == nil || l.level < level {
 		return
 	}
 

@@ -40,7 +40,7 @@ func monsterSuperUniqeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Monster.Unique.Super = records
 
-	r.Debugf("Loaded %d SuperUnique records", len(records))
+	r.Logger.Infof("Loaded %d SuperUnique records", len(records))
 
 	return nil
 }

@@ -62,7 +62,7 @@ key  | value         key  |  value
 So, GetLabelModifier returns value of offset in locale languages table
 */
 // some of values need to be set up. For now values with "checked" comment
-// was tested and works fine.
+// was tested and works fine in main menu.
 func GetLabelModifier(language string) int {
 	modifiers := map[string]int{
 		"ENG": 0, // (English) // checked
@@ -70,7 +70,7 @@ func GetLabelModifier(language string) int {
 		"DEU": 0, // (German) // checked
 		"FRA": 0, // (French)
 		"POR": 0, // (Portuguese)
-		"ITA": 0, // (Italian) // checked
+		"ITA": 0, // (Italian)
 		"JPN": 0, // (Japanese)
 		"KOR": 0, // (Korean)
 		"SIN": 0, //

@@ -23,7 +23,7 @@ func playerModesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Character.Modes = records
 
-	r.Debugf("Loaded %d PlayerMode records", len(records))
+	r.Logger.Infof("Loaded %d PlayerMode records", len(records))
 
 	return nil
 }

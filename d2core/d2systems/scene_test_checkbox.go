@@ -4,8 +4,6 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -33,7 +31,7 @@ var _ d2interface.Scene = &CheckboxTestScene{}
 // or start the map engine test.
 type CheckboxTestScene struct {
 	*BaseScene
-	state      d2enum.SceneState
+	booted     bool
 	checkboxes *akara.Subscription
 }
 
@@ -52,7 +50,7 @@ func (s *CheckboxTestScene) Init(world *akara.World) {
 }
 
 func (s *CheckboxTestScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
@@ -68,7 +66,7 @@ func (s *CheckboxTestScene) boot() {
 
 	s.createCheckboxes()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 //nolint:gomnd // arbitrary example numbers for test
@@ -86,12 +84,8 @@ func (s *CheckboxTestScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
-	}
-
-	if s.state != d2enum.SceneStateBooted {
-		return
 	}
 
 	s.BaseScene.Update()

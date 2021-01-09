@@ -1,12 +1,8 @@
 package d2systems
 
 import (
-	"fmt"
 	"math"
-	"strconv"
 	"time"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/gravestench/akara"
 
@@ -39,7 +35,7 @@ type MouseCursorScene struct {
 	lastTimeMoved time.Time
 	*BaseScene
 	cursor akara.EID
-	state  d2enum.SceneState
+	booted bool
 	debug  struct {
 		enabled bool
 	}
@@ -53,7 +49,7 @@ func (s *MouseCursorScene) Init(world *akara.World) {
 }
 
 func (s *MouseCursorScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
@@ -62,7 +58,7 @@ func (s *MouseCursorScene) boot() {
 
 	s.createMouseCursor()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 func (s *MouseCursorScene) createMouseCursor() {
@@ -80,12 +76,8 @@ func (s *MouseCursorScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
-	}
-
-	if s.state != d2enum.SceneStateBooted {
-		return
 	}
 
 	s.updateCursorTransform()
@@ -149,15 +141,8 @@ func (s *MouseCursorScene) registerDebugCommand() {
 		description = "show debug information about the mouse"
 	)
 
-	s.RegisterTerminalCommand(command, description, []string{"val"}, func(args []string) error {
-		val, err := strconv.ParseBool(args[0])
-		if err != nil {
-			return fmt.Errorf("invalid argument")
-		}
-
+	s.RegisterTerminalCommand(command, description, func(val bool) {
 		s.setDebug(val)
-
-		return nil
 	})
 }
 

@@ -3,8 +3,6 @@ package d2systems
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2button"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -32,7 +30,7 @@ var _ d2interface.Scene = &ButtonTestScene{}
 // or start the map engine test.
 type ButtonTestScene struct {
 	*BaseScene
-	state   d2enum.SceneState
+	booted  bool
 	buttons *akara.Subscription
 }
 
@@ -51,7 +49,7 @@ func (s *ButtonTestScene) Init(world *akara.World) {
 }
 
 func (s *ButtonTestScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
@@ -60,7 +58,7 @@ func (s *ButtonTestScene) boot() {
 
 	s.createButtons()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 func (s *ButtonTestScene) createButtons() {
@@ -73,12 +71,8 @@ func (s *ButtonTestScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
-	}
-
-	if s.state != d2enum.SceneStateBooted {
-		return
 	}
 
 	for _, eid := range s.buttons.GetEntities() {

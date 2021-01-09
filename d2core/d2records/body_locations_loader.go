@@ -19,7 +19,7 @@ func bodyLocationsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	r.Debugf("Loaded %d BodyLocation records", len(records))
+	r.Logger.Infof("Loaded %d Body Location records", len(records))
 
 	r.BodyLocations = records
 

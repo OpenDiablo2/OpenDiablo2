@@ -13,8 +13,7 @@ type CommandRegistration struct {
 	Enabled     bool
 	Name        string
 	Description string
-	Args        []string
-	Callback    func(args []string) error
+	Callback    interface{}
 }
 
 // New creates a new CommandRegistration. By default, IsCommandRegistration is false.

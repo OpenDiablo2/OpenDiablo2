@@ -35,7 +35,8 @@ func CreateAddPlayerPacket(
 	stats *d2hero.HeroStatsState,
 	skills map[int]*d2hero.HeroSkill,
 	equipment d2inventory.CharacterEquipment,
-	leftSkill, rightSkill, gold int) (NetPacket, error) {
+	leftSkill, rightSkill int,
+	gold int) (NetPacket, error) {
 	addPlayerPacket := AddPlayerPacket{
 		ID:         id,
 		Name:       name,

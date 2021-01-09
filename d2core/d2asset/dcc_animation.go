@@ -2,6 +2,9 @@ package d2asset
 
 import (
 	"errors"
+	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -129,11 +132,24 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 func (a *DCCAnimation) decodeFrame(directionIndex int) animationFrame {
 	dccDirection := a.dcc.Directions[directionIndex]
 
+	minX, minY := math.MaxInt32, math.MaxInt32
+	maxX, maxY := math.MinInt32, math.MinInt32
+
+	for _, dccFrame := range dccDirection.Frames {
+		minX = d2math.MinInt(minX, dccFrame.Box.Left)
+		minY = d2math.MinInt(minY, dccFrame.Box.Top)
+		maxX = d2math.MaxInt(maxX, dccFrame.Box.Right())
+		maxY = d2math.MaxInt(maxY, dccFrame.Box.Bottom())
+	}
+
+	frameWidth := maxX - minX
+	frameHeight := maxY - minY
+
 	frame := animationFrame{
-		width:   dccDirection.Box.Width,
-		height:  dccDirection.Box.Height,
-		offsetX: dccDirection.Box.Left,
-		offsetY: dccDirection.Box.Top,
+		width:   frameWidth,
+		height:  frameHeight,
+		offsetX: minX,
+		offsetY: minY,
 		decoded: true,
 	}
 

@@ -76,7 +76,7 @@ func itemTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d ItemType records", len(records))
+	r.Logger.Infof("Loaded %d ItemType records", len(records))
 
 	r.Item.Types = records
 	r.Item.Equivalency = equivMap

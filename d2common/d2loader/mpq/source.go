@@ -14,7 +14,7 @@ var _ asset.Source = &Source{}
 
 // NewSource creates a new MPQ Source
 func NewSource(sourcePath string) (asset.Source, error) {
-	loaded, err := d2mpq.FromFile(sourcePath)
+	loaded, err := d2mpq.Load(sourcePath)
 	if err != nil {
 		return nil, err
 	}

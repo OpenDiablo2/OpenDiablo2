@@ -23,7 +23,7 @@ func monsterTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	r.Debugf("Loaded %d MonType records", len(records))
+	r.Logger.Infof("Loaded %d MonType records", len(records))
 
 	r.Monster.Types = records
 

@@ -248,16 +248,16 @@ func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
-	drawColor := d2util.Color(white)
+	drawColor := rgbaColor(white)
 	switch entry.widget.(type) {
 	case *Layout:
-		drawColor = d2util.Color(magenta)
+		drawColor = rgbaColor(magenta)
 	case *SpacerStatic, *SpacerDynamic:
-		drawColor = d2util.Color(grey2)
+		drawColor = rgbaColor(grey2)
 	case *Label:
-		drawColor = d2util.Color(green)
+		drawColor = rgbaColor(green)
 	case *Button:
-		drawColor = d2util.Color(yellow)
+		drawColor = rgbaColor(yellow)
 	}
 
 	target.DrawLine(entry.width, 0, drawColor)
@@ -487,7 +487,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 		return nil, loadErr
 	}
 
-	textColor := d2util.Color(grey)
+	textColor := rgbaColor(grey)
 	textWidth, textHeight := font.GetTextMetrics(text)
 	textX := half(buttonWidth) - half(textWidth)
 	textY := half(buttonHeight) - half(textHeight) + config.textOffset

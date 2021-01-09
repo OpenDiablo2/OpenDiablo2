@@ -4,8 +4,6 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -46,7 +44,7 @@ type TerminalScene struct {
 	d2interface.Terminal
 	d2interface.InputManager
 	commandsToRegister *akara.Subscription
-	state              d2enum.SceneState
+	booted             bool
 }
 
 // Init the terminal
@@ -72,14 +70,14 @@ func (s *TerminalScene) setupSubscriptions() {
 }
 
 func (s *TerminalScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
 
 	s.createTerminal()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 // Update and render the terminal to the terminal viewport
@@ -92,11 +90,11 @@ func (s *TerminalScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
 	}
 
-	if s.state != d2enum.SceneStateBooted {
+	if !s.booted {
 		return
 	}
 
@@ -120,7 +118,7 @@ func (s *TerminalScene) processCommand(eid akara.EID) {
 
 	s.Infof("Registering command `%s` - %s", reg.Name, reg.Description)
 
-	err := s.Terminal.Bind(reg.Name, reg.Description, nil, reg.Callback)
+	err := s.Terminal.BindAction(reg.Name, reg.Description, reg.Callback)
 	if err != nil {
 		s.Error(err.Error())
 	}

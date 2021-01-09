@@ -22,7 +22,7 @@ func weaponClassesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Animation.Token.Weapon = records
 
-	r.Debugf("Loaded %d WeaponClass records", len(records))
+	r.Logger.Infof("Loaded %d WeaponClass records", len(records))
 
 	return nil
 }

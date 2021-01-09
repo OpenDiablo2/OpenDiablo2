@@ -3,7 +3,6 @@ package d2player
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -58,10 +57,6 @@ const (
 )
 
 const (
-	remainingPointsLabelX, remainingPointsLabelY = 677, 128
-)
-
-const (
 	skillTreePanelX = 401
 	skillTreePanelY = 64
 )
@@ -92,7 +87,6 @@ type skillTreeHeroTypeResources struct {
 func newSkillTree(
 	skills map[int]*d2hero.HeroSkill,
 	heroClass d2enum.Hero,
-	hero *d2hero.HeroStatsState,
 	asset *d2asset.AssetManager,
 	l d2util.LogLevel,
 	ui *d2ui.UIManager,
@@ -104,7 +98,6 @@ func newSkillTree(
 		uiManager: ui,
 		originX:   skillTreePanelX,
 		originY:   skillTreePanelY,
-		stats:     hero,
 		tab: [numTabs]*skillTreeTab{
 			{},
 			{},
@@ -121,25 +114,24 @@ func newSkillTree(
 }
 
 type skillTree struct {
-	resources       *skillTreeHeroTypeResources
-	asset           *d2asset.AssetManager
-	uiManager       *d2ui.UIManager
-	skills          map[int]*d2hero.HeroSkill
-	skillIcons      []*skillIcon
-	heroClass       d2enum.Hero
-	availSPLabel    *d2ui.Label
-	closeButton     *d2ui.Button
-	tab             [numTabs]*skillTreeTab
-	remainingPoints *d2ui.Label
-	isOpen          bool
-	originX         int
-	originY         int
-	selectedTab     int
-	onCloseCb       func()
-	panelGroup      *d2ui.WidgetGroup
-	iconGroup       *d2ui.WidgetGroup
-	panel           *d2ui.CustomWidget
-	stats           *d2hero.HeroStatsState
+	resources    *skillTreeHeroTypeResources
+	asset        *d2asset.AssetManager
+	uiManager    *d2ui.UIManager
+	skills       map[int]*d2hero.HeroSkill
+	skillIcons   []*skillIcon
+	heroClass    d2enum.Hero
+	frame        *d2ui.UIFrame
+	availSPLabel *d2ui.Label
+	closeButton  *d2ui.Button
+	tab          [numTabs]*skillTreeTab
+	isOpen       bool
+	originX      int
+	originY      int
+	selectedTab  int
+	onCloseCb    func()
+	panelGroup   *d2ui.WidgetGroup
+	iconGroup    *d2ui.WidgetGroup
+	panel        *d2ui.CustomWidget
 
 	*d2util.Logger
 	l d2util.LogLevel
@@ -152,19 +144,13 @@ func (s *skillTree) load() {
 	s.panel = s.uiManager.NewCustomWidget(s.Render, 400, 600)
 	s.panelGroup.AddWidget(s.panel)
 
-	frame := s.uiManager.NewUIFrame(d2ui.FrameRight)
-	s.panelGroup.AddWidget(frame)
+	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameRight)
+	s.panelGroup.AddWidget(s.frame)
 
 	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	s.closeButton.SetVisible(false)
 	s.closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(s.closeButton)
-
-	s.remainingPoints = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	s.remainingPoints.SetPosition(remainingPointsLabelX, remainingPointsLabelY)
-	s.remainingPoints.Alignment = d2ui.HorizontalAlignCenter
-	s.remainingPoints.SetText(strconv.Itoa(s.stats.SkillPoints))
-	s.panelGroup.AddWidget(s.remainingPoints)
 
 	if err := s.setHeroTypeResourcePath(); err != nil {
 		s.Error(err.Error())

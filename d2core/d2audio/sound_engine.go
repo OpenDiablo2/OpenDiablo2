@@ -3,7 +3,6 @@ package d2audio
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -32,7 +31,7 @@ const originalFPS float64 = 25
 // A Sound that can be started and stopped
 type Sound struct {
 	effect  d2interface.SoundEffect
-	entry   *d2records.SoundDetailRecord
+	entry   *d2records.SoundDetailsRecord
 	volume  float64
 	vTarget float64
 	vRate   float64
@@ -74,7 +73,7 @@ func (s *Sound) SetPan(pan float64) {
 
 // Play the sound
 func (s *Sound) Play() {
-	s.Info("starting sound " + s.entry.Handle)
+	s.Info("starting sound" + s.entry.Handle)
 	s.effect.Play()
 
 	if s.entry.FadeIn != 0 {
@@ -104,11 +103,6 @@ func (s *Sound) Stop() {
 	}
 }
 
-// String returns the sound filename
-func (s *Sound) String() string {
-	return s.entry.Handle
-}
-
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
 	asset    *d2asset.AssetManager
@@ -134,25 +128,43 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 	r.Logger.SetPrefix(logPrefix)
 	r.Logger.SetLevel(l)
 
-	if err := term.Bind("playsoundid", "plays the sound for a given id", []string{"id"}, r.commandPlaySoundID); err != nil {
+	err := term.BindAction("playsoundid", "plays the sound for a given id", func(id int) {
+		r.PlaySoundID(id)
+	})
+	if err != nil {
 		r.Error(err.Error())
 		return nil
 	}
 
-	if err := term.Bind("playsound", "plays the sound for a given handle string", []string{"name"}, r.commandPlaySound); err != nil {
+	err = term.BindAction("playsound", "plays the sound for a given handle string", func(handle string) {
+		r.PlaySoundHandle(handle)
+	})
+	if err != nil {
 		r.Error(err.Error())
 		return nil
 	}
 
-	if err := term.Bind("activesounds", "list currently active sounds", nil, r.commandActiveSounds); err != nil {
-		r.Error(err.Error())
-		return nil
-	}
+	err = term.BindAction("activesounds", "list currently active sounds", func() {
+		for s := range r.sounds {
+			if err != nil {
+				r.Error(err.Error())
+				return
+			}
 
-	if err := term.Bind("killsounds", "kill active sounds", nil, r.commandKillSounds); err != nil {
-		r.Error(err.Error())
-		return nil
-	}
+			r.Info(fmt.Sprint(s))
+		}
+	})
+
+	err = term.BindAction("killsounds", "kill active sounds", func() {
+		for s := range r.sounds {
+			if err != nil {
+				r.Error(err.Error())
+				return
+			}
+
+			s.Stop()
+		}
+	})
 
 	return &r
 }
@@ -180,11 +192,6 @@ func (s *SoundEngine) Advance(elapsed float64) {
 		s.timer = 0.2
 		s.accTime = 0
 	}
-}
-
-// UnbindTerminalCommands unbinds commands from the terminal
-func (s *SoundEngine) UnbindTerminalCommands(term d2interface.Terminal) error {
-	return term.Unbind("playsoundid", "playsound", "activesounds", "killsounds")
 }
 
 // Reset stop all sounds and reset state
@@ -234,36 +241,4 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 func (s *SoundEngine) PlaySoundHandle(handle string) *Sound {
 	sound := s.asset.Records.Sound.Details[handle].Index
 	return s.PlaySoundID(sound)
-}
-
-func (s *SoundEngine) commandPlaySoundID(args []string) error {
-	id, err := strconv.Atoi(args[0])
-	if err != nil {
-		return fmt.Errorf("invalid argument")
-	}
-
-	s.PlaySoundID(id)
-
-	return nil
-}
-
-func (s *SoundEngine) commandPlaySound(args []string) error {
-	s.PlaySoundHandle(args[0])
-
-	return nil
-}
-
-func (s *SoundEngine) commandActiveSounds([]string) error {
-	for sound := range s.sounds {
-		s.Info(sound.String())
-	}
-
-	return nil
-}
-func (s *SoundEngine) commandKillSounds([]string) error {
-	for sound := range s.sounds {
-		sound.Stop()
-	}
-
-	return nil
 }

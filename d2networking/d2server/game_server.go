@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -17,7 +16,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
@@ -52,17 +50,10 @@ type GameServer struct {
 	scriptEngine      *d2script.ScriptEngine
 	seed              int64
 	maxConnections    int
-	packetManagerChan chan ReceivedPacket
+	packetManagerChan chan []byte
 	heroStateFactory  *d2hero.HeroStateFactory
 
 	*d2util.Logger
-}
-
-// ReceivedPacket encapsulates the data necessary for the packet manager goroutine to process data from clients.
-// The packet manager needs to know who sent the data, in addition to the data itself.
-type ReceivedPacket struct {
-	Client ClientConnection
-	Packet d2netpacket.NetPacket
 }
 
 // NewGameServer builds a new GameServer that can be started
@@ -93,7 +84,7 @@ func NewGameServer(asset *d2asset.AssetManager,
 		connections:       make(map[string]ClientConnection),
 		networkServer:     networkServer,
 		maxConnections:    maxConnections[0],
-		packetManagerChan: make(chan ReceivedPacket),
+		packetManagerChan: make(chan []byte),
 		mapEngines:        make([]*d2mapengine.MapEngine, 0),
 		scriptEngine:      d2script.CreateScriptEngine(),
 		seed:              time.Now().UnixNano(),
@@ -151,13 +142,7 @@ func (g *GameServer) Start() error {
 		for {
 			c, err := g.listener.Accept()
 			if err != nil {
-				select {
-				case <-g.ctx.Done():
-					// this error was just a result of the server closing, don't worry about it
-				default:
-					g.Errorf("Unable to accept connection: %s", err)
-				}
-
+				g.Errorf("Unable to accept connection: %s", err)
 				return
 			}
 
@@ -172,7 +157,6 @@ func (g *GameServer) Start() error {
 func (g *GameServer) Stop() {
 	g.Lock()
 	g.cancel()
-	g.connections = make(map[string]ClientConnection)
 
 	if err := g.listener.Close(); err != nil {
 		g.Errorf("failed to close the listener %s, err: %v\n", g.listener.Addr(), err)
@@ -189,9 +173,45 @@ func (g *GameServer) packetManager() {
 		case <-g.ctx.Done():
 			return
 		case p := <-g.packetManagerChan:
-			err := g.OnPacketReceived(p.Client, p.Packet)
+			ipt, err := d2netpacket.InspectPacketType(p)
 			if err != nil {
-				g.Errorf("failed to handle packet received from client %s: %v", p.Client.GetUniqueID(), err)
+				g.Errorf("InspectPacketType: %v", err)
+			}
+
+			switch ipt {
+			case d2netpackettype.PlayerConnectionRequest:
+				player, err := d2netpacket.UnmarshalNetPacket(p)
+				if err != nil {
+					g.Errorf("Unable to unmarshal PlayerConnectionRequestPacket: %s\n", err)
+				}
+
+				g.sendPacketToClients(player)
+			case d2netpackettype.MovePlayer:
+				move, err := d2netpacket.UnmarshalNetPacket(p)
+				if err != nil {
+					g.Error(err.Error())
+					continue
+				}
+
+				g.sendPacketToClients(move)
+			case d2netpackettype.CastSkill:
+				castSkill, err := d2netpacket.UnmarshalNetPacket(p)
+				if err != nil {
+					g.Error(err.Error())
+					continue
+				}
+
+				g.sendPacketToClients(castSkill)
+			case d2netpackettype.SpawnItem:
+				item, err := d2netpacket.UnmarshalNetPacket(p)
+				if err != nil {
+					g.Error(err.Error())
+					continue
+				}
+
+				g.sendPacketToClients(item)
+			case d2netpackettype.ServerClosed:
+				g.Stop()
 			}
 		}
 	}
@@ -208,10 +228,9 @@ func (g *GameServer) sendPacketToClients(packet d2netpacket.NetPacket) {
 // handleConnection accepts an individual connection and starts pooling for new packets. It is recommended this is called
 // via Go Routine. Context should be a property of the GameServer Struct.
 func (g *GameServer) handleConnection(conn net.Conn) {
-	var (
-		connected int
-		client    ClientConnection
-	)
+	var connected int
+
+	var packet d2netpacket.NetPacket
 
 	g.Infof("Accepting connection: %s\n", conn.RemoteAddr().String())
 
@@ -224,18 +243,10 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 	decoder := json.NewDecoder(conn)
 
 	for {
-		var packet d2netpacket.NetPacket
-
 		err := decoder.Decode(&packet)
 		if err != nil {
-			switch err {
-			case io.EOF:
-				break // the other side closed the connection
-			default:
-				g.Error(err.Error())
-			}
-
-			return // allow the connection to close
+			g.Error(err.Error())
+			return // exit this connection as we could not read the first packet
 		}
 
 		// If this is the first packet we are seeing from this specific connection we first need to see if the client
@@ -246,7 +257,25 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 				g.Infof("Closing connection with %s: did not receive new player connection request...", conn.RemoteAddr().String())
 			}
 
-			if client, err = g.registerConnection(packet.PacketData, conn); err != nil {
+			if err := g.registerConnection(packet.PacketData, conn); err != nil {
+				switch err {
+				case errServerFull: // Server is currently full and not accepting new connections.
+					sf, serverFullErr := d2netpacket.CreateServerFullPacket()
+					if serverFullErr != nil {
+						g.Errorf("ServerFullPacket: %v", serverFullErr)
+					}
+
+					msf, marshalServerFullErr := d2netpacket.MarshalPacket(sf)
+					if marshalServerFullErr != nil {
+						g.Errorf("MarshalPacket: %v", marshalServerFullErr)
+					}
+
+					_, errServerFullPacket := conn.Write(msf)
+					g.Warningf("%v", errServerFullPacket)
+				case errPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
+					g.Errorf("%v", err)
+				}
+
 				return
 			}
 
@@ -257,10 +286,7 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 		case <-g.ctx.Done():
 			return
 		default:
-			g.packetManagerChan <- ReceivedPacket{
-				Client: client,
-				Packet: packet,
-			}
+			g.packetManagerChan <- packet.PacketData
 		}
 	}
 }
@@ -270,28 +296,12 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 // Errors:
 // - errServerFull
 // - errPlayerAlreadyExists
-func (g *GameServer) registerConnection(b []byte, conn net.Conn) (ClientConnection, error) {
-	var client ClientConnection
-
+func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	g.Lock()
-	defer g.Unlock()
 
 	// check to see if the server is full
 	if len(g.connections) >= g.maxConnections {
-		sf, serverFullErr := d2netpacket.CreateServerFullPacket()
-		if serverFullErr != nil {
-			g.Errorf("ServerFullPacket: %v", serverFullErr)
-		}
-
-		msf, marshalServerFullErr := d2netpacket.MarshalPacket(sf)
-		if marshalServerFullErr != nil {
-			g.Errorf("MarshalPacket: %v", marshalServerFullErr)
-		}
-
-		_, errServerFullPacket := conn.Write(msf)
-		g.Warningf("%v", errServerFullPacket)
-
-		return client, errServerFull
+		return errServerFull
 	}
 
 	// if it is not full, unmarshal the playerConnectionRequest
@@ -302,17 +312,29 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) (ClientConnecti
 
 	// check to see if the player is already registered
 	if _, ok := g.connections[packet.ID]; ok {
-		g.Errorf("%v", errPlayerAlreadyExists)
-		return client, errPlayerAlreadyExists
+		return errPlayerAlreadyExists
 	}
 
 	// Client a new TCP Client Connection and add it to the connections map
-	client = d2tcpclientconnection.CreateTCPClientConnection(conn, packet.ID)
+	client := d2tcpclientconnection.CreateTCPClientConnection(conn, packet.ID)
 	client.SetPlayerState(packet.PlayerState)
+	g.Infof("Client connected with an id of %s", client.GetUniqueID())
+	g.connections[client.GetUniqueID()] = client
 
-	g.OnClientConnected(client)
+	// Temporary position hack --------------------------------------------
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/829
+	sx, sy := g.mapEngines[0].GetStartPosition()
+	clientPlayerState := client.GetPlayerState()
+	clientPlayerState.X = sx
+	clientPlayerState.Y = sy
+	// ---------
 
-	return client, nil
+	// This really should be deferred however to much time will be spend holding a lock when we attempt to send a packet
+	g.Unlock()
+
+	g.handleClientConnection(client, sx, sy)
+
+	return nil
 }
 
 // OnClientConnected initializes the given ClientConnection. It sends the
@@ -425,27 +447,12 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 
 // OnClientDisconnected removes the given client from the list
 // of client connections.
-// If this client was the host, disconnects all clients and kills GameServer.
 func (g *GameServer) OnClientDisconnected(client ClientConnection) {
 	g.Infof("Client disconnected with an id of %s", client.GetUniqueID())
 	delete(g.connections, client.GetUniqueID())
-
-	if client.GetConnectionType() == d2clientconnectiontype.Local {
-		g.Info("Host disconnected, game server shuting down")
-
-		serverClosed, err := d2netpacket.CreateServerClosedPacket()
-		if err != nil {
-			g.Errorf("failed to generate ServerClosed packet after host disconnected: %s", err)
-		} else {
-			g.sendPacketToClients(serverClosed)
-		}
-
-		g.Stop()
-	}
 }
 
-// OnPacketReceived is called when a packet has been received from a remote client,
-// and by the local client to 'send' a packet to the server,
+// OnPacketReceived is called by the local client to 'send' a packet to the server.
 // nolint:gocyclo // switch statement on packet type makes sense, no need to change
 func (g *GameServer) OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	if g == nil {
@@ -483,13 +490,8 @@ func (g *GameServer) OnPacketReceived(client ClientConnection, packet d2netpacke
 		if err != nil {
 			g.Errorf("GameServer: error saving saving Player: %s", err)
 		}
-	case d2netpackettype.PlayerConnectionRequest:
-		break // prevent log message. these are handled by handleConnection
-	case d2netpackettype.PlayerDisconnectionNotification:
-		g.sendPacketToClients(packet)
-		g.OnClientDisconnected(client)
 	default:
-		g.Warningf("GameServer: received unknown packet %s", packet.PacketType)
+		g.Warningf("GameServer: received unknown packet %T", packet)
 	}
 
 	return nil

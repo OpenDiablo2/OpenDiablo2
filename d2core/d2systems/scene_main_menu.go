@@ -39,8 +39,8 @@ var _ d2interface.Scene = &MainMenuScene{}
 // or start the map engine test.
 type MainMenuScene struct {
 	*BaseScene
+	booted   bool
 	logoInit bool
-	state    d2enum.SceneState
 	sprites  struct {
 		trademark      akara.EID
 		logoFireLeft   akara.EID
@@ -59,12 +59,10 @@ func (s *MainMenuScene) Init(world *akara.World) {
 }
 
 func (s *MainMenuScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
-
-	s.state = d2enum.SceneStateBooting
 
 	s.setupViewports()
 	s.createBackground()
@@ -72,7 +70,7 @@ func (s *MainMenuScene) boot() {
 	s.createTrademarkScreen()
 	s.createLogo()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 func (s *MainMenuScene) setupViewports() {
@@ -172,12 +170,8 @@ func (s *MainMenuScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
-	}
-
-	if s.state != d2enum.SceneStateBooted {
-		return
 	}
 
 	if !s.logoInit {

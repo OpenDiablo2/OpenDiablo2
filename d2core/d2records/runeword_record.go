@@ -1,11 +1,11 @@
 package d2records
 
-// Runewords stores all of the RuneRecords
-type Runewords map[string]*RuneRecord
+// Runewords stores all of the RunesRecords
+type Runewords map[string]*RunesRecord
 
-// RuneRecord is a representation of a single row of runes.txt. It defines
+// RunesRecord is a representation of a single row of runes.txt. It defines
 // runewords available in the game.
-type RuneRecord struct {
+type RunesRecord struct {
 	Name     string
 	RuneName string // More of a note - the actual name should be read from the TBL files.
 	Complete bool   // An enabled/disabled flag. Only "Complete" runewords work in game.

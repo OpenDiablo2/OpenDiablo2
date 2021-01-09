@@ -107,7 +107,7 @@ func setLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Sets = records
 
-	r.Debugf("Loaded %d Set records", len(records))
+	r.Logger.Infof("Loaded %d records records", len(records))
 
 	return nil
 }

@@ -22,7 +22,7 @@ func hitClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Animation.Token.HitClass = records
 
-	r.Debugf("Loaded %d HitClass records", len(records))
+	r.Logger.Infof("Loaded %d HitClass records", len(records))
 
 	return nil
 }

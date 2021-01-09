@@ -59,7 +59,7 @@ func uniqueMonsterPrefixLoader(r *RecordManager, d *d2txt.DataDictionary) error 
 
 	r.Monster.Name.Prefix = records
 
-	r.Debugf("Loaded %d UniqueMonsterPrefix records", len(records))
+	r.Logger.Infof("Loaded %d unique monster prefix records", len(records))
 
 	return nil
 }
@@ -72,7 +72,7 @@ func uniqueMonsterSuffixLoader(r *RecordManager, d *d2txt.DataDictionary) error 
 
 	r.Monster.Name.Suffix = records
 
-	r.Debugf("Loaded %d UniqueMonsterSuffix records", len(records))
+	r.Logger.Infof("Loaded %d unique monster suffix records", len(records))
 
 	return nil
 }

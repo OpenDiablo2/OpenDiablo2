@@ -22,7 +22,7 @@ func colorsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Colors = records
 
-	r.Debugf("Loaded %d Color records", len(records))
+	r.Logger.Infof("Loaded %d Color records", len(records))
 
 	return nil
 }

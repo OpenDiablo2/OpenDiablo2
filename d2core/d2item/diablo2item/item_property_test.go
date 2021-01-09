@@ -277,7 +277,7 @@ var itemStatCosts = map[string]*d2records.ItemStatCostRecord{
 }
 
 // nolint:gochecknoglobals // just a test
-var charStats = map[d2enum.Hero]*d2records.CharStatRecord{
+var charStats = map[d2enum.Hero]*d2records.CharStatsRecord{
 	d2enum.HeroPaladin: {
 		Class:             d2enum.HeroPaladin,
 		SkillStrAll:       "to Paladin Skill Levels",
@@ -297,7 +297,7 @@ var skillDetails = map[int]*d2records.SkillRecord{
 }
 
 // nolint:gochecknoglobals // just a test
-var monStats = map[string]*d2records.MonStatRecord{
+var monStats = map[string]*d2records.MonStatsRecord{
 	"Specter": {NameString: "Specter", ID: 40},
 }
 

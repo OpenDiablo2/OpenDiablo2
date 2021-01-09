@@ -146,6 +146,7 @@ func (m *RenderSystem) createRenderer() {
 		RunInBackground: config.RunInBackground,
 		VsyncEnabled:    config.VsyncEnabled,
 		Backend:         config.Backend,
+		LogLevel:        config.LogLevel,
 	}
 
 	renderer, err := d2render.CreateRenderer(oldStyleConfig)

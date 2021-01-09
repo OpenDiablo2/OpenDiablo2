@@ -57,7 +57,7 @@ func monsterSoundsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d MonsterSound records", len(records))
+	r.Logger.Infof("Loaded %d Monster Sound records", len(records))
 
 	r.Monster.Sounds = records
 

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // Configuration defines the configuration for the engine, loaded from config.json
@@ -19,6 +21,7 @@ type Configuration struct {
 	RunInBackground bool
 	VsyncEnabled    bool
 	Backend         string
+	LogLevel        d2util.LogLevel
 	path            string
 }
 

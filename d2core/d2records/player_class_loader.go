@@ -29,7 +29,7 @@ func playerClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d PlayerClass records", len(records))
+	r.Logger.Infof("Loaded %d PlayerClass records", len(records))
 
 	r.Character.Classes = records
 
