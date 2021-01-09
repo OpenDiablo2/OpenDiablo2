@@ -1,11 +1,11 @@
 package d2records
 
-// Gems stores all of the GemRecords
-type Gems map[string]*GemRecord
+// Gems stores all of the GemsRecords
+type Gems map[string]*GemsRecord
 
-// GemRecord is a representation of a single row of gems.txt
+// GemsRecord is a representation of a single row of gems.txt
 // it describes the properties of socketable items
-type GemRecord struct {
+type GemsRecord struct {
 	Name            string
 	Letter          string
 	Transform       int

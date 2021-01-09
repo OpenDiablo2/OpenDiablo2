@@ -64,7 +64,10 @@ const (
 )
 
 // NewLayoutScrollbar attaches a scrollbar to the parentLayout to control the targetLayout
-func NewLayoutScrollbar(parentLayout, targetLayout *Layout) *LayoutScrollbar {
+func NewLayoutScrollbar(
+	parentLayout *Layout,
+	targetLayout *Layout,
+) *LayoutScrollbar {
 	parentW, parentH := parentLayout.GetSize()
 	_, targetH := targetLayout.GetSize()
 	gutterHeight := parentH - (2 * textSliderPartHeight)

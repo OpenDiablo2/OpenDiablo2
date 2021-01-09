@@ -62,7 +62,6 @@ const (
 	tcpJoinBtnX, tcpJoinBtnY                 = 264, 240
 	errorLabelX, errorLabelY                 = 400, 250
 	machineIPX, machineIPY                   = 400, 90
-	tipX, tipY                               = 400, 300
 )
 
 const (
@@ -160,8 +159,6 @@ type MainMenu struct {
 	tcpJoinGameLabel    *d2ui.Label
 	machineIP           *d2ui.Label
 	errorLabel          *d2ui.Label
-	joinTipLabel        *d2ui.Label
-	hostTipLabel        *d2ui.Label
 	tcpJoinGameEntry    *d2ui.TextBox
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
@@ -185,12 +182,10 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	loading.Progress(twentyPercent)
 
-	v.createMainMenuLabels(loading)
-	v.createMultiplayerLabels()
+	v.createLabels(loading)
 	v.loadBackgroundSprites()
 	v.createLogos(loading)
-	v.createMainMenuButtons(loading)
-	v.createMultiplayerMenuButtons()
+	v.createButtons(loading)
 
 	v.tcpJoinGameEntry = v.uiManager.NewTextbox()
 	v.tcpJoinGameEntry.SetPosition(joinGameDialogX, joinGameDialogY)
@@ -240,47 +235,39 @@ func (v *MainMenu) loadBackgroundSprites() {
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
-func (v *MainMenu) createMainMenuLabels(loading d2screen.LoadingState) {
+func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2ui.HorizontalAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
-	v.versionLabel.Color[0] = d2util.Color(white)
+	v.versionLabel.Color[0] = rgbaColor(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
 	v.commitLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.commitLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.commitLabel.SetText(v.buildInfo.Commit)
-	v.commitLabel.Color[0] = d2util.Color(white)
+	v.commitLabel.Color[0] = rgbaColor(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 
 	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel.SetText(v.asset.TranslateLabel(d2enum.CopyrightLabel))
-	v.copyrightLabel.Color[0] = d2util.Color(lightBrown)
+	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText(v.asset.TranslateLabel(d2enum.AllRightsReservedLabel))
-	v.copyrightLabel2.Color[0] = d2util.Color(lightBrown)
+	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
 	v.openDiabloLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.openDiabloLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
-	v.openDiabloLabel.Color[0] = d2util.Color(lightYellow)
+	v.openDiabloLabel.Color[0] = rgbaColor(lightYellow)
 	v.openDiabloLabel.SetPosition(od2LabelX, od2LabelY)
 	loading.Progress(fiftyPercent)
 
-	if v.errorLabel != nil {
-		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
-		v.errorLabel.Alignment = d2ui.HorizontalAlignCenter
-		v.errorLabel.Color[0] = d2util.Color(red)
-	}
-}
-
-func (v *MainMenu) createMultiplayerLabels() {
 	v.tcpIPOptionsLabel = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIPOptionsLabel.SetPosition(tcpOptionsX, tcpOptionsY)
 	v.tcpIPOptionsLabel.Alignment = d2ui.HorizontalAlignCenter
@@ -289,30 +276,20 @@ func (v *MainMenu) createMultiplayerLabels() {
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.tcpJoinGameLabel.SetText(strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(d2enum.TCPIPEnterHostIPLabel), 27), "\n"))
-	v.tcpJoinGameLabel.Color[0] = d2util.Color(gold)
+	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
 	v.machineIP.SetText(v.asset.TranslateLabel(d2enum.TCPIPYourIPLabel) + "\n" + v.getLocalIP())
-	v.machineIP.Color[0] = d2util.Color(lightYellow)
+	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
-	v.hostTipLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
-	v.hostTipLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.hostTipLabel.SetText(d2ui.ColorTokenize(strings.Join(d2util.SplitIntoLinesWithMaxWidth(
-		v.asset.TranslateLabel(d2enum.TipHostLabel), 36),
-		"\n"), d2ui.ColorTokenGold))
-	v.hostTipLabel.SetPosition(tipX, tipY)
-	v.hostTipLabel.SetVisible(false)
-
-	v.joinTipLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
-	v.joinTipLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.joinTipLabel.SetText(d2ui.ColorTokenize(strings.Join(d2util.SplitIntoLinesWithMaxWidth(
-		v.asset.TranslateLabel(d2enum.TipJoinLabel), 36),
-		"\n"), d2ui.ColorTokenGold))
-	v.joinTipLabel.SetPosition(tipX, tipY)
-	v.joinTipLabel.SetVisible(false)
+	if v.errorLabel != nil {
+		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
+		v.errorLabel.Alignment = d2ui.HorizontalAlignCenter
+		v.errorLabel.Color[0] = rgbaColor(red)
+	}
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
@@ -352,7 +329,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 
-func (v *MainMenu) createMainMenuButtons(loading d2screen.LoadingState) {
+func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(d2enum.ExitGameLabel))
 	v.exitDiabloButton.SetPosition(exitDiabloBtnX, exitDiabloBtnY)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
@@ -390,6 +367,8 @@ func (v *MainMenu) createMainMenuButtons(loading d2screen.LoadingState) {
 	v.btnServerIPOk = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateString(d2enum.OKLabel))
 	v.btnServerIPOk.SetPosition(srvOkBtnX, srvOkBtnY)
 	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
+
+	v.createMultiplayerMenuButtons()
 	loading.Progress(eightyPercent)
 }
 
@@ -411,14 +390,10 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.btnTCPIPHostGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(d2enum.TCPIPHostGameLabel))
 	v.btnTCPIPHostGame.SetPosition(tcpHostBtnX, tcpHostBtnY)
 	v.btnTCPIPHostGame.OnActivated(func() { v.onTCPIPHostGameClicked() })
-	v.btnTCPIPHostGame.OnHoverStart(func() { v.hostTipLabel.SetVisible(true) })
-	v.btnTCPIPHostGame.OnHoverEnd(func() { v.hostTipLabel.SetVisible(false) })
 
 	v.btnTCPIPJoinGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(d2enum.TCPIPJoinGameLabel))
 	v.btnTCPIPJoinGame.SetPosition(tcpJoinBtnX, tcpJoinBtnY)
 	v.btnTCPIPJoinGame.OnActivated(func() { v.onTCPIPJoinGameClicked() })
-	v.btnTCPIPJoinGame.OnHoverStart(func() { v.joinTipLabel.SetVisible(true) })
-	v.btnTCPIPJoinGame.OnHoverEnd(func() { v.joinTipLabel.SetVisible(false) })
 }
 
 func (v *MainMenu) onMapTestClicked() {

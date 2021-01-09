@@ -20,7 +20,7 @@ func eventsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d Event records", len(records))
+	r.Logger.Infof("Loaded %d Event records", len(records))
 
 	r.Character.Events = records
 

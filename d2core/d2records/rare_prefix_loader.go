@@ -12,7 +12,7 @@ func rareItemPrefixLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Rare.Prefix = records
 
-	r.Debugf("Loaded %d RarePrefix records", len(records))
+	r.Logger.Infof("Loaded %d RarePrefix records", len(records))
 
 	return nil
 }

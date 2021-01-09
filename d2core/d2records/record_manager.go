@@ -334,8 +334,8 @@ func (r *RecordManager) GetExperienceBreakpoint(heroType d2enum.Hero, level int)
 	return r.Character.Experience[level].HeroBreakpoints[heroType]
 }
 
-// GetLevelDetails gets a LevelDetailRecord by the record Id
-func (r *RecordManager) GetLevelDetails(id int) *LevelDetailRecord {
+// GetLevelDetails gets a LevelDetailsRecord by the record Id
+func (r *RecordManager) GetLevelDetails(id int) *LevelDetailsRecord {
 	for i := 0; i < len(r.Level.Details); i++ {
 		if r.Level.Details[i].ID == id {
 			return r.Level.Details[i]
@@ -433,7 +433,7 @@ func (r *RecordManager) lookupObject(act, typ, id int) *ObjectLookupRecord {
 }
 
 // SelectSoundByIndex selects a sound by its ID
-func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailRecord {
+func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailsRecord {
 	for idx := range r.Sound.Details {
 		if r.Sound.Details[idx].Index == index {
 			return r.Sound.Details[idx]

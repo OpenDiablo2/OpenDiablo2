@@ -304,7 +304,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d Missile records", len(records))
+	r.Logger.Infof("Loaded %d Missile Records", len(records))
 
 	r.Missiles = records
 

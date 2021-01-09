@@ -21,7 +21,7 @@ func monsterModeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d MonMode records", len(records))
+	r.Logger.Infof("Loaded %d MonMode records", len(records))
 
 	r.Monster.Modes = records
 

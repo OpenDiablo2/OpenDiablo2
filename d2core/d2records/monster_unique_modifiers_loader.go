@@ -48,7 +48,7 @@ func monsterUniqModifiersLoader(r *RecordManager, d *d2txt.DataDictionary) error
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d MonsterUniqueModifier records", len(records))
+	r.Logger.Infof("Loaded %d MonsterUniqueModifier records", len(records))
 
 	r.Monster.Unique.Mods = records
 	r.Monster.Unique.Constants = constants

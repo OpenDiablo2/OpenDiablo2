@@ -48,7 +48,7 @@ func experienceLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	}
 
 	for d.Next() {
-		record := &ExperienceBreakpointRecord{
+		record := &ExperienceBreakpointsRecord{
 			Level: d.Number("Level"),
 			HeroBreakpoints: map[d2enum.Hero]int{
 				d2enum.HeroAmazon:      d.Number("Amazon"),
@@ -68,7 +68,7 @@ func experienceLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d ExperienceBreakpoint records", len(breakpoints))
+	r.Logger.Infof("Loaded %d Experience Breakpoint records", len(breakpoints))
 
 	r.Character.MaxLevel = maxLevels
 	r.Character.Experience = breakpoints

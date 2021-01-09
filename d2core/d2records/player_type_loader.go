@@ -24,7 +24,7 @@ func playerTypeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	r.Debugf("Loaded %d PlayerType records", len(records))
+	r.Logger.Infof("Loaded %d PlayerType records", len(records))
 
 	r.Animation.Token.Player = records
 

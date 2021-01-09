@@ -139,7 +139,7 @@ func skillDescriptionLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Skill.Descriptions = records
 
-	r.Debugf("Loaded %d SkillDescription records", len(records))
+	r.Logger.Infof("Loaded %d Skill Description records", len(records))
 
 	return nil
 }

@@ -21,7 +21,7 @@ func lowQualityLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.LowQualityPrefixes = records
 
-	r.Debugf("Loaded %d LowQuality records", len(records))
+	r.Logger.Infof("Loaded %d Low Item Quality records", len(records))
 
 	return nil
 }

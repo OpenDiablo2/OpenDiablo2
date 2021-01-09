@@ -13,7 +13,7 @@ func weaponsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return err
 	}
 
-	r.Debugf("Loaded %d Weapon records", len(records))
+	r.Logger.Infof("Loaded %d weapons", len(records))
 
 	r.Item.Weapons = records
 

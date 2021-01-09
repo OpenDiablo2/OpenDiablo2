@@ -110,7 +110,7 @@ func (f *HeroStateFactory) GetAllHeroStates() ([]*HeroState, error) {
 }
 
 // CreateHeroSkillsState will assemble the hero skills from the class stats record.
-func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStatRecord, heroType d2enum.Hero) (map[int]*HeroSkill, error) {
+func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStatsRecord, heroType d2enum.Hero) (map[int]*HeroSkill, error) {
 	baseSkills := map[int]*HeroSkill{}
 
 	for idx := range classStats.BaseSkill {

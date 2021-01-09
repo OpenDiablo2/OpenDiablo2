@@ -24,12 +24,12 @@ const (
 	fmtRunewordPropMax   = "T1Max%d"
 )
 
-// Loadrecords loads runes records into a map[string]*RuneRecord
+// Loadrecords loads runes records into a map[string]*RunesRecord
 func runewordLoader(r *RecordManager, d *d2txt.DataDictionary) error {
-	records := make(map[string]*RuneRecord)
+	records := make(map[string]*RunesRecord)
 
 	for d.Next() {
-		record := &RuneRecord{
+		record := &RunesRecord{
 			Name:     d.String("name"),
 			RuneName: d.String("Rune Name"),
 			Complete: d.Bool("complete"),
@@ -89,7 +89,7 @@ func runewordLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Runewords = records
 
-	r.Debugf("Loaded %d Rune records", len(records))
+	r.Logger.Infof("Loaded %d records records", len(records))
 
 	return nil
 }

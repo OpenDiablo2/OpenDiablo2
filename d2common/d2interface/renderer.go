@@ -1,5 +1,7 @@
 package d2interface
 
+import "github.com/hajimehoshi/ebiten/v2"
+
 type renderCallback = func(Surface) error
 
 type updateCallback = func() error
@@ -19,7 +21,7 @@ type Renderer interface {
 	GetCursorPos() (int, int)
 	CurrentFPS() float64
 	ShowPanicScreen(message string)
-	Print(target interface{}, str string) error
-	PrintAt(target interface{}, str string, x, y int)
+	Print(target *ebiten.Image, str string) error
+	PrintAt(target *ebiten.Image, str string, x, y int)
 	GetWindowSize() (int, int)
 }

@@ -3,7 +3,6 @@ package d2asset
 import (
 	"fmt"
 	"image/color"
-	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -410,70 +409,43 @@ func (am *AssetManager) loadDCC(path string,
 
 // BindTerminalCommands binds the in-game terminal comands for the asset manager.
 func (am *AssetManager) BindTerminalCommands(term d2interface.Terminal) error {
-	if err := term.Bind("assetspam", "display verbose asset manager logs", nil, am.commandAssetSpam(term)); err != nil {
-		return err
-	}
-
-	if err := term.Bind("assetstat", "display asset manager cache statistics", nil, am.commandAssetStat(term)); err != nil {
-		return err
-	}
-
-	if err := term.Bind("assetclear", "clear asset manager cache", nil, am.commandAssetClear); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// UnbindTerminalCommands unbinds commands from the terminal
-func (am *AssetManager) UnbindTerminalCommands(term d2interface.Terminal) error {
-	return term.Unbind("assetspam", "assetstat", "assetclear")
-}
-
-func (am *AssetManager) commandAssetSpam(term d2interface.Terminal) func([]string) error {
-	return func(args []string) error {
-		verbose, err := strconv.ParseBool(args[0])
-		if err != nil {
-			term.Errorf("asset manager verbose invalid argument")
-			return nil
-		}
-
+	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
-			term.Infof("asset manager verbose logging enabled")
+			term.OutputInfof("asset manager verbose logging enabled")
 		} else {
-			term.Infof("asset manager verbose logging disabled")
+			term.OutputInfof("asset manager verbose logging disabled")
 		}
 
 		am.palettes.SetVerbose(verbose)
 		am.fonts.SetVerbose(verbose)
 		am.transforms.SetVerbose(verbose)
 		am.animations.SetVerbose(verbose)
-
-		return nil
+	}); err != nil {
+		return err
 	}
-}
 
-func (am *AssetManager) commandAssetStat(term d2interface.Terminal) func([]string) error {
-	return func([]string) error {
+	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
 		var cacheStatistics = func(c d2interface.Cache) float64 {
 			const percent = 100.0
 			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
 		}
 
-		term.Infof("palette cache: %f", cacheStatistics(am.palettes))
-		term.Infof("palette transform cache: %f", cacheStatistics(am.transforms))
-		term.Infof("Animation cache: %f", cacheStatistics(am.animations))
-		term.Infof("font cache: %f", cacheStatistics(am.fonts))
-
-		return nil
+		term.OutputInfof("palette cache: %f", cacheStatistics(am.palettes))
+		term.OutputInfof("palette transform cache: %f", cacheStatistics(am.transforms))
+		term.OutputInfof("Animation cache: %f", cacheStatistics(am.animations))
+		term.OutputInfof("font cache: %f", cacheStatistics(am.fonts))
+	}); err != nil {
+		return err
 	}
-}
 
-func (am *AssetManager) commandAssetClear([]string) error {
-	am.palettes.Clear()
-	am.transforms.Clear()
-	am.animations.Clear()
-	am.fonts.Clear()
+	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
+		am.palettes.Clear()
+		am.transforms.Clear()
+		am.animations.Clear()
+		am.fonts.Clear()
+	}); err != nil {
+		return err
+	}
 
 	return nil
 }

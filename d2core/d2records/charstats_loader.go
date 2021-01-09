@@ -38,7 +38,7 @@ func charStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	}
 
 	for d.Next() {
-		record := &CharStatRecord{
+		record := &CharStatsRecord{
 			Class: stringMap[d.String("class")],
 
 			InitStr:     d.Number("str"),
@@ -136,7 +136,7 @@ func charStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d CharStat records", len(records))
+	r.Logger.Infof("Loaded %d CharStats records", len(records))
 
 	r.Character.Stats = records
 

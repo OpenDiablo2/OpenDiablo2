@@ -2,13 +2,13 @@ package d2records
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-// LevelDetails has all of the LevelDetailRecords
-type LevelDetails map[int]*LevelDetailRecord
+// LevelDetails has all of the LevelDetailsRecords
+type LevelDetails map[int]*LevelDetailsRecord
 
-// LevelDetailRecord is a representation of a row from levels.txt
+// LevelDetailsRecord is a representation of a row from levels.txt
 // it describes lots of things about the levels, like where they are connected,
 // what kinds of monsters spawn, the level generator type, and lots of other stuff.
-type LevelDetailRecord struct {
+type LevelDetailsRecord struct {
 
 	// Name
 	// This column has no function, it only serves as a comment field to make it

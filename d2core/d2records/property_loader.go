@@ -67,7 +67,7 @@ func propertyLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Properties = records
 
-	r.Debugf("Loaded %d Property records", len(records))
+	r.Logger.Infof("Loaded %d Property records", len(records))
 
 	return nil
 }

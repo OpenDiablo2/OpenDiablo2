@@ -1,11 +1,13 @@
 ---
-name: pull_request
-"on": [pull_request]
+name: build
+"on":
+    push:
+        branches:
+            - master
 jobs:
     build:
         name: Build
         runs-on: ubuntu-latest
-        continue-on-error: true
         steps:
             -   name: Set up Go 1.14
                 uses: actions/setup-go@v2.1.3

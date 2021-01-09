@@ -8,7 +8,7 @@ func levelMazeDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(LevelMazeDetails)
 
 	for d.Next() {
-		record := &LevelMazeDetailRecord{
+		record := &LevelMazeDetailsRecord{
 			Name:              d.String("Name"),
 			LevelID:           d.Number("Level"),
 			NumRoomsNormal:    d.Number("Rooms"),
@@ -24,7 +24,7 @@ func levelMazeDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d LevelMazeDetail records", len(records))
+	r.Logger.Infof("Loaded %d LevelMazeDetails records", len(records))
 
 	r.Level.Maze = records
 

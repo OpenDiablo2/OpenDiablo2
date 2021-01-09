@@ -4,8 +4,6 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -39,10 +37,9 @@ type LoadingScene struct {
 		stage2 *akara.Subscription // has type, no handle
 		stage3 *akara.Subscription // has handle, no asset
 		stage4 *akara.Subscription // is loaded
-		total  *akara.Subscription // total files
 	}
 	progress float64
-	state    d2enum.SceneState
+	booted   bool
 }
 
 // Init the loading scene
@@ -58,15 +55,6 @@ func (s *LoadingScene) Init(world *akara.World) {
 
 func (s *LoadingScene) setupSubscriptions() {
 	s.Debug("setting up component subscriptions")
-
-	total := s.NewComponentFilter().
-		Require(
-			&d2components.File{},
-		).
-		Forbid(
-			&d2components.FileSource{},
-		).
-		Build()
 
 	stage1 := s.NewComponentFilter().
 		Require(
@@ -114,7 +102,6 @@ func (s *LoadingScene) setupSubscriptions() {
 		).
 		Build()
 
-	s.loadStages.total = s.World.AddSubscription(total)   // total count of all files at all stages
 	s.loadStages.stage1 = s.World.AddSubscription(stage1) // has path, no type
 	s.loadStages.stage2 = s.World.AddSubscription(stage2) // has type, no handle
 	s.loadStages.stage3 = s.World.AddSubscription(stage3) // has handle, no asset
@@ -122,14 +109,14 @@ func (s *LoadingScene) setupSubscriptions() {
 }
 
 func (s *LoadingScene) boot() {
-	if !s.BaseScene.Booted() {
+	if !s.BaseScene.booted {
 		s.BaseScene.boot()
 		return
 	}
 
 	s.createLoadingScreen()
 
-	s.state = d2enum.SceneStateBooted
+	s.booted = true
 }
 
 func (s *LoadingScene) createLoadingScreen() {
@@ -147,12 +134,8 @@ func (s *LoadingScene) Update() {
 		return
 	}
 
-	if s.state == d2enum.SceneStateUninitialized {
+	if !s.booted {
 		s.boot()
-	}
-
-	if s.state != d2enum.SceneStateBooted {
-		return
 	}
 
 	s.updateLoadProgress()
@@ -164,10 +147,12 @@ func (s *LoadingScene) Update() {
 }
 
 func (s *LoadingScene) updateLoadProgress() {
-	total := float64(len(s.loadStages.total.GetEntities()))
+	untyped := float64(len(s.loadStages.stage1.GetEntities()))
+	unhandled := float64(len(s.loadStages.stage2.GetEntities()))
+	unparsed := float64(len(s.loadStages.stage3.GetEntities()))
 	loaded := float64(len(s.loadStages.stage4.GetEntities()))
 
-	s.progress = loaded / total
+	s.progress = 1 - ((untyped + unhandled + unparsed) / 3 / loaded)
 }
 
 //nolint:gomnd // arbitrary numbers for test scene

@@ -58,7 +58,7 @@ func levelTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Debugf("Loaded %d LevelType records", len(records))
+	r.Logger.Infof("Loaded %d LevelType records", len(records))
 
 	r.Level.Types = records
 

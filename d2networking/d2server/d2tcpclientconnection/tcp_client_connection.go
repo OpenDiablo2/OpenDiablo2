@@ -33,9 +33,12 @@ func (t TCPClientConnection) GetUniqueID() string {
 
 // SendPacketToClient marshals and sends (writes) NetPackets
 func (t *TCPClientConnection) SendPacketToClient(p d2netpacket.NetPacket) error {
-	encoder := json.NewEncoder(t.tcpConnection)
+	packet, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
 
-	err := encoder.Encode(p)
+	_, err = t.tcpConnection.Write(packet)
 	if err != nil {
 		return err
 	}

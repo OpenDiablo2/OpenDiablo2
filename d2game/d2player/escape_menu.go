@@ -398,15 +398,25 @@ func (m *EscapeMenu) OnLoad() {
 
 // OnEscKey is called when the escape key is pressed
 func (m *EscapeMenu) OnEscKey() {
-	if m.currentLayout == configureControlsLayoutID {
+	// note: original D2 returns straight to the game from however deep in the menu we are
+	switch m.currentLayout {
+	case optionsLayoutID:
+		m.setLayout(mainLayoutID)
+		return
+	case soundOptionsLayoutID,
+		videoOptionsLayoutID,
+		automapOptionsLayoutID,
+		configureControlsLayoutID:
 		m.setLayout(optionsLayoutID)
 
 		if err := m.keyBindingMenu.Close(); err != nil {
 			m.Errorf("unable to close the configure controls menu: %v", err.Error())
 		}
-	} else {
-		m.close()
+
+		return
 	}
+
+	m.close()
 }
 
 // SetOnCloseCb sets the callback that is run when close() is called
