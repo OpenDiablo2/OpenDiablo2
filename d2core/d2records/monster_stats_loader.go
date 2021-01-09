@@ -10,7 +10,7 @@ func monsterStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(MonStats)
 
 	for d.Next() {
-		record := &MonStatsRecord{
+		record := &MonStatRecord{
 			Key:                            d.String("Id"),
 			ID:                             d.Number("hcIdx"),
 			BaseKey:                        d.String("BaseId"),
@@ -272,7 +272,7 @@ func monsterStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d MonStats records", len(records))
+	r.Debugf("Loaded %d MonStat records", len(records))
 
 	r.Monster.Stats = records
 

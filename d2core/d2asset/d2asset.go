@@ -9,19 +9,23 @@ import (
 )
 
 // NewAssetManager creates and assigns all necessary dependencies for the AssetManager top-level functions to work correctly
-func NewAssetManager() (*AssetManager, error) {
-	loader, err := d2loader.NewLoader(d2util.LogLevelDefault)
+func NewAssetManager(logLevel d2util.LogLevel) (*AssetManager, error) {
+	loader, err := d2loader.NewLoader(logLevel)
 	if err != nil {
 		return nil, err
 	}
 
-	records, err := d2records.NewRecordManager(d2util.LogLevelDebug)
+	records, err := d2records.NewRecordManager(logLevel)
 	if err != nil {
 		return nil, err
 	}
+
+	logger := d2util.NewLogger()
+	logger.SetPrefix(logPrefix)
+	logger.SetLevel(logLevel)
 
 	manager := &AssetManager{
-		Logger:     d2util.NewLogger(),
+		Logger:     logger,
 		Loader:     loader,
 		tables:     make([]d2tbl.TextDictionary, 0),
 		animations: d2cache.CreateCache(animationBudget),
@@ -30,8 +34,6 @@ func NewAssetManager() (*AssetManager, error) {
 		transforms: d2cache.CreateCache(paletteTransformBudget),
 		Records:    records,
 	}
-
-	manager.SetPrefix(logPrefix)
 
 	return manager, err
 }

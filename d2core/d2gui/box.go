@@ -74,8 +74,7 @@ func NewBox(
 	renderer d2interface.Renderer,
 	ui *d2ui.UIManager,
 	contentLayout *Layout,
-	width, height int,
-	x, y int,
+	width, height, x, y int,
 	l d2util.LogLevel,
 	title string,
 ) *Box {

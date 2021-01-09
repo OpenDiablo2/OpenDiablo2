@@ -45,7 +45,7 @@ func itemQualityLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Quality = records
 
-	r.Logger.Infof("Loaded %d ItemQualities records", len(records))
+	r.Debugf("Loaded %d ItemQuality records", len(records))
 
 	return nil
 }

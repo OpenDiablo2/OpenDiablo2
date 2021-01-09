@@ -119,7 +119,7 @@ func (s *TerminalScene) processCommand(eid akara.EID) {
 
 	s.Infof("Registering command `%s` - %s", reg.Name, reg.Description)
 
-	err := s.Terminal.BindAction(reg.Name, reg.Description, reg.Callback)
+	err := s.Terminal.Bind(reg.Name, reg.Description, nil, reg.Callback)
 	if err != nil {
 		s.Error(err.Error())
 	}

@@ -238,12 +238,12 @@ var skillDetails = map[int]*d2records.SkillRecord{
 }
 
 // nolint:gochecknoglobals // just a test
-var monStats = map[string]*d2records.MonStatsRecord{
+var monStats = map[string]*d2records.MonStatRecord{
 	"Specter": {NameString: "Specter", ID: 40},
 }
 
 // nolint:gochecknoglobals // just a test
-var charStats = map[d2enum.Hero]*d2records.CharStatsRecord{
+var charStats = map[d2enum.Hero]*d2records.CharStatRecord{
 	d2enum.HeroPaladin: {
 		Class:             d2enum.HeroPaladin,
 		SkillStrAll:       "to Paladin Skill Levels",

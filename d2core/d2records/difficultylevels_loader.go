@@ -42,7 +42,7 @@ func difficultyLevelsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d DifficultyLevel records", len(records))
+	r.Debugf("Loaded %d DifficultyLevel records", len(records))
 
 	r.DifficultyLevels = records
 

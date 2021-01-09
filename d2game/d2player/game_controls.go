@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,7 +28,6 @@ const (
 // Panel represents the panel at the bottom of the game screen
 type Panel interface {
 	IsOpen() bool
-	Toggle()
 	Open()
 	Close()
 }
@@ -37,11 +37,8 @@ const mouseBtnActionsThreshold = 0.25
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
 	leftSkill actionableType = iota
-	newStats
 	xp
-	walkRun
 	stamina
-	newSkills
 	rightSkill
 	hpGlobe
 	manaGlobe
@@ -53,30 +50,15 @@ const (
 	leftSkillWidth,
 	leftSkillHeight = 117, 550, 50, 50
 
-	newStatsX,
-	newStatsY,
-	newStatsWidth,
-	newStatsHeight = 206, 563, 30, 30
-
 	xpX,
 	xpY,
 	xpWidth,
 	xpHeight = 253, 560, 125, 5
 
-	walkRunX,
-	walkRunY,
-	walkRunWidth,
-	walkRunHeight = 255, 573, 17, 20
-
 	staminaX,
 	staminaY,
 	staminaWidth,
 	staminaHeight = 273, 573, 105, 20
-
-	newSkillsX,
-	newSkillsY,
-	newSkillsWidth,
-	newSkillsHeight = 562, 563, 30, 30
 
 	rightSkillX,
 	rightSkillY,
@@ -124,6 +106,7 @@ func NewGameControls(
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	keyMap *KeyMap,
+	audioProvider d2interface.AudioProvider,
 	l d2util.LogLevel,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
@@ -155,35 +138,17 @@ func NewGameControls(
 			Width:  leftSkillWidth,
 			Height: leftSkillHeight,
 		}},
-		{newStats, d2geom.Rectangle{
-			Left:   newStatsX,
-			Top:    newStatsY,
-			Width:  newStatsWidth,
-			Height: newStatsHeight,
-		}},
 		{xp, d2geom.Rectangle{
 			Left:   xpX,
 			Top:    xpY,
 			Width:  xpWidth,
 			Height: xpHeight,
 		}},
-		{walkRun, d2geom.Rectangle{
-			Left:   walkRunX,
-			Top:    walkRunY,
-			Width:  walkRunWidth,
-			Height: walkRunHeight,
-		}},
 		{stamina, d2geom.Rectangle{
 			Left:   staminaX,
 			Top:    staminaY,
 			Width:  staminaWidth,
 			Height: staminaHeight,
-		}},
-		{newSkills, d2geom.Rectangle{
-			Left:   newSkillsX,
-			Top:    newSkillsY,
-			Width:  newSkillsWidth,
-			Height: newSkillsHeight,
 		}},
 		{rightSkill, d2geom.Rectangle{
 			Left:   rightSkillX,
@@ -207,14 +172,14 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
-	questLog := NewQuestLog(asset, ui, l, hero.Act)
+	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
 	inventory, err := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
 	if err != nil {
 		return nil, err
 	}
 
-	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
+	skilltree := newSkillTree(hero.Skills, hero.Class, hero.Stats, asset, l, ui)
 
 	miniPanel := newMiniPanel(asset, ui, l, isSinglePlayer)
 
@@ -224,12 +189,8 @@ func NewGameControls(
 	}
 
 	helpOverlay := NewHelpOverlay(asset, ui, l, keyMap)
-	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
-
-	hoverLabel := hud.nameLabel
-	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc := &GameControls{
 		asset:          asset,
@@ -246,7 +207,6 @@ func NewGameControls(
 		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
-		hud:            hud,
 		bottomMenuRect: &d2geom.Rectangle{
 			Left:   menuBottomRectX,
 			Top:    menuBottomRectY,
@@ -270,6 +230,12 @@ func NewGameControls(
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
 	}
+
+	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, gc, mapRenderer)
+	gc.hud = hud
+
+	hoverLabel := hud.nameLabel
+	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
 	gc.questLog.SetOnCloseCb(gc.onCloseQuestLog)
@@ -389,11 +355,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 
 	switch gameEvent {
 	case d2enum.ClearScreen:
-		g.inventory.Close()
-		g.skilltree.Close()
-		g.heroStatsPanel.Close()
-		g.questLog.Close()
-		g.HelpOverlay.Close()
+		g.clearScreen()
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
 		g.toggleInventoryPanel()
@@ -420,11 +382,8 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 	gameEvent := g.keyMap.getGameEvent(event.Key())
 
-	switch gameEvent {
-	case d2enum.HoldRun:
+	if gameEvent == d2enum.HoldRun {
 		g.hud.onToggleRunButton(true)
-	default:
-		return false
 	}
 
 	return false
@@ -437,57 +396,18 @@ func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 func (g *GameControls) onEscKey() {
 	escHandled := false
 
-	if g.hud.skillSelectMenu.IsOpen() {
-		g.hud.skillSelectMenu.ClosePanels()
+	escHandled = g.hasOpenPanels() || g.HelpOverlay.IsOpen() || g.hud.skillSelectMenu.IsOpen()
+	g.clearScreen()
 
-		escHandled = true
-	}
-
-	if g.inventory.IsOpen() {
-		if g.inventory.moveGoldPanel.IsOpen() {
-			g.inventory.moveGoldPanel.Close()
-
-			return
-		}
-
-		g.inventory.Close()
-
-		escHandled = true
-	}
-
-	if g.skilltree.IsOpen() {
-		g.skilltree.Close()
-
-		escHandled = true
-	}
-
-	if g.heroStatsPanel.IsOpen() {
-		g.heroStatsPanel.Close()
-
-		escHandled = true
-	}
-
-	if g.questLog.IsOpen() {
-		g.questLog.Close()
-
-		escHandled = true
-	}
-
-	if g.HelpOverlay.IsOpen() {
-		g.HelpOverlay.Close()
-
-		escHandled = true
-	}
-
-	switch escHandled {
-	case true:
+	if escHandled {
 		g.updateLayout()
-	case false:
-		if g.escapeMenu.IsOpen() {
-			g.escapeMenu.OnEscKey()
-		} else {
-			g.openEscMenu()
-		}
+		return
+	}
+
+	if g.escapeMenu.IsOpen() {
+		g.escapeMenu.OnEscKey()
+	} else {
+		g.openEscMenu()
 	}
 }
 
@@ -629,36 +549,89 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-func (g *GameControls) toggleHeroStatsPanel() {
+func (g *GameControls) clearLeftScreenSide() {
+	g.heroStatsPanel.Close()
+	g.questLog.Close()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.hud.miniPanel.SetMovedRight(false)
+	g.updateLayout()
+}
+
+func (g *GameControls) clearRightScreenSide() {
+	g.inventory.Close()
+	g.skilltree.Close()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.hud.miniPanel.SetMovedLeft(false)
+	g.updateLayout()
+}
+
+func (g *GameControls) clearScreen() {
+	g.clearRightScreenSide()
+	g.clearLeftScreenSide()
+	g.hud.skillSelectMenu.ClosePanels()
+	g.HelpOverlay.Close()
+}
+
+func (g *GameControls) openLeftPanel(panel Panel) {
 	if !g.HelpOverlay.IsOpen() {
-		g.questLog.Close()
-		g.heroStatsPanel.Toggle()
-		g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
-		g.updateLayout()
+		isOpen := panel.IsOpen()
+
+		g.clearLeftScreenSide()
+
+		if !isOpen {
+			panel.Open()
+			g.hud.miniPanel.SetMovedRight(true)
+			g.updateLayout()
+		}
 	}
+}
+
+func (g *GameControls) openRightPanel(panel Panel) {
+	if !g.HelpOverlay.IsOpen() {
+		isOpen := panel.IsOpen()
+
+		g.clearRightScreenSide()
+
+		if !isOpen {
+			panel.Open()
+			g.hud.miniPanel.SetMovedLeft(true)
+			g.updateLayout()
+		}
+	}
+}
+
+func (g *GameControls) toggleHeroStatsPanel() {
+	g.openLeftPanel(g.heroStatsPanel)
 }
 
 func (g *GameControls) onCloseHeroStatsPanel() {
-	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
-	g.updateLayout()
 }
 
-func (g *GameControls) toggleQuestLog() {
+func (g *GameControls) toggleLeftSkillPanel() {
 	if !g.HelpOverlay.IsOpen() {
-		g.heroStatsPanel.Close()
-		g.questLog.Toggle()
-		g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
-		g.updateLayout()
+		g.clearScreen()
+		g.hud.skillSelectMenu.ToggleLeftPanel()
 	}
 }
 
+func (g *GameControls) toggleRightSkillPanel() {
+	if !g.HelpOverlay.IsOpen() {
+		g.clearScreen()
+		g.hud.skillSelectMenu.ToggleRightPanel()
+	}
+}
+
+func (g *GameControls) toggleQuestLog() {
+	g.openLeftPanel(g.questLog)
+}
+
 func (g *GameControls) onCloseQuestLog() {
-	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) toggleHelpOverlay() {
-	if !g.inventory.IsOpen() && !g.skilltree.IsOpen() && !g.heroStatsPanel.IsOpen() && !g.questLog.IsOpen() {
+	if !g.isRightPanelOpen() || g.isLeftPanelOpen() {
+		g.HelpOverlay.updateKeyMap(g.keyMap)
+		g.hud.skillSelectMenu.ClosePanels()
 		g.hud.miniPanel.openDisabled()
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
@@ -666,38 +639,21 @@ func (g *GameControls) toggleHelpOverlay() {
 }
 
 func (g *GameControls) toggleInventoryPanel() {
-	if !g.HelpOverlay.IsOpen() {
-		g.skilltree.Close()
-		g.inventory.Toggle()
-		g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
-		g.updateLayout()
-	}
+	g.openRightPanel(g.inventory)
 }
 
 func (g *GameControls) onCloseInventory() {
-	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
-	if !g.HelpOverlay.IsOpen() {
-		g.inventory.Close()
-		g.skilltree.Toggle()
-		g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
-		g.updateLayout()
-	}
+	g.openRightPanel(g.skilltree)
 }
 
 func (g *GameControls) onCloseSkilltree() {
-	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
-	g.updateLayout()
 }
 
 func (g *GameControls) openEscMenu() {
-	g.inventory.Close()
-	g.skilltree.Close()
-	g.heroStatsPanel.Close()
-	g.questLog.Close()
+	g.clearScreen()
 	g.hud.miniPanel.closeDisabled()
 	g.escapeMenu.open()
 	g.updateLayout()
@@ -711,6 +667,9 @@ func (g *GameControls) Load() {
 	g.heroStatsPanel.Load()
 	g.questLog.Load()
 	g.HelpOverlay.Load()
+
+	g.loadAddButtons()
+	g.setAddButtons()
 
 	miniPanelActions := &miniPanelActions{
 		characterToggle: g.toggleHeroStatsPanel,
@@ -727,9 +686,14 @@ func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
 	g.hud.Advance(elapsed)
 	g.inventory.Advance(elapsed)
+	g.questLog.Advance(elapsed)
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
+	}
+
+	if g.heroStatsPanel.IsOpen() || g.skilltree.IsOpen() {
+		g.setAddButtons()
 	}
 
 	return nil
@@ -744,18 +708,21 @@ func (g *GameControls) updateLayout() {
 		g.mapRenderer.ViewportDefault()
 	case isRightPanelOpen:
 		g.mapRenderer.ViewportToLeft()
-	default:
+	case isLeftPanelOpen:
 		g.mapRenderer.ViewportToRight()
 	}
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/801
 	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
 	return g.inventory.IsOpen() || g.skilltree.IsOpen()
+}
+
+func (g *GameControls) hasOpenPanels() bool {
+	return g.isRightPanelOpen() || g.isLeftPanelOpen() || g.hud.skillSelectMenu.IsOpen()
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
@@ -792,11 +759,11 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 
 // Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
-	if err := g.renderPanels(target); err != nil {
+	if err := g.hud.Render(target); err != nil {
 		return err
 	}
 
-	if err := g.hud.Render(target); err != nil {
+	if err := g.renderPanels(target); err != nil {
 		return err
 	}
 
@@ -854,11 +821,8 @@ func (g *GameControls) ToggleManaStats() {
 func (g *GameControls) onHoverActionable(item actionableType) {
 	hoverMap := map[actionableType]func(){
 		leftSkill:  func() {},
-		newStats:   func() {},
 		xp:         func() {},
-		walkRun:    func() {},
 		stamina:    func() {},
-		newSkills:  func() {},
 		rightSkill: func() {},
 		hpGlobe:    func() {},
 		manaGlobe:  func() {},
@@ -877,31 +841,19 @@ func (g *GameControls) onHoverActionable(item actionableType) {
 func (g *GameControls) onClickActionable(item actionableType) {
 	actionMap := map[actionableType]func(){
 		leftSkill: func() {
-			g.hud.skillSelectMenu.ToggleLeftPanel()
-		},
-
-		newStats: func() {
-			g.Info("New Stats Selector Action Pressed")
+			g.toggleLeftSkillPanel()
 		},
 
 		xp: func() {
 			g.Info("XP Action Pressed")
 		},
 
-		walkRun: func() {
-			g.Info("Walk/Run Action Pressed")
-		},
-
 		stamina: func() {
 			g.Info("Stamina Action Pressed")
 		},
 
-		newSkills: func() {
-			g.Info("New Skills Selector Action Pressed")
-		},
-
 		rightSkill: func() {
-			g.hud.skillSelectMenu.ToggleRightPanel()
+			g.toggleRightSkillPanel()
 		},
 
 		hpGlobe: func() {
@@ -925,59 +877,135 @@ func (g *GameControls) onClickActionable(item actionableType) {
 	action()
 }
 
-func (g *GameControls) bindFreeCamCommand(term d2interface.Terminal) error {
-	return term.BindAction("freecam", "toggle free camera movement", func() {
-		g.FreeCam = !g.FreeCam
-	})
+func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
+	if err := term.Bind("freecam", "toggle free camera movement", nil, g.commandFreeCam); err != nil {
+		return err
+	}
+
+	if err := term.Bind("setleftskill", "set skill to fire on left click", []string{"id"}, g.commandSetLeftSkill(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("setrightskill", "set skill to fire on right click", []string{"id"}, g.commandSetRightSkill(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("learnskills", "learn all skills for the a given class", []string{"token"}, g.commandLearnSkills(term)); err != nil {
+		return err
+	}
+
+	if err := term.Bind("learnskillid", "learn a skill by a given ID", []string{"id"}, g.commandLearnSkillID(term)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (g *GameControls) bindSetLeftSkillCommand(term d2interface.Terminal) error {
-	setLeftSkill := func(id int) {
-		skillRecord := g.asset.Records.Skill.Details[id]
-		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+// UnbindTerminalCommands unbinds commands from the terminal
+func (g *GameControls) UnbindTerminalCommands(term d2interface.Terminal) error {
+	return term.Unbind("freecam", "setleftskill", "setrightskill", "learnskills", "learnskillid")
+}
 
+func (g *GameControls) setAddButtons() {
+	g.hud.addStatsButton.SetEnabled(g.hero.Stats.StatsPoints > 0)
+	g.hud.addSkillButton.SetEnabled(g.hero.Stats.SkillPoints > 0)
+}
+
+func (g *GameControls) loadAddButtons() {
+	g.hud.addStatsButton.OnActivated(func() { g.toggleHeroStatsPanel() })
+	g.hud.addSkillButton.OnActivated(func() { g.toggleSkilltreePanel() })
+}
+
+func (g *GameControls) commandFreeCam([]string) error {
+	g.FreeCam = !g.FreeCam
+
+	return nil
+}
+
+func (g *GameControls) commandSetLeftSkill(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
+			term.Errorf("invalid argument")
+			return nil
+		}
+
+		skill, err := g.heroSkillByID(id)
+		if err != nil {
+			term.Errorf(err.Error())
+			return nil
 		}
 
 		g.hero.LeftSkill = skill
-	}
 
-	return term.BindAction(
-		"setleftskill",
-		"set skill to fire on left click",
-		setLeftSkill,
-	)
+		return nil
+	}
 }
 
-func (g *GameControls) bindSetRightSkillCommand(term d2interface.Terminal) error {
-	setRightSkill := func(id int) {
-		skillRecord := g.asset.Records.Skill.Details[id]
-		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
-
+func (g *GameControls) commandSetRightSkill(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
+			term.Errorf("invalid argument")
+			return nil
+		}
+
+		skill, err := g.heroSkillByID(id)
+		if err != nil {
+			term.Errorf(err.Error())
+			return nil
 		}
 
 		g.hero.RightSkill = skill
-	}
 
-	return term.BindAction(
-		"setrightskill",
-		"set skill to fire on right click",
-		setRightSkill,
-	)
+		return nil
+	}
 }
 
-const classTokenLength = 3
+func (g *GameControls) commandLearnSkillID(term d2interface.Terminal) func(args []string) error {
+	return func(args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			term.Errorf("invalid argument")
+			return nil
+		}
 
-func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
-	learnSkills := func(token string) {
+		skill, err := g.heroSkillByID(id)
+		if err != nil {
+			term.Errorf(err.Error())
+			return nil
+		}
+
+		g.hero.Skills[skill.ID] = skill
+		g.hud.skillSelectMenu.RegenerateImageCache()
+		g.Infof("Learned skill: " + skill.Skill)
+
+		return nil
+	}
+}
+
+func (g *GameControls) heroSkillByID(id int) (*d2hero.HeroSkill, error) {
+	skillRecord := g.asset.Records.Skill.Details[id]
+	if skillRecord == nil {
+		return nil, fmt.Errorf("cannot find a skill record for ID: %d", id)
+	}
+
+	skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create skill with ID of %d", id)
+	}
+
+	return skill, nil
+}
+
+func (g *GameControls) commandLearnSkills(term d2interface.Terminal) func(args []string) error {
+	const classTokenLength = 3
+
+	return func(args []string) error {
+		token := args[0]
 		if len(token) < classTokenLength {
-			term.OutputErrorf("The given class token should be at least 3 characters")
-			return
+			term.Errorf("The given class token should be at least 3 characters")
+			return nil
 		}
 
 		validPrefixes := []string{"ama", "ass", "nec", "bar", "sor", "dru", "pal"}
@@ -993,9 +1021,9 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 
 		if !isValidToken {
 			fmtInvalid := "Invalid class, must be a value starting with(case insensitive): %s"
-			term.OutputErrorf(fmtInvalid, strings.Join(validPrefixes, ", "))
+			term.Errorf(fmtInvalid, strings.Join(validPrefixes, ", "))
 
-			return
+			return nil
 		}
 
 		var err error
@@ -1031,70 +1059,10 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 		g.Infof("Learned %d skills", learnedSkillsCount)
 
 		if err != nil {
-			term.OutputErrorf("cannot learn skill for class, error: %s", err)
-			return
-		}
-	}
-
-	return term.BindAction(
-		"learnskills",
-		"learn all skills for the a given class",
-		learnSkills,
-	)
-}
-
-func (g *GameControls) bindLearnSkillByIDCommand(term d2interface.Terminal) error {
-	learnByID := func(id int) {
-		skillRecord := g.asset.Records.Skill.Details[id]
-		if skillRecord == nil {
-			term.OutputErrorf("cannot find a skill record for ID: %d", id)
-			return
+			term.Errorf("cannot learn skill for class, error: %s", err)
+			return nil
 		}
 
-		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
-		if skill == nil {
-			term.OutputErrorf("cannot create skill: %s", skillRecord.Skill)
-			return
-		}
-
-		g.hero.Skills[skill.ID] = skill
-
-		if err != nil {
-			term.OutputErrorf("cannot learn skill for class, error: %s", err)
-			return
-		}
-
-		g.hud.skillSelectMenu.RegenerateImageCache()
-		g.Info("Learned skill: " + skill.Skill)
+		return nil
 	}
-
-	return term.BindAction(
-		"learnskillid",
-		"learn a skill by a given ID",
-		learnByID,
-	)
-}
-
-func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
-	if err := g.bindFreeCamCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindSetLeftSkillCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindSetRightSkillCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindLearnSkillsCommand(term); err != nil {
-		return err
-	}
-
-	if err := g.bindLearnSkillByIDCommand(term); err != nil {
-		return err
-	}
-
-	return nil
 }

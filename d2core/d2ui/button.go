@@ -55,6 +55,7 @@ const (
 	ButtonTypeSquelchChat        ButtonType = 35
 	ButtonTypeTabBlank           ButtonType = 36
 	ButtonTypeBlankQuestBtn      ButtonType = 37
+	ButtonTypeAddSkill           ButtonType = 38
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -180,7 +181,7 @@ const (
 
 	blankQuestButtonXSegments      = 1
 	blankQuestButtonYSegments      = 1
-	blankQuestButtonDisabledFrames = -1
+	blankQuestButtonDisabledFrames = 0
 
 	buttonMinipanelCharacterBaseFrame = 0
 	buttonMinipanelInventoryBaseFrame = 2
@@ -198,6 +199,10 @@ const (
 	buttonGoldCoinSegmentsX     = 1
 	buttonGoldCoinSegmentsY     = 1
 	buttonGoldCoinDisabledFrame = -1
+
+	buttonAddSkillSegmentsX     = 1
+	buttonAddSkillSegmentsY     = 1
+	buttonAddSkillDisabledFrame = 2
 
 	pressedButtonOffset = 2
 )
@@ -746,6 +751,20 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       whiteAlpha100,
 		},
+		ButtonTypeAddSkill: {
+			XSegments:        buttonAddSkillSegmentsX,
+			YSegments:        buttonAddSkillSegmentsY,
+			DisabledFrame:    buttonAddSkillDisabledFrame,
+			DisabledColor:    whiteAlpha100,
+			ResourceName:     d2resource.AddSkillButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+		},
 	}
 }
 
@@ -848,8 +867,6 @@ type buttonStateDescriptor struct {
 
 func (v *Button) createTooltip() {
 	var t *Tooltip
-	// this is also related with https://github.com/OpenDiablo2/OpenDiablo2/issues/944
-	// all strings starting with "#" could be wrong translated to another locales
 	switch v.buttonLayout.Tooltip {
 	case buttonTooltipNone:
 		return
@@ -870,7 +887,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("NPCRepairItems"))
 	case buttonTooltipRepairAll:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("#128"))
+		t.SetText(v.manager.asset.TranslateLabel(d2enum.RepairAll))
 	case buttonTooltipLeftArrow:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("KeyLeft"))
@@ -905,7 +922,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	label.SetPosition(xOffset, textY)
 	label.Render(v.normalSurface)
 
-	if !btnLayout.HasImage || !btnLayout.AllowFrameChange {
+	if !btnLayout.AllowFrameChange {
 		return
 	}
 
@@ -1007,7 +1024,7 @@ func (v *Button) Render(target d2interface.Surface) {
 
 		if v.toggled {
 			target.Render(v.toggledSurface)
-		} else {
+		} else if v.buttonLayout.HasImage { // it allows to use SetEnabled(false) for non-image budons
 			target.Render(v.disabledSurface)
 		}
 	case v.toggled && v.pressed:

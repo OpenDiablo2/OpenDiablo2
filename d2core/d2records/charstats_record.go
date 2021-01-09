@@ -2,11 +2,11 @@ package d2records
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-// CharStats holds all of the CharStatsRecords
-type CharStats map[d2enum.Hero]*CharStatsRecord
+// CharStats holds all of the CharStatRecords
+type CharStats map[d2enum.Hero]*CharStatRecord
 
-// CharStatsRecord is a struct that represents a single row from charstats.txt
-type CharStatsRecord struct {
+// CharStatRecord is a struct that represents a single row from charstats.txt
+type CharStatRecord struct {
 	Class d2enum.Hero
 
 	// the initial stats at character level 1
