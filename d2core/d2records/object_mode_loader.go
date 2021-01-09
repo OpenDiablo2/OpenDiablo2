@@ -22,7 +22,7 @@ func objectModesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Object.Modes = records
 
-	r.Logger.Infof("Loaded %d ObjectMode records", len(records))
+	r.Debugf("Loaded %d ObjectMode records", len(records))
 
 	return nil
 }

@@ -1,8 +1,9 @@
 package d2interface
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // Scene is an extension of akara.System

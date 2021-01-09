@@ -1,7 +1,6 @@
 package d2gamescreen
 
 import (
-	"image/color"
 	"math"
 	"os"
 	"strconv"
@@ -190,7 +189,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 		v.characterNameLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].SetPosition(offsetX, offsetY)
-		v.characterNameLabel[i].Color[0] = rgbaColor(lightBrown)
+		v.characterNameLabel[i].Color[0] = d2util.Color(lightBrown)
 
 		offsetY += labelHeight
 
@@ -201,7 +200,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 		v.characterExpLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
-		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
+		v.characterExpLabel[i].Color[0] = d2util.Color(lightGreen)
 	}
 
 	v.refreshGameStates()
@@ -265,31 +264,6 @@ func (v *CharacterSelect) loadCharScrollbar() {
 	scrollBarX, scrollBarY, scrollBarHeight := 586, 87, 369
 	v.charScrollbar = v.uiManager.NewScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
 	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
-}
-
-func rgbaColor(rgba uint32) color.RGBA {
-	result := color.RGBA{}
-	a, b, g, r := 0, 1, 2, 3
-	byteWidth := 8
-	byteMask := 0xff
-
-	for idx := 0; idx < 4; idx++ {
-		shift := idx * byteWidth
-		component := uint8(rgba>>shift) & uint8(byteMask)
-
-		switch idx {
-		case a:
-			result.A = component
-		case b:
-			result.B = component
-		case g:
-			result.G = component
-		case r:
-			result.R = component
-		}
-	}
-
-	return result
 }
 
 func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
@@ -411,7 +385,7 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 	}
 
 	if v.showDeleteConfirmation {
-		screen.DrawRect(screenWidth, screenHeight, rgbaColor(blackHalfOpacity))
+		screen.DrawRect(screenWidth, screenHeight, d2util.Color(blackHalfOpacity))
 		v.okCancelBox.RenderSegmented(screen, 2, 1, 0)
 		v.deleteCharConfirmLabel.Render(screen)
 	}

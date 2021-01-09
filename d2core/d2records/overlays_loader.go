@@ -35,7 +35,7 @@ func overlaysLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d Overlay records", len(records))
+	r.Debugf("Loaded %d Overlay records", len(records))
 
 	r.Layout.Overlays = records
 

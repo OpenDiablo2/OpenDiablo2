@@ -69,6 +69,8 @@ func (ui *UIManager) NewTooltip(font,
 		boxEnabled:      true,
 	}
 	res.manager = ui
+	// cannot use ui.addWidget, because
+	// some tooltips could be covered by another widgets
 	ui.addTooltip(res)
 
 	return res

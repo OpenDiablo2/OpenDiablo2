@@ -20,7 +20,7 @@ func treasureClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Treasure.Normal = records
 
-	r.Logger.Infof("Loaded %d treasure class (normal) records", len(records))
+	r.Debugf("Loaded %d TreasureClass (normal) records", len(records))
 
 	return nil
 }
@@ -33,7 +33,7 @@ func treasureClassExLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Treasure.Expansion = records
 
-	r.Logger.Infof("Loaded %d treasure class (expansion) records", len(records))
+	r.Debugf("Loaded %d TreasureClass (expansion) records", len(records))
 
 	return nil
 }

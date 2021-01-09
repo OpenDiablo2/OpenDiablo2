@@ -37,7 +37,7 @@ func autoMapLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d AutoMapRecord records", len(records))
+	r.Debugf("Loaded %d AutoMap records", len(records))
 
 	r.Level.AutoMaps = records
 

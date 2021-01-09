@@ -2,9 +2,10 @@ package d2systems
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"sort"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom/rectangle"
 
@@ -459,12 +460,13 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 }
 
 // RegisterTerminalCommand registers a command that can be executed from the terminal
-func (s *BaseScene) RegisterTerminalCommand(name, desc string, fn interface{}) {
+func (s *BaseScene) RegisterTerminalCommand(name, desc string, args []string, fn func(args []string) error) {
 	regID := s.NewEntity()
 	reg := s.Components.CommandRegistration.Add(regID)
 	s.Components.Dirty.Add(regID)
 
 	reg.Name = name
 	reg.Description = desc
+	reg.Args = args
 	reg.Callback = fn
 }

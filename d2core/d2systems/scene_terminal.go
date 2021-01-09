@@ -1,9 +1,10 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 
@@ -119,7 +120,7 @@ func (s *TerminalScene) processCommand(eid akara.EID) {
 
 	s.Infof("Registering command `%s` - %s", reg.Name, reg.Description)
 
-	err := s.Terminal.BindAction(reg.Name, reg.Description, reg.Callback)
+	err := s.Terminal.Bind(reg.Name, reg.Description, nil, reg.Callback)
 	if err != nil {
 		s.Error(err.Error())
 	}

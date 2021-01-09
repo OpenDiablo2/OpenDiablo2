@@ -8,7 +8,7 @@ import (
 )
 
 type terminalLogger struct {
-	terminal *terminal
+	terminal *Terminal
 	buffer   bytes.Buffer
 	writer   io.Writer
 }
@@ -31,16 +31,16 @@ func (tl *terminalLogger) Write(p []byte) (int, error) {
 
 	switch {
 	case strings.Index(lineLower, "error") > 0:
-		tl.terminal.OutputErrorf(line)
+		tl.terminal.Errorf(line)
 	case strings.Index(lineLower, "warning") > 0:
-		tl.terminal.OutputWarningf(line)
+		tl.terminal.Warningf(line)
 	default:
-		tl.terminal.Outputf(line)
+		tl.terminal.Printf(line)
 	}
 
 	return tl.writer.Write(p)
 }
 
-func (tl *terminalLogger) BindToTerminal(t *terminal) {
+func (tl *terminalLogger) BindToTerminal(t *Terminal) {
 	tl.terminal = t
 }

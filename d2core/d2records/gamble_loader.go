@@ -19,7 +19,7 @@ func gambleLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d gamble records", len(records))
+	r.Debugf("Loaded %d Gamble records", len(records))
 
 	r.Gamble = records
 

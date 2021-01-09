@@ -1,9 +1,12 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"fmt"
 	"math"
+	"strconv"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/gravestench/akara"
 
@@ -146,8 +149,15 @@ func (s *MouseCursorScene) registerDebugCommand() {
 		description = "show debug information about the mouse"
 	)
 
-	s.RegisterTerminalCommand(command, description, func(val bool) {
+	s.RegisterTerminalCommand(command, description, []string{"val"}, func(args []string) error {
+		val, err := strconv.ParseBool(args[0])
+		if err != nil {
+			return fmt.Errorf("invalid argument")
+		}
+
 		s.setDebug(val)
+
+		return nil
 	})
 }
 

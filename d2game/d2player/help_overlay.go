@@ -155,6 +155,8 @@ const (
 	beltDotY   = 568
 )
 
+const bullets = 8
+
 // NewHelpOverlay creates a new HelpOverlay instance
 func NewHelpOverlay(
 	asset *d2asset.AssetManager,
@@ -182,6 +184,7 @@ type HelpOverlay struct {
 	frames           []*d2ui.Sprite
 	text             []*d2ui.Label
 	lines            []line
+	bullets          [bullets]*d2ui.Label
 	uiManager        *d2ui.UIManager
 	closeButton      *d2ui.Button
 	keyMap           *KeyMap
@@ -332,11 +335,8 @@ func (h *HelpOverlay) setupTitleAndButton() {
 	h.text = append(h.text, newLabel)
 }
 
-func (h *HelpOverlay) setupBulletedList() {
+func (h *HelpOverlay) updateBulletText() {
 	// Bullets
-	// the hotkeys displayed here should be pulled from a mapping of input events to game events
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/793
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/794
 	callouts := []struct{ text string }{
 		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(
@@ -378,17 +378,35 @@ func (h *HelpOverlay) setupBulletedList() {
 		)},
 	}
 
-	for idx := range callouts {
+	for i := 0; i < bullets; i++ {
+		h.bullets[i].SetText(callouts[i].text)
+	}
+}
+
+func (h *HelpOverlay) setupBulletedList() {
+	for idx := 0; idx < bullets; idx++ {
 		listItemOffsetY := idx * listItemVerticalOffset
 
-		h.createBullet(callout{
-			LabelText: callouts[idx].text,
-			LabelX:    listRootX,
-			LabelY:    listRootY + listItemOffsetY,
-			DotX:      listBulletX,
-			DotY:      listBulletRootY + listItemOffsetY,
-		})
+		label := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
+		label.SetPosition(listRootX, listRootY+listItemOffsetY)
+		h.bullets[idx] = label
+		h.panelGroup.AddWidget(h.bullets[idx])
+
+		newDot, err := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
+		if err != nil {
+			h.Error(err.Error())
+		}
+
+		err = newDot.SetCurrentFrame(0)
+		if err != nil {
+			h.Error(err.Error())
+		}
+
+		newDot.SetPosition(listBulletX, listBulletRootY+listItemOffsetY+bulletOffsetY)
+
+		h.frames = append(h.frames, newDot)
 	}
+	h.updateBulletText()
 }
 
 // nolint:funlen // can't reduce
@@ -409,7 +427,7 @@ func (h *HelpOverlay) setupLabelsWithLines() {
 		DotY:      newSkillDotY,
 	})
 
-	// Some of the help fonts require mulktiple lines.
+	// Some of the help fonts require multiple lines.
 	h.createLabel(callout{
 		LabelText: h.asset.TranslateString("StrHelp10"), // "Left Mouse-"
 		LabelX:    leftMouseLabelX,
@@ -553,26 +571,6 @@ type callout struct {
 	DotY      int
 }
 
-func (h *HelpOverlay) createBullet(c callout) {
-	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
-	newLabel.SetText(c.LabelText)
-	newLabel.SetPosition(c.LabelX, c.LabelY)
-	h.text = append(h.text, newLabel)
-
-	newDot, err := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
-	if err != nil {
-		h.Error(err.Error())
-	}
-
-	err = newDot.SetCurrentFrame(0)
-	if err != nil {
-		h.Error(err.Error())
-	}
-
-	newDot.SetPosition(c.DotX, c.DotY+bulletOffsetY)
-	h.frames = append(h.frames, newDot)
-}
-
 func (h *HelpOverlay) createLabel(c callout) {
 	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
 	newLabel.SetText(c.LabelText)
@@ -630,4 +628,9 @@ func (h *HelpOverlay) Render(target d2interface.Surface) {
 		target.DrawLine(l.MoveX, l.MoveY, l.Color)
 		target.Pop()
 	}
+}
+
+func (h *HelpOverlay) updateKeyMap(km *KeyMap) {
+	h.keyMap = km
+	h.updateBulletText()
 }

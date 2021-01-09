@@ -1,9 +1,10 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/gravestench/akara"
 

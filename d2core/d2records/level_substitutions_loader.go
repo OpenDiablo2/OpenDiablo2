@@ -40,7 +40,7 @@ func levelSubstitutionsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	r.Logger.Infof("Loaded %d LevelSubstitution records", len(records))
+	r.Debugf("Loaded %d LevelSubstitution records", len(records))
 
 	r.Level.Sub = records
 

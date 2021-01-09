@@ -2,9 +2,10 @@ package d2systems
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/gravestench/akara"
 
