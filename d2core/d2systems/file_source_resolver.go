@@ -144,7 +144,7 @@ func (s *fsSource) Path() string {
 
 // mpq source
 func (m *FileSourceResolver) makeMpqSource(path string) (d2components.AbstractSource, error) {
-	mpq, err := d2mpq.Load(path)
+	mpq, err := d2mpq.FromFile(path)
 	if err != nil {
 		return nil, err
 	}

@@ -94,7 +94,7 @@ func setItemLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.SetItems = records
 
-	r.Logger.Infof("Loaded %d SetItem records", len(records))
+	r.Debugf("Loaded %d SetItem records", len(records))
 
 	return nil
 }

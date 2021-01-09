@@ -21,7 +21,7 @@ func uniqueAppellationsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Monster.Unique.Appellations = records
 
-	r.Logger.Infof("Loaded %d UniqueAppellation records", len(records))
+	r.Debugf("Loaded %d UniqueAppellation records", len(records))
 
 	return nil
 }

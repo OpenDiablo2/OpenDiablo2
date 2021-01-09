@@ -88,7 +88,7 @@ func (m *FileTypeResolver) determineFileType(id akara.EID) {
 	ft := m.Components.FileType.Add(id)
 
 	// try to immediately load as an mpq
-	if _, err := d2mpq.Load(fp.Path); err == nil {
+	if _, err := d2mpq.New(fp.Path); err == nil {
 		ft.Type = d2enum.FileTypeMPQ
 		return
 	}

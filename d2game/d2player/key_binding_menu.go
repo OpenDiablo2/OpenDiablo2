@@ -666,7 +666,7 @@ func (menu *KeyBindingMenu) onDefaultClicked() error {
 func (menu *KeyBindingMenu) onAcceptClicked() error {
 	for gameEvent, change := range menu.changesToBeSaved {
 		menu.keyMap.SetPrimaryBinding(gameEvent, change.primary)
-		menu.keyMap.SetSecondaryBinding(gameEvent, change.primary)
+		menu.keyMap.SetSecondaryBinding(gameEvent, change.secondary)
 	}
 
 	menu.changesToBeSaved = make(map[d2enum.GameEvent]*bindingChange)

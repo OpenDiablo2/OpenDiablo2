@@ -22,7 +22,7 @@ func armorTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Animation.Token.Armor = records
 
-	r.Logger.Infof("Loaded %d ArmorType records", len(records))
+	r.Debugf("Loaded %d ArmorType records", len(records))
 
 	return nil
 }

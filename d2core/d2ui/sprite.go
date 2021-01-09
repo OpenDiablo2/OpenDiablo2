@@ -11,6 +11,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
+// static check if Sprite implemented Widget
+var _ Widget = &Sprite{}
+
 // Sprite is a positioned visual object.
 type Sprite struct {
 	*BaseWidget
@@ -74,7 +77,7 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
 			if err := s.animation.SetCurrentFrame(idx); err != nil {
-				s.Error("SetCurrentFrame error" + err.Error())
+				s.Errorf("Error while setting frame (%d): %s", idx, err)
 			}
 
 			target.PushTranslation(s.x+currentX, s.y+currentY)

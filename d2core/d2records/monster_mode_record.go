@@ -1,6 +1,6 @@
 package d2records
 
-// MonModes stores all of the GemsRecords
+// MonModes stores all of the MonModeRecords
 type MonModes map[string]*MonModeRecord
 
 // MonModeRecord is a representation of a single row of Monmode.txt

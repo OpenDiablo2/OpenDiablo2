@@ -18,7 +18,7 @@ func monsterPlacementsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Monster.Placements = records
 
-	r.Logger.Infof("Loaded %d MonsterPlacement records", len(records))
+	r.Debugf("Loaded %d MonsterPlacement records", len(records))
 
 	return nil
 }

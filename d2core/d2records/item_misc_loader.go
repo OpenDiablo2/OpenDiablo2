@@ -13,7 +13,7 @@ func miscItemsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return err
 	}
 
-	r.Logger.Infof("Loaded %d misc items", len(records))
+	r.Debugf("Loaded %d Misc Item records", len(records))
 
 	r.Item.Misc = records
 

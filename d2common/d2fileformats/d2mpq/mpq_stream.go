@@ -6,8 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
-	"strings"
+	"io"
 
 	"github.com/JoshVarga/blast"
 
@@ -17,80 +16,63 @@ import (
 
 // Stream represents a stream of data in an MPQ archive
 type Stream struct {
-	BlockTableEntry   BlockTableEntry
-	BlockPositions    []uint32
-	CurrentData       []byte
-	FileName          string
-	MPQData           *MPQ
-	EncryptionSeed    uint32
-	CurrentPosition   uint32
-	CurrentBlockIndex uint32
-	BlockSize         uint32
+	Data      []byte
+	Positions []uint32
+	MPQ       *MPQ
+	Block     *Block
+	Index     uint32
+	Size      uint32
+	Position  uint32
 }
 
 // CreateStream creates an MPQ stream
-func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*Stream, error) {
-	result := &Stream{
-		MPQData:           mpq,
-		BlockTableEntry:   blockTableEntry,
-		CurrentBlockIndex: 0xFFFFFFFF, //nolint:gomnd // MPQ magic
-	}
-	fileSegs := strings.Split(fileName, `\`)
-	result.EncryptionSeed = hashString(fileSegs[len(fileSegs)-1], 3)
-
-	if result.BlockTableEntry.HasFlag(FileFixKey) {
-		result.EncryptionSeed = (result.EncryptionSeed + result.BlockTableEntry.FilePosition) ^ result.BlockTableEntry.UncompressedFileSize
+func CreateStream(mpq *MPQ, block *Block, fileName string) (*Stream, error) {
+	s := &Stream{
+		MPQ:   mpq,
+		Block: block,
+		Index: 0xFFFFFFFF, //nolint:gomnd // MPQ magic
 	}
 
-	result.BlockSize = 0x200 << result.MPQData.data.BlockSize //nolint:gomnd // MPQ magic
-
-	if result.BlockTableEntry.HasFlag(FilePatchFile) {
-		log.Fatal("Patching is not supported")
+	if s.Block.HasFlag(FileFixKey) {
+		s.Block.calculateEncryptionSeed(fileName)
 	}
 
-	var err error
+	s.Size = 0x200 << s.MPQ.header.BlockSize //nolint:gomnd // MPQ magic
 
-	if (result.BlockTableEntry.HasFlag(FileCompress) || result.BlockTableEntry.HasFlag(FileImplode)) &&
-		!result.BlockTableEntry.HasFlag(FileSingleUnit) {
-		err = result.loadBlockOffsets()
+	if s.Block.HasFlag(FilePatchFile) {
+		return nil, errors.New("patching is not supported")
 	}
 
-	return result, err
+	if (s.Block.HasFlag(FileCompress) || s.Block.HasFlag(FileImplode)) && !s.Block.HasFlag(FileSingleUnit) {
+		if err := s.loadBlockOffsets(); err != nil {
+			return nil, err
+		}
+	}
+
+	return s, nil
 }
 
 func (v *Stream) loadBlockOffsets() error {
-	blockPositionCount := ((v.BlockTableEntry.UncompressedFileSize + v.BlockSize - 1) / v.BlockSize) + 1
-	v.BlockPositions = make([]uint32, blockPositionCount)
-
-	_, err := v.MPQData.file.Seek(int64(v.BlockTableEntry.FilePosition), 0)
-	if err != nil {
+	if _, err := v.MPQ.file.Seek(int64(v.Block.FilePosition), io.SeekStart); err != nil {
 		return err
 	}
 
-	mpqBytes := make([]byte, blockPositionCount*4) //nolint:gomnd // MPQ magic
+	blockPositionCount := ((v.Block.UncompressedFileSize + v.Size - 1) / v.Size) + 1
+	v.Positions = make([]uint32, blockPositionCount)
 
-	_, err = v.MPQData.file.Read(mpqBytes)
-	if err != nil {
+	if err := binary.Read(v.MPQ.file, binary.LittleEndian, &v.Positions); err != nil {
 		return err
 	}
 
-	for i := range v.BlockPositions {
-		idx := i * 4 //nolint:gomnd // MPQ magic
-		v.BlockPositions[i] = binary.LittleEndian.Uint32(mpqBytes[idx : idx+4])
-	}
+	if v.Block.HasFlag(FileEncrypted) {
+		decrypt(v.Positions, v.Block.EncryptionSeed-1)
 
-	blockPosSize := blockPositionCount << 2 //nolint:gomnd // MPQ magic
-
-	if v.BlockTableEntry.HasFlag(FileEncrypted) {
-		decrypt(v.BlockPositions, v.EncryptionSeed-1)
-
-		if v.BlockPositions[0] != blockPosSize {
-			log.Println("Decryption of MPQ failed!")
+		blockPosSize := blockPositionCount << 2 //nolint:gomnd // MPQ magic
+		if v.Positions[0] != blockPosSize {
 			return errors.New("decryption of MPQ failed")
 		}
 
-		if v.BlockPositions[1] > v.BlockSize+blockPosSize {
-			log.Println("Decryption of MPQ failed!")
+		if v.Positions[1] > v.Size+blockPosSize {
 			return errors.New("decryption of MPQ failed")
 		}
 	}
@@ -98,16 +80,18 @@ func (v *Stream) loadBlockOffsets() error {
 	return nil
 }
 
-func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
-	if v.BlockTableEntry.HasFlag(FileSingleUnit) {
+func (v *Stream) Read(buffer []byte, offset, count uint32) (readTotal uint32, err error) {
+	if v.Block.HasFlag(FileSingleUnit) {
 		return v.readInternalSingleUnit(buffer, offset, count)
 	}
 
-	toRead := count
-	readTotal := uint32(0)
+	var read uint32
 
+	toRead := count
 	for toRead > 0 {
-		read := v.readInternal(buffer, offset, toRead)
+		if read, err = v.readInternal(buffer, offset, toRead); err != nil {
+			return 0, err
+		}
 
 		if read == 0 {
 			break
@@ -118,149 +102,153 @@ func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
 		toRead -= read
 	}
 
-	return readTotal
+	return readTotal, nil
 }
 
-func (v *Stream) readInternalSingleUnit(buffer []byte, offset, count uint32) uint32 {
-	if len(v.CurrentData) == 0 {
-		v.loadSingleUnit()
+func (v *Stream) readInternalSingleUnit(buffer []byte, offset, count uint32) (uint32, error) {
+	if len(v.Data) == 0 {
+		if err := v.loadSingleUnit(); err != nil {
+			return 0, err
+		}
 	}
 
-	bytesToCopy := d2math.Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
-
-	copy(buffer[offset:offset+bytesToCopy], v.CurrentData[v.CurrentPosition:v.CurrentPosition+bytesToCopy])
-
-	v.CurrentPosition += bytesToCopy
-
-	return bytesToCopy
+	return v.copy(buffer, offset, v.Position, count)
 }
 
-func (v *Stream) readInternal(buffer []byte, offset, count uint32) uint32 {
-	v.bufferData()
+func (v *Stream) readInternal(buffer []byte, offset, count uint32) (uint32, error) {
+	if err := v.bufferData(); err != nil {
+		return 0, err
+	}
 
-	localPosition := v.CurrentPosition % v.BlockSize
-	bytesToCopy := d2math.MinInt32(int32(len(v.CurrentData))-int32(localPosition), int32(count))
+	localPosition := v.Position % v.Size
 
+	return v.copy(buffer, offset, localPosition, count)
+}
+
+func (v *Stream) copy(buffer []byte, offset, pos, count uint32) (uint32, error) {
+	bytesToCopy := d2math.Min(uint32(len(v.Data))-pos, count)
 	if bytesToCopy <= 0 {
-		return 0
+		return 0, nil
 	}
 
-	copy(buffer[offset:offset+uint32(bytesToCopy)], v.CurrentData[localPosition:localPosition+uint32(bytesToCopy)])
+	copy(buffer[offset:offset+bytesToCopy], v.Data[pos:pos+bytesToCopy])
+	v.Position += bytesToCopy
 
-	v.CurrentPosition += uint32(bytesToCopy)
-
-	return uint32(bytesToCopy)
+	return bytesToCopy, nil
 }
 
-func (v *Stream) bufferData() {
-	requiredBlock := v.CurrentPosition / v.BlockSize
+func (v *Stream) bufferData() (err error) {
+	blockIndex := v.Position / v.Size
 
-	if requiredBlock == v.CurrentBlockIndex {
-		return
+	if blockIndex == v.Index {
+		return nil
 	}
 
-	expectedLength := d2math.Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
-	v.CurrentData = v.loadBlock(requiredBlock, expectedLength)
-	v.CurrentBlockIndex = requiredBlock
+	expectedLength := d2math.Min(v.Block.UncompressedFileSize-(blockIndex*v.Size), v.Size)
+	if v.Data, err = v.loadBlock(blockIndex, expectedLength); err != nil {
+		return err
+	}
+
+	v.Index = blockIndex
+
+	return nil
 }
 
-func (v *Stream) loadSingleUnit() {
-	fileData := make([]byte, v.BlockSize)
-
-	_, err := v.MPQData.file.Seek(int64(v.MPQData.data.HeaderSize), 0)
-	if err != nil {
-		log.Print(err)
+func (v *Stream) loadSingleUnit() (err error) {
+	if _, err = v.MPQ.file.Seek(int64(v.MPQ.header.HeaderSize), io.SeekStart); err != nil {
+		return err
 	}
 
-	_, err = v.MPQData.file.Read(fileData)
-	if err != nil {
-		log.Print(err)
+	fileData := make([]byte, v.Size)
+
+	if _, err = v.MPQ.file.Read(fileData); err != nil {
+		return err
 	}
 
-	if v.BlockSize == v.BlockTableEntry.UncompressedFileSize {
-		v.CurrentData = fileData
-		return
+	if v.Size == v.Block.UncompressedFileSize {
+		v.Data = fileData
+		return nil
 	}
 
-	v.CurrentData = decompressMulti(fileData, v.BlockTableEntry.UncompressedFileSize)
+	v.Data, err = decompressMulti(fileData, v.Block.UncompressedFileSize)
+
+	return err
 }
 
-func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
+func (v *Stream) loadBlock(blockIndex, expectedLength uint32) ([]byte, error) {
 	var (
 		offset uint32
 		toRead uint32
 	)
 
-	if v.BlockTableEntry.HasFlag(FileCompress) || v.BlockTableEntry.HasFlag(FileImplode) {
-		offset = v.BlockPositions[blockIndex]
-		toRead = v.BlockPositions[blockIndex+1] - offset
+	if v.Block.HasFlag(FileCompress) || v.Block.HasFlag(FileImplode) {
+		offset = v.Positions[blockIndex]
+		toRead = v.Positions[blockIndex+1] - offset
 	} else {
-		offset = blockIndex * v.BlockSize
+		offset = blockIndex * v.Size
 		toRead = expectedLength
 	}
 
-	offset += v.BlockTableEntry.FilePosition
+	offset += v.Block.FilePosition
 	data := make([]byte, toRead)
 
-	_, err := v.MPQData.file.Seek(int64(offset), 0)
-	if err != nil {
-		log.Print(err)
+	if _, err := v.MPQ.file.Seek(int64(offset), io.SeekStart); err != nil {
+		return []byte{}, err
 	}
 
-	_, err = v.MPQData.file.Read(data)
-	if err != nil {
-		log.Print(err)
+	if _, err := v.MPQ.file.Read(data); err != nil {
+		return []byte{}, err
 	}
 
-	if v.BlockTableEntry.HasFlag(FileEncrypted) && v.BlockTableEntry.UncompressedFileSize > 3 {
-		if v.EncryptionSeed == 0 {
-			panic("Unable to determine encryption key")
+	if v.Block.HasFlag(FileEncrypted) && v.Block.UncompressedFileSize > 3 {
+		if v.Block.EncryptionSeed == 0 {
+			return []byte{}, errors.New("unable to determine encryption key")
 		}
 
-		decryptBytes(data, blockIndex+v.EncryptionSeed)
+		decryptBytes(data, blockIndex+v.Block.EncryptionSeed)
 	}
 
-	if v.BlockTableEntry.HasFlag(FileCompress) && (toRead != expectedLength) {
-		if !v.BlockTableEntry.HasFlag(FileSingleUnit) {
-			data = decompressMulti(data, expectedLength)
-		} else {
-			data = pkDecompress(data)
+	if v.Block.HasFlag(FileCompress) && (toRead != expectedLength) {
+		if !v.Block.HasFlag(FileSingleUnit) {
+			return decompressMulti(data, expectedLength)
 		}
+
+		return pkDecompress(data)
 	}
 
-	if v.BlockTableEntry.HasFlag(FileImplode) && (toRead != expectedLength) {
-		data = pkDecompress(data)
+	if v.Block.HasFlag(FileImplode) && (toRead != expectedLength) {
+		return pkDecompress(data)
 	}
 
-	return data
+	return data, nil
 }
 
 //nolint:gomnd // Will fix enum values later
-func decompressMulti(data []byte /*expectedLength*/, _ uint32) []byte {
+func decompressMulti(data []byte /*expectedLength*/, _ uint32) ([]byte, error) {
 	compressionType := data[0]
 
 	switch compressionType {
 	case 1: // Huffman
-		panic("huffman decompression not supported")
+		return []byte{}, errors.New("huffman decompression not supported")
 	case 2: // ZLib/Deflate
 		return deflate(data[1:])
 	case 8: // PKLib/Impode
 		return pkDecompress(data[1:])
 	case 0x10: // BZip2
-		panic("bzip2 decompression not supported")
+		return []byte{}, errors.New("bzip2 decompression not supported")
 	case 0x80: // IMA ADPCM Stereo
-		return d2compression.WavDecompress(data[1:], 2)
+		return d2compression.WavDecompress(data[1:], 2), nil
 	case 0x40: // IMA ADPCM Mono
-		return d2compression.WavDecompress(data[1:], 1)
+		return d2compression.WavDecompress(data[1:], 1), nil
 	case 0x12:
-		panic("lzma decompression not supported")
+		return []byte{}, errors.New("lzma decompression not supported")
 	// Combos
 	case 0x22:
 		// sparse then zlib
-		panic("sparse decompression + deflate decompression not supported")
+		return []byte{}, errors.New("sparse decompression + deflate decompression not supported")
 	case 0x30:
 		// sparse then bzip2
-		panic("sparse decompression + bzip2 decompression not supported")
+		return []byte{}, errors.New("sparse decompression + bzip2 decompression not supported")
 	case 0x41:
 		sinput := d2compression.HuffmanDecompress(data[1:])
 		sinput = d2compression.WavDecompress(sinput, 1)
@@ -268,69 +256,68 @@ func decompressMulti(data []byte /*expectedLength*/, _ uint32) []byte {
 
 		copy(tmp, sinput)
 
-		return tmp
+		return tmp, nil
 	case 0x48:
 		// byte[] result = PKDecompress(sinput, outputLength);
 		// return MpqWavCompression.Decompress(new MemoryStream(result), 1);
-		panic("pk + mpqwav decompression not supported")
+		return []byte{}, errors.New("pk + mpqwav decompression not supported")
 	case 0x81:
 		sinput := d2compression.HuffmanDecompress(data[1:])
 		sinput = d2compression.WavDecompress(sinput, 2)
 		tmp := make([]byte, len(sinput))
 		copy(tmp, sinput)
 
-		return tmp
+		return tmp, nil
 	case 0x88:
 		// byte[] result = PKDecompress(sinput, outputLength);
 		// return MpqWavCompression.Decompress(new MemoryStream(result), 2);
-		panic("pk + wav decompression not supported")
-	default:
-		panic(fmt.Sprintf("decompression not supported for unknown compression type %X", compressionType))
+		return []byte{}, errors.New("pk + wav decompression not supported")
 	}
+
+	return []byte{}, fmt.Errorf("decompression not supported for unknown compression type %X", compressionType)
 }
 
-func deflate(data []byte) []byte {
+func deflate(data []byte) ([]byte, error) {
 	b := bytes.NewReader(data)
+
 	r, err := zlib.NewReader(b)
-
 	if err != nil {
-		panic(err)
+		return []byte{}, err
 	}
 
 	buffer := new(bytes.Buffer)
 
 	_, err = buffer.ReadFrom(r)
 	if err != nil {
-		log.Panic(err)
+		return []byte{}, err
 	}
 
 	err = r.Close()
 	if err != nil {
-		log.Panic(err)
+		return []byte{}, err
 	}
 
-	return buffer.Bytes()
+	return buffer.Bytes(), nil
 }
 
-func pkDecompress(data []byte) []byte {
+func pkDecompress(data []byte) ([]byte, error) {
 	b := bytes.NewReader(data)
-	r, err := blast.NewReader(b)
 
+	r, err := blast.NewReader(b)
 	if err != nil {
-		panic(err)
+		return []byte{}, err
 	}
 
 	buffer := new(bytes.Buffer)
 
-	_, err = buffer.ReadFrom(r)
-	if err != nil {
-		panic(err)
+	if _, err = buffer.ReadFrom(r); err != nil {
+		return []byte{}, err
 	}
 
 	err = r.Close()
 	if err != nil {
-		panic(err)
+		return []byte{}, err
 	}
 
-	return buffer.Bytes()
+	return buffer.Bytes(), nil
 }

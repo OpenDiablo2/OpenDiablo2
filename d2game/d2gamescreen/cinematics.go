@@ -98,7 +98,7 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
 	v.cinematicsLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.cinematicsLabel.SetText(v.asset.TranslateLabel(d2enum.SelectCinematicLabel))
-	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
+	v.cinematicsLabel.Color[0] = d2util.Color(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
 }
 

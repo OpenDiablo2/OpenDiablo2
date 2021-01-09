@@ -31,7 +31,7 @@ func shrineLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Object.Shrines = records
 
-	r.Logger.Infof("Loaded %d shrines", len(records))
+	r.Debugf("Loaded %d Shrine records", len(records))
 
 	return nil
 }
