@@ -37,11 +37,8 @@ const mouseBtnActionsThreshold = 0.25
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
 	leftSkill actionableType = iota
-	newStats
 	xp
-	walkRun
 	stamina
-	newSkills
 	rightSkill
 	hpGlobe
 	manaGlobe
@@ -53,30 +50,15 @@ const (
 	leftSkillWidth,
 	leftSkillHeight = 117, 550, 50, 50
 
-	newStatsX,
-	newStatsY,
-	newStatsWidth,
-	newStatsHeight = 206, 563, 30, 30
-
 	xpX,
 	xpY,
 	xpWidth,
 	xpHeight = 253, 560, 125, 5
 
-	walkRunX,
-	walkRunY,
-	walkRunWidth,
-	walkRunHeight = 255, 573, 17, 20
-
 	staminaX,
 	staminaY,
 	staminaWidth,
 	staminaHeight = 273, 573, 105, 20
-
-	newSkillsX,
-	newSkillsY,
-	newSkillsWidth,
-	newSkillsHeight = 562, 563, 30, 30
 
 	rightSkillX,
 	rightSkillY,
@@ -156,35 +138,17 @@ func NewGameControls(
 			Width:  leftSkillWidth,
 			Height: leftSkillHeight,
 		}},
-		{newStats, d2geom.Rectangle{
-			Left:   newStatsX,
-			Top:    newStatsY,
-			Width:  newStatsWidth,
-			Height: newStatsHeight,
-		}},
 		{xp, d2geom.Rectangle{
 			Left:   xpX,
 			Top:    xpY,
 			Width:  xpWidth,
 			Height: xpHeight,
 		}},
-		{walkRun, d2geom.Rectangle{
-			Left:   walkRunX,
-			Top:    walkRunY,
-			Width:  walkRunWidth,
-			Height: walkRunHeight,
-		}},
 		{stamina, d2geom.Rectangle{
 			Left:   staminaX,
 			Top:    staminaY,
 			Width:  staminaWidth,
 			Height: staminaHeight,
-		}},
-		{newSkills, d2geom.Rectangle{
-			Left:   newSkillsX,
-			Top:    newSkillsY,
-			Width:  newSkillsWidth,
-			Height: newSkillsHeight,
 		}},
 		{rightSkill, d2geom.Rectangle{
 			Left:   rightSkillX,
@@ -857,11 +821,8 @@ func (g *GameControls) ToggleManaStats() {
 func (g *GameControls) onHoverActionable(item actionableType) {
 	hoverMap := map[actionableType]func(){
 		leftSkill:  func() {},
-		newStats:   func() {},
 		xp:         func() {},
-		walkRun:    func() {},
 		stamina:    func() {},
-		newSkills:  func() {},
 		rightSkill: func() {},
 		hpGlobe:    func() {},
 		manaGlobe:  func() {},
@@ -883,24 +844,12 @@ func (g *GameControls) onClickActionable(item actionableType) {
 			g.toggleLeftSkillPanel()
 		},
 
-		newStats: func() {
-			g.Info("New Stats Selector Action Pressed")
-		},
-
 		xp: func() {
 			g.Info("XP Action Pressed")
 		},
 
-		walkRun: func() {
-			g.Info("Walk/Run Action Pressed")
-		},
-
 		stamina: func() {
 			g.Info("Stamina Action Pressed")
-		},
-
-		newSkills: func() {
-			g.Info("New Skills Selector Action Pressed")
 		},
 
 		rightSkill: func() {
