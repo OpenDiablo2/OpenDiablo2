@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -97,13 +96,7 @@ func (m *MapEngine) addDT1(fileName string) {
 		}
 	}
 
-	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
-	if err != nil {
-		m.Fatalf("Could not load /data/global/tiles/%s", fileName)
-		return
-	}
-
-	dt1, err := d2dt1.LoadDT1(fileData)
+	dt1, err := m.asset.LoadDT1(fileName)
 	if err != nil {
 		m.Error(err.Error())
 	}
@@ -120,12 +113,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 		return
 	}
 
-	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
-	if err != nil {
-		panic(err)
-	}
-
-	ds1, err := d2ds1.LoadDS1(fileData)
+	ds1, err := m.asset.LoadDS1(fileName)
 	if err != nil {
 		m.Error(err.Error())
 	}

@@ -137,6 +137,10 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 		soundFile += sfx
 	}
 
+	if fileExists, _ := eap.asset.FileExists(soundFile); !fileExists {
+		soundFile = "data/global/music/" + sfx
+	}
+
 	audioData, err := eap.asset.LoadFileStream(soundFile)
 
 	if err != nil {
@@ -151,6 +155,10 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 
 	if err != nil {
 		eap.Fatal(err.Error())
+	}
+
+	if d == nil {
+		eap.Fatal("Decoded data is nil")
 	}
 
 	var player *audio.Player
