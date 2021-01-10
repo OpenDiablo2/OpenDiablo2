@@ -88,11 +88,11 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
-	if err := term.Bind("mapdebugvis", "set map debug visualization level", nil, result.commandMapDebugVis); err != nil {
+	if err := term.Bind("mapdebugvis", "set map debug visualization level", []string{"level"}, result.commandMapDebugVis); err != nil {
 		result.Errorf("could not bind the mapdebugvis action, err: %v", err)
 	}
 
-	if err := term.Bind("entitydebugvis", "set entity debug visualization level", nil, result.commandEntityDebugVis); err != nil {
+	if err := term.Bind("entitydebugvis", "set entity debug visualization level", []string{"level"}, result.commandEntityDebugVis); err != nil {
 		result.Errorf("could not bind the entitydebugvis action, err: %v", err)
 	}
 
@@ -109,6 +109,10 @@ func (mr *MapRenderer) UnbindTerminalCommands(term d2interface.Terminal) error {
 }
 
 func (mr *MapRenderer) commandMapDebugVis(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("invalid argument supplied")
+	}
+
 	level, err := strconv.Atoi(args[0])
 	if err != nil {
 		return fmt.Errorf("invalid argument supplied")
