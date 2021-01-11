@@ -2,14 +2,13 @@ package asset
 
 import (
 	"fmt"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
+	"io"
 )
 
 // Source is an abstraction for something that can load and list assets
 type Source interface {
 	fmt.Stringer
-	Type() types.SourceType
-	Open(name string) (Asset, error)
+	Open(name string) (io.ReadSeeker, error)
 	Path() string
+	Exists(subPath string) bool
 }

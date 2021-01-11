@@ -2,12 +2,13 @@ package d2loader
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"testing"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (
@@ -36,11 +37,11 @@ func TestLoader_NewLoader(t *testing.T) {
 func TestLoader_AddSource(t *testing.T) {
 	loader, _ := NewLoader(d2util.LogLevelDefault)
 
-	sourceA, errA := loader.AddSource(sourcePathA)
-	sourceB, errB := loader.AddSource(sourcePathB)
-	sourceC, errC := loader.AddSource(sourcePathC)
-	sourceD, errD := loader.AddSource(sourcePathD)
-	sourceE, errE := loader.AddSource(badSourcePath)
+	errA := loader.AddSource(sourcePathA, types.AssetSourceFileSystem)
+	errB := loader.AddSource(sourcePathB, types.AssetSourceFileSystem)
+	errC := loader.AddSource(sourcePathC, types.AssetSourceFileSystem)
+	errD := loader.AddSource(sourcePathD, types.AssetSourceFileSystem)
+	errE := loader.AddSource(badSourcePath, types.AssetSourceMPQ)
 
 	if errA != nil {
 		t.Error(errA)
@@ -62,25 +63,6 @@ func TestLoader_AddSource(t *testing.T) {
 		t.Error("expecting error on bad file path")
 	}
 
-	if sourceA.String() != sourcePathA {
-		t.Error("source path not the same as what we added")
-	}
-
-	if sourceB.String() != sourcePathB {
-		t.Error("source path not the same as what we added")
-	}
-
-	if sourceC.String() != sourcePathC {
-		t.Error("source path not the same as what we added")
-	}
-
-	if sourceD.String() != sourcePathD {
-		t.Error("source path not the same as what we added")
-	}
-
-	if sourceE != nil {
-		t.Error("source for bad path should be nil")
-	}
 }
 
 // nolint:gocyclo // this is just a test, not a big deal if we ignore linter here
@@ -88,25 +70,25 @@ func TestLoader_Load(t *testing.T) {
 	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	// we expect files common to any source to come from here
-	commonSource, err := loader.AddSource(sourcePathB)
+	err := loader.AddSource(sourcePathB, types.AssetSourceFileSystem)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
 
-	_, err = loader.AddSource(sourcePathD)
+	err = loader.AddSource(sourcePathD, types.AssetSourceMPQ)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
 
-	_, err = loader.AddSource(sourcePathA)
+	err = loader.AddSource(sourcePathA, types.AssetSourceFileSystem)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
 
-	_, err = loader.AddSource(sourcePathC)
+	err = loader.AddSource(sourcePathC, types.AssetSourceFileSystem)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
@@ -124,8 +106,6 @@ func TestLoader_Load(t *testing.T) {
 
 	if entryCommon == nil || errCommon != nil {
 		t.Error("common entry should exist")
-	} else if entryCommon.Source() != commonSource {
-		t.Error("common entry should come from the first loader source")
 	}
 
 	if errA != nil || errB != nil || errC != nil || errD != nil {
@@ -145,7 +125,7 @@ func TestLoader_Load(t *testing.T) {
 	buffer := make([]byte, 1)
 
 	tests := []struct {
-		entry asset.Asset
+		entry io.ReadSeeker
 		data  string
 	}{
 		{entryCommon, "b"}, // sourcePathB is loaded first, we expect a "b"
@@ -172,8 +152,8 @@ func TestLoader_Load(t *testing.T) {
 		got := string(result[0])
 
 		if got != expected {
-			fmtStr := "unexpected data in file %s, loaded from source `%s`: expected `%s`, got `%s`"
-			msg := fmt.Sprintf(fmtStr, entry.Path(), entry.Source(), expected, got)
+			fmtStr := "unexpected data in file, expected %q, got %q"
+			msg := fmt.Sprintf(fmtStr, expected, got)
 			t.Error(msg)
 		}
 	}

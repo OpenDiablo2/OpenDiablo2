@@ -90,7 +90,7 @@ func (v *Stream) Read(buffer []byte, offset, count uint32) (readTotal uint32, er
 	toRead := count
 	for toRead > 0 {
 		if read, err = v.readInternal(buffer, offset, toRead); err != nil {
-			return 0, err
+			return readTotal, err
 		}
 
 		if read == 0 {
@@ -128,7 +128,7 @@ func (v *Stream) readInternal(buffer []byte, offset, count uint32) (uint32, erro
 func (v *Stream) copy(buffer []byte, offset, pos, count uint32) (uint32, error) {
 	bytesToCopy := d2math.Min(uint32(len(v.Data))-pos, count)
 	if bytesToCopy <= 0 {
-		return 0, nil
+		return 0, io.EOF
 	}
 
 	copy(buffer[offset:offset+bytesToCopy], v.Data[pos:pos+bytesToCopy])

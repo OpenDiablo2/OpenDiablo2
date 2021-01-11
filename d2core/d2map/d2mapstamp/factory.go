@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
@@ -54,12 +53,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 			continue
 		}
 
-		fileData, err := f.asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
-		if err != nil {
-			panic(err)
-		}
-
-		dt1, err := d2dt1.LoadDT1(fileData)
+		dt1, err := f.asset.LoadDT1(levelTypeDt1)
 		if err != nil {
 			f.Error(err.Error())
 			return nil
