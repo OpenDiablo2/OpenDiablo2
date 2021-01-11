@@ -127,6 +127,7 @@ func (l *Loader) AddSource(path string, sourceType types.SourceType) error {
 	return nil
 }
 
+// Exists checks if the given path exists in at least one source
 func (l *Loader) Exists(subPath string) bool {
 	subPath = filepath.Clean(subPath)
 

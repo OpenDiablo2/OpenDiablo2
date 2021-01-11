@@ -863,6 +863,7 @@ type buttonStateDescriptor struct {
 
 func (v *Button) createTooltip() {
 	var t *Tooltip
+
 	switch v.buttonLayout.Tooltip {
 	case buttonTooltipNone:
 		return

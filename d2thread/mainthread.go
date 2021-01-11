@@ -10,7 +10,7 @@ import (
 //
 // The default value is 16 and should be good for 99% usecases.
 var (
-	callQueue chan func() //nolint:gochecknoglobals
+	callQueue chan func() //nolint:gochecknoglobals // necessary evil for now
 )
 
 func checkRun() {

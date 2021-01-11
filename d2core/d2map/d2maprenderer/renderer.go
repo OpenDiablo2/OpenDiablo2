@@ -88,11 +88,18 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
-	if err := term.Bind("mapdebugvis", "set map debug visualization level", []string{"level"}, result.commandMapDebugVis); err != nil {
+	var name, desc, level string
+
+	name, desc = "mapdebugvis", "set map debug visualization level"
+	level = "level"
+
+	if err := term.Bind(name, desc, []string{level}, result.commandMapDebugVis); err != nil {
 		result.Errorf("could not bind the mapdebugvis action, err: %v", err)
 	}
 
-	if err := term.Bind("entitydebugvis", "set entity debug visualization level", []string{"level"}, result.commandEntityDebugVis); err != nil {
+	name, desc = "entitydebugvis", "set entity debug visualization level"
+
+	if err := term.Bind(name, desc, []string{level}, result.commandEntityDebugVis); err != nil {
 		result.Errorf("could not bind the entitydebugvis action, err: %v", err)
 	}
 

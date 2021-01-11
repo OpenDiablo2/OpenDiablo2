@@ -260,8 +260,6 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 		return nil, err
 	}
 
-	//config.SetPath(filepath.Join(configAsset.Source().Path(), configAsset.Path()))
-
 	a.Infof("loaded configuration file from %s", config.Path())
 
 	return config, nil
@@ -623,6 +621,11 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	gameClient, err := d2client.Create(connType, a.asset, *a.Options.LogLevel, a.scriptEngine)
 	if err != nil {
 		a.Error(err.Error())
+	}
+
+	if gameClient == nil {
+		a.Error("could not create client")
+		return
 	}
 
 	if err = gameClient.Open(host, filePath); err != nil {

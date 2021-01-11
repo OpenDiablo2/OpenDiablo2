@@ -485,6 +485,7 @@ func (am *AssetManager) commandAssetClear([]string) error {
 	return nil
 }
 
+// LoadDT1 loads and returns the given path as a DT1
 func (am *AssetManager) LoadDT1(dt1Path string) (*d2dt1.DT1, error) {
 	if dt1Value, found := am.dt1s.Retrieve(dt1Path); found {
 		return dt1Value.(*d2dt1.DT1), nil
@@ -492,7 +493,7 @@ func (am *AssetManager) LoadDT1(dt1Path string) (*d2dt1.DT1, error) {
 
 	fileData, err := am.LoadFile("/data/global/tiles/" + dt1Path)
 	if err != nil {
-		return nil, fmt.Errorf("Could not load /data/global/tiles/%s", dt1Path)
+		return nil, fmt.Errorf("could not load /data/global/tiles/%s", dt1Path)
 	}
 
 	dt1, err := d2dt1.LoadDT1(fileData)
@@ -507,6 +508,7 @@ func (am *AssetManager) LoadDT1(dt1Path string) (*d2dt1.DT1, error) {
 	return dt1, nil
 }
 
+// LoadDS1 loads and returns the given path as a DS1
 func (am *AssetManager) LoadDS1(ds1Path string) (*d2ds1.DS1, error) {
 	if ds1Value, found := am.dt1s.Retrieve(ds1Path); found {
 		return ds1Value.(*d2ds1.DS1), nil
@@ -527,9 +529,9 @@ func (am *AssetManager) LoadDS1(ds1Path string) (*d2ds1.DS1, error) {
 	}
 
 	return ds1, nil
-
 }
 
+// LoadCOF loads and returns the given path as a COF
 func (am *AssetManager) LoadCOF(cofPath string) (*d2cof.COF, error) {
 	if cofValue, found := am.cofs.Retrieve(cofPath); found {
 		return cofValue.(*d2cof.COF), nil
@@ -552,6 +554,7 @@ func (am *AssetManager) LoadCOF(cofPath string) (*d2cof.COF, error) {
 	return cof, nil
 }
 
+// LoadDCC loads and returns the given path as a DCC
 func (am *AssetManager) LoadDCC(dccPath string) (*d2dcc.DCC, error) {
 	if dccValue, found := am.dccs.Retrieve(dccPath); found {
 		return dccValue.(*d2dcc.DCC), nil
