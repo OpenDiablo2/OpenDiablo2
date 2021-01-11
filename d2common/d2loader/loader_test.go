@@ -62,7 +62,6 @@ func TestLoader_AddSource(t *testing.T) {
 	if errE == nil {
 		t.Error("expecting error on bad file path")
 	}
-
 }
 
 // nolint:gocyclo // this is just a test, not a big deal if we ignore linter here

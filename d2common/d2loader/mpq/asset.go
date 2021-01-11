@@ -42,12 +42,6 @@ func (a *Asset) Path() string {
 // Read will read asset data into the given buffer
 func (a *Asset) Read(buf []byte) (n int, err error) {
 	return a.stream.Read(buf)
-	//totalRead, err := a.stream.Read(buf)
-	//if totalRead == 0 {
-	//	return 0, io.EOF
-	//}
-	//
-	//return totalRead, err
 }
 
 // Seek will seek the read position for the next read operation
