@@ -101,6 +101,8 @@ const (
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
+	runtime.LockOSThread()
+
 	logger := d2util.NewLogger()
 	logger.SetPrefix(appLoggerPrefix)
 

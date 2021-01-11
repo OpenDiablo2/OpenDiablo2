@@ -3,7 +3,6 @@ package d2thread
 
 import (
 	"errors"
-	"runtime"
 )
 
 // CallQueueCap is the capacity of the call queue. This means how many calls to CallNonBlock will not
@@ -13,10 +12,6 @@ import (
 var (
 	callQueue chan func() //nolint:gochecknoglobals
 )
-
-func init() {
-	runtime.LockOSThread()
-}
 
 func checkRun() {
 	if callQueue == nil {
