@@ -274,9 +274,9 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 		return nil, err
 	}
 
-	table := d2tbl.LoadTextDictionary(data)
-	if table == nil {
-		return nil, fmt.Errorf("table not found: %s", tablePath)
+	table, err := d2tbl.LoadTextDictionary(data)
+	if err != nil {
+		return table, err
 	}
 
 	am.Debugf(fmtLoadStringTable, tablePath)
