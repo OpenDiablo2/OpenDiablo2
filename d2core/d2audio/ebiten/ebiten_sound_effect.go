@@ -3,13 +3,15 @@ package ebiten
 import (
 	"io"
 	"math"
+	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 type panStream struct {
 	io.ReadSeeker
-	pan float64 // -1: left; 0: center; 1: right
+	pan  float64 // -1: left; 0: center; 1: right
+	Lock sync.Mutex
 }
 
 const (
@@ -24,6 +26,9 @@ func newPanStreamFromReader(src io.ReadSeeker) *panStream {
 }
 
 func (s *panStream) Read(p []byte) (n int, err error) {
+	s.Lock.Lock()
+	defer s.Lock.Unlock()
+
 	n, err = s.ReadSeeker.Read(p)
 	if err != nil {
 		return
@@ -54,7 +59,9 @@ type SoundEffect struct {
 
 // SetPan sets the audio pan, left is -1.0, center is 0.0, right is 1.0
 func (v *SoundEffect) SetPan(pan float64) {
+	v.panStream.Lock.Lock()
 	v.panStream.pan = pan
+	v.panStream.Lock.Unlock()
 }
 
 // SetVolume ets the volume

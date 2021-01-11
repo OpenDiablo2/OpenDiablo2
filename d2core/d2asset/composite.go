@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
@@ -161,15 +162,26 @@ func (c *Composite) SetDirection(direction int) {
 		return
 	}
 
+	wg := sync.WaitGroup{}
+
 	c.direction = direction
+	wg.Add(len(c.mode.layers))
+
 	for layerIdx := range c.mode.layers {
-		layer := c.mode.layers[layerIdx]
-		if layer != nil {
-			if err := layer.SetDirection(c.direction); err != nil {
-				fmt.Printf("failed to set direction of layer: %d, err: %v\n", layerIdx, err)
+		go func(idx int) {
+			defer wg.Done()
+
+			layer := c.mode.layers[idx]
+
+			if layer != nil {
+				if err := layer.SetDirection(c.direction); err != nil {
+					fmt.Printf("failed to set direction of layer: %d, err: %v\n", idx, err)
+				}
 			}
-		}
+		}(layerIdx)
 	}
+
+	wg.Wait()
 }
 
 // GetDirection returns the current direction the composite is facing
@@ -248,7 +260,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		return nil, fmt.Errorf("composite not found at path '%s': %v", cofPath, err)
 	}
 
-	cof, err := c.loadCOF(cofPath)
+	cof, err := c.LoadCOF(cofPath)
 	if err != nil {
 		return nil, err
 	}
@@ -306,13 +318,13 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
 	}
 
-	for _, animationPath := range animationPaths {
-		exists, err := c.FileExists(animationPath)
+	for idx := range animationPaths {
+		exists, err := c.FileExists(animationPaths[idx])
 		if !exists || err != nil {
-			return nil, fmt.Errorf("animation path '%s' not found: %v", animationPath, err)
+			return nil, fmt.Errorf("animation path '%s' not found: %v", animationPaths[idx], err)
 		}
 
-		animation, err := c.LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
+		animation, err := c.LoadAnimationWithEffect(animationPaths[idx], palettePath, drawEffect)
 		if err == nil {
 			return animation, nil
 		}
@@ -357,15 +369,6 @@ func (c *Composite) updateSize() {
 
 	c.size.Width = biggestW
 	c.size.Height = biggestH
-}
-
-func (c *Composite) loadCOF(cofPath string) (*d2cof.COF, error) {
-	cofData, err := c.LoadFile(cofPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return d2cof.Load(cofData)
 }
 
 func baseString(baseType d2enum.ObjectType) string {
