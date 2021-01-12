@@ -10,6 +10,97 @@ import (
 // TextDictionary is a string map
 type TextDictionary map[string]string
 
+func (td TextDictionary) loadHashEntries(hashEntries []*textDictionaryHashEntry, br *d2datautils.StreamReader) error {
+	for i := 0; i < len(hashEntries); i++ {
+		entry := textDictionaryHashEntry{}
+
+		active, err := br.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		entry.IsActive = active > 0
+
+		entry.Index, err = br.ReadUInt16()
+		if err != nil {
+			return err
+		}
+
+		entry.HashValue, err = br.ReadUInt32()
+		if err != nil {
+			return err
+		}
+
+		entry.IndexString, err = br.ReadUInt32()
+		if err != nil {
+			return err
+		}
+
+		entry.NameString, err = br.ReadUInt32()
+		if err != nil {
+			return err
+		}
+
+		entry.NameLength, err = br.ReadUInt16()
+		if err != nil {
+			return err
+		}
+
+		hashEntries[i] = &entry
+	}
+
+	for idx := range hashEntries {
+		if !hashEntries[idx].IsActive {
+			continue
+		}
+
+		if err := td.loadHashEntry(idx, hashEntries[idx], br); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (td TextDictionary) loadHashEntry(idx int, hashEntry *textDictionaryHashEntry, br *d2datautils.StreamReader) error {
+	br.SetPosition(uint64(hashEntry.NameString))
+
+	nameVal, err := br.ReadBytes(int(hashEntry.NameLength - 1))
+	if err != nil {
+		return err
+	}
+
+	value := string(nameVal)
+
+	br.SetPosition(uint64(hashEntry.IndexString))
+
+	key := ""
+
+	for {
+		b, err := br.ReadByte()
+		if b == 0 {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		key += string(b)
+	}
+
+	if key == "x" || key == "X" {
+		key = "#" + strconv.Itoa(idx)
+	}
+
+	_, exists := td[key]
+	if !exists {
+		td[key] = value
+	}
+
+	return nil
+}
+
 type textDictionaryHashEntry struct {
 	IsActive    bool
 	Index       uint16
@@ -30,71 +121,46 @@ func LoadTextDictionary(dictionaryData []byte) (TextDictionary, error) {
 	br := d2datautils.CreateStreamReader(dictionaryData)
 
 	// skip past the CRC
-	br.ReadBytes(crcByteCount)
+	_, _ = br.ReadBytes(crcByteCount)
 
-	numberOfElements := br.GetUInt16()
-	hashTableSize := br.GetUInt32()
+	var err error
+
+	numberOfElements, err := br.ReadUInt16()
+	if err != nil {
+		return nil, err
+	}
+
+	hashTableSize, err := br.ReadUInt32()
+	if err != nil {
+		return nil, err
+	}
 
 	// Version (always 0)
-	if _, err := br.ReadByte(); err != nil {
+	if _, err = br.ReadByte(); err != nil {
 		return nil, errors.New("error reading Version record")
 	}
 
-	br.GetUInt32() // StringOffset
-	br.GetUInt32() // When the number of times you have missed a match with a hash key equals this value, you give up because it is not there.
-	br.GetUInt32() // FileSize
+	_, _ = br.ReadUInt32() // StringOffset
+
+	// When the number of times you have missed a match with a
+	// hash key equals this value, you give up because it is not there.
+	_, _ = br.ReadUInt32()
+
+	_, _ = br.ReadUInt32() // FileSize
 
 	elementIndex := make([]uint16, numberOfElements)
 	for i := 0; i < int(numberOfElements); i++ {
-		elementIndex[i] = br.GetUInt16()
-	}
-
-	hashEntries := make([]textDictionaryHashEntry, hashTableSize)
-	for i := 0; i < int(hashTableSize); i++ {
-		hashEntries[i] = textDictionaryHashEntry{
-			br.GetByte() == 1,
-			br.GetUInt16(),
-			br.GetUInt32(),
-			br.GetUInt32(),
-			br.GetUInt32(),
-			br.GetUInt16(),
+		elementIndex[i], err = br.ReadUInt16()
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	for idx, hashEntry := range hashEntries {
-		if br.EOF() {
-			return nil, errors.New("unexpected end of text dictionary file")
-		}
+	hashEntries := make([]*textDictionaryHashEntry, hashTableSize)
 
-		if !hashEntry.IsActive {
-			continue
-		}
-
-		br.SetPosition(uint64(hashEntry.NameString))
-		nameVal := br.ReadBytes(int(hashEntry.NameLength - 1))
-		value := string(nameVal)
-
-		br.SetPosition(uint64(hashEntry.IndexString))
-
-		key := ""
-
-		for {
-			b := br.GetByte()
-			if b == 0 {
-				break
-			}
-
-			key += string(b)
-		}
-
-		if key == "x" || key == "X" {
-			key = "#" + strconv.Itoa(idx)
-		}
-
-		_, exists := lookupTable[key]
-		if !exists {
-			lookupTable[key] = value
-		}
+	err = lookupTable.loadHashEntries(hashEntries, br)
+	if err != nil {
+		return nil, err
 	}
 
 	return lookupTable, nil

@@ -29,5 +29,8 @@ func (v *BlizzardIntro) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(fiftyPercent)
 
-	v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
+	v.videoDecoder, err = d2video.CreateBinkDecoder(videoBytes)
+	if err != nil {
+		loading.Error(err)
+	}
 }

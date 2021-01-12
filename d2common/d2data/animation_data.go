@@ -27,20 +27,48 @@ type AnimationDataRecord struct {
 type AnimationData map[string][]*AnimationDataRecord
 
 // LoadAnimationData loads the animation data table into the global AnimationData dictionary
-func LoadAnimationData(rawData []byte) AnimationData {
+func LoadAnimationData(rawData []byte) (AnimationData, error) {
 	animdata := make(AnimationData)
 	streamReader := d2datautils.CreateStreamReader(rawData)
 
 	for !streamReader.EOF() {
-		dataCount := int(streamReader.GetInt32())
+		var dataCount int
+
+		b, err := streamReader.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		dataCount = int(b)
+
 		for i := 0; i < dataCount; i++ {
-			cofNameBytes := streamReader.ReadBytes(numCofNameBytes)
+			cofNameBytes, err := streamReader.ReadBytes(numCofNameBytes)
+			if err != nil {
+				return nil, err
+			}
+
+			fpd, err := streamReader.ReadInt32()
+			if err != nil {
+				return nil, err
+			}
+
+			animSpeed, err := streamReader.ReadInt32()
+			if err != nil {
+				return nil, err
+			}
+
 			data := &AnimationDataRecord{
 				COFName:            strings.ReplaceAll(string(cofNameBytes), string(byte(0)), ""),
-				FramesPerDirection: int(streamReader.GetInt32()),
-				AnimationSpeed:     int(streamReader.GetInt32()),
+				FramesPerDirection: int(fpd),
+				AnimationSpeed:     int(animSpeed),
 			}
-			data.Flags = streamReader.ReadBytes(numFlagBytes)
+
+			flagBytes, err := streamReader.ReadBytes(numFlagBytes)
+			if err != nil {
+				return nil, err
+			}
+
+			data.Flags = flagBytes
 			cofIndex := strings.ToLower(data.COFName)
 
 			if _, found := animdata[cofIndex]; !found {
@@ -51,5 +79,5 @@ func LoadAnimationData(rawData []byte) AnimationData {
 		}
 	}
 
-	return animdata
+	return animdata, nil
 }

@@ -22,55 +22,146 @@ const (
 	BlockFormatIsometric BlockDataFormat = 1
 )
 
+const (
+	numUnknownHeaderBytes = 260
+	knownMajorVersion     = 7
+	knownMinorVersion     = 6
+	numUnknownTileBytes1  = 4
+	numUnknownTileBytes2  = 4
+	numUnknownTileBytes3  = 7
+	numUnknownTileBytes4  = 12
+)
+
 // LoadDT1 loads a DT1 record
-//nolint:funlen // Can't reduce
+//nolint:funlen,gocognit,gocyclo // Can't reduce
 func LoadDT1(fileData []byte) (*DT1, error) {
 	result := &DT1{}
 	br := d2datautils.CreateStreamReader(fileData)
-	ver1 := br.GetInt32()
-	ver2 := br.GetInt32()
 
-	if ver1 != 7 || ver2 != 6 {
-		return nil, fmt.Errorf("expected to have a version of 7.6, but got %d.%d instead", ver1, ver2)
+	var err error
+
+	majorVersion, err := br.ReadInt32()
+	if err != nil {
+		return nil, err
 	}
 
-	br.SkipBytes(260) //nolint:gomnd // Unknown data
+	minorVersion, err := br.ReadInt32()
+	if err != nil {
+		return nil, err
+	}
 
-	numberOfTiles := br.GetInt32()
-	br.SetPosition(uint64(br.GetInt32()))
+	if majorVersion != knownMajorVersion || minorVersion != knownMinorVersion {
+		const fmtErr = "expected to have a version of 7.6, but got %d.%d instead"
+		return nil, fmt.Errorf(fmtErr, majorVersion, minorVersion)
+	}
+
+	br.SkipBytes(numUnknownHeaderBytes)
+
+	numberOfTiles, err := br.ReadInt32()
+	if err != nil {
+		return nil, err
+	}
+
+	position, err := br.ReadInt32()
+	if err != nil {
+		return nil, err
+	}
+
+	br.SetPosition(uint64(position))
 
 	result.Tiles = make([]Tile, numberOfTiles)
 
 	for tileIdx := range result.Tiles {
-		newTile := Tile{}
-		newTile.Direction = br.GetInt32()
-		newTile.RoofHeight = br.GetInt16()
-		newTile.MaterialFlags = NewMaterialFlags(br.GetUInt16())
-		newTile.Height = br.GetInt32()
-		newTile.Width = br.GetInt32()
+		tile := Tile{}
 
-		br.SkipBytes(4) //nolint:gomnd // Unknown data
-
-		newTile.Type = br.GetInt32()
-		newTile.Style = br.GetInt32()
-		newTile.Sequence = br.GetInt32()
-		newTile.RarityFrameIndex = br.GetInt32()
-
-		br.SkipBytes(4) //nolint:gomnd // Unknown data
-
-		for i := range newTile.SubTileFlags {
-			newTile.SubTileFlags[i] = NewSubTileFlags(br.GetByte())
+		tile.Direction, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
 		}
 
-		br.SkipBytes(7) //nolint:gomnd // Unknown data
+		tile.RoofHeight, err = br.ReadInt16()
+		if err != nil {
+			return nil, err
+		}
 
-		newTile.blockHeaderPointer = br.GetInt32()
-		newTile.blockHeaderSize = br.GetInt32()
-		newTile.Blocks = make([]Block, br.GetInt32())
+		var matFlagBytes uint16
 
-		br.SkipBytes(12) //nolint:gomnd // Unknown data
+		matFlagBytes, err = br.ReadUInt16()
+		if err != nil {
+			return nil, err
+		}
 
-		result.Tiles[tileIdx] = newTile
+		tile.MaterialFlags = NewMaterialFlags(matFlagBytes)
+
+		tile.Height, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.Width, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		br.SkipBytes(numUnknownTileBytes1)
+
+		tile.Type, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.Style, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.Sequence, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.RarityFrameIndex, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		br.SkipBytes(numUnknownTileBytes2)
+
+		for i := range tile.SubTileFlags {
+			var subtileFlagBytes byte
+
+			subtileFlagBytes, err = br.ReadByte()
+			if err != nil {
+				return nil, err
+			}
+
+			tile.SubTileFlags[i] = NewSubTileFlags(subtileFlagBytes)
+		}
+
+		br.SkipBytes(numUnknownTileBytes3)
+
+		tile.blockHeaderPointer, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.blockHeaderSize, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		var numBlocks int32
+
+		numBlocks, err = br.ReadInt32()
+		if err != nil {
+			return nil, err
+		}
+
+		tile.Blocks = make([]Block, numBlocks)
+
+		br.SkipBytes(numUnknownTileBytes4)
+
+		result.Tiles[tileIdx] = tile
 	}
 
 	for tileIdx := range result.Tiles {
@@ -78,14 +169,32 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 		br.SetPosition(uint64(tile.blockHeaderPointer))
 
 		for blockIdx := range tile.Blocks {
-			result.Tiles[tileIdx].Blocks[blockIdx].X = br.GetInt16()
-			result.Tiles[tileIdx].Blocks[blockIdx].Y = br.GetInt16()
+			result.Tiles[tileIdx].Blocks[blockIdx].X, err = br.ReadInt16()
+			if err != nil {
+				return nil, err
+			}
+
+			result.Tiles[tileIdx].Blocks[blockIdx].Y, err = br.ReadInt16()
+			if err != nil {
+				return nil, err
+			}
 
 			br.SkipBytes(2) //nolint:gomnd // Unknown data
 
-			result.Tiles[tileIdx].Blocks[blockIdx].GridX = br.GetByte()
-			result.Tiles[tileIdx].Blocks[blockIdx].GridY = br.GetByte()
-			formatValue := br.GetInt16()
+			result.Tiles[tileIdx].Blocks[blockIdx].GridX, err = br.ReadByte()
+			if err != nil {
+				return nil, err
+			}
+
+			result.Tiles[tileIdx].Blocks[blockIdx].GridY, err = br.ReadByte()
+			if err != nil {
+				return nil, err
+			}
+
+			formatValue, err := br.ReadInt16()
+			if err != nil {
+				return nil, err
+			}
 
 			if formatValue == 1 {
 				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatIsometric
@@ -93,16 +202,27 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatRLE
 			}
 
-			result.Tiles[tileIdx].Blocks[blockIdx].Length = br.GetInt32()
+			result.Tiles[tileIdx].Blocks[blockIdx].Length, err = br.ReadInt32()
+			if err != nil {
+				return nil, err
+			}
 
 			br.SkipBytes(2) //nolint:gomnd // Unknown data
 
-			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset = br.GetInt32()
+			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset, err = br.ReadInt32()
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		for blockIndex, block := range tile.Blocks {
 			br.SetPosition(uint64(tile.blockHeaderPointer + block.FileOffset))
-			encodedData := br.ReadBytes(int(block.Length))
+
+			encodedData, err := br.ReadBytes(int(block.Length))
+			if err != nil {
+				return nil, err
+			}
+
 			tile.Blocks[blockIndex].EncodedData = encodedData
 		}
 	}

@@ -6,7 +6,7 @@ import (
 
 // WavDecompress decompresses wav files
 //nolint:gomnd // binary decode magic
-func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen,gocognit,gocyclo // can't reduce
+func WavDecompress(data []byte, channelCount int) ([]byte, error) { //nolint:funlen,gocognit,gocyclo // can't reduce
 	Array1 := []int{0x2c, 0x2c}
 	Array2 := make([]int, channelCount)
 
@@ -35,20 +35,33 @@ func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen,gocog
 	input := d2datautils.CreateStreamReader(data)
 	output := d2datautils.CreateStreamWriter()
 
-	input.GetByte()
+	_, err := input.ReadByte()
+	if err != nil {
+		return nil, err
+	}
 
-	shift := input.GetByte()
+	shift, err := input.ReadByte()
+	if err != nil {
+		return nil, err
+	}
 
 	for i := 0; i < channelCount; i++ {
-		temp := input.GetInt16()
+		temp, err := input.ReadInt16()
+		if err != nil {
+			return nil, err
+		}
+
 		Array2[i] = int(temp)
 		output.PushInt16(temp)
 	}
 
 	channel := channelCount - 1
 
-	for input.GetPosition() < input.GetSize() {
-		value := input.GetByte()
+	for input.Position() < input.Size() {
+		value, err := input.ReadByte()
+		if err != nil {
+			return nil, err
+		}
 
 		if channelCount == 2 {
 			channel = 1 - channel
@@ -129,5 +142,5 @@ func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen,gocog
 		}
 	}
 
-	return output.GetBytes()
+	return output.GetBytes(), nil
 }

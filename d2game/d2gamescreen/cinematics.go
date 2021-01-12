@@ -176,7 +176,11 @@ func (v *Cinematics) playVideo(path string) {
 		return
 	}
 
-	v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
+	v.videoDecoder, err = d2video.CreateBinkDecoder(videoBytes)
+	if err != nil {
+		v.Error(err.Error())
+		return
+	}
 }
 
 // Render renders the credits screen

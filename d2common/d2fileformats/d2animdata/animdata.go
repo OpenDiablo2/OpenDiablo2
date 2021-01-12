@@ -57,6 +57,7 @@ func (ad *AnimationData) GetRecords(name string) []*AnimationDataRecord {
 }
 
 // Load loads the data into an AnimationData struct
+//nolint:gocognit,funlen // can't reduce
 func Load(data []byte) (*AnimationData, error) {
 	reader := d2datautils.CreateStreamReader(data)
 	animdata := &AnimationData{}
@@ -65,7 +66,11 @@ func Load(data []byte) (*AnimationData, error) {
 	animdata.entries = make(map[string][]*AnimationDataRecord)
 
 	for blockIdx := range animdata.blocks {
-		recordCount := reader.GetUInt32()
+		recordCount, err := reader.ReadUInt32()
+		if err != nil {
+			return nil, err
+		}
+
 		if recordCount > maxRecordsPerBlock {
 			return nil, fmt.Errorf("more than %d records in block", maxRecordsPerBlock)
 		}
@@ -73,7 +78,10 @@ func Load(data []byte) (*AnimationData, error) {
 		records := make([]*AnimationDataRecord, recordCount)
 
 		for recordIdx := uint32(0); recordIdx < recordCount; recordIdx++ {
-			nameBytes := reader.ReadBytes(byteCountName)
+			nameBytes, err := reader.ReadBytes(byteCountName)
+			if err != nil {
+				return nil, err
+			}
 
 			if nameBytes[byteCountName-1] != byte(0) {
 				return nil, errors.New("animdata AnimationDataRecord name missing null terminator byte")
@@ -84,15 +92,27 @@ func Load(data []byte) (*AnimationData, error) {
 
 			animdata.hashTable[hashIdx] = hashName(name)
 
-			frames := reader.GetUInt32()
-			speed := reader.GetUInt16()
+			frames, err := reader.ReadUInt32()
+			if err != nil {
+				return nil, err
+			}
+
+			speed, err := reader.ReadUInt16()
+			if err != nil {
+				return nil, err
+			}
 
 			reader.SkipBytes(byteCountSpeedPadding)
 
 			events := make(map[int]AnimationEvent)
 
 			for eventIdx := 0; eventIdx < numEvents; eventIdx++ {
-				event := AnimationEvent(reader.GetByte())
+				eventByte, err := reader.ReadByte()
+				if err != nil {
+					return nil, err
+				}
+
+				event := AnimationEvent(eventByte)
 				if event != AnimationEventNone {
 					events[eventIdx] = event
 				}
@@ -122,7 +142,7 @@ func Load(data []byte) (*AnimationData, error) {
 		animdata.blocks[blockIdx] = b
 	}
 
-	if reader.GetPosition() != uint64(len(data)) {
+	if reader.Position() != uint64(len(data)) {
 		return nil, errors.New("unable to parse animation data")
 	}
 

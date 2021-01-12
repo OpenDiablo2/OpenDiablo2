@@ -7,6 +7,9 @@ import (
 const (
 	endOfScanLine = 0x80
 	maxRunLength  = 0x7f
+
+	terminationSize = 4
+	terminatorSize  = 3
 )
 
 type scanlineState int
@@ -31,47 +34,116 @@ type DC6 struct {
 
 // Load uses restruct to read the binary dc6 data into structs then parses image data from the frame data.
 func Load(data []byte) (*DC6, error) {
-	const (
-		terminationSize = 4
-		terminatorSize  = 3
-	)
-
 	r := d2datautils.CreateStreamReader(data)
 
 	var dc DC6
-	dc.Version = r.GetInt32()
-	dc.Flags = r.GetUInt32()
-	dc.Encoding = r.GetUInt32()
-	dc.Termination = r.ReadBytes(terminationSize)
-	dc.Directions = r.GetUInt32()
-	dc.FramesPerDirection = r.GetUInt32()
+
+	var err error
+
+	err = dc.loadHeader(r)
+	if err != nil {
+		return nil, err
+	}
 
 	frameCount := int(dc.Directions * dc.FramesPerDirection)
 
 	dc.FramePointers = make([]uint32, frameCount)
 	for i := 0; i < frameCount; i++ {
-		dc.FramePointers[i] = r.GetUInt32()
+		dc.FramePointers[i], err = r.ReadUInt32()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	dc.Frames = make([]*DC6Frame, frameCount)
 
-	for i := 0; i < frameCount; i++ {
-		frame := &DC6Frame{
-			Flipped:   r.GetUInt32(),
-			Width:     r.GetUInt32(),
-			Height:    r.GetUInt32(),
-			OffsetX:   r.GetInt32(),
-			OffsetY:   r.GetInt32(),
-			Unknown:   r.GetUInt32(),
-			NextBlock: r.GetUInt32(),
-			Length:    r.GetUInt32(),
-		}
-		frame.FrameData = r.ReadBytes(int(frame.Length))
-		frame.Terminator = r.ReadBytes(terminatorSize)
-		dc.Frames[i] = frame
+	if err := dc.loadFrames(r); err != nil {
+		return nil, err
 	}
 
 	return &dc, nil
+}
+
+func (d *DC6) loadHeader(r *d2datautils.StreamReader) error {
+	var err error
+
+	if d.Version, err = r.ReadInt32(); err != nil {
+		return err
+	}
+
+	if d.Flags, err = r.ReadUInt32(); err != nil {
+		return err
+	}
+
+	if d.Encoding, err = r.ReadUInt32(); err != nil {
+		return err
+	}
+
+	if d.Termination, err = r.ReadBytes(terminationSize); err != nil {
+		return err
+	}
+
+	if d.Directions, err = r.ReadUInt32(); err != nil {
+		return err
+	}
+
+	if d.FramesPerDirection, err = r.ReadUInt32(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DC6) loadFrames(r *d2datautils.StreamReader) error {
+	var err error
+
+	for i := 0; i < len(d.FramePointers); i++ {
+		frame := &DC6Frame{}
+
+		if frame.Flipped, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.Width, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.Height, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.OffsetX, err = r.ReadInt32(); err != nil {
+			return err
+		}
+
+		if frame.OffsetY, err = r.ReadInt32(); err != nil {
+			return err
+		}
+
+		if frame.Unknown, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.NextBlock, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.Length, err = r.ReadUInt32(); err != nil {
+			return err
+		}
+
+		if frame.FrameData, err = r.ReadBytes(int(frame.Length)); err != nil {
+			return err
+		}
+
+		if frame.Terminator, err = r.ReadBytes(terminatorSize); err != nil {
+			return err
+		}
+
+		d.Frames[i] = frame
+	}
+
+	return nil
 }
 
 // DecodeFrame decodes the given frame to an indexed color texture
