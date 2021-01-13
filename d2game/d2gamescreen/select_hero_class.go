@@ -511,7 +511,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 	}
 
 	playerState.Equipment = v.InventoryItemFactory.DefaultHeroItems[v.selectedHero]
-	v.navigator.ToCreateGame(playerState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
+	v.navigator.ToCreateGame(playerState.FilePath, v.connectionType, v.connectionHost)
 }
 
 // Render renders the Select Hero Class screen
