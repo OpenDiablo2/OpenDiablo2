@@ -246,6 +246,7 @@ const (
 
 	Frame                     = "/data/global/ui/PANEL/800borderframe.dc6"
 	InventoryCharacterPanel   = "/data/global/ui/PANEL/invchar6.DC6"
+	PartyScreen               = "/data/global/ui/MENU/party.dc6"
 	HeroStatsPanelStatsPoints = "/data/global/ui/PANEL/skillpoints.dc6"
 	HeroStatsPanelSocket      = "/data/global/ui/PANEL/levelsocket.dc6"
 	InventoryWeaponsTab       = "/data/global/ui/PANEL/invchar6Tab.DC6"
