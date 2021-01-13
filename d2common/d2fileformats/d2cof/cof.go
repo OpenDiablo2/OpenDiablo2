@@ -7,6 +7,32 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+const (
+	unknownByteCount = 21
+	numHeaderBytes   = 4 + unknownByteCount
+	numLayerBytes    = 9
+)
+
+const (
+	headerNumLayers = iota
+	headerFramesPerDir
+	headerNumDirs
+	headerSpeed = numHeaderBytes - 1
+)
+
+const (
+	layerType = iota
+	layerShadow
+	layerSelectable
+	layerTransparent
+	layerDrawEffect
+	layerWeaponClass
+)
+
+const (
+	badCharacter = string(byte(0))
+)
+
 // COF is a structure that represents a COF file.
 type COF struct {
 	NumberOfDirections int
@@ -23,13 +49,20 @@ type COF struct {
 func Load(fileData []byte) (*COF, error) {
 	result := &COF{}
 	streamReader := d2datautils.CreateStreamReader(fileData)
-	result.NumberOfLayers = int(streamReader.GetByte())
-	result.FramesPerDirection = int(streamReader.GetByte())
-	result.NumberOfDirections = int(streamReader.GetByte())
 
-	streamReader.SkipBytes(21) //nolint:gomnd // Unknown data
+	var b []byte
 
-	result.Speed = int(streamReader.GetByte())
+	var err error
+
+	b, err = streamReader.ReadBytes(numHeaderBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	result.NumberOfLayers = int(b[headerNumLayers])
+	result.FramesPerDirection = int(b[headerFramesPerDir])
+	result.NumberOfDirections = int(b[headerNumDirs])
+	result.Speed = int(b[headerSpeed])
 
 	streamReader.SkipBytes(3) //nolint:gomnd // Unknown data
 
@@ -38,27 +71,44 @@ func Load(fileData []byte) (*COF, error) {
 
 	for i := 0; i < result.NumberOfLayers; i++ {
 		layer := CofLayer{}
-		layer.Type = d2enum.CompositeType(streamReader.GetByte())
-		layer.Shadow = streamReader.GetByte()
-		layer.Selectable = streamReader.GetByte() != 0
-		layer.Transparent = streamReader.GetByte() != 0
-		layer.DrawEffect = d2enum.DrawEffect(streamReader.GetByte())
-		weaponClassStr := streamReader.ReadBytes(4) //nolint:gomnd // Binary data
-		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(byte(0)), "")))
+
+		b, err = streamReader.ReadBytes(numLayerBytes)
+		if err != nil {
+			return nil, err
+		}
+
+		layer.Type = d2enum.CompositeType(b[layerType])
+		layer.Shadow = b[layerShadow]
+		layer.Selectable = b[layerSelectable] > 0
+		layer.Transparent = b[layerTransparent] > 0
+		layer.DrawEffect = d2enum.DrawEffect(b[layerDrawEffect])
+
+		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(
+			string(b[layerWeaponClass:]), badCharacter, "")))
+
 		result.CofLayers[i] = layer
 		result.CompositeLayers[layer.Type] = i
 	}
 
-	animationFrameBytes := streamReader.ReadBytes(result.FramesPerDirection)
+	b, err = streamReader.ReadBytes(result.FramesPerDirection)
+	if err != nil {
+		return nil, err
+	}
+
 	result.AnimationFrames = make([]d2enum.AnimationFrame, result.FramesPerDirection)
 
-	for i := range animationFrameBytes {
-		result.AnimationFrames[i] = d2enum.AnimationFrame(animationFrameBytes[i])
+	for i := range b {
+		result.AnimationFrames[i] = d2enum.AnimationFrame(b[i])
 	}
 
 	priorityLen := result.FramesPerDirection * result.NumberOfDirections * result.NumberOfLayers
 	result.Priority = make([][][]d2enum.CompositeType, result.NumberOfDirections)
-	priorityBytes := streamReader.ReadBytes(priorityLen)
+
+	priorityBytes, err := streamReader.ReadBytes(priorityLen)
+	if err != nil {
+		return nil, err
+	}
+
 	priorityIndex := 0
 
 	for direction := 0; direction < result.NumberOfDirections; direction++ {

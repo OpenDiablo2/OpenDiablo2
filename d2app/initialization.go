@@ -150,7 +150,10 @@ func (a *App) initAnimationData(path string) error {
 
 	a.Debugf(fmtLoadAnimData, path)
 
-	animData := d2data.LoadAnimationData(animDataBytes)
+	animData, err := d2data.LoadAnimationData(animDataBytes)
+	if err != nil {
+		a.Error(err.Error())
+	}
 
 	a.Infof("Loaded %d animation data records", len(animData))
 

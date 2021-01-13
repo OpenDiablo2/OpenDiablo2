@@ -223,7 +223,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) ([]byte, error) {
 	return data, nil
 }
 
-//nolint:gomnd // Will fix enum values later
+//nolint:gomnd,funlen,gocyclo // Will fix enum values later, can't help function length
 func decompressMulti(data []byte /*expectedLength*/, _ uint32) ([]byte, error) {
 	compressionType := data[0]
 
@@ -237,9 +237,9 @@ func decompressMulti(data []byte /*expectedLength*/, _ uint32) ([]byte, error) {
 	case 0x10: // BZip2
 		return []byte{}, errors.New("bzip2 decompression not supported")
 	case 0x80: // IMA ADPCM Stereo
-		return d2compression.WavDecompress(data[1:], 2), nil
+		return d2compression.WavDecompress(data[1:], 2)
 	case 0x40: // IMA ADPCM Mono
-		return d2compression.WavDecompress(data[1:], 1), nil
+		return d2compression.WavDecompress(data[1:], 1)
 	case 0x12:
 		return []byte{}, errors.New("lzma decompression not supported")
 	// Combos
@@ -250,8 +250,11 @@ func decompressMulti(data []byte /*expectedLength*/, _ uint32) ([]byte, error) {
 		// sparse then bzip2
 		return []byte{}, errors.New("sparse decompression + bzip2 decompression not supported")
 	case 0x41:
-		sinput := d2compression.HuffmanDecompress(data[1:])
-		sinput = d2compression.WavDecompress(sinput, 1)
+		sinput, err := d2compression.WavDecompress(d2compression.HuffmanDecompress(data[1:]), 1)
+		if err != nil {
+			return nil, err
+		}
+
 		tmp := make([]byte, len(sinput))
 
 		copy(tmp, sinput)
@@ -262,8 +265,11 @@ func decompressMulti(data []byte /*expectedLength*/, _ uint32) ([]byte, error) {
 		// return MpqWavCompression.Decompress(new MemoryStream(result), 1);
 		return []byte{}, errors.New("pk + mpqwav decompression not supported")
 	case 0x81:
-		sinput := d2compression.HuffmanDecompress(data[1:])
-		sinput = d2compression.WavDecompress(sinput, 2)
+		sinput, err := d2compression.WavDecompress(d2compression.HuffmanDecompress(data[1:]), 2)
+		if err != nil {
+			return nil, err
+		}
+
 		tmp := make([]byte, len(sinput))
 		copy(tmp, sinput)
 
