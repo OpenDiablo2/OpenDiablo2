@@ -573,7 +573,7 @@ func (g *GameControls) clearScreen() {
 }
 
 func (g *GameControls) openLeftPanel(panel Panel) {
-	if !g.HelpOverlay.IsOpen() {
+	if !g.HelpOverlay.IsOpen() && !g.escapeMenu.IsOpen() {
 		isOpen := panel.IsOpen()
 
 		g.clearLeftScreenSide()
@@ -587,7 +587,7 @@ func (g *GameControls) openLeftPanel(panel Panel) {
 }
 
 func (g *GameControls) openRightPanel(panel Panel) {
-	if !g.HelpOverlay.IsOpen() {
+	if !g.HelpOverlay.IsOpen() && !g.escapeMenu.IsOpen() {
 		isOpen := panel.IsOpen()
 
 		g.clearRightScreenSide()
