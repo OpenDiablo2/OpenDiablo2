@@ -789,6 +789,37 @@ type Button struct {
 
 // NewButton creates an instance of Button
 func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
+	buttonLayout := getButtonLayouts()[buttonType]
+
+	btn := ui.createButton(buttonLayout, text)
+
+	return btn
+}
+
+func (ui *UIManager) NewCustomButton(path string, frame int) *Button {
+	layout := ButtonLayout{
+		XSegments:        1,
+		YSegments:        1,
+		DisabledFrame:    -1,
+		DisabledColor:    whiteAlpha100,
+		ResourceName:     path,
+		PaletteName:      d2resource.PaletteSky,
+		BaseFrame:        frame,
+		Toggleable:       true,
+		FontPath:         d2resource.Font16,
+		AllowFrameChange: true,
+		HasImage:         true,
+		FixedWidth:       ButtonNoFixedWidth,
+		FixedHeight:      ButtonNoFixedHeight,
+	}
+
+	btn := ui.createButton(layout, "")
+
+	return btn
+}
+
+// createButton creates button using input layout and text
+func (ui *UIManager) createButton(layout ButtonLayout, text string) *Button {
 	base := NewBaseWidget(ui)
 	base.SetVisible(true)
 
@@ -798,24 +829,23 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		pressed:    false,
 	}
 
-	buttonLayout := getButtonLayouts()[buttonType]
-	btn.buttonLayout = buttonLayout
-	lbl := ui.NewLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
+	btn.buttonLayout = layout
 
+	lbl := ui.NewLabel(layout.FontPath, d2resource.PaletteUnits)
 	lbl.SetText(text)
-	lbl.Color[0] = d2util.Color(buttonLayout.LabelColor)
+	lbl.Color[0] = d2util.Color(layout.LabelColor)
 	lbl.Alignment = HorizontalAlignCenter
 
-	buttonSprite, err := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
+	buttonSprite, err := ui.NewSprite(layout.ResourceName, layout.PaletteName)
 	if err != nil {
 		ui.Error(err.Error())
 		return nil
 	}
 
-	if buttonLayout.FixedWidth > 0 {
-		btn.width = buttonLayout.FixedWidth
+	if layout.FixedWidth > 0 {
+		btn.width = layout.FixedWidth
 	} else {
-		for i := 0; i < buttonLayout.XSegments; i++ {
+		for i := 0; i < layout.XSegments; i++ {
 			w, _, frameSizeErr := buttonSprite.GetFrameSize(i)
 			if frameSizeErr != nil {
 				ui.Error(frameSizeErr.Error())
@@ -826,11 +856,11 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		}
 	}
 
-	if buttonLayout.FixedHeight > 0 {
-		btn.height = buttonLayout.FixedHeight
+	if layout.FixedHeight > 0 {
+		btn.height = layout.FixedHeight
 	} else {
-		for i := 0; i < buttonLayout.YSegments; i++ {
-			_, h, frameSizeErr := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
+		for i := 0; i < layout.YSegments; i++ {
+			_, h, frameSizeErr := buttonSprite.GetFrameSize(i * layout.YSegments)
 			if frameSizeErr != nil {
 				ui.Error(frameSizeErr.Error())
 				return nil
@@ -849,7 +879,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 
 	ui.addWidget(btn) // important that this comes before prerenderStates!
 
-	btn.prerenderStates(buttonSprite, &buttonLayout, lbl)
+	btn.prerenderStates(buttonSprite, &layout, lbl)
 
 	return btn
 }
