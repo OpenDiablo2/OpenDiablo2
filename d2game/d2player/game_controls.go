@@ -364,6 +364,10 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
 		g.toggleInventoryPanel()
+	case d2enum.TogglePartyPanel:
+		if !g.isSinglePlayer {
+			g.togglePartyScreen()
+		}
 	case d2enum.ToggleSkillTreePanel:
 		g.toggleSkilltreePanel()
 	case d2enum.ToggleCharacterPanel:
