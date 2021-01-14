@@ -15,10 +15,10 @@ import (
 )
 
 const ( // for the dc6 frames
-	partyScreenTopLeft = iota
-	partyScreenTopRight
-	partyScreenBottomLeft
-	partyScreenBottomRight
+	partyPanelTopLeft = iota
+	partyPanelTopRight
+	partyPanelBottomLeft
+	partyPanelBottomRight
 )
 
 /*
@@ -57,7 +57,7 @@ const (
 */
 
 const (
-	partyScreenCloseButtonX, partyScreenCloseButtonY = 358, 453
+	partyPanelCloseButtonX, partyPanelCloseButtonY = 358, 453
 )
 
 /*
@@ -97,16 +97,16 @@ type StatsPanelLabels struct {
 */
 
 // NewHeroStatsPanel creates a new hero status panel
-func NewPartyScreen(asset *d2asset.AssetManager,
+func NewPartyPanel(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	heroName string,
 	heroClass d2enum.Hero,
 	l d2util.LogLevel,
-	heroState *d2hero.HeroStatsState) *PartyScreen {
+	heroState *d2hero.HeroStatsState) *PartyPanel {
 	originX := 0
 	originY := 0
 
-	hsp := &PartyScreen{
+	hsp := &PartyPanel{
 		asset:     asset,
 		uiManager: ui,
 		originX:   originX,
@@ -125,7 +125,7 @@ func NewPartyScreen(asset *d2asset.AssetManager,
 }
 
 // HeroStatsPanel represents the hero status panel
-type PartyScreen struct {
+type PartyPanel struct {
 	asset           *d2asset.AssetManager
 	uiManager       *d2ui.UIManager
 	panel           *d2ui.Sprite
@@ -146,7 +146,7 @@ type PartyScreen struct {
 }
 
 // Load the data for the hero status panel
-func (s *PartyScreen) Load() {
+func (s *PartyPanel) Load() {
 	var err error
 
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
@@ -154,7 +154,7 @@ func (s *PartyScreen) Load() {
 	frame := s.uiManager.NewUIFrame(d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
 
-	s.panel, err = s.uiManager.NewSprite(d2resource.PartyScreen, d2resource.PaletteSky)
+	s.panel, err = s.uiManager.NewSprite(d2resource.PartyPanel, d2resource.PaletteSky)
 	if err != nil {
 		s.Error(err.Error())
 	}
@@ -165,7 +165,7 @@ func (s *PartyScreen) Load() {
 
 	closeButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	closeButton.SetVisible(false)
-	closeButton.SetPosition(partyScreenCloseButtonX, partyScreenCloseButtonY)
+	closeButton.SetPosition(partyPanelCloseButtonX, partyPanelCloseButtonY)
 	closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(closeButton)
 
@@ -253,12 +253,12 @@ func (s *HeroStatsPanel) setLayout() {
 */
 
 // IsOpen returns true if the hero status panel is open
-func (s *PartyScreen) IsOpen() bool {
+func (s *PartyPanel) IsOpen() bool {
 	return s.isOpen
 }
 
 // Toggle toggles the visibility of the hero status panel
-func (s *PartyScreen) Toggle() {
+func (s *PartyPanel) Toggle() {
 	if s.isOpen {
 		s.Close()
 	} else {
@@ -267,13 +267,13 @@ func (s *PartyScreen) Toggle() {
 }
 
 // Open opens the hero status panel
-func (s *PartyScreen) Open() {
+func (s *PartyPanel) Open() {
 	s.isOpen = true
 	s.panelGroup.SetVisible(true)
 }
 
 // Close closed the hero status panel
-func (s *PartyScreen) Close() {
+func (s *PartyPanel) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
 }
@@ -294,17 +294,17 @@ func (s *HeroStatsPanel) Advance(elapsed float64) {
 }
 */
 
-func (s *PartyScreen) renderStaticMenu(target d2interface.Surface) {
+func (s *PartyPanel) renderStaticMenu(target d2interface.Surface) {
 	s.renderStaticPanelFrames(target)
 }
 
 // nolint:dupl // see quest_log.go.renderStaticPanelFrames comment
-func (s *PartyScreen) renderStaticPanelFrames(target d2interface.Surface) {
+func (s *PartyPanel) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
-		partyScreenTopLeft,
-		partyScreenTopRight,
-		partyScreenBottomRight,
-		partyScreenBottomLeft,
+		partyPanelTopLeft,
+		partyPanelTopRight,
+		partyPanelBottomRight,
+		partyPanelBottomLeft,
 	}
 
 	currentX := s.originX + statsPanelOffsetX

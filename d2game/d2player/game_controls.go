@@ -173,7 +173,7 @@ func NewGameControls(
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 
-	partyScreen := NewPartyScreen(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
+	partyPanel := NewPartyPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 
 	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
@@ -207,7 +207,7 @@ func NewGameControls(
 		inventory:      inventory,
 		skilltree:      skilltree,
 		heroStatsPanel: heroStatsPanel,
-		partyScreen:    partyScreen,
+		partyPanel:     partyPanel,
 		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
@@ -277,7 +277,7 @@ type GameControls struct {
 	hud                    *HUD
 	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
-	partyScreen            *PartyScreen
+	partyPanel             *PartyPanel
 	questLog               *QuestLog
 	HelpOverlay            *HelpOverlay
 	bottomMenuRect         *d2geom.Rectangle
@@ -366,7 +366,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.toggleInventoryPanel()
 	case d2enum.TogglePartyPanel:
 		if !g.isSinglePlayer {
-			g.togglePartyScreen()
+			g.togglePartyPanel()
 		}
 	case d2enum.ToggleSkillTreePanel:
 		g.toggleSkilltreePanel()
@@ -560,7 +560,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) clearLeftScreenSide() {
 	g.heroStatsPanel.Close()
-	g.partyScreen.Close()
+	g.partyPanel.Close()
 	g.questLog.Close()
 	g.hud.skillSelectMenu.ClosePanels()
 	g.hud.miniPanel.SetMovedRight(false)
@@ -614,8 +614,8 @@ func (g *GameControls) toggleHeroStatsPanel() {
 	g.openLeftPanel(g.heroStatsPanel)
 }
 
-func (g *GameControls) togglePartyScreen() {
-	g.openLeftPanel(g.partyScreen)
+func (g *GameControls) togglePartyPanel() {
+	g.openLeftPanel(g.partyPanel)
 }
 
 func (g *GameControls) onCloseHeroStatsPanel() {
@@ -679,7 +679,7 @@ func (g *GameControls) Load() {
 	g.inventory.Load()
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
-	g.partyScreen.Load()
+	g.partyPanel.Load()
 	g.questLog.Load()
 	g.HelpOverlay.Load()
 
@@ -688,7 +688,7 @@ func (g *GameControls) Load() {
 
 	miniPanelActions := &miniPanelActions{
 		characterToggle: g.toggleHeroStatsPanel,
-		partyToggle:     g.togglePartyScreen,
+		partyToggle:     g.togglePartyPanel,
 		inventoryToggle: g.toggleInventoryPanel,
 		skilltreeToggle: g.toggleSkilltreePanel,
 		menuToggle:      g.openEscMenu,
@@ -730,7 +730,7 @@ func (g *GameControls) updateLayout() {
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	return g.heroStatsPanel.IsOpen() || g.partyScreen.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
+	return g.heroStatsPanel.IsOpen() || g.partyPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
