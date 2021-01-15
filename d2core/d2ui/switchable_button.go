@@ -1,7 +1,11 @@
 package d2ui
 
-var _ Widget = &Button{}
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
+// static check if SwitchableButton implemented widget
+var _ Widget = &SwitchableButton{}
+
+// SwitchableButton represents switchable button widget
 type SwitchableButton struct {
 	*BaseWidget
 	active        *Button
@@ -11,6 +15,7 @@ type SwitchableButton struct {
 	state         bool
 }
 
+// NewSwitchableButton creates new switchable button
 func (ui *UIManager) NewSwitchableButton(active, inactive *Button, state bool) *SwitchableButton {
 	base := NewBaseWidget(ui)
 	base.SetVisible(true)
@@ -28,10 +33,12 @@ func (ui *UIManager) NewSwitchableButton(active, inactive *Button, state bool) *
 	return sbtn
 }
 
+// SetVisible sets widget's visibility
 func (sbtn *SwitchableButton) SetVisible(visible bool) {
 	if !visible {
 		sbtn.active.SetVisible(false)
 		sbtn.inactive.SetVisible(false)
+
 		return
 	}
 
@@ -44,6 +51,7 @@ func (sbtn *SwitchableButton) SetVisible(visible bool) {
 	}
 }
 
+// OnActivated sets onActivate callback
 func (sbtn *SwitchableButton) OnActivated(cb func()) {
 	sbtn.active.OnActivated(func() {
 		cb()
@@ -52,10 +60,12 @@ func (sbtn *SwitchableButton) OnActivated(cb func()) {
 	})
 }
 
+// Activate switches widget into active state
 func (sbtn *SwitchableButton) Activate() {
 	sbtn.onActivate()
 }
 
+// OnDezactivated sets onDezactivate callback
 func (sbtn *SwitchableButton) OnDezactivated(cb func()) {
 	sbtn.inactive.OnActivated(func() {
 		cb()
@@ -64,12 +74,25 @@ func (sbtn *SwitchableButton) OnDezactivated(cb func()) {
 	})
 }
 
+// Dezactivate switch widget to inactive state
 func (sbtn *SwitchableButton) Dezactivate() {
 	sbtn.onDezactivate()
 }
 
+// SetPosition sets widget's position
 func (sbtn *SwitchableButton) SetPosition(x, y int) {
 	sbtn.BaseWidget.SetPosition(x, y)
 	sbtn.active.SetPosition(x, y)
 	sbtn.inactive.SetPosition(x, y)
+}
+
+// Advance advances widget
+func (sbtn *SwitchableButton) Advance(_ float64) error {
+	// noop
+	return nil
+}
+
+// Render renders widget
+func (sbtn *SwitchableButton) Render(_ d2interface.Surface) {
+	// noop
 }

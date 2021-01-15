@@ -208,8 +208,8 @@ const (
 )
 
 // nolint:funlen // cant reduce
-func getButtonLayouts() map[ButtonType]ButtonLayout {
-	return map[ButtonType]ButtonLayout{
+func getButtonLayouts() map[ButtonType]*ButtonLayout {
+	return map[ButtonType]*ButtonLayout{
 		ButtonTypeWide: {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
@@ -774,7 +774,7 @@ var _ ClickableWidget = &Button{}
 // Button defines a standard wide UI button
 type Button struct {
 	*BaseWidget
-	buttonLayout          ButtonLayout
+	buttonLayout          *ButtonLayout
 	normalSurface         d2interface.Surface
 	pressedSurface        d2interface.Surface
 	toggledSurface        d2interface.Surface
@@ -796,8 +796,9 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	return btn
 }
 
+// NewCustomButton creates new custom button
 func (ui *UIManager) NewCustomButton(path string, frame int) *Button {
-	layout := ButtonLayout{
+	layout := &ButtonLayout{
 		XSegments:        1,
 		YSegments:        1,
 		DisabledFrame:    -1,
@@ -819,7 +820,7 @@ func (ui *UIManager) NewCustomButton(path string, frame int) *Button {
 }
 
 // createButton creates button using input layout and text
-func (ui *UIManager) createButton(layout ButtonLayout, text string) *Button {
+func (ui *UIManager) createButton(layout *ButtonLayout, text string) *Button {
 	base := NewBaseWidget(ui)
 	base.SetVisible(true)
 
@@ -879,7 +880,7 @@ func (ui *UIManager) createButton(layout ButtonLayout, text string) *Button {
 
 	ui.addWidget(btn) // important that this comes before prerenderStates!
 
-	btn.prerenderStates(buttonSprite, &layout, lbl)
+	btn.prerenderStates(buttonSprite, layout, lbl)
 
 	return btn
 }

@@ -1,15 +1,11 @@
 package d2player
 
 import (
-	//"strconv"
-	//"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	// "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	//"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -96,11 +92,10 @@ type StatsPanelLabels struct {
 }
 */
 
-// NewHeroStatsPanel creates a new hero status panel
+// NewPartyPanel creates a new party panel
 func NewPartyPanel(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	heroName string,
-	heroClass d2enum.Hero,
 	l d2util.LogLevel,
 	heroState *d2hero.HeroStatsState) *PartyPanel {
 	originX := 0
@@ -113,7 +108,6 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 		originY:   originY,
 		heroState: heroState,
 		heroName:  heroName,
-		heroClass: heroClass,
 		labels:    &StatsPanelLabels{},
 	}
 
@@ -124,19 +118,16 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 	return hsp
 }
 
-// HeroStatsPanel represents the hero status panel
+// PartyPanel represents the party panel
 type PartyPanel struct {
-	asset           *d2asset.AssetManager
-	uiManager       *d2ui.UIManager
-	panel           *d2ui.Sprite
-	heroState       *d2hero.HeroStatsState
-	heroName        string
-	heroClass       d2enum.Hero
-	labels          *StatsPanelLabels
-	onCloseCb       func()
-	panelGroup      *d2ui.WidgetGroup
-	newStatPoints   *d2ui.WidgetGroup
-	remainingPoints *d2ui.Label
+	asset      *d2asset.AssetManager
+	uiManager  *d2ui.UIManager
+	panel      *d2ui.Sprite
+	heroState  *d2hero.HeroStatsState
+	heroName   string
+	labels     *StatsPanelLabels
+	onCloseCb  func()
+	panelGroup *d2ui.WidgetGroup
 
 	originX int
 	originY int
@@ -278,12 +269,12 @@ func (s *PartyPanel) Close() {
 	s.panelGroup.SetVisible(false)
 }
 
-/*
-// SetOnCloseCb the callback run on closing the HeroStatsPanel
-func (s *HeroStatsPanel) SetOnCloseCb(cb func()) {
+// SetOnCloseCb the callback run on closing the PartyPanel
+func (s *PartyPanel) SetOnCloseCb(cb func()) {
 	s.onCloseCb = cb
 }
 
+/*
 // Advance updates labels on the panel
 func (s *HeroStatsPanel) Advance(elapsed float64) {
 	if !s.isOpen {
