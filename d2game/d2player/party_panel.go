@@ -30,6 +30,7 @@ const (
 	seeingButtonFrame = iota * 4
 	relationshipsFrame
 	listeningButtonFrame
+	// nolint:deadcode,varcheck,unused // will be used
 	lockButtonFrame
 
 	nextButtonFrame = 2
@@ -53,15 +54,18 @@ const (
 )
 
 type partyIndex struct {
-	name                 *d2ui.Label
-	class                *d2ui.Label
+	name  *d2ui.Label
+	class *d2ui.Label
+	// nolint:structcheck,unused // will be used
 	level                *d2ui.Label
 	relationshipSwitcher *d2ui.SwitchableButton
 	seeingSwitcher       *d2ui.SwitchableButton
 	listeningSwitcher    *d2ui.SwitchableButton
 }
 
-func (s *PartyPanel) NewPartyIndex(name string, class d2enum.Hero, level int, idx int) *partyIndex {
+// newPartyIndex creates new party index
+// nolint:unparam // level will be used
+func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx int) *partyIndex {
 	result := &partyIndex{}
 
 	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
@@ -183,7 +187,7 @@ func (s *PartyPanel) Load() {
 	s.panelGroup.AddWidget(v)
 
 	// example data
-	s.partyIndexes[0] = s.NewPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0)
+	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0)
 	for _, i := range s.partyIndexes {
 		// needed for "developing time" to avoit panic
 		if i.name != nil {
