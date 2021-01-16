@@ -1,7 +1,7 @@
 package d2player
 
 import (
-	// "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -23,7 +23,68 @@ const (
 
 const (
 	partyPanelCloseButtonX, partyPanelCloseButtonY = 358, 453
+	partyPanelHeroNameX, partyPanelHeroNameY       = 180, 80
 )
+
+const (
+	seeingButtonFrame = iota * 4
+	relationshipsFrame
+	listeningButtonFrame
+	lockButtonFrame
+
+	nextButtonFrame = 2
+)
+
+const (
+	maxPlayersInGame          = 8
+	barX                      = 90
+	relationshipSwitcherX     = 95
+	seeingSwitcherX           = 345
+	listeningSwitcherX        = 365
+	nameLabelX                = 115
+	classLabelX               = 115
+	baseBarY                  = 134
+	baseRelationshipSwitcherY = 150
+	baseSeeingSwitcherY       = 145
+	baseListeningSwitcherY    = 145
+	baseNameLabelY            = 145
+	baseClassLabelY           = 160
+	nextBar                   = 52
+)
+
+type partyIndex struct {
+	name                 *d2ui.Label
+	class                *d2ui.Label
+	level                *d2ui.Label
+	relationshipSwitcher *d2ui.SwitchableButton
+	seeingSwitcher       *d2ui.SwitchableButton
+	listeningSwitcher    *d2ui.SwitchableButton
+}
+
+func (s *PartyPanel) NewPartyIndex(name string, class d2enum.Hero, level int, idx int) *partyIndex {
+	result := &partyIndex{}
+
+	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	nameLabel.SetText(name)
+	nameLabel.SetPosition(nameLabelX, baseNameLabelY+nextBar*idx)
+	result.name = nameLabel
+
+	classLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	classLabel.SetText(s.asset.TranslateString(class.String()))
+	classLabel.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
+	result.class = classLabel
+
+	relationships := s.createSwitcher(relationshipsFrame, relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
+	result.relationshipSwitcher = relationships
+
+	seeing := s.createSwitcher(seeingButtonFrame, seeingSwitcherX, baseSeeingSwitcherY+nextBar*idx)
+	result.seeingSwitcher = seeing
+
+	listening := s.createSwitcher(listeningButtonFrame, listeningSwitcherX, baseListeningSwitcherY+nextBar*idx)
+	result.listeningSwitcher = listening
+
+	return result
+}
 
 // NewPartyPanel creates a new party panel
 func NewPartyPanel(asset *d2asset.AssetManager,
@@ -34,14 +95,22 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 	originX := 0
 	originY := 0
 
+	var v [maxPlayersInGame]*partyIndex
+	for i := 0; i < maxPlayersInGame; i++ {
+		v[i] = &partyIndex{}
+	}
+
 	hsp := &PartyPanel{
-		asset:     asset,
-		uiManager: ui,
-		originX:   originX,
-		originY:   originY,
-		heroState: heroState,
-		heroName:  heroName,
-		labels:    &StatsPanelLabels{},
+		asset:        asset,
+		uiManager:    ui,
+		originX:      originX,
+		originY:      originY,
+		heroState:    heroState,
+		heroName:     heroName,
+		labels:       &StatsPanelLabels{},
+		partyIndexes: v,
+		barX:         barX,
+		barY:         baseBarY,
 	}
 
 	hsp.Logger = d2util.NewLogger()
@@ -53,18 +122,22 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 
 // PartyPanel represents the party panel
 type PartyPanel struct {
-	asset      *d2asset.AssetManager
-	uiManager  *d2ui.UIManager
-	panel      *d2ui.Sprite
-	heroState  *d2hero.HeroStatsState
-	heroName   string
-	labels     *StatsPanelLabels
-	onCloseCb  func()
-	panelGroup *d2ui.WidgetGroup
+	asset        *d2asset.AssetManager
+	uiManager    *d2ui.UIManager
+	panel        *d2ui.Sprite
+	bar          *d2ui.Sprite
+	heroState    *d2hero.HeroStatsState
+	heroName     string
+	labels       *StatsPanelLabels
+	onCloseCb    func()
+	panelGroup   *d2ui.WidgetGroup
+	partyIndexes [maxPlayersInGame]*partyIndex
 
 	originX int
 	originY int
 	isOpen  bool
+	barX    int
+	barY    int
 
 	*d2util.Logger
 }
@@ -84,7 +157,7 @@ func (s *PartyPanel) Load() {
 	}
 
 	w, h := frame.GetSize()
-	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
+	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticPanelFrames, w, h)
 	s.panelGroup.AddWidget(staticPanel)
 
 	closeButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
@@ -93,7 +166,57 @@ func (s *PartyPanel) Load() {
 	closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(closeButton)
 
+	heroName := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	heroName.SetText(s.heroName)
+	heroName.SetPosition(partyPanelHeroNameX, partyPanelHeroNameY)
+	heroName.Alignment = d2ui.HorizontalAlignCenter
+	s.panelGroup.AddWidget(heroName)
+
+	s.bar, err = s.uiManager.NewSprite(d2resource.PartyBar, d2resource.PaletteSky)
+	if err != nil {
+		s.Error(err.Error())
+	}
+
+	s.barX, s.barY = barX, baseBarY+1*nextBar
+	w, h = s.bar.GetCurrentFrameSize()
+	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
+	s.panelGroup.AddWidget(v)
+
+	// example data
+	s.partyIndexes[0] = s.NewPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0)
+	for _, i := range s.partyIndexes {
+		// needed for "developing time" to avoit panic
+		if i.name != nil {
+			s.panelGroup.AddWidget(i.name)
+		}
+
+		if i.class != nil {
+			s.panelGroup.AddWidget(i.class)
+		}
+
+		if i.relationshipSwitcher != nil {
+			s.panelGroup.AddWidget(i.relationshipSwitcher)
+		}
+
+		if i.seeingSwitcher != nil {
+			s.panelGroup.AddWidget(i.seeingSwitcher)
+		}
+
+		if i.listeningSwitcher != nil {
+			s.panelGroup.AddWidget(i.listeningSwitcher)
+		}
+	}
+
 	s.panelGroup.SetVisible(false)
+}
+
+func (s *PartyPanel) createSwitcher(frame, x, y int) *d2ui.SwitchableButton {
+	active := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame)
+	inactive := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame+nextButtonFrame)
+	switcher := s.uiManager.NewSwitchableButton(active, inactive, true)
+	switcher.SetPosition(x, y)
+
+	return switcher
 }
 
 // IsOpen returns true if the hero status panel is open
@@ -132,10 +255,6 @@ func (s *PartyPanel) Advance(_ float64) {
 	// noop
 }
 
-func (s *PartyPanel) renderStaticMenu(target d2interface.Surface) {
-	s.renderStaticPanelFrames(target)
-}
-
 // nolint:dupl // see quest_log.go.renderStaticPanelFrames comment
 func (s *PartyPanel) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
@@ -169,5 +288,34 @@ func (s *PartyPanel) renderStaticPanelFrames(target d2interface.Surface) {
 		}
 
 		s.panel.Render(target)
+	}
+}
+
+func (s *PartyPanel) renderBar(target d2interface.Surface) {
+	frames := []int{
+		partyPanelTopLeft,
+		partyPanelTopRight,
+	}
+
+	currentX := s.originX + s.barX
+	currentY := s.originY + s.barY
+
+	for _, frameIndex := range frames {
+		if err := s.bar.SetCurrentFrame(frameIndex); err != nil {
+			s.Error(err.Error())
+		}
+
+		w, h := s.bar.GetCurrentFrameSize()
+
+		switch frameIndex {
+		case statsPanelTopLeft:
+			s.bar.SetPosition(currentX, currentY)
+			currentX += w
+		case statsPanelTopRight:
+			s.bar.SetPosition(currentX, currentY)
+			currentY += h
+		}
+
+		s.bar.Render(target)
 	}
 }

@@ -18,7 +18,6 @@ type SwitchableButton struct {
 // NewSwitchableButton creates new switchable button
 func (ui *UIManager) NewSwitchableButton(active, inactive *Button, state bool) *SwitchableButton {
 	base := NewBaseWidget(ui)
-	base.SetVisible(true)
 
 	sbtn := &SwitchableButton{
 		BaseWidget: base,
@@ -26,9 +25,13 @@ func (ui *UIManager) NewSwitchableButton(active, inactive *Button, state bool) *
 		inactive:   inactive,
 		state:      state,
 	}
+	sbtn.bindManager(ui)
+	sbtn.SetVisible(false)
 
 	sbtn.OnActivated(func() {})
 	sbtn.OnDezactivated(func() {})
+
+	ui.addWidget(sbtn)
 
 	return sbtn
 }
@@ -93,6 +96,12 @@ func (sbtn *SwitchableButton) Advance(_ float64) error {
 }
 
 // Render renders widget
-func (sbtn *SwitchableButton) Render(_ d2interface.Surface) {
-	// noop
+func (sbtn *SwitchableButton) Render(target d2interface.Surface) {
+	if sbtn.active.GetVisible() {
+		sbtn.active.Render(target)
+	}
+
+	if sbtn.inactive.GetVisible() {
+		sbtn.inactive.Render(target)
+	}
 }
