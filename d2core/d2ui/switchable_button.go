@@ -8,11 +8,11 @@ var _ Widget = &SwitchableButton{}
 // SwitchableButton represents switchable button widget
 type SwitchableButton struct {
 	*BaseWidget
-	active        *Button
-	inactive      *Button
-	onActivate    func()
-	onDezactivate func()
-	state         bool
+	active       *Button
+	inactive     *Button
+	onActivate   func()
+	onDeactivate func()
+	state        bool
 }
 
 // NewSwitchableButton creates new switchable button
@@ -29,7 +29,7 @@ func (ui *UIManager) NewSwitchableButton(active, inactive *Button, state bool) *
 	sbtn.SetVisible(false)
 
 	sbtn.OnActivated(func() {})
-	sbtn.OnDezactivated(func() {})
+	sbtn.OnDeactivated(func() {})
 
 	ui.addWidget(sbtn)
 
@@ -68,8 +68,8 @@ func (sbtn *SwitchableButton) Activate() {
 	sbtn.onActivate()
 }
 
-// OnDezactivated sets onDezactivate callback
-func (sbtn *SwitchableButton) OnDezactivated(cb func()) {
+// OnDeactivated sets onDeactivate callback
+func (sbtn *SwitchableButton) OnDeactivated(cb func()) {
 	sbtn.inactive.OnActivated(func() {
 		cb()
 		sbtn.state = true
@@ -77,9 +77,9 @@ func (sbtn *SwitchableButton) OnDezactivated(cb func()) {
 	})
 }
 
-// Dezactivate switch widget to inactive state
-func (sbtn *SwitchableButton) Dezactivate() {
-	sbtn.onDezactivate()
+// Deactivate switch widget to inactive state
+func (sbtn *SwitchableButton) Deactivate() {
+	sbtn.onDeactivate()
 }
 
 // SetPosition sets widget's position
