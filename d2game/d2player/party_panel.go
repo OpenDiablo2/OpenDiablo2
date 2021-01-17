@@ -1,6 +1,8 @@
 package d2player
 
 import (
+	"strconv"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -44,19 +46,20 @@ const (
 	listeningSwitcherX        = 365
 	nameLabelX                = 115
 	classLabelX               = 115
+	levelLabelX               = 383
 	baseBarY                  = 134
 	baseRelationshipSwitcherY = 150
-	baseSeeingSwitcherY       = 145
-	baseListeningSwitcherY    = 145
+	baseSeeingSwitcherY       = 140
+	baseListeningSwitcherY    = 140
 	baseNameLabelY            = 145
 	baseClassLabelY           = 160
+	baseLevelLabelY           = 160
 	nextBar                   = 52
 )
 
 type partyIndex struct {
-	name  *d2ui.Label
-	class *d2ui.Label
-	// nolint:structcheck,unused // will be used
+	name                 *d2ui.Label
+	class                *d2ui.Label
 	level                *d2ui.Label
 	relationshipSwitcher *d2ui.SwitchableButton
 	seeingSwitcher       *d2ui.SwitchableButton
@@ -64,7 +67,6 @@ type partyIndex struct {
 }
 
 // newPartyIndex creates new party index
-// nolint:unparam // level will be used
 func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx int) *partyIndex {
 	result := &partyIndex{}
 
@@ -77,6 +79,12 @@ func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx in
 	classLabel.SetText(s.asset.TranslateString(class.String()))
 	classLabel.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
 	result.class = classLabel
+
+	levelLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	levelLabel.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(level))
+	levelLabel.Alignment = d2ui.HorizontalAlignRight
+	levelLabel.SetPosition(levelLabelX, baseLevelLabelY+nextBar*idx)
+	result.level = levelLabel
 
 	relationships := s.createSwitcher(relationshipsFrame, relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
 	result.relationshipSwitcher = relationships
@@ -188,6 +196,7 @@ func (s *PartyPanel) Load() {
 
 	// example data
 	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0)
+	s.partyIndexes[1] = s.newPartyIndex("gameMember1", d2enum.HeroPaladin, 99, 1)
 	for _, i := range s.partyIndexes {
 		// needed for "developing time" to avoit panic
 		if i.name != nil {
@@ -208,6 +217,10 @@ func (s *PartyPanel) Load() {
 
 		if i.listeningSwitcher != nil {
 			s.panelGroup.AddWidget(i.listeningSwitcher)
+		}
+
+		if i.level != nil {
+			s.panelGroup.AddWidget(i.level)
 		}
 	}
 
