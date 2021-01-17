@@ -82,6 +82,12 @@ func (sbtn *SwitchableButton) Deactivate() {
 	sbtn.onDeactivate()
 }
 
+// SetState sets button's state
+func (sbtn *SwitchableButton) SetState(state bool) {
+	sbtn.state = state
+	sbtn.SetVisible(sbtn.GetVisible())
+}
+
 // SetPosition sets widget's position
 func (sbtn *SwitchableButton) SetPosition(x, y int) {
 	sbtn.BaseWidget.SetPosition(x, y)

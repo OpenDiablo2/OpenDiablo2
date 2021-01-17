@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -64,10 +65,11 @@ type partyIndex struct {
 	relationshipSwitcher *d2ui.SwitchableButton
 	seeingSwitcher       *d2ui.SwitchableButton
 	listeningSwitcher    *d2ui.SwitchableButton
+	relationships        d2enum.PlayersRelationships
 }
 
 // newPartyIndex creates new party index
-func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx int) *partyIndex {
+func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx int, relations d2enum.PlayersRelationships) *partyIndex {
 	result := &partyIndex{}
 
 	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
@@ -95,7 +97,28 @@ func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx in
 	listening := s.createSwitcher(listeningButtonFrame, listeningSwitcherX, baseListeningSwitcherY+nextBar*idx)
 	result.listeningSwitcher = listening
 
+	result.relationships = relations
+
+	result.setColor(relations)
+
 	return result
+}
+
+func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
+	var color = d2util.Color(d2gui.ColorWhite)
+
+	switch relations {
+	case d2enum.PlayerRelationEnemy:
+		color = d2util.Color(d2gui.ColorRed)
+
+		pi.relationshipSwitcher.SetState(false)
+	case d2enum.PlayerRelationFriend:
+		color = d2util.Color(d2gui.ColorGreen)
+	}
+
+	pi.name.Color[0] = color
+	pi.class.Color[0] = color
+	pi.level.Color[0] = color
 }
 
 // NewPartyPanel creates a new party panel
@@ -189,14 +212,16 @@ func (s *PartyPanel) Load() {
 		s.Error(err.Error())
 	}
 
-	s.barX, s.barY = barX, baseBarY+1*nextBar
+	// nolint:gomnd // test data
+	s.barX, s.barY = barX, baseBarY+2*nextBar
 	w, h = s.bar.GetCurrentFrameSize()
 	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
 	s.panelGroup.AddWidget(v)
 
 	// example data
-	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0)
-	s.partyIndexes[1] = s.newPartyIndex("gameMember1", d2enum.HeroPaladin, 99, 1)
+	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0, d2enum.PlayerRelationEnemy)
+	s.partyIndexes[1] = s.newPartyIndex("gameMember1", d2enum.HeroPaladin, 99, 1, d2enum.PlayerRelationFriend)
+
 	for _, i := range s.partyIndexes {
 		// needed for "developing time" to avoit panic
 		if i.name != nil {
