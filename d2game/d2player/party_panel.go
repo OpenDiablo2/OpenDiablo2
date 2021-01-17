@@ -212,12 +212,6 @@ func (s *PartyPanel) Load() {
 		s.Error(err.Error())
 	}
 
-	// nolint:gomnd // test data
-	s.barX, s.barY = barX, baseBarY+2*nextBar
-	w, h = s.bar.GetCurrentFrameSize()
-	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
-	s.panelGroup.AddWidget(v)
-
 	// example data
 	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0, d2enum.PlayerRelationEnemy)
 	s.partyIndexes[1] = s.newPartyIndex("gameMember1", d2enum.HeroPaladin, 99, 1, d2enum.PlayerRelationFriend)
@@ -248,6 +242,18 @@ func (s *PartyPanel) Load() {
 			s.panelGroup.AddWidget(i.level)
 		}
 	}
+
+	for n, i := range s.partyIndexes {
+		currentN := n
+		if i.name == nil {
+			s.barX, s.barY = barX, baseBarY+currentN*nextBar
+			break
+		}
+	}
+
+	w, h = s.bar.GetCurrentFrameSize()
+	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
+	s.panelGroup.AddWidget(v)
 
 	s.panelGroup.SetVisible(false)
 }
