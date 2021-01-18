@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -60,21 +61,16 @@ const (
 )
 
 // newPartyIndex creates new party index
-func (s *PartyPanel) newPartyIndex(player *d2mapentity.Player, idx int, relations d2enum.PlayersRelationships) *partyIndex {
-	result := &partyIndex{
-		hero: player,
-	}
+func (s *PartyPanel) newPartyIndex() *partyIndex {
+	result := &partyIndex{}
 
 	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	nameLabel.SetText(player.Name())
 	result.name = nameLabel
 
 	classLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	classLabel.SetText(s.asset.TranslateString(player.Class.String()))
 	result.class = classLabel
 
 	levelLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	levelLabel.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(player.Stats.Level))
 	levelLabel.Alignment = d2ui.HorizontalAlignRight
 	result.level = levelLabel
 
@@ -86,11 +82,6 @@ func (s *PartyPanel) newPartyIndex(player *d2mapentity.Player, idx int, relation
 
 	listening := s.createSwitcher(listeningButtonFrame)
 	result.listeningSwitcher = listening
-
-	result.relationships = relations
-
-	result.setColor(relations)
-	result.setPositions(idx)
 
 	return result
 }
@@ -132,11 +123,29 @@ func (pi *partyIndex) setPositions(idx int) {
 	pi.listeningSwitcher.SetPosition(listeningSwitcherX, baseListeningSwitcherY+idx*nextBar)
 }
 
+// AddPlayer adds a new player to the party panel
+func (s *PartyPanel) AddPlayer(player *d2mapentity.Player, idx int, relations d2enum.PlayersRelationships) {
+	s.partyIndexes[idx].hero = player
+
+	s.partyIndexes[idx].name.SetText(player.Name())
+
+	s.partyIndexes[idx].class.SetText(s.asset.TranslateString(player.Class.String()))
+
+	s.partyIndexes[idx].level.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(player.Stats.Level))
+
+	s.partyIndexes[idx].relationships = relations
+
+	s.partyIndexes[idx].setColor(relations)
+	s.partyIndexes[idx].setPositions(idx)
+}
+
 // DeletePlayer deletes player from PartyIndexes
 func (s *PartyPanel) DeletePlayer(player *d2mapentity.Player) bool {
 	for n, i := range s.partyIndexes {
 		if i.hero == player {
-			s.partyIndexes[n] = nil
+			s.Debugf("removing player at index %d", n)
+
+			s.partyIndexes[n].hero = nil
 			s.Sort()
 
 			return true
@@ -148,21 +157,53 @@ func (s *PartyPanel) DeletePlayer(player *d2mapentity.Player) bool {
 
 // Sort sorts party indexes
 func (s *PartyPanel) Sort() {
-	var sorted [maxPlayersInGame]*partyIndex
+	var emptySlots []*partyIndex
 
-	idx := 0
+	var emptySlotsNumbers []int
 
-	for _, i := range s.partyIndexes {
-		if i != nil {
-			sorted[idx] = i
-			idx++
+	var fullSlots []*partyIndex
+
+	var fullSlotsNumbers []int
+
+	// split s.partyIndexes to empty and non-empty
+	for n, i := range s.partyIndexes {
+		if i.hero == nil {
+			emptySlots = append(emptySlots, i)
+			emptySlotsNumbers = append(emptySlotsNumbers, n)
+		} else {
+			fullSlots = append(fullSlots, i)
+			fullSlotsNumbers = append(fullSlotsNumbers, n)
 		}
 	}
 
-	s.partyIndexes = sorted
+	// adds non-empty indexes befor empty indexes
+	for n, i := range fullSlots {
+		s.partyIndexes[n] = i
+	}
 
+	// adds empty indexes
+	for n, i := range emptySlots {
+		s.partyIndexes[len(fullSlots)+n] = i
+	}
+
+	// sorts widget groups
+	var sortedWG [maxPlayersInGame]*d2ui.WidgetGroup
+	// first add non empty WG's
+	for n, i := range fullSlotsNumbers {
+		sortedWG[n] = s.indexes[i]
+	}
+
+	// after that, adds empty WG's
+	for n, i := range emptySlotsNumbers {
+		sortedWG[len(fullSlotsNumbers)+n] = s.indexes[i]
+	}
+
+	// overwrite existing order
+	s.indexes = sortedWG
+
+	// sets appropriate positions
 	for n, i := range s.partyIndexes {
-		if i != nil {
+		if i.hero != nil {
 			i.setPositions(n)
 		}
 	}
@@ -185,7 +226,7 @@ func (s *PartyPanel) setBarPosition() {
 	for n, i := range s.partyIndexes {
 		currentN := n
 
-		if i == nil {
+		if i.hero == nil {
 			s.barX, s.barY = barX, baseBarY+currentN*nextBar
 			break
 		}
@@ -202,48 +243,57 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 	testPlayer *d2mapentity.Player,
 
 	heroState *d2hero.HeroStatsState) *PartyPanel {
+	log.Print("OpenDiablo2 - Party Panel - development")
+
 	originX := 0
 	originY := 0
 
-	var v [maxPlayersInGame]*partyIndex
-	for i := 0; i < maxPlayersInGame; i++ {
-		v[i] = nil
-	}
-
-	hsp := &PartyPanel{
-		asset:        asset,
-		uiManager:    ui,
-		originX:      originX,
-		originY:      originY,
-		heroState:    heroState,
-		heroName:     heroName,
-		labels:       &StatsPanelLabels{},
-		partyIndexes: v,
-		barX:         barX,
-		barY:         baseBarY,
+	pp := &PartyPanel{
+		asset:     asset,
+		uiManager: ui,
+		originX:   originX,
+		originY:   originY,
+		heroState: heroState,
+		heroName:  heroName,
+		labels:    &StatsPanelLabels{},
+		barX:      barX,
+		barY:      baseBarY,
 
 		testPlayer: testPlayer,
 	}
 
-	hsp.Logger = d2util.NewLogger()
-	hsp.Logger.SetLevel(l)
-	hsp.Logger.SetPrefix(logPrefix)
+	var partyIndexes [maxPlayersInGame]*partyIndex
 
-	return hsp
+	var indexes [maxPlayersInGame]*d2ui.WidgetGroup
+
+	for i := 0; i < maxPlayersInGame; i++ {
+		partyIndexes[i] = pp.newPartyIndex()
+		indexes[i] = pp.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	}
+
+	pp.partyIndexes = partyIndexes
+
+	pp.Logger = d2util.NewLogger()
+	pp.Logger.SetLevel(l)
+	pp.Logger.SetPrefix(logPrefix)
+
+	return pp
 }
 
 // PartyPanel represents the party panel
 type PartyPanel struct {
-	asset        *d2asset.AssetManager
-	uiManager    *d2ui.UIManager
-	panel        *d2ui.Sprite
-	bar          *d2ui.Sprite
-	heroState    *d2hero.HeroStatsState
-	heroName     string
-	labels       *StatsPanelLabels
-	onCloseCb    func()
-	panelGroup   *d2ui.WidgetGroup
+	asset      *d2asset.AssetManager
+	uiManager  *d2ui.UIManager
+	panel      *d2ui.Sprite
+	bar        *d2ui.Sprite
+	heroState  *d2hero.HeroStatsState
+	heroName   string
+	labels     *StatsPanelLabels
+	onCloseCb  func()
+	panelGroup *d2ui.WidgetGroup
+
 	partyIndexes [maxPlayersInGame]*partyIndex
+	indexes      [maxPlayersInGame]*d2ui.WidgetGroup
 
 	originX int
 	originY int
@@ -261,6 +311,9 @@ func (s *PartyPanel) Load() {
 	var err error
 
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	for i := 0; i < maxPlayersInGame; i++ {
+		s.indexes[i] = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	}
 
 	frame := s.uiManager.NewUIFrame(d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
@@ -293,28 +346,24 @@ func (s *PartyPanel) Load() {
 
 	// example data
 	p0 := s.testPlayer
-	s.partyIndexes[0] = s.newPartyIndex(p0, 0, d2enum.PlayerRelationEnemy)
+	s.AddPlayer(p0, 0, d2enum.PlayerRelationEnemy)
 	p1 := s.testPlayer
 	// nolint:gomnd // only test
 	p1.Stats.Level = 99
 	p1.Class = d2enum.HeroNecromancer
-	s.partyIndexes[1] = s.newPartyIndex(p1, 1, d2enum.PlayerRelationFriend)
+	s.AddPlayer(p1, 1, d2enum.PlayerRelationFriend)
 
-	if !s.DeletePlayer(p0) {
-		s.Warning("Cannot remove player: Player Not Found")
+	for n, i := range s.partyIndexes {
+		s.indexes[n].AddWidget(i.name)
+		s.indexes[n].AddWidget(i.class)
+		s.indexes[n].AddWidget(i.relationshipSwitcher)
+		s.indexes[n].AddWidget(i.seeingSwitcher)
+		s.indexes[n].AddWidget(i.listeningSwitcher)
+		s.indexes[n].AddWidget(i.level)
 	}
 
-	for _, i := range s.partyIndexes {
-		if i != nil {
-			continue
-		}
-
-		s.panelGroup.AddWidget(i.name)
-		s.panelGroup.AddWidget(i.class)
-		s.panelGroup.AddWidget(i.relationshipSwitcher)
-		s.panelGroup.AddWidget(i.seeingSwitcher)
-		s.panelGroup.AddWidget(i.listeningSwitcher)
-		s.panelGroup.AddWidget(i.level)
+	if !s.DeletePlayer(p0) {
+		s.Warning("cannot remove player: DeletePlayer returned false")
 	}
 
 	w, h = s.bar.GetCurrentFrameSize()
@@ -353,12 +402,22 @@ func (s *PartyPanel) Toggle() {
 func (s *PartyPanel) Open() {
 	s.isOpen = true
 	s.panelGroup.SetVisible(true)
+
+	for n, i := range s.indexes {
+		if s.partyIndexes[n].hero != nil {
+			i.SetVisible(true)
+		}
+	}
 }
 
 // Close closed the hero status panel
 func (s *PartyPanel) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
+
+	for _, i := range s.indexes {
+		i.SetVisible(false)
+	}
 }
 
 // SetOnCloseCb the callback run on closing the PartyPanel
