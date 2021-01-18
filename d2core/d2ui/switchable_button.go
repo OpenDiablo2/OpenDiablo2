@@ -88,11 +88,32 @@ func (sbtn *SwitchableButton) SetState(state bool) {
 	sbtn.SetVisible(sbtn.GetVisible())
 }
 
+// SetActiveTooltip sets tooltip of active button's
+func (sbtn *SwitchableButton) SetActiveTooltip(tooltip *Tooltip) {
+	sbtn.active.SetTooltip(tooltip)
+}
+
+// SetInactiveTooltip sets tooltip of inactive button's
+func (sbtn *SwitchableButton) SetInactiveTooltip(tooltip *Tooltip) {
+	sbtn.inactive.SetTooltip(tooltip)
+}
+
 // SetPosition sets widget's position
 func (sbtn *SwitchableButton) SetPosition(x, y int) {
 	sbtn.BaseWidget.SetPosition(x, y)
 	sbtn.active.SetPosition(x, y)
 	sbtn.inactive.SetPosition(x, y)
+}
+
+// GetSize returns current button's size
+func (sbtn *SwitchableButton) GetSize() (x, y int) {
+	if sbtn.state {
+		x, y = sbtn.active.GetSize()
+	} else {
+		x, y = sbtn.inactive.GetSize()
+	}
+
+	return x, y
 }
 
 // Advance advances widget
