@@ -9,10 +9,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+)
+
+const (
+	lightGreen = 0x18ff00ff
+	red        = 0xff0000ff
 )
 
 const ( // for the dc6 frames
@@ -98,15 +102,15 @@ type partyIndex struct {
 }
 
 func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
-	var color = d2util.Color(d2gui.ColorWhite)
+	var color = d2util.Color(white)
 
 	switch relations {
 	case d2enum.PlayerRelationEnemy:
-		color = d2util.Color(d2gui.ColorRed)
+		color = d2util.Color(red)
 
 		pi.relationshipSwitcher.SetState(false)
 	case d2enum.PlayerRelationFriend:
-		color = d2util.Color(d2gui.ColorGreen)
+		color = d2util.Color(lightGreen)
 	}
 
 	pi.name.Color[0] = color
@@ -124,7 +128,15 @@ func (pi *partyIndex) setPositions(idx int) {
 }
 
 // AddPlayer adds a new player to the party panel
-func (s *PartyPanel) AddPlayer(player *d2mapentity.Player, idx int, relations d2enum.PlayersRelationships) {
+func (s *PartyPanel) AddPlayer(player *d2mapentity.Player, relations d2enum.PlayersRelationships) {
+	idx := 0
+	for n, i := range s.partyIndexes {
+		if i.hero == nil {
+			idx = n
+			break
+		}
+	}
+
 	s.partyIndexes[idx].hero = player
 
 	s.partyIndexes[idx].name.SetText(player.Name())
@@ -346,12 +358,12 @@ func (s *PartyPanel) Load() {
 
 	// example data
 	p0 := s.testPlayer
-	s.AddPlayer(p0, 0, d2enum.PlayerRelationEnemy)
+	s.AddPlayer(p0, d2enum.PlayerRelationEnemy)
 	p1 := s.testPlayer
 	// nolint:gomnd // only test
 	p1.Stats.Level = 99
 	p1.Class = d2enum.HeroNecromancer
-	s.AddPlayer(p1, 1, d2enum.PlayerRelationFriend)
+	s.AddPlayer(p1, d2enum.PlayerRelationFriend)
 
 	for n, i := range s.partyIndexes {
 		s.indexes[n].AddWidget(i.name)
@@ -365,6 +377,8 @@ func (s *PartyPanel) Load() {
 	if !s.DeletePlayer(p0) {
 		s.Warning("cannot remove player: DeletePlayer returned false")
 	}
+
+	s.AddPlayer(p0, d2enum.PlayerRelationEnemy)
 
 	w, h = s.bar.GetCurrentFrameSize()
 	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
