@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -53,12 +54,49 @@ const (
 	baseSeeingSwitcherY       = 140
 	baseListeningSwitcherY    = 140
 	baseNameLabelY            = 145
-	baseClassLabelY           = 160
+	baseClassLabelY           = 158
 	baseLevelLabelY           = 160
 	nextBar                   = 52
 )
 
+// newPartyIndex creates new party index
+func (s *PartyPanel) newPartyIndex(player *d2mapentity.Player, idx int, relations d2enum.PlayersRelationships) *partyIndex {
+	result := &partyIndex{
+		hero: player,
+	}
+
+	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	nameLabel.SetText(player.Name())
+	result.name = nameLabel
+
+	classLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	classLabel.SetText(s.asset.TranslateString(player.Class.String()))
+	result.class = classLabel
+
+	levelLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	levelLabel.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(player.Stats.Level))
+	levelLabel.Alignment = d2ui.HorizontalAlignRight
+	result.level = levelLabel
+
+	relationships := s.createSwitcher(relationshipsFrame)
+	result.relationshipSwitcher = relationships
+
+	seeing := s.createSwitcher(seeingButtonFrame)
+	result.seeingSwitcher = seeing
+
+	listening := s.createSwitcher(listeningButtonFrame)
+	result.listeningSwitcher = listening
+
+	result.relationships = relations
+
+	result.setColor(relations)
+	result.setPositions(idx)
+
+	return result
+}
+
 type partyIndex struct {
+	hero                 *d2mapentity.Player
 	name                 *d2ui.Label
 	class                *d2ui.Label
 	level                *d2ui.Label
@@ -66,42 +104,6 @@ type partyIndex struct {
 	seeingSwitcher       *d2ui.SwitchableButton
 	listeningSwitcher    *d2ui.SwitchableButton
 	relationships        d2enum.PlayersRelationships
-}
-
-// newPartyIndex creates new party index
-func (s *PartyPanel) newPartyIndex(name string, class d2enum.Hero, level, idx int, relations d2enum.PlayersRelationships) *partyIndex {
-	result := &partyIndex{}
-
-	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	nameLabel.SetText(name)
-	nameLabel.SetPosition(nameLabelX, baseNameLabelY+nextBar*idx)
-	result.name = nameLabel
-
-	classLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	classLabel.SetText(s.asset.TranslateString(class.String()))
-	classLabel.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
-	result.class = classLabel
-
-	levelLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	levelLabel.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(level))
-	levelLabel.Alignment = d2ui.HorizontalAlignRight
-	levelLabel.SetPosition(levelLabelX, baseLevelLabelY+nextBar*idx)
-	result.level = levelLabel
-
-	relationships := s.createSwitcher(relationshipsFrame, relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
-	result.relationshipSwitcher = relationships
-
-	seeing := s.createSwitcher(seeingButtonFrame, seeingSwitcherX, baseSeeingSwitcherY+nextBar*idx)
-	result.seeingSwitcher = seeing
-
-	listening := s.createSwitcher(listeningButtonFrame, listeningSwitcherX, baseListeningSwitcherY+nextBar*idx)
-	result.listeningSwitcher = listening
-
-	result.relationships = relations
-
-	result.setColor(relations)
-
-	return result
 }
 
 func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
@@ -121,18 +123,91 @@ func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
 	pi.level.Color[0] = color
 }
 
+func (pi *partyIndex) setPositions(idx int) {
+	pi.name.SetPosition(nameLabelX, baseNameLabelY+nextBar*idx)
+	pi.class.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
+	pi.level.SetPosition(levelLabelX, baseLevelLabelY+nextBar*idx)
+	pi.relationshipSwitcher.SetPosition(relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
+	pi.seeingSwitcher.SetPosition(seeingSwitcherX, baseSeeingSwitcherY+idx*nextBar)
+	pi.listeningSwitcher.SetPosition(listeningSwitcherX, baseListeningSwitcherY+idx*nextBar)
+}
+
+// DeletePlayer deletes player from PartyIndexes
+func (s *PartyPanel) DeletePlayer(player *d2mapentity.Player) bool {
+	for n, i := range s.partyIndexes {
+		if i.hero == player {
+			s.partyIndexes[n] = nil
+			s.Sort()
+
+			return true
+		}
+	}
+
+	return false
+}
+
+// Sort sorts party indexes
+func (s *PartyPanel) Sort() {
+	var sorted [maxPlayersInGame]*partyIndex
+
+	idx := 0
+
+	for _, i := range s.partyIndexes {
+		if i != nil {
+			sorted[idx] = i
+			idx++
+		}
+	}
+
+	s.partyIndexes = sorted
+
+	for n, i := range s.partyIndexes {
+		if i != nil {
+			i.setPositions(n)
+		}
+	}
+}
+
+// UpdatePlayer updates party-index
+func (s *PartyPanel) UpdatePlayer(oldPlayer, newPlayer *d2mapentity.Player) bool {
+	for n, i := range s.partyIndexes {
+		if i.hero == oldPlayer {
+			s.partyIndexes[n].hero = newPlayer
+
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *PartyPanel) setBarPosition() {
+	for n, i := range s.partyIndexes {
+		currentN := n
+
+		if i == nil {
+			s.barX, s.barY = barX, baseBarY+currentN*nextBar
+			break
+		}
+	}
+}
+
 // NewPartyPanel creates a new party panel
 func NewPartyPanel(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	heroName string,
 	l d2util.LogLevel,
+
+	// example Player structure (me)
+	testPlayer *d2mapentity.Player,
+
 	heroState *d2hero.HeroStatsState) *PartyPanel {
 	originX := 0
 	originY := 0
 
 	var v [maxPlayersInGame]*partyIndex
 	for i := 0; i < maxPlayersInGame; i++ {
-		v[i] = &partyIndex{}
+		v[i] = nil
 	}
 
 	hsp := &PartyPanel{
@@ -146,6 +221,8 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 		partyIndexes: v,
 		barX:         barX,
 		barY:         baseBarY,
+
+		testPlayer: testPlayer,
 	}
 
 	hsp.Logger = d2util.NewLogger()
@@ -175,6 +252,8 @@ type PartyPanel struct {
 	barY    int
 
 	*d2util.Logger
+
+	testPlayer *d2mapentity.Player
 }
 
 // Load the data for the hero status panel
@@ -213,56 +292,45 @@ func (s *PartyPanel) Load() {
 	}
 
 	// example data
-	s.partyIndexes[0] = s.newPartyIndex("PartyMember", d2enum.HeroPaladin, 5, 0, d2enum.PlayerRelationEnemy)
-	s.partyIndexes[1] = s.newPartyIndex("gameMember1", d2enum.HeroPaladin, 99, 1, d2enum.PlayerRelationFriend)
+	p0 := s.testPlayer
+	s.partyIndexes[0] = s.newPartyIndex(p0, 0, d2enum.PlayerRelationEnemy)
+	p1 := s.testPlayer
+	// nolint:gomnd // only test
+	p1.Stats.Level = 99
+	p1.Class = d2enum.HeroNecromancer
+	s.partyIndexes[1] = s.newPartyIndex(p1, 1, d2enum.PlayerRelationFriend)
 
-	for _, i := range s.partyIndexes {
-		// needed for "developing time" to avoit panic
-		if i.name != nil {
-			s.panelGroup.AddWidget(i.name)
-		}
-
-		if i.class != nil {
-			s.panelGroup.AddWidget(i.class)
-		}
-
-		if i.relationshipSwitcher != nil {
-			s.panelGroup.AddWidget(i.relationshipSwitcher)
-		}
-
-		if i.seeingSwitcher != nil {
-			s.panelGroup.AddWidget(i.seeingSwitcher)
-		}
-
-		if i.listeningSwitcher != nil {
-			s.panelGroup.AddWidget(i.listeningSwitcher)
-		}
-
-		if i.level != nil {
-			s.panelGroup.AddWidget(i.level)
-		}
+	if !s.DeletePlayer(p0) {
+		s.Warning("Cannot remove player: Player Not Found")
 	}
 
-	for n, i := range s.partyIndexes {
-		currentN := n
-		if i.name == nil {
-			s.barX, s.barY = barX, baseBarY+currentN*nextBar
-			break
+	for _, i := range s.partyIndexes {
+		if i != nil {
+			continue
 		}
+
+		s.panelGroup.AddWidget(i.name)
+		s.panelGroup.AddWidget(i.class)
+		s.panelGroup.AddWidget(i.relationshipSwitcher)
+		s.panelGroup.AddWidget(i.seeingSwitcher)
+		s.panelGroup.AddWidget(i.listeningSwitcher)
+		s.panelGroup.AddWidget(i.level)
 	}
 
 	w, h = s.bar.GetCurrentFrameSize()
 	v := s.uiManager.NewCustomWidget(s.renderBar, w, h)
 	s.panelGroup.AddWidget(v)
 
+	s.setBarPosition()
+
 	s.panelGroup.SetVisible(false)
 }
 
-func (s *PartyPanel) createSwitcher(frame, x, y int) *d2ui.SwitchableButton {
+func (s *PartyPanel) createSwitcher(frame int) *d2ui.SwitchableButton {
 	active := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame)
 	inactive := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame+nextButtonFrame)
 	switcher := s.uiManager.NewSwitchableButton(active, inactive, true)
-	switcher.SetPosition(x, y)
+	switcher.SetVisible(false)
 
 	return switcher
 }

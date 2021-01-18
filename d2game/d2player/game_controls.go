@@ -173,7 +173,7 @@ func NewGameControls(
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 
-	partyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero.Stats)
+	partyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats)
 
 	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
