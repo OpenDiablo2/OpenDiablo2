@@ -109,6 +109,7 @@ func NewGameControls(
 	audioProvider d2interface.AudioProvider,
 	l d2util.LogLevel,
 	isSinglePlayer bool,
+	players map[string]*d2mapentity.Player,
 ) (*GameControls, error) {
 	var inventoryRecordKey string
 
@@ -173,7 +174,7 @@ func NewGameControls(
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 
-	partyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats)
+	PartyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats, players)
 
 	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
@@ -207,7 +208,7 @@ func NewGameControls(
 		inventory:      inventory,
 		skilltree:      skilltree,
 		heroStatsPanel: heroStatsPanel,
-		partyPanel:     partyPanel,
+		PartyPanel:     PartyPanel,
 		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
@@ -277,7 +278,7 @@ type GameControls struct {
 	hud                    *HUD
 	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
-	partyPanel             *PartyPanel
+	PartyPanel             *PartyPanel
 	questLog               *QuestLog
 	HelpOverlay            *HelpOverlay
 	bottomMenuRect         *d2geom.Rectangle
@@ -560,7 +561,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) clearLeftScreenSide() {
 	g.heroStatsPanel.Close()
-	g.partyPanel.Close()
+	g.PartyPanel.Close()
 	g.questLog.Close()
 	g.hud.skillSelectMenu.ClosePanels()
 	g.hud.miniPanel.SetMovedRight(false)
@@ -615,7 +616,7 @@ func (g *GameControls) toggleHeroStatsPanel() {
 }
 
 func (g *GameControls) togglePartyPanel() {
-	g.openLeftPanel(g.partyPanel)
+	g.openLeftPanel(g.PartyPanel)
 }
 
 func (g *GameControls) onCloseHeroStatsPanel() {
@@ -679,7 +680,7 @@ func (g *GameControls) Load() {
 	g.inventory.Load()
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
-	g.partyPanel.Load()
+	g.PartyPanel.Load()
 	g.questLog.Load()
 	g.HelpOverlay.Load()
 
@@ -703,7 +704,7 @@ func (g *GameControls) Advance(elapsed float64) error {
 	g.hud.Advance(elapsed)
 	g.inventory.Advance(elapsed)
 	g.questLog.Advance(elapsed)
-	g.partyPanel.Advance(elapsed)
+	g.PartyPanel.Advance(elapsed)
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
@@ -731,7 +732,7 @@ func (g *GameControls) updateLayout() {
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	return g.heroStatsPanel.IsOpen() || g.partyPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
+	return g.heroStatsPanel.IsOpen() || g.PartyPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {

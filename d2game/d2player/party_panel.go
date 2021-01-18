@@ -83,6 +83,16 @@ func (s *PartyPanel) newPartyIndex() *partyIndex {
 	result.level = levelLabel
 
 	relationships := s.createSwitcher(relationshipsFrame)
+
+	result.relationshipsActiveTooltip = s.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	result.relationshipsActiveTooltip.SetText(s.asset.TranslateString("strParty7") + "\n" + s.asset.TranslateString("strParty8"))
+	relationships.SetActiveTooltip(result.relationshipsActiveTooltip)
+
+	result.relationshipsInactiveTooltip = s.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky,
+		d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	result.relationshipsInactiveTooltip.SetText(s.asset.TranslateString("strParty9") + "\n" + s.asset.TranslateString("strParty8"))
+	relationships.SetInactiveTooltip(result.relationshipsInactiveTooltip)
+
 	result.relationshipSwitcher = relationships
 
 	seeing := s.createSwitcher(seeingButtonFrame)
@@ -114,18 +124,20 @@ func (s *PartyPanel) newPartyIndex() *partyIndex {
 
 // partyIndex represents a party index
 type partyIndex struct {
-	hero                     *d2mapentity.Player
-	name                     *d2ui.Label
-	class                    *d2ui.Label
-	level                    *d2ui.Label
-	relationshipSwitcher     *d2ui.SwitchableButton
-	seeingSwitcher           *d2ui.SwitchableButton
-	seeingActiveTooltip      *d2ui.Tooltip
-	seeingInactiveTooltip    *d2ui.Tooltip
-	listeningSwitcher        *d2ui.SwitchableButton
-	listeningActiveTooltip   *d2ui.Tooltip
-	listeningInactiveTooltip *d2ui.Tooltip
-	relationships            d2enum.PlayersRelationships
+	hero                         *d2mapentity.Player
+	name                         *d2ui.Label
+	class                        *d2ui.Label
+	level                        *d2ui.Label
+	relationshipSwitcher         *d2ui.SwitchableButton
+	relationshipsActiveTooltip   *d2ui.Tooltip
+	relationshipsInactiveTooltip *d2ui.Tooltip
+	seeingSwitcher               *d2ui.SwitchableButton
+	seeingActiveTooltip          *d2ui.Tooltip
+	seeingInactiveTooltip        *d2ui.Tooltip
+	listeningSwitcher            *d2ui.SwitchableButton
+	listeningActiveTooltip       *d2ui.Tooltip
+	listeningInactiveTooltip     *d2ui.Tooltip
+	relationships                d2enum.PlayersRelationships
 }
 
 // setColor sets appropriate labels' colors
@@ -153,7 +165,12 @@ func (pi *partyIndex) setPositions(idx int) {
 	pi.name.SetPosition(nameLabelX, baseNameLabelY+nextBar*idx)
 	pi.class.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
 	pi.level.SetPosition(levelLabelX, baseLevelLabelY+nextBar*idx)
+
 	pi.relationshipSwitcher.SetPosition(relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
+	_, h = pi.relationshipsActiveTooltip.GetSize()
+	pi.relationshipsActiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*nextBar-h)
+	_, h = pi.relationshipsInactiveTooltip.GetSize()
+	pi.relationshipsInactiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*nextBar-h)
 
 	pi.seeingSwitcher.SetPosition(seeingSwitcherX, baseSeeingSwitcherY+idx*nextBar)
 	_, h = pi.seeingActiveTooltip.GetSize()
@@ -263,6 +280,22 @@ func (s *PartyPanel) Sort() {
 	}
 }
 
+// IsInPanel returns true if player given already exists in panel
+func (s *PartyPanel) IsInPanel(player *d2mapentity.Player) bool {
+	for _, i := range s.partyIndexes {
+		if i.hero == player {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsMe returns true if player given is "me"
+func (s *PartyPanel) IsMe(player *d2mapentity.Player) bool {
+	return player == s.me
+}
+
 // setBarPosition sets party-panel bar's position
 func (s *PartyPanel) setBarPosition() {
 	for n, i := range s.partyIndexes {
@@ -275,16 +308,28 @@ func (s *PartyPanel) setBarPosition() {
 	}
 }
 
+// UpdatePanel updates panel indexes with players list
+func (s *PartyPanel) UpdatePanel() {
+	for _, i := range s.players {
+		if !s.IsInPanel(i) && !s.IsMe(i) {
+			s.AddPlayer(i, d2enum.PlayerRelationNeutral)
+
+			// we need to switch all hidden widgets to be visible
+			if s.IsOpen() {
+				s.Open()
+			}
+		}
+	}
+}
+
 // NewPartyPanel creates a new party panel
 func NewPartyPanel(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	heroName string,
 	l d2util.LogLevel,
-
-	// example Player structure (me)
-	testPlayer *d2mapentity.Player,
-
-	heroState *d2hero.HeroStatsState) *PartyPanel {
+	me *d2mapentity.Player,
+	heroState *d2hero.HeroStatsState,
+	players map[string]*d2mapentity.Player) *PartyPanel {
 	log.Print("OpenDiablo2 - Party Panel - development")
 
 	originX := 0
@@ -300,8 +345,8 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 		labels:    &StatsPanelLabels{},
 		barX:      barX,
 		barY:      baseBarY,
-
-		testPlayer: testPlayer,
+		players:   players,
+		me:        me,
 	}
 
 	var partyIndexes [maxPlayersInGame]*partyIndex
@@ -337,6 +382,9 @@ type PartyPanel struct {
 	partyIndexes [maxPlayersInGame]*partyIndex
 	indexes      [maxPlayersInGame]*d2ui.WidgetGroup
 
+	players map[string]*d2mapentity.Player
+	me      *d2mapentity.Player
+
 	originX int
 	originY int
 	isOpen  bool
@@ -344,8 +392,6 @@ type PartyPanel struct {
 	barY    int
 
 	*d2util.Logger
-
-	testPlayer *d2mapentity.Player
 }
 
 // Load the data for the hero status panel
@@ -388,15 +434,6 @@ func (s *PartyPanel) Load() {
 	heroName.Alignment = d2ui.HorizontalAlignCenter
 	s.panelGroup.AddWidget(heroName)
 
-	// example data - create an example players and add them
-	p0 := s.testPlayer
-	s.AddPlayer(p0, d2enum.PlayerRelationEnemy)
-	p1 := s.testPlayer
-	// nolint:gomnd // only test
-	p1.Stats.Level = 99
-	p1.Class = d2enum.HeroNecromancer
-	s.AddPlayer(p1, d2enum.PlayerRelationFriend)
-
 	// create WidgetGroups of party indexes
 	for n, i := range s.partyIndexes {
 		s.indexes[n].AddWidget(i.name)
@@ -406,13 +443,6 @@ func (s *PartyPanel) Load() {
 		s.indexes[n].AddWidget(i.listeningSwitcher)
 		s.indexes[n].AddWidget(i.level)
 	}
-
-	// further test data (to check if DeletePlayer works after creating WG's)
-	if !s.DeletePlayer(p0) {
-		s.Warning("cannot remove player: DeletePlayer returned false")
-	}
-
-	s.AddPlayer(p0, d2enum.PlayerRelationEnemy)
 
 	// create bar
 	s.bar, err = s.uiManager.NewSprite(d2resource.PartyBar, d2resource.PaletteSky)
@@ -482,7 +512,16 @@ func (s *PartyPanel) SetOnCloseCb(cb func()) {
 
 // Advance advances panel
 func (s *PartyPanel) Advance(_ float64) {
-	// noop
+	if !s.IsOpen() {
+		return
+	}
+
+	s.UpdatePanel()
+}
+
+// UpdatePlayersList updates internal players list
+func (s *PartyPanel) UpdatePlayersList(list map[string]*d2mapentity.Player) {
+	s.players = list
 }
 
 // nolint:dupl // see quest_log.go.renderStaticPanelFrames comment
