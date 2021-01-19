@@ -205,6 +205,10 @@ const (
 	buttonAddSkillSegmentsY     = 1
 	buttonAddSkillDisabledFrame = 2
 
+	partyButtonSegmentsX     = 1
+	partyButtonSegmentsY     = 1
+	partyButtonDisabledFrame = -1
+
 	pressedButtonOffset = 2
 )
 
@@ -216,6 +220,7 @@ func getButtonLayouts() map[ButtonType]*ButtonLayout {
 			YSegments:        buttonWideSegmentsY,
 			DisabledFrame:    buttonWideDisabledFrame,
 			DisabledColor:    lightGreyAlpha75,
+			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.WideButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -766,9 +771,9 @@ func getButtonLayouts() map[ButtonType]*ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 		},
 		ButtonTypePartyButton: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    buttonWideDisabledFrame,
+			XSegments:        partyButtonSegmentsX,
+			YSegments:        partyButtonSegmentsY,
+			DisabledFrame:    partyButtonDisabledFrame,
 			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.PartyButton,
