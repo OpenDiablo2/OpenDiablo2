@@ -1,6 +1,8 @@
 package d2ui
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+)
 
 // static check if SwitchableButton implemented widget
 var _ Widget = &SwitchableButton{}
@@ -114,6 +116,27 @@ func (sbtn *SwitchableButton) GetSize() (x, y int) {
 	}
 
 	return x, y
+}
+
+// SetEnabled sets button's enabled
+func (sbtn *SwitchableButton) SetEnabled(enabled bool) {
+	sbtn.active.SetEnabled(enabled)
+	sbtn.inactive.SetEnabled(enabled)
+}
+
+// GetEnabled returns true if current switcher position is enabled
+func (sbtn *SwitchableButton) GetEnabled() bool {
+	if sbtn.state {
+		return sbtn.active.GetEnabled()
+	}
+
+	return sbtn.inactive.GetEnabled()
+}
+
+// SetDisabledColor sets switcher's disabled color
+func (sbtn *SwitchableButton) SetDisabledColor(color uint32) {
+	sbtn.active.buttonLayout.DisabledColor = color
+	sbtn.inactive.buttonLayout.DisabledColor = color
 }
 
 // Advance advances widget

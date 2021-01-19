@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -17,6 +18,12 @@ import (
 const (
 	lightGreen = 0x18ff00ff
 	red        = 0xff0000ff
+	lightRed   = 0xdb3f3dff
+	orange     = 0xffa800ff
+)
+
+const (
+	playerHostileLevel = 9
 )
 
 const ( // for the dc6 frames
@@ -56,33 +63,44 @@ const (
 	listeningSwitcherX        = 345
 	seeingSwitcherX           = 365
 	nameLabelX                = 115
+	nameTooltipX              = 100
 	classLabelX               = 115
 	levelLabelX               = 383
+	inviteAcceptButtonX       = 250
 	baseBarY                  = 134
 	baseRelationshipSwitcherY = 150
 	baseSeeingSwitcherY       = 140
 	baseListeningSwitcherY    = 140
-	baseNameLabelY            = 145
+	baseNameLabelY            = 144
+	baseNameTooltipY          = 120
 	baseClassLabelY           = 158
 	baseLevelLabelY           = 160
-	nextBar                   = 52
+	baseInviteAcceptButtonY   = 140
+	indexOffset               = 52
 )
 
 // newPartyIndex creates new party index
 func (s *PartyPanel) newPartyIndex() *partyIndex {
-	result := &partyIndex{}
+	result := &partyIndex{
+		asset: s.asset,
+		me:    s.me,
+	}
 
 	nameLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
+	result.nameTooltip = s.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
 	result.name = nameLabel
 
 	classLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	result.class = classLabel
+
+	result.nameRect = d2geom.Rectangle{}
 
 	levelLabel := s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	levelLabel.Alignment = d2ui.HorizontalAlignRight
 	result.level = levelLabel
 
 	relationships := s.createSwitcher(relationshipsFrame)
+	relationships.SetDisabledColor(lightRed)
 
 	result.relationshipsActiveTooltip = s.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
 	result.relationshipsActiveTooltip.SetText(s.asset.TranslateString("strParty7") + "\n" + s.asset.TranslateString("strParty8"))
@@ -119,13 +137,21 @@ func (s *PartyPanel) newPartyIndex() *partyIndex {
 
 	result.listeningSwitcher = listening
 
+	result.inviteAcceptButton = s.uiManager.NewButton(d2ui.ButtonTypePartyButton, s.asset.TranslateString("Invite"))
+	result.inviteAcceptButton.SetVisible(false)
+
 	return result
 }
 
 // partyIndex represents a party index
 type partyIndex struct {
+	asset *d2asset.AssetManager
+	me    *d2mapentity.Player
+
 	hero                         *d2mapentity.Player
 	name                         *d2ui.Label
+	nameTooltip                  *d2ui.Tooltip
+	nameRect                     d2geom.Rectangle
 	class                        *d2ui.Label
 	level                        *d2ui.Label
 	relationshipSwitcher         *d2ui.SwitchableButton
@@ -137,7 +163,17 @@ type partyIndex struct {
 	listeningSwitcher            *d2ui.SwitchableButton
 	listeningActiveTooltip       *d2ui.Tooltip
 	listeningInactiveTooltip     *d2ui.Tooltip
+	inviteAcceptButton           *d2ui.Button
 	relationships                d2enum.PlayersRelationships
+}
+
+func (pi *partyIndex) setNameTooltipText() {
+	switch pi.relationships {
+	case d2enum.PlayerRelationNeutral, d2enum.PlayerRelationFriend:
+		pi.nameTooltip.SetText(pi.asset.TranslateString("Party17"))
+	case d2enum.PlayerRelationEnemy:
+		pi.nameTooltip.SetText(pi.asset.TranslateString("Party12"))
+	}
 }
 
 // setColor sets appropriate labels' colors
@@ -151,6 +187,13 @@ func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
 		pi.relationshipSwitcher.SetState(false)
 	case d2enum.PlayerRelationFriend:
 		color = d2util.Color(lightGreen)
+	case d2enum.PlayerRelationNeutral:
+		if pi.CanGoHostile() {
+			color = d2util.Color(white)
+		} else {
+			color = d2util.Color(orange)
+			pi.relationshipSwitcher.SetEnabled(false)
+		}
 	}
 
 	pi.name.Color[0] = color
@@ -160,35 +203,54 @@ func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
 
 // setPositions sets party-index's position to given
 func (pi *partyIndex) setPositions(idx int) {
-	var h int
+	var w, h int
 
-	pi.name.SetPosition(nameLabelX, baseNameLabelY+nextBar*idx)
-	pi.class.SetPosition(classLabelX, baseClassLabelY+nextBar*idx)
-	pi.level.SetPosition(levelLabelX, baseLevelLabelY+nextBar*idx)
+	pi.name.SetPosition(nameLabelX, baseNameLabelY+indexOffset*idx)
+	pi.nameTooltip.SetPosition(nameTooltipX, baseNameTooltipY+indexOffset*idx)
+	pi.class.SetPosition(classLabelX, baseClassLabelY+indexOffset*idx)
+	pi.level.SetPosition(levelLabelX, baseLevelLabelY+indexOffset*idx)
 
-	pi.relationshipSwitcher.SetPosition(relationshipSwitcherX, baseRelationshipSwitcherY+nextBar*idx)
+	w, h1 := pi.class.GetSize()
+
+	_, h = pi.name.GetSize()
+
+	pi.nameRect = d2geom.Rectangle{
+		Left:   nameLabelX,
+		Top:    baseNameLabelY + idx*indexOffset,
+		Width:  w,
+		Height: h + h1,
+	}
+
+	pi.relationshipSwitcher.SetPosition(relationshipSwitcherX, baseRelationshipSwitcherY+indexOffset*idx)
 	_, h = pi.relationshipsActiveTooltip.GetSize()
-	pi.relationshipsActiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*nextBar-h)
+	pi.relationshipsActiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*indexOffset-h)
 	_, h = pi.relationshipsInactiveTooltip.GetSize()
-	pi.relationshipsInactiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*nextBar-h)
+	pi.relationshipsInactiveTooltip.SetPosition(relationshipSwitcherX+buttonSize, baseRelationshipSwitcherY+idx*indexOffset-h)
 
-	pi.seeingSwitcher.SetPosition(seeingSwitcherX, baseSeeingSwitcherY+idx*nextBar)
+	pi.seeingSwitcher.SetPosition(seeingSwitcherX, baseSeeingSwitcherY+idx*indexOffset)
 	_, h = pi.seeingActiveTooltip.GetSize()
-	pi.seeingActiveTooltip.SetPosition(seeingSwitcherX+buttonSize, baseSeeingSwitcherY+idx*nextBar-h)
+	pi.seeingActiveTooltip.SetPosition(seeingSwitcherX+buttonSize, baseSeeingSwitcherY+idx*indexOffset-h)
 	_, h = pi.seeingInactiveTooltip.GetSize()
-	pi.seeingInactiveTooltip.SetPosition(seeingSwitcherX+buttonSize, baseSeeingSwitcherY+idx*nextBar-h)
+	pi.seeingInactiveTooltip.SetPosition(seeingSwitcherX+buttonSize, baseSeeingSwitcherY+idx*indexOffset-h)
 
-	pi.listeningSwitcher.SetPosition(listeningSwitcherX, baseListeningSwitcherY+idx*nextBar)
+	pi.listeningSwitcher.SetPosition(listeningSwitcherX, baseListeningSwitcherY+idx*indexOffset)
 	_, h = pi.listeningActiveTooltip.GetSize()
-	pi.listeningActiveTooltip.SetPosition(listeningSwitcherX+buttonSize, baseListeningSwitcherY+idx*nextBar-h)
+	pi.listeningActiveTooltip.SetPosition(listeningSwitcherX+buttonSize, baseListeningSwitcherY+idx*indexOffset-h)
 	_, h = pi.listeningInactiveTooltip.GetSize()
-	pi.listeningInactiveTooltip.SetPosition(listeningSwitcherX+buttonSize, baseListeningSwitcherY+idx*nextBar-h)
+	pi.listeningInactiveTooltip.SetPosition(listeningSwitcherX+buttonSize, baseListeningSwitcherY+idx*indexOffset-h)
+
+	pi.inviteAcceptButton.SetPosition(inviteAcceptButtonX, baseInviteAcceptButtonY+idx*indexOffset)
+}
+
+func (pi *partyIndex) CanGoHostile() bool {
+	return pi.hero.Stats.Level >= playerHostileLevel && pi.me.Stats.Level >= playerHostileLevel
 }
 
 // AddPlayer adds a new player to the party panel
 func (s *PartyPanel) AddPlayer(player *d2mapentity.Player, relations d2enum.PlayersRelationships) {
 	idx := 0
 
+	// search for free index
 	for n, i := range s.partyIndexes {
 		if i.hero == nil {
 			idx = n
@@ -202,12 +264,14 @@ func (s *PartyPanel) AddPlayer(player *d2mapentity.Player, relations d2enum.Play
 
 	s.partyIndexes[idx].class.SetText(s.asset.TranslateString(player.Class.String()))
 
-	s.partyIndexes[idx].level.SetText(s.asset.TranslateString("level") + ": " + strconv.Itoa(player.Stats.Level))
+	s.partyIndexes[idx].level.SetText(s.asset.TranslateString("Level") + ":" + strconv.Itoa(player.Stats.Level))
 
 	s.partyIndexes[idx].relationships = relations
 
 	s.partyIndexes[idx].setColor(relations)
 	s.partyIndexes[idx].setPositions(idx)
+
+	s.partyIndexes[idx].setNameTooltipText()
 }
 
 // DeletePlayer deletes player from PartyIndexes
@@ -302,7 +366,7 @@ func (s *PartyPanel) setBarPosition() {
 		currentN := n
 
 		if i.hero == nil {
-			s.barX, s.barY = barX, baseBarY+currentN*nextBar
+			s.barX, s.barY = barX, baseBarY+currentN*indexOffset
 			break
 		}
 	}
@@ -434,6 +498,10 @@ func (s *PartyPanel) Load() {
 	heroName.Alignment = d2ui.HorizontalAlignCenter
 	s.panelGroup.AddWidget(heroName)
 
+	m0 := s.me
+	m0.Class = d2enum.HeroNecromancer
+	s.AddPlayer(m0, d2enum.PlayerRelationNeutral)
+
 	// create WidgetGroups of party indexes
 	for n, i := range s.partyIndexes {
 		s.indexes[n].AddWidget(i.name)
@@ -442,6 +510,7 @@ func (s *PartyPanel) Load() {
 		s.indexes[n].AddWidget(i.seeingSwitcher)
 		s.indexes[n].AddWidget(i.listeningSwitcher)
 		s.indexes[n].AddWidget(i.level)
+		s.indexes[n].AddWidget(i.inviteAcceptButton)
 	}
 
 	// create bar
@@ -522,6 +591,22 @@ func (s *PartyPanel) Advance(_ float64) {
 // UpdatePlayersList updates internal players list
 func (s *PartyPanel) UpdatePlayersList(list map[string]*d2mapentity.Player) {
 	s.players = list
+}
+
+// OnMouseMove handles mouse movement events
+func (s *PartyPanel) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+	mx, my := event.X(), event.Y()
+
+	for _, i := range s.partyIndexes {
+		// Mouse over a game control element
+		if i.nameRect.IsInRect(mx, my) {
+			i.nameTooltip.SetVisible(true)
+		} else {
+			i.nameTooltip.SetVisible(false)
+		}
+	}
+
+	return true
 }
 
 // nolint:dupl // see quest_log.go.renderStaticPanelFrames comment

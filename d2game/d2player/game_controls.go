@@ -503,6 +503,7 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	}
 
 	g.hud.OnMouseMove(event)
+	g.PartyPanel.OnMouseMove(event)
 
 	return false
 }

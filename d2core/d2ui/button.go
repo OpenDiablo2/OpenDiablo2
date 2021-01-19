@@ -56,6 +56,7 @@ const (
 	ButtonTypeTabBlank           ButtonType = 36
 	ButtonTypeBlankQuestBtn      ButtonType = 37
 	ButtonTypeAddSkill           ButtonType = 38
+	ButtonTypePartyButton        ButtonType = 39
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -215,7 +216,6 @@ func getButtonLayouts() map[ButtonType]*ButtonLayout {
 			YSegments:        buttonWideSegmentsY,
 			DisabledFrame:    buttonWideDisabledFrame,
 			DisabledColor:    lightGreyAlpha75,
-			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.WideButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -765,6 +765,21 @@ func getButtonLayouts() map[ButtonType]*ButtonLayout {
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 		},
+		ButtonTypePartyButton: {
+			XSegments:        1,
+			YSegments:        1,
+			DisabledFrame:    buttonWideDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			TextOffset:       buttonWideTextOffset,
+			ResourceName:     d2resource.PartyButton,
+			PaletteName:      d2resource.PaletteUnits,
+			FontPath:         d2resource.FontFormal10,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
 	}
 }
 
@@ -801,7 +816,7 @@ func (ui *UIManager) NewCustomButton(path string, frame int) *Button {
 	layout := &ButtonLayout{
 		XSegments:        1,
 		YSegments:        1,
-		DisabledFrame:    -1,
+		DisabledFrame:    frame,
 		DisabledColor:    whiteAlpha100,
 		ResourceName:     path,
 		PaletteName:      d2resource.PaletteSky,
