@@ -10,10 +10,12 @@ const (
 	PlayerRelationEnemy
 )
 
+// determinates a level, which both players should reach to go hostile
 const (
 	PlayersHostileLevel = 9
 )
 
+// determinates max players number for one game
 const (
 	MaxPlayersInGame = 8
 )

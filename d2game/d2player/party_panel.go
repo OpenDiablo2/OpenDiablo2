@@ -371,8 +371,8 @@ func (s *PartyPanel) Load() {
 
 // createSwitcher creates party-panel switcher using frame given
 func (s *PartyPanel) createSwitcher(frame int) *d2ui.SwitchableButton {
-	active := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame)
-	inactive := s.uiManager.NewCustomButton(d2resource.PartyBoxes, frame+d2enum.PartyButtonNextButtonFrame)
+	active := s.uiManager.NewDefaultButton(d2resource.PartyBoxes, frame)
+	inactive := s.uiManager.NewDefaultButton(d2resource.PartyBoxes, frame+d2enum.PartyButtonNextButtonFrame)
 	switcher := s.uiManager.NewSwitchableButton(active, inactive, true)
 	switcher.SetVisible(false)
 

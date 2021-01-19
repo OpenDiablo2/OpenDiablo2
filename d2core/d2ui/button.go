@@ -811,8 +811,8 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	return btn
 }
 
-// NewCustomButton creates new custom button
-func (ui *UIManager) NewCustomButton(path string, frame int) *Button {
+// NewDefaultButton creates a new button with default settings
+func (ui *UIManager) NewDefaultButton(path string, frame int) *Button {
 	layout := &ButtonLayout{
 		XSegments:        1,
 		YSegments:        1,
