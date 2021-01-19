@@ -174,8 +174,6 @@ func NewGameControls(
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 
-	PartyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats, players)
-
 	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
 	inventory, err := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
@@ -208,7 +206,6 @@ func NewGameControls(
 		inventory:      inventory,
 		skilltree:      skilltree,
 		heroStatsPanel: heroStatsPanel,
-		PartyPanel:     PartyPanel,
 		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
@@ -234,6 +231,11 @@ func NewGameControls(
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
+	}
+
+	if !isSinglePlayer {
+		PartyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats, players)
+		gc.PartyPanel = PartyPanel
 	}
 
 	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, gc, mapRenderer)
