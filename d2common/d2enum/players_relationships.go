@@ -9,3 +9,11 @@ const (
 	PlayerRelationFriend
 	PlayerRelationEnemy
 )
+
+const (
+	PlayersHostileLevel = 9
+)
+
+const (
+	MaxPlayersInGame = 8
+)
