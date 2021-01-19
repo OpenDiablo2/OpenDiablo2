@@ -339,10 +339,6 @@ func (s *PartyPanel) Load() {
 	heroName.Alignment = d2ui.HorizontalAlignCenter
 	s.panelGroup.AddWidget(heroName)
 
-	m0 := s.me
-	m0.Class = d2enum.HeroNecromancer
-	s.AddPlayer(m0, d2enum.PlayerRelationNeutral)
-
 	// create WidgetGroups of party indexes
 	for n, i := range s.partyIndexes {
 		s.indexes[n].AddWidget(i.name)
