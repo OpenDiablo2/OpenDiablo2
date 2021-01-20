@@ -505,7 +505,10 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	}
 
 	g.hud.OnMouseMove(event)
-	g.PartyPanel.OnMouseMove(event)
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.OnMouseMove(event)
+	}
 
 	return false
 }
@@ -564,7 +567,11 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) clearLeftScreenSide() {
 	g.heroStatsPanel.Close()
-	g.PartyPanel.Close()
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Close()
+	}
+
 	g.questLog.Close()
 	g.hud.skillSelectMenu.ClosePanels()
 	g.hud.miniPanel.SetMovedRight(false)
@@ -683,7 +690,11 @@ func (g *GameControls) Load() {
 	g.inventory.Load()
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
-	g.PartyPanel.Load()
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Load()
+	}
+
 	g.questLog.Load()
 	g.HelpOverlay.Load()
 
@@ -707,7 +718,10 @@ func (g *GameControls) Advance(elapsed float64) error {
 	g.hud.Advance(elapsed)
 	g.inventory.Advance(elapsed)
 	g.questLog.Advance(elapsed)
-	g.PartyPanel.Advance(elapsed)
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Advance(elapsed)
+	}
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
@@ -735,7 +749,15 @@ func (g *GameControls) updateLayout() {
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	return g.heroStatsPanel.IsOpen() || g.PartyPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
+	var partyPanel bool
+
+	if g.PartyPanel != nil {
+		partyPanel = g.PartyPanel.IsOpen()
+	} else {
+		partyPanel = false
+	}
+
+	return g.heroStatsPanel.IsOpen() || partyPanel || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {

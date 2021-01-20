@@ -280,7 +280,9 @@ func (v *Game) Advance(elapsed float64) error {
 	v.soundEnv.Advance(elapsed)
 
 	if v.gameControls != nil {
-		v.gameControls.PartyPanel.UpdatePlayersList(v.gameClient.Players)
+		if v.gameControls.PartyPanel != nil {
+			v.gameControls.PartyPanel.UpdatePlayersList(v.gameClient.Players)
+		}
 	}
 
 	return nil
