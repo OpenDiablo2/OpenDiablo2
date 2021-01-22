@@ -331,6 +331,16 @@ func (m *miniPanel) SetMovedLeft(moveLeft bool) {
 	m.movedLeft = moveLeft
 }
 
+func (m *miniPanel) ResetPosition() {
+	if m.movedLeft {
+		m.undoMoveLeft()
+		m.movedLeft = false
+	} else if m.movedRight {
+		m.undoMoveRight()
+		m.movedRight = false
+	}
+}
+
 func (m *miniPanel) SetMovedRight(moveRight bool) {
 	if m.movedRight == moveRight {
 		return

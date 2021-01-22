@@ -565,7 +565,6 @@ func (g *GameControls) clearLeftScreenSide() {
 	g.PartyPanel.Close()
 	g.questLog.Close()
 	g.hud.skillSelectMenu.ClosePanels()
-	g.hud.miniPanel.SetMovedRight(false)
 	g.updateLayout()
 }
 
@@ -573,7 +572,6 @@ func (g *GameControls) clearRightScreenSide() {
 	g.inventory.Close()
 	g.skilltree.Close()
 	g.hud.skillSelectMenu.ClosePanels()
-	g.hud.miniPanel.SetMovedLeft(false)
 	g.updateLayout()
 }
 
@@ -592,7 +590,6 @@ func (g *GameControls) openLeftPanel(panel Panel) {
 
 		if !isOpen {
 			panel.Open()
-			g.hud.miniPanel.SetMovedRight(true)
 			g.updateLayout()
 		}
 	}
@@ -606,7 +603,6 @@ func (g *GameControls) openRightPanel(panel Panel) {
 
 		if !isOpen {
 			panel.Open()
-			g.hud.miniPanel.SetMovedLeft(true)
 			g.updateLayout()
 		}
 	}
@@ -728,10 +724,13 @@ func (g *GameControls) updateLayout() {
 
 	switch {
 	case isRightPanelOpen == isLeftPanelOpen:
+		g.hud.miniPanel.ResetPosition()
 		g.mapRenderer.ViewportDefault()
 	case isRightPanelOpen:
+		g.hud.miniPanel.SetMovedRight(true)
 		g.mapRenderer.ViewportToLeft()
 	case isLeftPanelOpen:
+		g.hud.miniPanel.SetMovedLeft(true)
 		g.mapRenderer.ViewportToRight()
 	}
 }
