@@ -621,6 +621,7 @@ func (g *GameControls) togglePartyPanel() {
 }
 
 func (g *GameControls) onCloseHeroStatsPanel() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleLeftSkillPanel() {
@@ -642,6 +643,7 @@ func (g *GameControls) toggleQuestLog() {
 }
 
 func (g *GameControls) onCloseQuestLog() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleHelpOverlay() {
@@ -659,6 +661,7 @@ func (g *GameControls) toggleInventoryPanel() {
 }
 
 func (g *GameControls) onCloseInventory() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
@@ -666,6 +669,7 @@ func (g *GameControls) toggleSkilltreePanel() {
 }
 
 func (g *GameControls) onCloseSkilltree() {
+	g.updateLayout()
 }
 
 func (g *GameControls) openEscMenu() {
