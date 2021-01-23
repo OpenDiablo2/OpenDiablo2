@@ -207,6 +207,7 @@ func (g *Inventory) Close() {
 	g.isOpen = false
 	g.moveGoldPanel.Close()
 	g.panelGroup.SetVisible(false)
+	g.itemTooltip.SetVisible(false)
 	g.onCloseCb()
 }
 
@@ -288,25 +289,24 @@ func (g *Inventory) renderFrame(target d2interface.Surface) {
 }
 
 func (g *Inventory) showItemDescriptionTooltip() {
-	hovering := false
+	hoveringNow := g.checkEquippedSlotsHover()
 
-	for _, slot := range g.grid.equipmentSlots {
-		mx, my := g.lastMouseX, g.lastMouseY
-		hovering = hovering || ((mx > slot.x) && (mx < slot.x+slot.width) && (my < slot.y) && (my > slot.y-slot.height))
-		if hovering {
-			if !g.hovering {
-				g.hoverX, g.hoverY = mx, my
-			}
-			g.showEquippedItemDescriptionTooltip(&slot)
-
-			break
-		}
-	}
-
-	g.hovering = hovering
-	if hovering {
+	if hoveringNow {
+		g.hovering = true
 		return
 	}
+
+	hoveringNow = g.checkGridSlotsHover()
+
+	if !hoveringNow {
+		g.itemTooltip.SetVisible(false)
+	}
+
+	g.hovering = hoveringNow
+}
+
+func (g *Inventory) checkGridSlotsHover() bool {
+	hovering := false
 
 	for idx := range g.grid.items {
 		item := g.grid.items[idx]
@@ -328,10 +328,28 @@ func (g *Inventory) showItemDescriptionTooltip() {
 		}
 	}
 
-	g.hovering = hovering
-	if !g.hovering {
-		g.itemTooltip.SetVisible(false)
+	return hovering
+}
+
+func (g *Inventory) checkEquippedSlotsHover() bool {
+	hovering := false
+
+	for _, slot := range g.grid.equipmentSlots {
+		mx, my := g.lastMouseX, g.lastMouseY
+
+		hovering = hovering || ((mx > slot.x) && (mx < slot.x+slot.width) && (my < slot.y) && (my > slot.y-slot.height))
+		if hovering {
+			if !g.hovering {
+				g.hoverX, g.hoverY = mx, my
+			}
+
+			g.showEquippedItemDescriptionTooltip(slot)
+
+			break
+		}
 	}
+
+	return hovering
 }
 
 func (g *Inventory) showGridItemDescriptionTooltip(i InventoryItem) {
@@ -345,7 +363,7 @@ func (g *Inventory) showGridItemDescriptionTooltip(i InventoryItem) {
 	}
 }
 
-func (g *Inventory) showEquippedItemDescriptionTooltip(slot *EquipmentSlot) {
+func (g *Inventory) showEquippedItemDescriptionTooltip(slot EquipmentSlot) {
 	if !g.moveGoldPanel.IsOpen() {
 		lines := slot.item.GetItemDescription()
 		g.itemTooltip.SetTextLines(lines)
