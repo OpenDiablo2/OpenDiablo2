@@ -387,7 +387,7 @@ func (v *MainMenu) createMainMenuButtons(loading d2screen.LoadingState) {
 	v.btnServerIPCancel.SetPosition(srvCancelBtnX, srvCancelBtnY)
 	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
 
-	v.btnServerIPOk = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateString(d2enum.OKLabel))
+	v.btnServerIPOk = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(d2enum.OKLabel))
 	v.btnServerIPOk.SetPosition(srvOkBtnX, srvOkBtnY)
 	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
 	loading.Progress(eightyPercent)
