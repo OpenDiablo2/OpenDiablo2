@@ -207,6 +207,7 @@ func (g *Inventory) Close() {
 	g.isOpen = false
 	g.moveGoldPanel.Close()
 	g.panelGroup.SetVisible(false)
+	g.itemTooltip.SetVisible(false)
 	g.onCloseCb()
 }
 
@@ -251,7 +252,7 @@ func (g *Inventory) Render(target d2interface.Surface) {
 	g.renderFrame(target)
 
 	g.grid.Render(target)
-	g.renderItemHover(target)
+	g.showItemDescriptionTooltip()
 }
 
 func (g *Inventory) renderFrame(target d2interface.Surface) {
@@ -287,7 +288,24 @@ func (g *Inventory) renderFrame(target d2interface.Surface) {
 	}
 }
 
-func (g *Inventory) renderItemHover(target d2interface.Surface) {
+func (g *Inventory) showItemDescriptionTooltip() {
+	hoveringNow := g.checkEquippedSlotsHover()
+
+	if hoveringNow {
+		g.hovering = true
+		return
+	}
+
+	hoveringNow = g.checkGridSlotsHover()
+
+	if !hoveringNow {
+		g.itemTooltip.SetVisible(false)
+	}
+
+	g.hovering = hoveringNow
+}
+
+func (g *Inventory) checkGridSlotsHover() bool {
 	hovering := false
 
 	for idx := range g.grid.items {
@@ -304,22 +322,52 @@ func (g *Inventory) renderItemHover(target d2interface.Surface) {
 				g.hoverX, g.hoverY = mx, my
 			}
 
-			g.renderItemDescription(target, item)
+			g.showGridItemDescriptionTooltip(item)
 
 			break
 		}
 	}
 
-	g.hovering = hovering
+	return hovering
 }
 
-func (g *Inventory) renderItemDescription(target d2interface.Surface, i InventoryItem) {
+func (g *Inventory) checkEquippedSlotsHover() bool {
+	hovering := false
+
+	for _, slot := range g.grid.equipmentSlots {
+		mx, my := g.lastMouseX, g.lastMouseY
+
+		hovering = hovering || ((mx > slot.x) && (mx < slot.x+slot.width) && (my < slot.y) && (my > slot.y-slot.height))
+		if hovering {
+			if !g.hovering {
+				g.hoverX, g.hoverY = mx, my
+			}
+
+			g.showEquippedItemDescriptionTooltip(slot)
+
+			break
+		}
+	}
+
+	return hovering
+}
+
+func (g *Inventory) showGridItemDescriptionTooltip(i InventoryItem) {
 	if !g.moveGoldPanel.IsOpen() {
 		lines := i.GetItemDescription()
 		g.itemTooltip.SetTextLines(lines)
 		_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
 
 		g.itemTooltip.SetPosition(g.hoverX, y)
-		g.itemTooltip.Render(target)
+		g.itemTooltip.SetVisible(true)
+	}
+}
+
+func (g *Inventory) showEquippedItemDescriptionTooltip(slot EquipmentSlot) {
+	if !g.moveGoldPanel.IsOpen() {
+		lines := slot.item.GetItemDescription()
+		g.itemTooltip.SetTextLines(lines)
+		g.itemTooltip.SetPosition(g.hoverX, slot.y)
+		g.itemTooltip.SetVisible(true)
 	}
 }
