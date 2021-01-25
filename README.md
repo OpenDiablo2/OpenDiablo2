@@ -51,15 +51,6 @@ To install them you can use `./build.sh` in the project root folder - this scrip
 
 ## Contributing
 
-The imports for this project utilize `github.com/OpenDiablo2/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
-still pull from the main repo's files. In order to use your local version, add the following to `go.mod` in the base folder:
-
-```
-replace github.com/OpenDiablo2/OpenDiablo2 => /your/forked/import/path
-```
-
-This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
-
 If you find something you'd like to fix that's obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
 
 If you'd like to help out and are not quite sure how, you can look through any open issues and tasks, or ask
