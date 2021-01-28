@@ -923,7 +923,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("strClose"))
 	case buttonTooltipOk:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateLabel(d2enum.OKLabel))
+		t.SetText(v.manager.asset.TranslateString(d2enum.OKLabel))
 	case buttonTooltipBuy:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("NPCPurchaseItems"))
@@ -935,7 +935,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("NPCRepairItems"))
 	case buttonTooltipRepairAll:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateLabel(d2enum.RepairAll))
+		t.SetText(v.manager.asset.TranslateString(d2enum.RepairAll))
 	case buttonTooltipLeftArrow:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("KeyLeft"))

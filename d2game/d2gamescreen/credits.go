@@ -106,7 +106,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.ExitLabel))
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(d2enum.ExitLabel))
 	v.exitButton.SetPosition(charSelExitBtnX, charSelExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	loading.Progress(fourtyPercent)
