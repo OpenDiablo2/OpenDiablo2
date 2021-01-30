@@ -35,6 +35,10 @@ const (
 
 // COF is a structure that represents a COF file.
 type COF struct {
+	// unknown bytes for header
+	unknownHeaderBytes []byte
+	// unknown bytes (first "body's" bytes)
+	unknown1           []byte
 	NumberOfDirections int
 	FramesPerDirection int
 	NumberOfLayers     int
@@ -62,9 +66,19 @@ func Load(fileData []byte) (*COF, error) {
 	result.NumberOfLayers = int(b[headerNumLayers])
 	result.FramesPerDirection = int(b[headerFramesPerDir])
 	result.NumberOfDirections = int(b[headerNumDirs])
+	result.unknownHeaderBytes = b[headerNumDirs+1 : headerSpeed]
 	result.Speed = int(b[headerSpeed])
 
-	streamReader.SkipBytes(3) //nolint:gomnd // Unknown data
+	// read unknown bytes
+	// previous streamReader.SkipBytes(3)
+	for i := 0; i < 3; i++ {
+		b, errSR := streamReader.ReadByte()
+		if errSR != nil {
+			return nil, errSR
+		}
+
+		result.unknown1 = append(result.unknown1, b)
+	}
 
 	result.CofLayers = make([]CofLayer, result.NumberOfLayers)
 	result.CompositeLayers = make(map[d2enum.CompositeType]int)
@@ -83,6 +97,7 @@ func Load(fileData []byte) (*COF, error) {
 		layer.Transparent = b[layerTransparent] > 0
 		layer.DrawEffect = d2enum.DrawEffect(b[layerDrawEffect])
 
+		layer.weaponClassByte = b[layerWeaponClass:]
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(
 			string(b[layerWeaponClass:]), badCharacter, "")))
 
@@ -123,4 +138,51 @@ func Load(fileData []byte) (*COF, error) {
 	}
 
 	return result, nil
+}
+
+// Unmarshal unmarshals COF into byte slince
+func (c *COF) Unmarshal() []byte {
+	var result []byte
+
+	result = append(result, byte(c.NumberOfLayers))
+	result = append(result, byte(c.FramesPerDirection))
+	result = append(result, byte(c.NumberOfDirections))
+	result = append(result, c.unknownHeaderBytes...)
+	result = append(result, byte(c.Speed))
+	result = append(result, c.unknown1...)
+
+	for i := range c.CofLayers {
+		result = append(result, byte(c.CofLayers[i].Type.Int()))
+		result = append(result, c.CofLayers[i].Shadow)
+
+		if c.CofLayers[i].Selectable {
+			result = append(result, byte(1))
+		} else {
+			result = append(result, byte(0))
+		}
+
+		if c.CofLayers[i].Transparent {
+			result = append(result, byte(1))
+		} else {
+			result = append(result, byte(0))
+		}
+
+		result = append(result, byte(c.CofLayers[i].DrawEffect))
+
+		result = append(result, c.CofLayers[i].weaponClassByte...)
+	}
+
+	for _, i := range c.AnimationFrames {
+		result = append(result, byte(i))
+	}
+
+	for direction := 0; direction < c.NumberOfDirections; direction++ {
+		for frame := 0; frame < c.FramesPerDirection; frame++ {
+			for i := 0; i < c.NumberOfLayers; i++ {
+				result = append(result, byte(c.Priority[direction][frame][i]))
+			}
+		}
+	}
+
+	return result
 }

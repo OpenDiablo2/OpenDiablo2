@@ -1,6 +1,9 @@
 package d2dcc
 
 import (
+	//"fmt"
+	//"os"
+
 	"errors"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
@@ -18,6 +21,7 @@ type DCC struct {
 	Directions         []*DCCDirection
 	directionOffsets   []int
 	fileData           []byte
+	size               int32
 }
 
 // Load loads a DCC file.
@@ -44,7 +48,8 @@ func Load(fileData []byte) (*DCC, error) {
 		return nil, errors.New("this value isn't 1. It has to be 1")
 	}
 
-	bm.GetInt32() // TotalSizeCoded
+	size := bm.GetInt32() // TotalSizeCoded
+	result.size = size
 
 	result.directionOffsets = make([]int, result.NumberOfDirections)
 
@@ -53,7 +58,29 @@ func Load(fileData []byte) (*DCC, error) {
 		result.Directions[i] = result.decodeDirection(i)
 	}
 
+	/*fmt.Println(fileData)
+	fmt.Println("\n\n\n")
+	fmt.Println(result.Encode())
+	os.Exit(0)*/
+
 	return result, nil
+}
+
+func (d *DCC) Encode() []byte {
+	var result []byte
+
+	result = append(result, byte(d.Signature))
+	result = append(result, byte(d.Version))
+	result = append(result, byte(d.NumberOfDirections))
+	result = append(result, byte(d.FramesPerDirection))
+	result = append(result, 0, 0, 0, 1)
+	result = append(result, 0, 0, 0, byte(d.size), 84, 4, 0)
+
+	for i := 0; i < d.NumberOfDirections; i++ {
+		result = append(result, byte(d.directionOffsets[i]))
+	}
+
+	return result
 }
 
 // decodeDirection decodes and returns the given direction
