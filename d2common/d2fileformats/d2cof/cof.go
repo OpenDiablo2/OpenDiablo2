@@ -140,8 +140,8 @@ func Load(fileData []byte) (*COF, error) {
 	return result, nil
 }
 
-// Unmarshal unmarshals COF into byte slince
-func (c *COF) Unmarshal() []byte {
+// Marshals encodes COF back into byte slince
+func (c *COF) Marshal() []byte {
 	var result []byte
 
 	result = append(result, byte(c.NumberOfLayers))
