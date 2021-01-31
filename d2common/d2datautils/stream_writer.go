@@ -26,6 +26,13 @@ func (v *StreamWriter) PushByte(val byte) {
 	v.data.WriteByte(val)
 }
 
+// PushBytes writes a byte slince to the stream
+func (v *StreamWriter) PushBytes(b []byte) {
+	for _, i := range b {
+		v.PushByte(i)
+	}
+}
+
 // PushInt16 writes a int16 word to the stream
 func (v *StreamWriter) PushInt16(val int16) {
 	v.PushUint16(uint16(val))

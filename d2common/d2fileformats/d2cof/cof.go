@@ -142,47 +142,47 @@ func Load(fileData []byte) (*COF, error) {
 
 // Marshals encodes COF back into byte slince
 func (c *COF) Marshal() []byte {
-	var result []byte
+	sw := d2datautils.CreateStreamWriter()
 
-	result = append(result, byte(c.NumberOfLayers))
-	result = append(result, byte(c.FramesPerDirection))
-	result = append(result, byte(c.NumberOfDirections))
-	result = append(result, c.unknownHeaderBytes...)
-	result = append(result, byte(c.Speed))
-	result = append(result, c.unknown1...)
+	sw.PushByte(byte(c.NumberOfLayers))
+	sw.PushByte(byte(c.FramesPerDirection))
+	sw.PushByte(byte(c.NumberOfDirections))
+	sw.PushBytes(c.unknownHeaderBytes)
+	sw.PushByte(byte(c.Speed))
+	sw.PushBytes(c.unknown1)
 
 	for i := range c.CofLayers {
-		result = append(result, byte(c.CofLayers[i].Type.Int()))
-		result = append(result, c.CofLayers[i].Shadow)
+		sw.PushByte(byte(c.CofLayers[i].Type.Int()))
+		sw.PushByte(c.CofLayers[i].Shadow)
 
 		if c.CofLayers[i].Selectable {
-			result = append(result, byte(1))
+			sw.PushByte(byte(1))
 		} else {
-			result = append(result, byte(0))
+			sw.PushByte(byte(0))
 		}
 
 		if c.CofLayers[i].Transparent {
-			result = append(result, byte(1))
+			sw.PushByte(byte(1))
 		} else {
-			result = append(result, byte(0))
+			sw.PushByte(byte(0))
 		}
 
-		result = append(result, byte(c.CofLayers[i].DrawEffect))
+		sw.PushByte(byte(c.CofLayers[i].DrawEffect))
 
-		result = append(result, c.CofLayers[i].weaponClassByte...)
+		sw.PushBytes(c.CofLayers[i].weaponClassByte)
 	}
 
 	for _, i := range c.AnimationFrames {
-		result = append(result, byte(i))
+		sw.PushByte(byte(i))
 	}
 
 	for direction := 0; direction < c.NumberOfDirections; direction++ {
 		for frame := 0; frame < c.FramesPerDirection; frame++ {
 			for i := 0; i < c.NumberOfLayers; i++ {
-				result = append(result, byte(c.Priority[direction][frame][i]))
+				sw.PushByte(byte(c.Priority[direction][frame][i]))
 			}
 		}
 	}
 
-	return result
+	return sw.GetBytes()
 }
