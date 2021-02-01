@@ -50,6 +50,7 @@ type COF struct {
 }
 
 // Load loads a COF file.
+// nolint:funlen // no need to change
 func Load(fileData []byte) (*COF, error) {
 	result := &COF{}
 	streamReader := d2datautils.CreateStreamReader(fileData)
@@ -140,16 +141,16 @@ func Load(fileData []byte) (*COF, error) {
 	return result, nil
 }
 
-// Marshals encodes COF back into byte slince
+// Marshal encodes COF back into byte slince
 func (c *COF) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
 	sw.PushByte(byte(c.NumberOfLayers))
 	sw.PushByte(byte(c.FramesPerDirection))
 	sw.PushByte(byte(c.NumberOfDirections))
-	sw.PushBytes(c.unknownHeaderBytes)
+	sw.PushBytes(c.unknownHeaderBytes...)
 	sw.PushByte(byte(c.Speed))
-	sw.PushBytes(c.unknown1)
+	sw.PushBytes(c.unknown1...)
 
 	for i := range c.CofLayers {
 		sw.PushByte(byte(c.CofLayers[i].Type.Int()))
@@ -169,7 +170,7 @@ func (c *COF) Marshal() []byte {
 
 		sw.PushByte(byte(c.CofLayers[i].DrawEffect))
 
-		sw.PushBytes(c.CofLayers[i].weaponClassByte)
+		sw.PushBytes(c.CofLayers[i].weaponClassByte...)
 	}
 
 	for _, i := range c.AnimationFrames {

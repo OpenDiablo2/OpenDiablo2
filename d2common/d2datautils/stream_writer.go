@@ -27,7 +27,7 @@ func (v *StreamWriter) PushByte(val byte) {
 }
 
 // PushBytes writes a byte slince to the stream
-func (v *StreamWriter) PushBytes(b []byte) {
+func (v *StreamWriter) PushBytes(b ...byte) {
 	for _, i := range b {
 		v.PushByte(i)
 	}
