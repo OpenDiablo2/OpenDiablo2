@@ -8,14 +8,12 @@ func TestStreamWriterByte(t *testing.T) {
 	sr := CreateStreamWriter()
 	data := []byte{0x12, 0x34, 0x56, 0x78}
 
-	for _, d := range data {
-		sr.PushByte(d)
-	}
+	sr.PushBytes(data...)
 
 	output := sr.GetBytes()
 	for i, d := range data {
 		if output[i] != d {
-			t.Fatalf("sr.PushByte() pushed %X, but wrote %X instead", d, output[i])
+			t.Fatalf("sr.PushBytes() pushed %X, but wrote %X instead", d, output[i])
 		}
 	}
 }
