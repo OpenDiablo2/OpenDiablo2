@@ -145,42 +145,42 @@ func Load(fileData []byte) (*COF, error) {
 func (c *COF) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
-	sw.PushByte(byte(c.NumberOfLayers))
-	sw.PushByte(byte(c.FramesPerDirection))
-	sw.PushByte(byte(c.NumberOfDirections))
+	sw.PushBytes(byte(c.NumberOfLayers))
+	sw.PushBytes(byte(c.FramesPerDirection))
+	sw.PushBytes(byte(c.NumberOfDirections))
 	sw.PushBytes(c.unknownHeaderBytes...)
-	sw.PushByte(byte(c.Speed))
+	sw.PushBytes(byte(c.Speed))
 	sw.PushBytes(c.unknown1...)
 
 	for i := range c.CofLayers {
-		sw.PushByte(byte(c.CofLayers[i].Type.Int()))
-		sw.PushByte(c.CofLayers[i].Shadow)
+		sw.PushBytes(byte(c.CofLayers[i].Type.Int()))
+		sw.PushBytes(c.CofLayers[i].Shadow)
 
 		if c.CofLayers[i].Selectable {
-			sw.PushByte(byte(1))
+			sw.PushBytes(byte(1))
 		} else {
-			sw.PushByte(byte(0))
+			sw.PushBytes(byte(0))
 		}
 
 		if c.CofLayers[i].Transparent {
-			sw.PushByte(byte(1))
+			sw.PushBytes(byte(1))
 		} else {
-			sw.PushByte(byte(0))
+			sw.PushBytes(byte(0))
 		}
 
-		sw.PushByte(byte(c.CofLayers[i].DrawEffect))
+		sw.PushBytes(byte(c.CofLayers[i].DrawEffect))
 
 		sw.PushBytes(c.CofLayers[i].weaponClassByte...)
 	}
 
 	for _, i := range c.AnimationFrames {
-		sw.PushByte(byte(i))
+		sw.PushBytes(byte(i))
 	}
 
 	for direction := 0; direction < c.NumberOfDirections; direction++ {
 		for frame := 0; frame < c.FramesPerDirection; frame++ {
 			for i := 0; i < c.NumberOfLayers; i++ {
-				sw.PushByte(byte(c.Priority[direction][frame][i]))
+				sw.PushBytes(byte(c.Priority[direction][frame][i]))
 			}
 		}
 	}

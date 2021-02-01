@@ -401,10 +401,10 @@ Loop:
 		case 257:
 			newvalue := bitstream.ReadBits(8)
 
-			outputstream.PushByte(byte(newvalue))
+			outputstream.PushBytes(byte(newvalue))
 			tail = insertNode(tail, newvalue)
 		default:
-			outputstream.PushByte(byte(decoded))
+			outputstream.PushBytes(byte(decoded))
 		}
 	}
 

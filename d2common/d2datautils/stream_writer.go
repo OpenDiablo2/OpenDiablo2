@@ -21,15 +21,10 @@ func (v *StreamWriter) GetBytes() []byte {
 	return v.data.Bytes()
 }
 
-// PushByte writes a byte to the stream
-func (v *StreamWriter) PushByte(val byte) {
-	v.data.WriteByte(val)
-}
-
-// PushBytes writes a byte slince to the stream
+// PushBytes writes a bytes to the stream
 func (v *StreamWriter) PushBytes(b ...byte) {
 	for _, i := range b {
-		v.PushByte(i)
+		v.data.WriteByte(i)
 	}
 }
 
