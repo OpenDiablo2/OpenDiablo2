@@ -37,3 +37,7 @@ func (i CompositeType) String() string {
 	}
 	return _CompositeType_name[_CompositeType_index[i]:_CompositeType_index[i+1]]
 }
+
+func (i CompositeType) Int() int {
+	return int(i)
+}
