@@ -53,7 +53,7 @@ const (
 
 const questCompleteAnimationDuration = 3
 
-func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
+func getPositionForSocket(number int) (x, y int) {
 	pos := []struct {
 		x int
 		y int
@@ -312,7 +312,7 @@ func (s *QuestLog) loadQuestBoard(act int) (wg *d2ui.WidgetGroup, icons []*d2ui.
 
 	for n := 0; n < questsInAct; n++ {
 		cw := n
-		x, y := s.getPositionForSocket(n)
+		x, y := getPositionForSocket(n)
 
 		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
 		if err != nil {

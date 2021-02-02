@@ -167,6 +167,8 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 			actions.partyToggle,
 			m.asset.TranslateString("minipanelparty"),
 		}
+
+		// nolint:gomnd // party buton is 3 in order
 		btn := m.createButton(partyContent, x+(3*buttonWidth), y, buttonHeight)
 		m.panelGroup.AddWidget(btn)
 		idxOffset++
