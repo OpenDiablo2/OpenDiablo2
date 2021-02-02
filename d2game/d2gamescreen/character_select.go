@@ -288,7 +288,8 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateString(d2enum.NoLabel))
+	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel,
+		v.asset.TranslateString(d2enum.NoLabel))
 	v.deleteCharCancelButton.SetPosition(deleteCancelX, deleteCancelY)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
