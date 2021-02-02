@@ -288,7 +288,11 @@ func (v *MainMenu) createMultiplayerLabels() {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpJoinGameLabel.SetText(strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString(d2enum.TCPIPEnterHostIPLabel), 27), "\n"))
+	v.tcpJoinGameLabel.SetText(strings.Join(
+		d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString(
+			d2enum.TCPIPEnterHostIPLabel,
+		), 27), "\n"))
+
 	v.tcpJoinGameLabel.Color[0] = d2util.Color(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
