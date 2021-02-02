@@ -270,6 +270,7 @@ func (m *MapEngine) GetStartPosition() (x, y float64) {
 			tile := m.tiles[tileX+(tileY*m.size.Width)].Components
 			for idx := range tile.Walls {
 				if tile.Walls[idx].Type.Special() && tile.Walls[idx].Style == 30 {
+					// nolint:gomnd // constant
 					return float64(tileX) + 0.5, float64(tileY) + 0.5
 				}
 			}
@@ -281,6 +282,7 @@ func (m *MapEngine) GetStartPosition() (x, y float64) {
 
 // GetCenterPosition returns the center point of the map.
 func (m *MapEngine) GetCenterPosition() (x, y float64) {
+	// nolint:gomnd // half of size
 	return float64(m.size.Width) / 2.0, float64(m.size.Height) / 2.0
 }
 
