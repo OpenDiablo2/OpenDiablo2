@@ -39,6 +39,7 @@ func (v *BitStream) ReadBits(bitCount int) int {
 		return -1
 	}
 
+	// nolint:gomnd // byte expresion
 	result := v.current & (0xffff >> uint(maxBits-bitCount))
 	v.WasteBits(bitCount)
 
@@ -51,6 +52,7 @@ func (v *BitStream) PeekByte() int {
 		return -1
 	}
 
+	// nolint:gomnd // byte
 	return v.current & 0xff
 }
 

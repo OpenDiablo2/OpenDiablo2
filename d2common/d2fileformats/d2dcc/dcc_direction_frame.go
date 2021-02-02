@@ -55,6 +55,7 @@ func CreateDCCDirectionFrame(bits *d2datautils.BitMuncher, direction *DCCDirecti
 }
 
 func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
+	// nolint:gomnd // constant
 	var w = 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
 
 	if (v.Width - w) <= 1 {
@@ -62,6 +63,8 @@ func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 	} else {
 		tmp := v.Width - w - 1
 		v.HorizontalCellCount = 2 + (tmp / 4) //nolint:gomnd // magic math
+
+		// nolint:gomnd // constant
 		if (tmp % 4) == 0 {
 			v.HorizontalCellCount--
 		}
@@ -75,6 +78,8 @@ func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 	} else {
 		tmp := v.Height - h - 1
 		v.VerticalCellCount = 2 + (tmp / 4) //nolint:gomnd // data decode
+
+		// nolint:gomnd // constant
 		if (tmp % 4) == 0 {
 			v.VerticalCellCount--
 		}
@@ -88,6 +93,8 @@ func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 		for i := 1; i < (v.HorizontalCellCount - 1); i++ {
 			cellWidths[i] = 4
 		}
+
+		// nolint:gomnd // constants
 		cellWidths[v.HorizontalCellCount-1] = v.Width - w - (4 * (v.HorizontalCellCount - 2))
 	}
 
@@ -99,6 +106,8 @@ func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 		for i := 1; i < (v.VerticalCellCount - 1); i++ {
 			cellHeights[i] = 4
 		}
+
+		// nolint:gomnd // constants
 		cellHeights[v.VerticalCellCount-1] = v.Height - h - (4 * (v.VerticalCellCount - 2))
 	}
 
