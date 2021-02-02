@@ -19,6 +19,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
+const (
+	indexPerLine = 2
+)
+
 // CreateCharacterSelect creates the character select screen and returns a pointer to it
 func CreateCharacterSelect(
 	navigator d2interface.Navigator,
@@ -181,7 +185,8 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(fiftyPercent)
 
 	for i := 0; i < 8; i++ {
-		offsetX, offsetY := rootLabelOffsetX, rootLabelOffsetY+((i/2)*95)
+		// nolint:gomnd // consant
+		offsetX, offsetY := rootLabelOffsetX, rootLabelOffsetY+((i/indexPerLine)*95)
 
 		if i&1 > 0 {
 			offsetX = 385
@@ -312,7 +317,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 	expText := v.asset.TranslateString("#803")
 
 	for i := 0; i < 8; i++ {
-		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
+		idx := i + (v.charScrollbar.GetCurrentOffset() * indexPerLine)
 
 		if idx >= len(v.gameStates) {
 			v.characterNameLabel[i].SetText("")
@@ -360,14 +365,14 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 	v.background.RenderSegmented(screen, 4, 3, 0)
 	v.d2HeroTitle.Render(screen)
 
-	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
+	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * indexPerLine)
 
 	if v.selectedCharacter > -1 && actualSelectionIndex >= 0 && actualSelectionIndex < 8 {
 		v.selectionBox.RenderSegmented(screen, 2, 1, 0)
 	}
 
 	for i := 0; i < 8; i++ {
-		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
+		idx := i + (v.charScrollbar.GetCurrentOffset() * indexPerLine)
 		if idx >= len(v.gameStates) {
 			continue
 		}
@@ -399,10 +404,11 @@ func (v *CharacterSelect) moveSelectionBox() {
 
 	bw := 272
 	bh := 92
-	selectedIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
+
+	selectedIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * indexPerLine)
 
 	selBoxX := selectionBoxOffsetX + ((selectedIndex & 1) * bw)
-	selBoxY := selectionBoxOffsetY + (bh * (selectedIndex / 2))
+	selBoxY := selectionBoxOffsetY + (bh * (selectedIndex / indexPerLine))
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 	v.d2HeroTitle.SetText(v.gameStates[v.selectedCharacter].HeroName)
 }
@@ -440,8 +446,8 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		}
 
 		// Make sure selection takes the scrollbar into account to make proper selection.
-		if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
-			selectedIndex = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
+		if (v.charScrollbar.GetCurrentOffset()*indexPerLine)+selectedIndex < len(v.gameStates) {
+			selectedIndex = (v.charScrollbar.GetCurrentOffset() * indexPerLine) + selectedIndex
 		}
 
 		// if the selection box didn't move, check if it was a double click, otherwise set selectedCharacter to

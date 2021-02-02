@@ -509,7 +509,9 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 
 		switch buttonState(i) {
 		case buttonStatePressed, buttonStatePressedToggled:
+			// nolint:gomnd // constant offset
 			textOffsetX = -2
+			// nolint:gomnd // constant offset
 			textOffsetY = 2
 		}
 

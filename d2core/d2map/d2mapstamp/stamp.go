@@ -83,6 +83,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {
 				// Temorary use of Lookup.
+				// nolint:gomnd // constant modifier
 				npcX, npcY := (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
 				npc, err := mr.entity.NewNPC(npcX, npcY, monstat, 0)
 
@@ -105,6 +106,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			objectRecord := mr.factory.asset.Records.Object.Details[lookup.ObjectsTxtId]
 
 			if objectRecord != nil {
+				// nolint:gomnd // constant
 				entity, err := mr.entity.NewObject((tileOffsetX*5)+object.X,
 					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
 

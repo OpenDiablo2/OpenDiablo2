@@ -265,7 +265,7 @@ func (t *Terminal) Render(surface d2interface.Surface) error {
 	outputHeight := t.lineCount * charHeight
 	totalHeight := outputHeight + charHeight
 
-	offset := -int((1.0 - easeInOut(t.visAnim)) * float64(totalHeight))
+	offset := -int((1 - easeInOut(t.visAnim)) * float64(totalHeight))
 	surface.PushTranslation(0, offset)
 
 	surface.DrawRect(totalWidth, outputHeight, t.bgColor)
@@ -412,6 +412,7 @@ func easeInOut(t float64) float64 {
 
 	t -= 2
 
+	// nolint:gomnd // constant
 	return -0.5 * (t*t*t*t - 2)
 }
 

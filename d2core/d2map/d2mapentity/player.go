@@ -260,6 +260,7 @@ func (p *Player) GetVelocity() d2vector.Vector {
 func (p *Player) GetSize() (width, height int) {
 	width, height = p.composite.GetSize()
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/820
+	// nolint:gomnd // returns 1.5 of height
 	height = (height * 2) - (height / 2)
 
 	return width, height

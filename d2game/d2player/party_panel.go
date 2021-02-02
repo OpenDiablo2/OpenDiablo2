@@ -60,6 +60,78 @@ const (
 	indexOffset                                      = 52
 )
 
+// NewPartyPanel creates a new party panel
+func NewPartyPanel(asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	heroName string,
+	l d2util.LogLevel,
+	me *d2mapentity.Player,
+	heroState *d2hero.HeroStatsState,
+	players map[string]*d2mapentity.Player) *PartyPanel {
+	log.Print("OpenDiablo2 - Party Panel - development")
+
+	originX := 0
+	originY := 0
+
+	pp := &PartyPanel{
+		asset:     asset,
+		uiManager: ui,
+		originX:   originX,
+		originY:   originY,
+		heroState: heroState,
+		heroName:  heroName,
+		labels:    &StatsPanelLabels{},
+		barX:      barX,
+		barY:      baseBarY,
+		players:   players,
+		me:        me,
+	}
+
+	var partyIndexes [d2enum.MaxPlayersInGame]*partyIndex
+
+	var indexes [d2enum.MaxPlayersInGame]*d2ui.WidgetGroup
+
+	for i := 0; i < d2enum.MaxPlayersInGame; i++ {
+		partyIndexes[i] = pp.newPartyIndex()
+		indexes[i] = pp.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	}
+
+	pp.partyIndexes = partyIndexes
+
+	pp.Logger = d2util.NewLogger()
+	pp.Logger.SetLevel(l)
+	pp.Logger.SetPrefix(logPrefix)
+
+	return pp
+}
+
+// PartyPanel represents the party panel
+type PartyPanel struct {
+	asset      *d2asset.AssetManager
+	uiManager  *d2ui.UIManager
+	panel      *d2ui.Sprite
+	bar        *d2ui.Sprite
+	heroState  *d2hero.HeroStatsState
+	heroName   string
+	labels     *StatsPanelLabels
+	onCloseCb  func()
+	panelGroup *d2ui.WidgetGroup
+
+	partyIndexes [d2enum.MaxPlayersInGame]*partyIndex
+	indexes      [d2enum.MaxPlayersInGame]*d2ui.WidgetGroup
+
+	players map[string]*d2mapentity.Player
+	me      *d2mapentity.Player
+
+	originX int
+	originY int
+	isOpen  bool
+	barX    int
+	barY    int
+
+	*d2util.Logger
+}
+
 // newPartyIndex creates new party index
 func (s *PartyPanel) newPartyIndex() *partyIndex {
 	result := &partyIndex{
@@ -225,78 +297,6 @@ func (pi *partyIndex) setPositions(idx int) {
 
 func (pi *partyIndex) CanGoHostile() bool {
 	return pi.hero.Stats.Level >= d2enum.PlayersHostileLevel && pi.me.Stats.Level >= d2enum.PlayersHostileLevel
-}
-
-// NewPartyPanel creates a new party panel
-func NewPartyPanel(asset *d2asset.AssetManager,
-	ui *d2ui.UIManager,
-	heroName string,
-	l d2util.LogLevel,
-	me *d2mapentity.Player,
-	heroState *d2hero.HeroStatsState,
-	players map[string]*d2mapentity.Player) *PartyPanel {
-	log.Print("OpenDiablo2 - Party Panel - development")
-
-	originX := 0
-	originY := 0
-
-	pp := &PartyPanel{
-		asset:     asset,
-		uiManager: ui,
-		originX:   originX,
-		originY:   originY,
-		heroState: heroState,
-		heroName:  heroName,
-		labels:    &StatsPanelLabels{},
-		barX:      barX,
-		barY:      baseBarY,
-		players:   players,
-		me:        me,
-	}
-
-	var partyIndexes [d2enum.MaxPlayersInGame]*partyIndex
-
-	var indexes [d2enum.MaxPlayersInGame]*d2ui.WidgetGroup
-
-	for i := 0; i < d2enum.MaxPlayersInGame; i++ {
-		partyIndexes[i] = pp.newPartyIndex()
-		indexes[i] = pp.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
-	}
-
-	pp.partyIndexes = partyIndexes
-
-	pp.Logger = d2util.NewLogger()
-	pp.Logger.SetLevel(l)
-	pp.Logger.SetPrefix(logPrefix)
-
-	return pp
-}
-
-// PartyPanel represents the party panel
-type PartyPanel struct {
-	asset      *d2asset.AssetManager
-	uiManager  *d2ui.UIManager
-	panel      *d2ui.Sprite
-	bar        *d2ui.Sprite
-	heroState  *d2hero.HeroStatsState
-	heroName   string
-	labels     *StatsPanelLabels
-	onCloseCb  func()
-	panelGroup *d2ui.WidgetGroup
-
-	partyIndexes [d2enum.MaxPlayersInGame]*partyIndex
-	indexes      [d2enum.MaxPlayersInGame]*d2ui.WidgetGroup
-
-	players map[string]*d2mapentity.Player
-	me      *d2mapentity.Player
-
-	originX int
-	originY int
-	isOpen  bool
-	barX    int
-	barY    int
-
-	*d2util.Logger
 }
 
 // Load the data for the hero status panel

@@ -414,6 +414,8 @@ func (box *Box) setupOptions(sectionHeight int) error {
 		}
 
 		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
+
+		// nolint:gomnd // constant
 		box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight - boxBorderSpriteTopBorderSectionOffset)
 		box.sprites = append(box.sprites, cornerLeft, cornerRight)
 	}
@@ -470,6 +472,7 @@ func (box *Box) Load() error {
 	contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
 	contentLayoutX, contentLayoutY := box.contentLayout.GetPosition()
 	box.contentLayout.SetPosition(contentLayoutX+box.paddingX, contentLayoutY+box.paddingY)
+	// nolint:gomnd // constant
 	box.contentLayout.SetSize(contentLayoutW-(2*box.paddingX), contentLayoutH-(2*box.paddingY))
 
 	box.layout.AddLayoutFromSource(box.contentLayout)
