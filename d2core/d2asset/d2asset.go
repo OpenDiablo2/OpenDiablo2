@@ -27,7 +27,7 @@ func NewAssetManager(logLevel d2util.LogLevel) (*AssetManager, error) {
 	manager := &AssetManager{
 		Logger:     logger,
 		Loader:     loader,
-		tables:     make([]d2tbl.TextDictionary, 0),
+		tables:     make([]*d2tbl.TextDictionary, 0),
 		animations: d2cache.CreateCache(animationBudget),
 		fonts:      d2cache.CreateCache(fontBudget),
 		palettes:   d2cache.CreateCache(paletteBudget),
