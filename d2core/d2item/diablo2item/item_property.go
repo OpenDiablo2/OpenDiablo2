@@ -8,6 +8,10 @@ import (
 )
 
 const (
+	invalidHeroIndex = -1.0
+)
+
+const (
 	noValue = iota
 	oneValue
 	twoValue
@@ -271,8 +275,6 @@ func (p *Property) fnProcs(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat
 // fnRandomSkill random selection of parameters for parameter-based stat ???
 func (p *Property) fnRandomSkill(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	var skillLevel, skillID float64
-
-	invalidHeroIndex := -1.0
 
 	switch len(p.inputParams) {
 	case noValue, oneValue, twoValue:

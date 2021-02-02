@@ -93,6 +93,7 @@ func Utf16BytesToString(b []byte) (string, error) {
 
 	lb := len(b)
 	for i := 0; i < lb; i += 2 {
+		// nolint:gomnd // byte operation
 		u16s[0] = uint16(b[i]) + (uint16(b[i+1]) << 8)
 		r := utf16.Decode(u16s)
 		n := utf8.EncodeRune(b8buf, r[0])

@@ -72,6 +72,7 @@ func (v *TextBox) Render(target d2interface.Surface) {
 	v.bgSprite.Render(target)
 	v.textLabel.Render(target)
 
+	// nolint:gomnd // byte expressions
 	if (time.Now().UnixNano()/1e6)&(1<<8) > 0 {
 		v.lineBar.Render(target)
 	}

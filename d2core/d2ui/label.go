@@ -166,6 +166,7 @@ func (v *Label) getAlignOffset(textWidth int) int {
 	case HorizontalAlignLeft:
 		return 0
 	case HorizontalAlignCenter:
+		// nolint:gomnd // center of label = 1/2 of it
 		return -textWidth / 2
 	case HorizontalAlignRight:
 		return -textWidth

@@ -1151,5 +1151,6 @@ func (v *Button) SetTooltip(t *Tooltip) {
 }
 
 func half(n int) int {
+	// nolint:gomnd // half is half
 	return n / 2
 }
