@@ -301,6 +301,7 @@ func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
 			d2enum.LayerStreamShadow,
 		}
 	} else {
+		// nolint:gomnd // constant
 		layerStream = make([]d2enum.LayerStreamType,
 			(ds1.NumberOfWalls*2)+ds1.NumberOfFloors+ds1.NumberOfShadowLayers+ds1.NumberOfSubstitutionLayers)
 

@@ -273,7 +273,9 @@ func (g *ItemGrid) renderEquippedItems(target d2interface.Surface) {
 
 		itemSprite := g.sprites[eq.item.GetItemCode()]
 		itemWidth, itemHeight := itemSprite.GetCurrentFrameSize()
+		// nolint:gomnd // 1/2 ov width
 		x := eq.x + ((eq.width - itemWidth) / 2)
+		// nolint:gomnd // 1/2 ov height
 		y := eq.y - ((eq.height - itemHeight) / 2)
 
 		g.renderItem(eq.item, target, x, y)
