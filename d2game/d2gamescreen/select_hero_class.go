@@ -416,7 +416,7 @@ func (v *SelectHeroClass) createLabels() {
 	halfFontWidth := fontWidth / half
 
 	v.headingLabel.SetPosition(headingX-halfFontWidth, headingY)
-	v.headingLabel.SetText(v.asset.TranslateLabel(d2enum.SelectHeroClassLabel))
+	v.headingLabel.SetText(v.asset.TranslateString(d2enum.SelectHeroClassLabel))
 	v.headingLabel.Alignment = d2ui.HorizontalAlignCenter
 
 	v.heroClassLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
@@ -437,7 +437,7 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.heroNameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.heroNameLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(d2enum.CharNameLabel), d2ui.ColorTokenGold))
+	v.heroNameLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateString(d2enum.CharNameLabel), d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
@@ -447,16 +447,16 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(d2enum.HardCoreLabel), d2ui.ColorTokenGold))
+	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateString(d2enum.HardCoreLabel), d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 
 func (v *SelectHeroClass) createButtons() {
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.ExitLabel))
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(d2enum.ExitLabel))
 	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 
-	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.OKLabel))
+	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(d2enum.OKLabel))
 	v.okButton.SetPosition(selHeroOkBtnX, selHeroOkBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
@@ -719,7 +719,7 @@ func (v *SelectHeroClass) setDescLabels(descKey int, key string) {
 	if key != "" {
 		heroDesc = v.asset.TranslateString(key)
 	} else {
-		heroDesc = v.asset.TranslateLabel(descKey)
+		heroDesc = v.asset.TranslateString(descKey)
 	}
 
 	parts := d2util.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
