@@ -1,6 +1,6 @@
 package d2enum
 
-// there are labels for "numeric labels (see AssetManager.TranslateLabel)
+// there are labels for "numeric labels (see AssetManager.TranslateString)
 const (
 	RepairAll = iota
 	_
