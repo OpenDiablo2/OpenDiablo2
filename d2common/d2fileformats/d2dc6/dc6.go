@@ -146,6 +146,41 @@ func (d *DC6) loadFrames(r *d2datautils.StreamReader) error {
 	return nil
 }
 
+// Marshal encodes dc6 animation back into byte slice
+func (d *DC6) Marshal() []byte {
+	sw := d2datautils.CreateStreamWriter()
+
+	// Encode header
+	sw.PushInt32(d.Version)
+	sw.PushUint32(d.Flags)
+	sw.PushUint32(d.Encoding)
+
+	sw.PushBytes(d.Termination...)
+
+	sw.PushUint32(d.Directions)
+	sw.PushUint32(d.FramesPerDirection)
+
+	// load frames
+	for _, i := range d.FramePointers {
+		sw.PushUint32(i)
+	}
+
+	for i := range d.Frames {
+		sw.PushUint32(d.Frames[i].Flipped)
+		sw.PushUint32(d.Frames[i].Width)
+		sw.PushUint32(d.Frames[i].Height)
+		sw.PushInt32(d.Frames[i].OffsetX)
+		sw.PushInt32(d.Frames[i].OffsetY)
+		sw.PushUint32(d.Frames[i].Unknown)
+		sw.PushUint32(d.Frames[i].NextBlock)
+		sw.PushUint32(d.Frames[i].Length)
+		sw.PushBytes(d.Frames[i].FrameData...)
+		sw.PushBytes(d.Frames[i].Terminator...)
+	}
+
+	return sw.GetBytes()
+}
+
 // DecodeFrame decodes the given frame to an indexed color texture
 func (d *DC6) DecodeFrame(frameIndex int) []byte {
 	frame := d.Frames[frameIndex]
