@@ -452,12 +452,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].hidden = byte((dw & 0x80000000) >> 31)   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Walls[wallIndex].Decode(dw) //nolint:gomnd // Bitmask
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
@@ -473,19 +468,9 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & 0xFFFFFF00) >> 8) //nolint:gomnd // Bitmask
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					ds1.Tiles[y][x].Floors[floorIndex].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].hidden = byte((dw & 0x80000000) >> 31)   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Floors[floorIndex].Decode(dw)
 				case d2enum.LayerStreamShadow:
-					ds1.Tiles[y][x].Shadows[0].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].hidden = byte((dw & 0x80000000) >> 31)   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Shadows[0].Decode(dw)
 				case d2enum.LayerStreamSubstitute:
 					ds1.Tiles[y][x].Substitutions[0].Unknown = dw
 				}
@@ -497,7 +482,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 }
 
 // Marshal encodes ds1 back to byte slice
-// nolint:funlen,gocognit // no need to change
+// nolint:funlen,gocognit,gocyclo // no need to change
 func (ds1 *DS1) Marshal() []byte {
 	// create stream writer
 	sw := d2datautils.CreateStreamWriter()
@@ -549,12 +534,7 @@ func (ds1 *DS1) Marshal() []byte {
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Prop1) & 0xFF            //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Sequence) & 0x3F) << 8  //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Unknown1) & 0xFC) << 14 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Style) & 0x3F) << 20    //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Unknown2) & 0x7C) << 26 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].hidden) & 0x01) << 31   //nolint:gomnd // Bitmask
+					dw = ds1.Tiles[y][x].Walls[wallIndex].Encode()
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
@@ -563,19 +543,9 @@ func (ds1 *DS1) Marshal() []byte {
 
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					dw |= uint32(ds1.Tiles[y][x].Floors[floorIndex].Prop1) & 0xFF            //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Floors[floorIndex].Sequence) & 0x3F) << 8  //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Floors[floorIndex].Unknown1) & 0xFC) << 14 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Floors[floorIndex].Style) & 0x3F) << 20    //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Floors[floorIndex].Unknown2) & 0x7C) << 26 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Floors[floorIndex].hidden) & 0x01) << 31   //nolint:gomnd // Bitmask
+					dw = ds1.Tiles[y][x].Floors[floorIndex].Encode()
 				case d2enum.LayerStreamShadow:
-					dw |= uint32(ds1.Tiles[y][x].Shadows[0].Prop1) & 0xFF            //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Shadows[0].Sequence) & 0x3F) << 8  //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Shadows[0].Unknown1) & 0xFC) << 14 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Shadows[0].Style) & 0x3F) << 20    //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Shadows[0].Unknown2) & 0x7C) << 26 //nolint:gomnd // Bitmask
-					dw |= (uint32(ds1.Tiles[y][x].Shadows[0].hidden) & 0x01) << 31   //nolint:gomnd // Bitmask
+					dw = ds1.Tiles[y][x].Shadows[0].Encode()
 				case d2enum.LayerStreamSubstitute:
 					dw = ds1.Tiles[y][x].Substitutions[0].Unknown
 				}
