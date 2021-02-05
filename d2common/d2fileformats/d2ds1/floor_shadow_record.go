@@ -7,8 +7,13 @@ type FloorShadowRecord struct {
 	Unknown1    byte
 	Style       byte
 	Unknown2    byte
-	Hidden      bool
+	hidden      byte
 	RandomIndex byte
 	Animated    bool
 	YAdjust     int
+}
+
+// Hidden returns if floor/shadow is hidden
+func (f *FloorShadowRecord) Hidden() bool {
+	return f.hidden > 0
 }

@@ -11,7 +11,12 @@ type WallRecord struct {
 	Unknown1    byte
 	Style       byte
 	Unknown2    byte
-	Hidden      bool
+	hidden      byte
 	RandomIndex byte
 	YAdjust     int
+}
+
+// Hidden returns if wall is hidden
+func (w *WallRecord) Hidden() bool {
+	return w.hidden > 0
 }
