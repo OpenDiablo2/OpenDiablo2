@@ -482,7 +482,6 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 }
 
 // Marshal encodes ds1 back to byte slice
-// nolint:funlen,gocognit,gocyclo // no need to change
 func (ds1 *DS1) Marshal() []byte {
 	// create stream writer
 	sw := d2datautils.CreateStreamWriter()
@@ -524,35 +523,7 @@ func (ds1 *DS1) Marshal() []byte {
 	}
 
 	// Step 2 - encode layers
-	for lIdx := range ds1.layerStreamTypes {
-		layerStreamType := ds1.layerStreamTypes[lIdx]
-
-		for y := 0; y < int(ds1.Height); y++ {
-			for x := 0; x < int(ds1.Width); x++ {
-				dw := uint32(0)
-
-				switch layerStreamType {
-				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
-					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Encode(sw)
-				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
-					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
-					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
-					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & 0xFFFFFF00) << 8 //nolint:gomnd // Bitmask
-
-					sw.PushUint32(dw)
-				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
-					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					ds1.Tiles[y][x].Floors[floorIndex].Encode(sw)
-				case d2enum.LayerStreamShadow:
-					ds1.Tiles[y][x].Shadows[0].Encode(sw)
-				case d2enum.LayerStreamSubstitute:
-					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
-				}
-			}
-		}
-	}
+	ds1.encodeLayers(sw)
 
 	// Step 3 - encode objects
 	if !(ds1.Version < v2) {
@@ -582,6 +553,45 @@ func (ds1 *DS1) Marshal() []byte {
 		}
 	}
 
+	// Step 5 - encode NPC's and its paths
+	ds1.encodeNPCs(sw)
+
+	return sw.GetBytes()
+}
+
+func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
+	for lIdx := range ds1.layerStreamTypes {
+		layerStreamType := ds1.layerStreamTypes[lIdx]
+
+		for y := 0; y < int(ds1.Height); y++ {
+			for x := 0; x < int(ds1.Width); x++ {
+				dw := uint32(0)
+
+				switch layerStreamType {
+				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
+					ds1.Tiles[y][x].Walls[wallIndex].Encode(sw)
+				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
+					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
+					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
+					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & 0xFFFFFF00) << 8 //nolint:gomnd // Bitmask
+
+					sw.PushUint32(dw)
+				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
+					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
+					ds1.Tiles[y][x].Floors[floorIndex].Encode(sw)
+				case d2enum.LayerStreamShadow:
+					ds1.Tiles[y][x].Shadows[0].Encode(sw)
+				case d2enum.LayerStreamSubstitute:
+					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
+				}
+			}
+		}
+	}
+}
+
+func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
 	// Step 5.1 - encode npc's
 	sw.PushUint32(uint32(len(ds1.npcIndexes)))
 
@@ -600,6 +610,4 @@ func (ds1 *DS1) Marshal() []byte {
 			}
 		}
 	}
-
-	return sw.GetBytes()
 }
