@@ -30,6 +30,9 @@ func (v *StreamWriter) PushBytes(b ...byte) {
 	}
 }
 
+// PushBit pushes single bit into stream
+// WARNING: if you'll use PushBit, offset'll be less then 7, and if you'll
+// use another Push... method, bits'll not be pushed
 func (v *StreamWriter) PushBit(b bool) {
 	if b {
 		v.bitCache |= (1 << v.bitOffset)
@@ -45,6 +48,7 @@ func (v *StreamWriter) PushBit(b bool) {
 	v.bitOffset = 0
 }
 
+// PushBits pushes bits (with max range 8)
 func (v *StreamWriter) PushBits(b byte, bits int) {
 	val := b
 	for i := 0; i < bits; i++ {
@@ -58,6 +62,7 @@ func (v *StreamWriter) PushBits(b byte, bits int) {
 	}
 }
 
+// PushBits16 pushes bits (with max range 16)
 func (v *StreamWriter) PushBits16(b uint16, bits int) {
 	val := b
 	for i := 0; i < bits; i++ {
@@ -66,10 +71,12 @@ func (v *StreamWriter) PushBits16(b uint16, bits int) {
 		} else {
 			v.PushBit(false)
 		}
+
 		val >>= 1
 	}
 }
 
+// PushBits32 pushes bits (with max range 32)
 func (v *StreamWriter) PushBits32(b uint32, bits int) {
 	val := b
 	for i := 0; i < bits; i++ {
@@ -78,13 +85,8 @@ func (v *StreamWriter) PushBits32(b uint32, bits int) {
 		} else {
 			v.PushBit(false)
 		}
-		val >>= 1
-	}
-}
 
-func (v *StreamWriter) ForcePushBits() {
-	for i := 0; i < bitsPerByte-v.bitOffset; i++ {
-		v.PushBit(0 != 0)
+		val >>= 1
 	}
 }
 

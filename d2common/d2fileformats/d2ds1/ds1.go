@@ -550,7 +550,6 @@ func (ds1 *DS1) Marshal() []byte {
 				case d2enum.LayerStreamSubstitute:
 					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
 				}
-
 			}
 		}
 	}
