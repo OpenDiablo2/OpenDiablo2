@@ -534,23 +534,23 @@ func (ds1 *DS1) Marshal() []byte {
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					dw = ds1.Tiles[y][x].Walls[wallIndex].Encode()
+					ds1.Tiles[y][x].Walls[wallIndex].Encode(sw)
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
 					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
 					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & 0xFFFFFF00) << 8 //nolint:gomnd // Bitmask
 
+					sw.PushUint32(dw)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					dw = ds1.Tiles[y][x].Floors[floorIndex].Encode()
+					ds1.Tiles[y][x].Floors[floorIndex].Encode(sw)
 				case d2enum.LayerStreamShadow:
-					dw = ds1.Tiles[y][x].Shadows[0].Encode()
+					ds1.Tiles[y][x].Shadows[0].Encode(sw)
 				case d2enum.LayerStreamSubstitute:
-					dw = ds1.Tiles[y][x].Substitutions[0].Unknown
+					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
 				}
 
-				sw.PushUint32(dw)
 			}
 		}
 	}

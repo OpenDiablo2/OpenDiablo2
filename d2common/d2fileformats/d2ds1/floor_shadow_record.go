@@ -1,5 +1,9 @@
 package d2ds1
 
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
+)
+
 // FloorShadowRecord represents a floor or shadow record in a DS1 file.
 type FloorShadowRecord struct {
 	Prop1       byte
@@ -28,14 +32,12 @@ func (f *FloorShadowRecord) Decode(dw uint32) {
 	f.hidden = byte((dw & 0x80000000) >> 31)   //nolint:gomnd // Bitmask
 }
 
-// Encode encodes floor-shadow record
-func (f *FloorShadowRecord) Encode() (dw uint32) {
-	dw |= uint32(f.Prop1) & 0xFF            //nolint:gomnd // Bitmask
-	dw |= (uint32(f.Sequence) & 0x3F) << 8  //nolint:gomnd // Bitmask
-	dw |= (uint32(f.Unknown1) & 0xFC) << 14 //nolint:gomnd // Bitmask
-	dw |= (uint32(f.Style) & 0x3F) << 20    //nolint:gomnd // Bitmask
-	dw |= (uint32(f.Unknown2) & 0x7C) << 26 //nolint:gomnd // Bitmask
-	dw |= (uint32(f.hidden) & 0x01) << 31   //nolint:gomnd // Bitmask
-
-	return dw
+// Encode adds Floor's bits to stream writter given
+func (f *FloorShadowRecord) Encode(sw *d2datautils.StreamWriter) {
+	sw.PushBits32(uint32(f.Prop1), 8)
+	sw.PushBits32(uint32(f.Sequence), 6)
+	sw.PushBits32(uint32(f.Unknown1), 6)
+	sw.PushBits32(uint32(f.Style), 6)
+	sw.PushBits32(uint32(f.Unknown2), 5)
+	sw.PushBits32(uint32(f.hidden), 1)
 }

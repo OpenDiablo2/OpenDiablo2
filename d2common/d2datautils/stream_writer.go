@@ -4,7 +4,9 @@ import "bytes"
 
 // StreamWriter allows you to create a byte array by streaming in writes of various sizes
 type StreamWriter struct {
-	data *bytes.Buffer
+	data      *bytes.Buffer
+	bitOffset int
+	bitCache  byte
 }
 
 // CreateStreamWriter creates a new StreamWriter instance
@@ -25,6 +27,64 @@ func (v *StreamWriter) GetBytes() []byte {
 func (v *StreamWriter) PushBytes(b ...byte) {
 	for _, i := range b {
 		v.data.WriteByte(i)
+	}
+}
+
+func (v *StreamWriter) PushBit(b bool) {
+	if b {
+		v.bitCache |= (1 << v.bitOffset)
+	}
+	v.bitOffset++
+
+	if v.bitOffset != bitsPerByte {
+		return
+	}
+
+	v.PushBytes(v.bitCache)
+	v.bitCache = 0
+	v.bitOffset = 0
+}
+
+func (v *StreamWriter) PushBits(b byte, bits int) {
+	val := b
+	for i := 0; i < bits; i++ {
+		if val&1 == 1 {
+			v.PushBit(true)
+		} else {
+			v.PushBit(false)
+		}
+
+		val >>= 1
+	}
+}
+
+func (v *StreamWriter) PushBits16(b uint16, bits int) {
+	val := b
+	for i := 0; i < bits; i++ {
+		if val&1 == 1 {
+			v.PushBit(true)
+		} else {
+			v.PushBit(false)
+		}
+		val >>= 1
+	}
+}
+
+func (v *StreamWriter) PushBits32(b uint32, bits int) {
+	val := b
+	for i := 0; i < bits; i++ {
+		if val&1 == 1 {
+			v.PushBit(true)
+		} else {
+			v.PushBit(false)
+		}
+		val >>= 1
+	}
+}
+
+func (v *StreamWriter) ForcePushBits() {
+	for i := 0; i < bitsPerByte-v.bitOffset; i++ {
+		v.PushBit(0 != 0)
 	}
 }
 

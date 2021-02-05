@@ -1,6 +1,9 @@
 package d2ds1
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+)
 
 // WallRecord represents a wall record.
 type WallRecord struct {
@@ -21,16 +24,14 @@ func (w *WallRecord) Hidden() bool {
 	return w.hidden > 0
 }
 
-// Encode encodes wall record
-func (w *WallRecord) Encode() (dw uint32) {
-	dw |= uint32(w.Prop1) & 0xFF            //nolint:gomnd // Bitmask
-	dw |= (uint32(w.Sequence) & 0x3F) << 8  //nolint:gomnd // Bitmask
-	dw |= (uint32(w.Unknown1) & 0xFC) << 14 //nolint:gomnd // Bitmask
-	dw |= (uint32(w.Style) & 0x3F) << 20    //nolint:gomnd // Bitmask
-	dw |= (uint32(w.Unknown2) & 0x7C) << 26 //nolint:gomnd // Bitmask
-	dw |= (uint32(w.hidden) & 0x01) << 31   //nolint:gomnd // Bitmask
-
-	return dw
+// Encode adds wall's record's bytes into stream writer given
+func (w *WallRecord) Encode(sw *d2datautils.StreamWriter) {
+	sw.PushBits32(uint32(w.Prop1), 8)
+	sw.PushBits32(uint32(w.Sequence), 6)
+	sw.PushBits32(uint32(w.Unknown1), 6)
+	sw.PushBits32(uint32(w.Style), 6)
+	sw.PushBits32(uint32(w.Unknown2), 5)
+	sw.PushBits32(uint32(w.hidden), 1)
 }
 
 // Decode decodes wall record
