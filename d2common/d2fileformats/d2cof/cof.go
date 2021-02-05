@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	unknownByteCount = 21
-	numHeaderBytes   = 4 + unknownByteCount
-	numLayerBytes    = 9
+	numUnknownHeaderBytes = 21
+	numUnknownBodyBytes   = 3
+	numHeaderBytes        = 4 + numUnknownHeaderBytes
+	numLayerBytes         = 9
 )
 
 const (
@@ -33,12 +34,41 @@ const (
 	badCharacter = string(byte(0))
 )
 
+// New creates a new COF
+func New() *COF {
+	return &COF{
+		unknownHeaderBytes: make([]byte, numUnknownHeaderBytes),
+		unknownBodyBytes:   make([]byte, numUnknownBodyBytes),
+		NumberOfDirections: 0,
+		FramesPerDirection: 0,
+		NumberOfLayers:     0,
+		Speed:              0,
+		CofLayers:          make([]CofLayer, 0),
+		CompositeLayers:    make(map[d2enum.CompositeType]int),
+		AnimationFrames:    make([]d2enum.AnimationFrame, 0),
+		Priority:           make([][][]d2enum.CompositeType, 0),
+	}
+}
+
+// Marshal a COF to a new byte slice
+func Marshal(c *COF) []byte {
+	return c.Marshal()
+}
+
+// Unmarshal a byte slice to a new COF
+func Unmarshal(data []byte) (*COF, error) {
+	c := New()
+	err := c.Unmarshal(data)
+
+	return c, err
+}
+
 // COF is a structure that represents a COF file.
 type COF struct {
 	// unknown bytes for header
 	unknownHeaderBytes []byte
 	// unknown bytes (first "body's" bytes)
-	unknown1           []byte
+	unknownBodyBytes   []byte
 	NumberOfDirections int
 	FramesPerDirection int
 	NumberOfLayers     int
@@ -49,10 +79,9 @@ type COF struct {
 	Priority           [][][]d2enum.CompositeType
 }
 
-// Load loads a COF file.
+// Unmarshal a byte slice to this COF
 // nolint:funlen // no need to change
-func Load(fileData []byte) (*COF, error) {
-	result := &COF{}
+func (c *COF) Unmarshal(fileData []byte) error {
 	streamReader := d2datautils.CreateStreamReader(fileData)
 
 	var b []byte
@@ -61,35 +90,29 @@ func Load(fileData []byte) (*COF, error) {
 
 	b, err = streamReader.ReadBytes(numHeaderBytes)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	result.NumberOfLayers = int(b[headerNumLayers])
-	result.FramesPerDirection = int(b[headerFramesPerDir])
-	result.NumberOfDirections = int(b[headerNumDirs])
-	result.unknownHeaderBytes = b[headerNumDirs+1 : headerSpeed]
-	result.Speed = int(b[headerSpeed])
+	c.NumberOfLayers = int(b[headerNumLayers])
+	c.FramesPerDirection = int(b[headerFramesPerDir])
+	c.NumberOfDirections = int(b[headerNumDirs])
+	c.unknownHeaderBytes = b[headerNumDirs+1 : headerSpeed]
+	c.Speed = int(b[headerSpeed])
 
-	// read unknown bytes
-	// previous streamReader.SkipBytes(3)
-	for i := 0; i < 3; i++ {
-		b, errSR := streamReader.ReadByte()
-		if errSR != nil {
-			return nil, errSR
-		}
-
-		result.unknown1 = append(result.unknown1, b)
+	c.unknownBodyBytes, err = streamReader.ReadBytes(numUnknownBodyBytes)
+	if err != nil {
+		return err
 	}
 
-	result.CofLayers = make([]CofLayer, result.NumberOfLayers)
-	result.CompositeLayers = make(map[d2enum.CompositeType]int)
+	c.CofLayers = make([]CofLayer, c.NumberOfLayers)
+	c.CompositeLayers = make(map[d2enum.CompositeType]int)
 
-	for i := 0; i < result.NumberOfLayers; i++ {
+	for i := 0; i < c.NumberOfLayers; i++ {
 		layer := CofLayer{}
 
 		b, err = streamReader.ReadBytes(numLayerBytes)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		layer.Type = d2enum.CompositeType(b[layerType])
@@ -102,46 +125,46 @@ func Load(fileData []byte) (*COF, error) {
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(
 			string(b[layerWeaponClass:]), badCharacter, "")))
 
-		result.CofLayers[i] = layer
-		result.CompositeLayers[layer.Type] = i
+		c.CofLayers[i] = layer
+		c.CompositeLayers[layer.Type] = i
 	}
 
-	b, err = streamReader.ReadBytes(result.FramesPerDirection)
+	b, err = streamReader.ReadBytes(c.FramesPerDirection)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	result.AnimationFrames = make([]d2enum.AnimationFrame, result.FramesPerDirection)
+	c.AnimationFrames = make([]d2enum.AnimationFrame, c.FramesPerDirection)
 
 	for i := range b {
-		result.AnimationFrames[i] = d2enum.AnimationFrame(b[i])
+		c.AnimationFrames[i] = d2enum.AnimationFrame(b[i])
 	}
 
-	priorityLen := result.FramesPerDirection * result.NumberOfDirections * result.NumberOfLayers
-	result.Priority = make([][][]d2enum.CompositeType, result.NumberOfDirections)
+	priorityLen := c.FramesPerDirection * c.NumberOfDirections * c.NumberOfLayers
+	c.Priority = make([][][]d2enum.CompositeType, c.NumberOfDirections)
 
 	priorityBytes, err := streamReader.ReadBytes(priorityLen)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	priorityIndex := 0
 
-	for direction := 0; direction < result.NumberOfDirections; direction++ {
-		result.Priority[direction] = make([][]d2enum.CompositeType, result.FramesPerDirection)
-		for frame := 0; frame < result.FramesPerDirection; frame++ {
-			result.Priority[direction][frame] = make([]d2enum.CompositeType, result.NumberOfLayers)
-			for i := 0; i < result.NumberOfLayers; i++ {
-				result.Priority[direction][frame][i] = d2enum.CompositeType(priorityBytes[priorityIndex])
+	for direction := 0; direction < c.NumberOfDirections; direction++ {
+		c.Priority[direction] = make([][]d2enum.CompositeType, c.FramesPerDirection)
+		for frame := 0; frame < c.FramesPerDirection; frame++ {
+			c.Priority[direction][frame] = make([]d2enum.CompositeType, c.NumberOfLayers)
+			for i := 0; i < c.NumberOfLayers; i++ {
+				c.Priority[direction][frame][i] = d2enum.CompositeType(priorityBytes[priorityIndex])
 				priorityIndex++
 			}
 		}
 	}
 
-	return result, nil
+	return nil
 }
 
-// Marshal encodes COF back into byte slince
+// Marshal this COF to a byte slice
 func (c *COF) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
@@ -150,7 +173,7 @@ func (c *COF) Marshal() []byte {
 	sw.PushBytes(byte(c.NumberOfDirections))
 	sw.PushBytes(c.unknownHeaderBytes...)
 	sw.PushBytes(byte(c.Speed))
-	sw.PushBytes(c.unknown1...)
+	sw.PushBytes(c.unknownBodyBytes...)
 
 	for i := range c.CofLayers {
 		sw.PushBytes(byte(c.CofLayers[i].Type.Int()))
