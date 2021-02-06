@@ -24,22 +24,22 @@ func (w *WallRecord) Hidden() bool {
 	return w.hidden > 0
 }
 
-// Encode adds wall's record's bytes into stream writer given
-func (w *WallRecord) Encode(sw *d2datautils.StreamWriter) {
-	sw.PushBits32(uint32(w.Prop1), 8)
-	sw.PushBits32(uint32(w.Sequence), 6)
-	sw.PushBits32(uint32(w.Unknown1), 6)
-	sw.PushBits32(uint32(w.Style), 6)
-	sw.PushBits32(uint32(w.Unknown2), 5)
-	sw.PushBits32(uint32(w.hidden), 1)
-}
-
 // Decode decodes wall record
 func (w *WallRecord) Decode(dw uint32) {
-	w.Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-	w.Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-	w.Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-	w.Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-	w.Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-	w.hidden = byte((dw & 0x80000000) >> 31)   //nolint:gomnd // Bitmask
+	w.Prop1 = byte((dw & prop1Bitmask) >> prop1Offset)
+	w.Sequence = byte((dw & sequenceBitmask) >> sequenceOffset)
+	w.Unknown1 = byte((dw & unknown1Bitmask) >> unknown1Offset)
+	w.Style = byte((dw & styleBitmask) >> styleOffset)
+	w.Unknown2 = byte((dw & unknown2Bitmask) >> unknown2Offset)
+	w.hidden = byte((dw & hiddenBitmask) >> hiddenOffset)
+}
+
+// Encode adds wall's record's bytes into stream writer given
+func (w *WallRecord) Encode(sw *d2datautils.StreamWriter) {
+	sw.PushBits32(uint32(w.Prop1), prop1Length)
+	sw.PushBits32(uint32(w.Sequence), sequenceLength)
+	sw.PushBits32(uint32(w.Unknown1), unknown1Length)
+	sw.PushBits32(uint32(w.Style), styleLength)
+	sw.PushBits32(uint32(w.Unknown2), unknown2Length)
+	sw.PushBits32(uint32(w.hidden), hiddenLength)
 }

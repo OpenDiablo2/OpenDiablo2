@@ -27,6 +27,13 @@ const (
 	v18          = 18
 )
 
+const (
+	wallZeroBitmask = 0xFFFFFF00
+	wallZeroOffset  = 8
+
+	wallTypeBitmask = 0x000000FF
+)
+
 // DS1 represents the "stamp" data that is used to build up maps.
 type DS1 struct {
 	Files                      []string            // FilePtr table of file string pointers
@@ -452,11 +459,11 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Decode(dw) //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Walls[wallIndex].Decode(dw)
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
-					c := int32(dw & 0x000000FF) //nolint:gomnd // Bitmask
+					c := int32(dw & wallTypeBitmask)
 
 					if ds1.Version < v7 {
 						if c < int32(len(dirLookup)) {
@@ -465,7 +472,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 					}
 
 					ds1.Tiles[y][x].Walls[wallIndex].Type = d2enum.TileType(c)
-					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & 0xFFFFFF00) >> 8) //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & wallZeroBitmask) >> wallZeroOffset)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
 					ds1.Tiles[y][x].Floors[floorIndex].Decode(dw)
@@ -575,7 +582,7 @@ func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
 					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & 0xFFFFFF00) << 8 //nolint:gomnd // Bitmask
+					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & wallZeroBitmask) << wallZeroOffset
 
 					sw.PushUint32(dw)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
