@@ -52,7 +52,6 @@ func (v *StreamWriter) PushBit(b bool) {
 }
 
 // PushBits pushes bits (with max range 8)
-//func (v *StreamWriter) PushBits(b byte, bits int) {
 func (v *StreamWriter) PushBits(b byte, bits int) {
 	if bits > bitsPerByte {
 		log.Print("input bits number must be less (or equal) then 8")
