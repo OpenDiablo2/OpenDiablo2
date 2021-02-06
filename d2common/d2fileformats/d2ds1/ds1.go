@@ -9,22 +9,21 @@ import (
 )
 
 const (
-	maxActNumber = 5
-	subType1     = 1
-	subType2     = 2
-	v2           = 2
-	v3           = 3
-	v4           = 4
-	v7           = 7
-	v8           = 8
-	v9           = 9
-	v10          = 10
-	v12          = 12
-	v13          = 13
-	v14          = 14
-	v15          = 15
-	v16          = 16
-	v18          = 18
+	subType1 = 1
+	subType2 = 2
+	v2       = 2
+	v3       = 3
+	v4       = 4
+	v7       = 7
+	v8       = 8
+	v9       = 9
+	v10      = 10
+	v12      = 12
+	v13      = 13
+	v14      = 14
+	v15      = 15
+	v16      = 16
+	v18      = 18
 )
 
 const (
@@ -32,6 +31,10 @@ const (
 	wallZeroOffset  = 8
 
 	wallTypeBitmask = 0x000000FF
+)
+
+const (
+	unknown1BytesCount = 8
 )
 
 // DS1 represents the "stamp" data that is used to build up maps.
@@ -57,7 +60,6 @@ type DS1 struct {
 }
 
 // LoadDS1 loads the specified DS1 file
-//nolint:funlen,gocognit,gocyclo // will refactor later
 func LoadDS1(fileData []byte) (*DS1, error) {
 	ds1 := &DS1{
 		Act:                        1,
@@ -71,74 +73,14 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 
 	var err error
 
-	ds1.Version, err = br.ReadInt32()
+	err = ds1.loadHeader(br)
 	if err != nil {
 		return nil, err
-	}
-
-	ds1.Width, err = br.ReadInt32()
-	if err != nil {
-		return nil, err
-	}
-
-	ds1.Height, err = br.ReadInt32()
-	if err != nil {
-		return nil, err
-	}
-
-	ds1.Width++
-	ds1.Height++
-
-	if ds1.Version >= v8 {
-		ds1.Act, err = br.ReadInt32()
-		if err != nil {
-			return nil, err
-		}
-
-		ds1.Act = d2math.MinInt32(maxActNumber, ds1.Act+1)
-	}
-
-	if ds1.Version >= v10 {
-		ds1.SubstitutionType, err = br.ReadInt32()
-		if err != nil {
-			return nil, err
-		}
-
-		if ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2 {
-			ds1.NumberOfSubstitutionLayers = 1
-		}
-	}
-
-	if ds1.Version >= v3 {
-		// These files reference things that don't exist anymore :-?
-		numberOfFiles, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
-		if err != nil {
-			return nil, err
-		}
-
-		ds1.Files = make([]string, numberOfFiles)
-
-		for i := 0; i < int(numberOfFiles); i++ {
-			ds1.Files[i] = ""
-
-			for {
-				ch, err := br.ReadByte()
-				if err != nil {
-					return nil, err
-				}
-
-				if ch == 0 {
-					break
-				}
-
-				ds1.Files[i] += string(ch)
-			}
-		}
 	}
 
 	if ds1.Version >= v9 && ds1.Version <= v13 {
 		// Skipping two dwords because they are "meaningless"?
-		ds1.unknown1, err = br.ReadBytes(8) //nolint:gomnd // We don't know what's here
+		ds1.unknown1, err = br.ReadBytes(unknown1BytesCount)
 		if err != nil {
 			return nil, err
 		}
@@ -195,6 +137,86 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 	}
 
 	return ds1, nil
+}
+
+func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
+	var err error
+
+	ds1.Version, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Width, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Height, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Width++
+	ds1.Height++
+
+	if ds1.Version >= v8 {
+		ds1.Act, err = br.ReadInt32()
+		if err != nil {
+			return err
+		}
+
+		ds1.Act = d2math.MinInt32(d2enum.ActsNumber, ds1.Act+1)
+	}
+
+	if ds1.Version >= v10 {
+		ds1.SubstitutionType, err = br.ReadInt32()
+		if err != nil {
+			return err
+		}
+
+		if ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2 {
+			ds1.NumberOfSubstitutionLayers = 1
+		}
+	}
+
+	err = ds1.loadFileList(br)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
+	if ds1.Version >= v3 {
+		// These files reference things that don't exist anymore :-?
+		numberOfFiles, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		if err != nil {
+			return err
+		}
+
+		ds1.Files = make([]string, numberOfFiles)
+
+		for i := 0; i < int(numberOfFiles); i++ {
+			ds1.Files[i] = ""
+
+			for {
+				ch, err := br.ReadByte()
+				if err != nil {
+					return err
+				}
+
+				if ch == 0 {
+					break
+				}
+
+				ds1.Files[i] += string(ch)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
