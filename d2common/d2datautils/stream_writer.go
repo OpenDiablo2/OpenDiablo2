@@ -1,6 +1,9 @@
 package d2datautils
 
-import "bytes"
+import (
+	"bytes"
+	"log"
+)
 
 // StreamWriter allows you to create a byte array by streaming in writes of various sizes
 type StreamWriter struct {
@@ -49,7 +52,12 @@ func (v *StreamWriter) PushBit(b bool) {
 }
 
 // PushBits pushes bits (with max range 8)
+//func (v *StreamWriter) PushBits(b byte, bits int) {
 func (v *StreamWriter) PushBits(b byte, bits int) {
+	if bits > bitsPerByte {
+		log.Print("input bits number must be less (or equal) then 8")
+	}
+
 	val := b
 	for i := 0; i < bits; i++ {
 		if val&1 == 1 {
@@ -64,6 +72,10 @@ func (v *StreamWriter) PushBits(b byte, bits int) {
 
 // PushBits16 pushes bits (with max range 16)
 func (v *StreamWriter) PushBits16(b uint16, bits int) {
+	if bits > bitsPerByte*bytesPerint16 {
+		log.Print("input bits number must be less (or equal) then 16")
+	}
+
 	val := b
 	for i := 0; i < bits; i++ {
 		if val&1 == 1 {
@@ -78,6 +90,10 @@ func (v *StreamWriter) PushBits16(b uint16, bits int) {
 
 // PushBits32 pushes bits (with max range 32)
 func (v *StreamWriter) PushBits32(b uint32, bits int) {
+	if bits > bitsPerByte*bytesPerint32 {
+		log.Print("input bits number must be less (or equal) then 32")
+	}
+
 	val := b
 	for i := 0; i < bits; i++ {
 		if val&1 == 1 {
