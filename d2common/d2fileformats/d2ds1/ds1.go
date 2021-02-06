@@ -191,7 +191,7 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
 	if ds1.Version >= v3 {
 		// These files reference things that don't exist anymore :-?
-		numberOfFiles, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		numberOfFiles, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
@@ -379,17 +379,17 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 	}
 
 	for npcIdx := 0; npcIdx < int(numberOfNpcs); npcIdx++ {
-		numPaths, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		numPaths, err := br.ReadInt32() // nolint:govet // I want to re-use this error variable
 		if err != nil {
 			return err
 		}
 
-		npcX, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		npcX, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		npcY, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		npcY, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
