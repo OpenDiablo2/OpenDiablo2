@@ -22,7 +22,7 @@ func getExampleDC6() *DC6 {
 		FramesPerDirection: 1,
 		FramePointers:      []uint32{56},
 		Frames: []*DC6Frame{
-			&DC6Frame{
+			{
 				Flipped:    0,
 				Width:      32,
 				Height:     26,
@@ -64,6 +64,6 @@ func TestDC6Clone(t *testing.T) {
 	if exampleDC6.Termination[0] != clonedDC6.Termination[0] ||
 		len(exampleDC6.Frames) != len(clonedDC6.Frames) ||
 		exampleDC6.Frames[0].NextBlock != clonedDC6.Frames[0].NextBlock {
-		t.Fatal("cloned dc6 isn't equal to orginal")
+		t.Fatal("cloned dc6 isn't equal to original")
 	}
 }

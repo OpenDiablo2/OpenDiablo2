@@ -51,6 +51,7 @@ func New() *DC6 {
 // Load loads a dc6 animation
 func Load(data []byte) (*DC6, error) {
 	d := New()
+
 	err := d.Unmarshal(data)
 	if err != nil {
 		return nil, err
@@ -60,29 +61,29 @@ func Load(data []byte) (*DC6, error) {
 }
 
 // Unmarshal converts bite slice into DC6 structure
-func (dc *DC6) Unmarshal(data []byte) error {
+func (d *DC6) Unmarshal(data []byte) error {
 	var err error
 
 	r := d2datautils.CreateStreamReader(data)
 
-	err = dc.loadHeader(r)
+	err = d.loadHeader(r)
 	if err != nil {
 		return err
 	}
 
-	frameCount := int(dc.Directions * dc.FramesPerDirection)
+	frameCount := int(d.Directions * d.FramesPerDirection)
 
-	dc.FramePointers = make([]uint32, frameCount)
+	d.FramePointers = make([]uint32, frameCount)
 	for i := 0; i < frameCount; i++ {
-		dc.FramePointers[i], err = r.ReadUInt32()
+		d.FramePointers[i], err = r.ReadUInt32()
 		if err != nil {
 			return err
 		}
 	}
 
-	dc.Frames = make([]*DC6Frame, frameCount)
+	d.Frames = make([]*DC6Frame, frameCount)
 
-	if err := dc.loadFrames(r); err != nil {
+	if err := d.loadFrames(r); err != nil {
 		return err
 	}
 
