@@ -64,17 +64,19 @@ const (
 type AssetManager struct {
 	*d2util.Logger
 	*d2loader.Loader
-	tables     []d2tbl.TextDictionary
-	dt1s       d2interface.Cache
-	ds1s       d2interface.Cache
-	cofs       d2interface.Cache
-	dccs       d2interface.Cache
-	animations d2interface.Cache
-	fonts      d2interface.Cache
-	palettes   d2interface.Cache
-	transforms d2interface.Cache
-	Records    *d2records.RecordManager
-	language   string
+
+	tables           []*d2tbl.TextDictionary
+	dt1s             d2interface.Cache
+	ds1s             d2interface.Cache
+	cofs             d2interface.Cache
+	dccs             d2interface.Cache
+	animations       d2interface.Cache
+	fonts            d2interface.Cache
+	palettes         d2interface.Cache
+	transforms       d2interface.Cache
+	Records          *d2records.RecordManager
+	language         string
+	languageModifier int
 }
 
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
@@ -141,6 +143,7 @@ func (am *AssetManager) LoadLanguage(languagePath string) string {
 	am.Infof("Language: %s", language)
 
 	am.language = language
+	am.languageModifier = d2resource.GetLabelModifier(language)
 
 	return language
 }
@@ -268,7 +271,7 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 }
 
 // LoadStringTable loads a string table from the given path
-func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary, error) {
+func (am *AssetManager) LoadStringTable(tablePath string) (*d2tbl.TextDictionary, error) {
 	data, err := am.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
@@ -287,7 +290,8 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 }
 
 // TranslateString returns the translation of the given string. The string is retrieved from
-// the loaded string tables.
+// the loaded string tables. If input value is int (e.g. from d2enum/numeric_labels.go)
+// output string is translation for # + input
 func (am *AssetManager) TranslateString(input interface{}) string {
 	var key string
 
@@ -296,10 +300,12 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 		key = s
 	case fmt.Stringer:
 		key = s.String()
+	case int:
+		key = fmt.Sprintf("#%d", d2enum.BaseLabelNumbers(s+am.languageModifier))
 	}
 
 	for idx := range am.tables {
-		if value, found := am.tables[idx][key]; found {
+		if value, found := am.tables[idx].Entries[key]; found {
 			return value
 		}
 	}
@@ -307,11 +313,6 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
 	// log.Panicf("Could not find a string for the key '%s'", key)
 	return key
-}
-
-// TranslateLabel translates the label taking into account its shift in the table
-func (am *AssetManager) TranslateLabel(label int) string {
-	return am.TranslateString(fmt.Sprintf("#%d", d2enum.BaseLabelNumbers(label+d2resource.GetLabelModifier(am.language))))
 }
 
 // LoadPaletteTransform loads a palette transform file

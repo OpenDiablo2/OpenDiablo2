@@ -2,14 +2,10 @@ package d2dt1
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
-
-// DT1 represents a DT1 file.
-type DT1 struct {
-	Tiles []Tile
-}
 
 // BlockDataFormat represents the format of the block data
 type BlockDataFormat int16
@@ -32,6 +28,16 @@ const (
 	numUnknownTileBytes4  = 12
 )
 
+// DT1 represents a DT1 file.
+type DT1 struct {
+	majorVersion       int32
+	minorVersion       int32
+	unknownHeaderBytes []byte
+	numberOfTiles      int32
+	bodyPosition       int32
+	Tiles              []Tile
+}
+
 // LoadDT1 loads a DT1 record
 //nolint:funlen,gocognit,gocyclo // Can't reduce
 func LoadDT1(fileData []byte) (*DT1, error) {
@@ -40,36 +46,39 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 
 	var err error
 
-	majorVersion, err := br.ReadInt32()
+	result.majorVersion, err = br.ReadInt32()
 	if err != nil {
 		return nil, err
 	}
 
-	minorVersion, err := br.ReadInt32()
+	result.minorVersion, err = br.ReadInt32()
 	if err != nil {
 		return nil, err
 	}
 
-	if majorVersion != knownMajorVersion || minorVersion != knownMinorVersion {
+	if result.majorVersion != knownMajorVersion || result.minorVersion != knownMinorVersion {
 		const fmtErr = "expected to have a version of 7.6, but got %d.%d instead"
-		return nil, fmt.Errorf(fmtErr, majorVersion, minorVersion)
+		return nil, fmt.Errorf(fmtErr, result.majorVersion, result.minorVersion)
 	}
 
-	br.SkipBytes(numUnknownHeaderBytes)
-
-	numberOfTiles, err := br.ReadInt32()
+	result.unknownHeaderBytes, err = br.ReadBytes(numUnknownHeaderBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	position, err := br.ReadInt32()
+	result.numberOfTiles, err = br.ReadInt32()
 	if err != nil {
 		return nil, err
 	}
 
-	br.SetPosition(uint64(position))
+	result.bodyPosition, err = br.ReadInt32()
+	if err != nil {
+		return nil, err
+	}
 
-	result.Tiles = make([]Tile, numberOfTiles)
+	br.SetPosition(uint64(result.bodyPosition))
+
+	result.Tiles = make([]Tile, result.numberOfTiles)
 
 	for tileIdx := range result.Tiles {
 		tile := Tile{}
@@ -103,7 +112,10 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			return nil, err
 		}
 
-		br.SkipBytes(numUnknownTileBytes1)
+		tile.unknown1, err = br.ReadBytes(numUnknownTileBytes1)
+		if err != nil {
+			return nil, err
+		}
 
 		tile.Type, err = br.ReadInt32()
 		if err != nil {
@@ -125,7 +137,10 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			return nil, err
 		}
 
-		br.SkipBytes(numUnknownTileBytes2)
+		tile.unknown2, err = br.ReadBytes(numUnknownTileBytes2)
+		if err != nil {
+			return nil, err
+		}
 
 		for i := range tile.SubTileFlags {
 			var subtileFlagBytes byte
@@ -138,7 +153,10 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			tile.SubTileFlags[i] = NewSubTileFlags(subtileFlagBytes)
 		}
 
-		br.SkipBytes(numUnknownTileBytes3)
+		tile.unknown3, err = br.ReadBytes(numUnknownTileBytes3)
+		if err != nil {
+			return nil, err
+		}
 
 		tile.blockHeaderPointer, err = br.ReadInt32()
 		if err != nil {
@@ -159,7 +177,10 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 
 		tile.Blocks = make([]Block, numBlocks)
 
-		br.SkipBytes(numUnknownTileBytes4)
+		tile.unknown4, err = br.ReadBytes(numUnknownTileBytes4)
+		if err != nil {
+			return nil, err
+		}
 
 		result.Tiles[tileIdx] = tile
 	}
@@ -179,7 +200,11 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				return nil, err
 			}
 
-			br.SkipBytes(2) //nolint:gomnd // Unknown data
+			//nolint:gomnd // Unknown data
+			result.Tiles[tileIdx].Blocks[blockIdx].unknown1, err = br.ReadBytes(2)
+			if err != nil {
+				return nil, err
+			}
 
 			result.Tiles[tileIdx].Blocks[blockIdx].GridX, err = br.ReadByte()
 			if err != nil {
@@ -191,15 +216,9 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				return nil, err
 			}
 
-			formatValue, err := br.ReadInt16()
+			result.Tiles[tileIdx].Blocks[blockIdx].format, err = br.ReadInt16()
 			if err != nil {
 				return nil, err
-			}
-
-			if formatValue == 1 {
-				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatIsometric
-			} else {
-				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatRLE
 			}
 
 			result.Tiles[tileIdx].Blocks[blockIdx].Length, err = br.ReadInt32()
@@ -207,7 +226,11 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				return nil, err
 			}
 
-			br.SkipBytes(2) //nolint:gomnd // Unknown data
+			//nolint:gomnd // Unknown data
+			result.Tiles[tileIdx].Blocks[blockIdx].unknown2, err = br.ReadBytes(2)
+			if err != nil {
+				return nil, err
+			}
 
 			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset, err = br.ReadInt32()
 			if err != nil {
@@ -228,4 +251,77 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 	}
 
 	return result, nil
+}
+
+// Marshal encodes dt1 data back to byte slice
+func (d *DT1) Marshal() []byte {
+	sw := d2datautils.CreateStreamWriter()
+
+	// header
+	sw.PushInt32(d.majorVersion)
+	sw.PushInt32(d.minorVersion)
+	sw.PushBytes(d.unknownHeaderBytes...)
+	sw.PushInt32(d.numberOfTiles)
+	sw.PushInt32(d.bodyPosition)
+
+	// Step 1 - encoding tiles headers
+	for i := 0; i < len(d.Tiles); i++ {
+		sw.PushInt32(d.Tiles[i].Direction)
+		sw.PushInt16(d.Tiles[i].RoofHeight)
+		sw.PushUint16(d.Tiles[i].MaterialFlags.Encode())
+		sw.PushInt32(d.Tiles[i].Height)
+		sw.PushInt32(d.Tiles[i].Width)
+		sw.PushBytes(d.Tiles[i].unknown1...)
+		sw.PushInt32(d.Tiles[i].Type)
+		sw.PushInt32(d.Tiles[i].Style)
+		sw.PushInt32(d.Tiles[i].Sequence)
+		sw.PushInt32(d.Tiles[i].RarityFrameIndex)
+		sw.PushBytes(d.Tiles[i].unknown2...)
+
+		for _, j := range d.Tiles[i].SubTileFlags {
+			sw.PushBytes(j.Encode())
+		}
+
+		sw.PushBytes(d.Tiles[i].unknown3...)
+		sw.PushInt32(d.Tiles[i].blockHeaderPointer)
+		sw.PushInt32(d.Tiles[i].blockHeaderSize)
+		sw.PushInt32(int32(len(d.Tiles[i].Blocks)))
+		sw.PushBytes(d.Tiles[i].unknown4...)
+	}
+
+	// we must sort blocks first
+	blocks := make(map[int][]Block)
+	for i := range d.Tiles {
+		blocks[int(d.Tiles[i].blockHeaderPointer)] = d.Tiles[i].Blocks
+	}
+
+	keys := make([]int, 0, len(blocks))
+	for i := range blocks {
+		keys = append(keys, i)
+	}
+
+	sort.Ints(keys)
+
+	// Step 2 - encoding blocks
+	for i := 0; i < len(keys); i++ {
+		// Step 2.1 - encoding blocks' header
+		for j := range blocks[keys[i]] {
+			sw.PushInt16(blocks[keys[i]][j].X)
+			sw.PushInt16(blocks[keys[i]][j].Y)
+			sw.PushBytes(blocks[keys[i]][j].unknown1...)
+			sw.PushBytes(blocks[keys[i]][j].GridX)
+			sw.PushBytes(blocks[keys[i]][j].GridY)
+			sw.PushInt16(blocks[keys[i]][j].format)
+			sw.PushInt32(blocks[keys[i]][j].Length)
+			sw.PushBytes(blocks[keys[i]][j].unknown2...)
+			sw.PushInt32(blocks[keys[i]][j].FileOffset)
+		}
+
+		// Step 2.2 - encoding blocks' data
+		for j := range blocks[keys[i]] {
+			sw.PushBytes(blocks[keys[i]][j].EncodedData...)
+		}
+	}
+
+	return sw.GetBytes()
 }
