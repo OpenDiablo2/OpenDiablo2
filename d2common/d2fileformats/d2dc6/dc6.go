@@ -32,17 +32,42 @@ type DC6 struct {
 	Frames             []*DC6Frame // size is Directions*FramesPerDirection
 }
 
-// Load uses restruct to read the binary dc6 data into structs then parses image data from the frame data.
+// New creates a new, empty DC6
+func New() *DC6 {
+	result := &DC6{
+		Version:            0,
+		Flags:              0,
+		Encoding:           0,
+		Termination:        make([]byte, 4),
+		Directions:         0,
+		FramesPerDirection: 0,
+		FramePointers:      make([]uint32, 0),
+		Frames:             make([]*DC6Frame, 0),
+	}
+
+	return result
+}
+
+// Load loads a dc6 animation
 func Load(data []byte) (*DC6, error) {
-	r := d2datautils.CreateStreamReader(data)
+	d := New()
+	err := d.Unmarshal(data)
+	if err != nil {
+		return nil, err
+	}
 
-	var dc DC6
+	return d, nil
+}
 
+// Unmarshal converts bite slice into DC6 structure
+func (dc *DC6) Unmarshal(data []byte) error {
 	var err error
+
+	r := d2datautils.CreateStreamReader(data)
 
 	err = dc.loadHeader(r)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	frameCount := int(dc.Directions * dc.FramesPerDirection)
@@ -51,17 +76,17 @@ func Load(data []byte) (*DC6, error) {
 	for i := 0; i < frameCount; i++ {
 		dc.FramePointers[i], err = r.ReadUInt32()
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	dc.Frames = make([]*DC6Frame, frameCount)
 
 	if err := dc.loadFrames(r); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &dc, nil
+	return nil
 }
 
 func (d *DC6) loadHeader(r *d2datautils.StreamReader) error {
@@ -241,7 +266,7 @@ func (d *DC6) Clone() *DC6 {
 
 	for i := range d.Frames {
 		cloneFrame := *d.Frames[i]
-		clone.Frames = append(clone.Frames, &cloneFrame)
+		clone.Frames[i] = &cloneFrame
 	}
 
 	return &clone
