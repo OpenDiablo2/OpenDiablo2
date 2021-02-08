@@ -14,6 +14,14 @@ const (
 	knownSignature = "Woo!\x01"
 )
 
+const (
+	signatureBytesCount     = 5
+	unknownHeaderBytesCount = 7
+	unknown1BytesCount      = 1
+	unknown2BytesCount      = 4
+	unknown3BytesCount      = 4
+)
+
 type fontGlyph struct {
 	unknown1 []byte
 	unknown2 []byte
@@ -36,7 +44,7 @@ type Font struct {
 func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 	sr := d2datautils.CreateStreamReader(data)
 
-	signature, err := sr.ReadBytes(5)
+	signature, err := sr.ReadBytes(signatureBytesCount)
 	if err != nil {
 		return nil, err
 	}
@@ -51,12 +59,15 @@ func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 		color: color.White,
 	}
 
-	font.unknownHeaderBytes, err = sr.ReadBytes(7)
+	font.unknownHeaderBytes, err = sr.ReadBytes(unknownHeaderBytesCount)
 	if err != nil {
 		return nil, err
 	}
 
-	font.initGlyphs(sr)
+	err = font.initGlyphs(sr)
+	if err != nil {
+		return nil, err
+	}
 
 	return font, nil
 }
@@ -68,7 +79,6 @@ func (f *Font) SetColor(c color.Color) {
 
 // GetTextMetrics returns the dimensions of the Font element in pixels
 func (f *Font) GetTextMetrics(text string) (width, height int) {
-
 	var (
 		lineWidth  int
 		lineHeight int
@@ -144,7 +154,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		var glyph fontGlyph
 
-		glyph.unknown1, err = sr.ReadBytes(1)
+		glyph.unknown1, err = sr.ReadBytes(unknown1BytesCount)
 		if err != nil {
 			return err
 		}
@@ -158,7 +168,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		glyph.height = maxCharHeight
 
-		glyph.unknown2, err = sr.ReadBytes(4)
+		glyph.unknown2, err = sr.ReadBytes(unknown2BytesCount)
 		if err != nil {
 			return err
 		}
@@ -170,7 +180,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		glyph.frame = int(frame)
 
-		glyph.unknown3, err = sr.ReadBytes(4)
+		glyph.unknown3, err = sr.ReadBytes(unknown3BytesCount)
 		if err != nil {
 			return err
 		}
@@ -183,6 +193,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 	return nil
 }
 
+// Marshal encodes font back into byte slice
 func (f *Font) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 

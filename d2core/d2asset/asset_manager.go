@@ -226,6 +226,8 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*d2
 		return nil, err
 	}
 
+	am.Debugf(fmtLoadFont, tablePath, spritePath, palettePath)
+
 	font, err := d2font.Load(tableData, sheet)
 	if err != nil {
 		return nil, fmt.Errorf("error while loading font table %s: %v", tablePath, err)
