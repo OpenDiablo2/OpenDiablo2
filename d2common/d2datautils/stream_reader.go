@@ -107,6 +107,10 @@ func (v *StreamReader) Size() uint64 {
 
 // ReadBytes reads multiple bytes
 func (v *StreamReader) ReadBytes(count int) ([]byte, error) {
+	if count <= 0 {
+		return nil, nil
+	}
+
 	size := v.Size()
 	if v.position >= size || v.position+uint64(count) > size {
 		return nil, io.EOF
