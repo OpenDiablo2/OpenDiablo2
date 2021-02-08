@@ -1,6 +1,8 @@
 package d2dat
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+)
 
 const (
 	// index offset helpers
@@ -20,4 +22,15 @@ func Load(data []byte) (d2interface.Palette, error) {
 	}
 
 	return palette, nil
+}
+
+// Marshal encodes data palettte back into byte slice
+func (d *DATPalette) Marshal() []byte {
+	var result []byte
+
+	for _, i := range d.colors {
+		result = append(result, i.B(), i.G(), i.R())
+	}
+
+	return result
 }
