@@ -42,6 +42,7 @@ func TestBitmuncherSteBitsRead(t *testing.T) {
 func TestBitmuncherReadBit(t *testing.T) {
 	td := getTestData()
 	bm := CreateBitMuncher(td, 0)
+
 	var result byte
 
 	for i := 0; i < bitsPerByte; i++ {
