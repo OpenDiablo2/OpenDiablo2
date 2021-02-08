@@ -538,7 +538,7 @@ func (am *AssetManager) LoadCOF(cofPath string) (*d2cof.COF, error) {
 		return nil, err
 	}
 
-	cof, err := d2cof.Load(fileData)
+	cof, err := d2cof.Unmarshal(fileData)
 	if err != nil {
 		return nil, err
 	}
