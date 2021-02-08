@@ -1,9 +1,6 @@
 package d2font
 
 import (
-	//"os"
-
-	//"encoding/binary"
 	"fmt"
 	"image/color"
 	"strings"
@@ -13,23 +10,38 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
+const (
+	knownSignature = "Woo!\x01"
+)
+
 type fontGlyph struct {
-	frame  int
-	width  int
-	height int
+	unknown1 []byte
+	unknown2 []byte
+	unknown3 []byte
+	frame    int
+	width    int
+	height   int
 }
 
 // Font represents a displayable font
 type Font struct {
-	sheet  d2interface.Animation
-	table  []byte
-	glyphs map[rune]fontGlyph
-	color  color.Color
+	unknownHeaderBytes []byte
+	sheet              d2interface.Animation
+	table              []byte
+	glyphs             map[rune]fontGlyph
+	color              color.Color
 }
 
 // Load loads a new font from byte slice
 func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
-	if string(data[:5]) != "Woo!\x01" {
+	sr := d2datautils.CreateStreamReader(data)
+
+	signature, err := sr.ReadBytes(5)
+	if err != nil {
+		return nil, err
+	}
+
+	if string(signature) != knownSignature {
 		return nil, fmt.Errorf("invalid font table format")
 	}
 
@@ -39,20 +51,12 @@ func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 		color: color.White,
 	}
 
-	font.initGlyphs()
-
-	ok := true
-	dw := font.Marshal()
-	for i := range dw {
-		if dw[i] != data[i] {
-			ok = false
-		}
+	font.unknownHeaderBytes, err = sr.ReadBytes(7)
+	if err != nil {
+		return nil, err
 	}
 
-	_ = ok
-	//fmt.Println(ok)
-	//fmt.Println(len(data) == len(dw))
-	//os.Exit(0)
+	font.initGlyphs(sr)
 
 	return font, nil
 }
@@ -90,11 +94,6 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 
 // RenderText prints a text using its configured style on a Surface (multi-lines are left-aligned, use label otherwise)
 func (f *Font) RenderText(text string, target d2interface.Surface) error {
-	if f.glyphs == nil {
-		f.sheet.BindRenderer(target.Renderer())
-		f.initGlyphs()
-	}
-
 	f.sheet.SetColorMod(f.color)
 
 	lines := strings.Split(text, "\n")
@@ -132,17 +131,12 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	return nil
 }
 
-func (f *Font) initGlyphs() error {
-	sr := d2datautils.CreateStreamReader(f.table)
-	sr.SkipBytes(12)
-
+func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 	_, maxCharHeight := f.sheet.GetFrameBounds()
 
 	glyphs := make(map[rune]fontGlyph)
 
 	for i := 12; i < len(f.table); i += 14 {
-		sr.SetPosition(uint64(i))
-
 		code, err := sr.ReadUInt16()
 		if err != nil {
 			return err
@@ -150,7 +144,10 @@ func (f *Font) initGlyphs() error {
 
 		var glyph fontGlyph
 
-		sr.SkipBytes(1)
+		glyph.unknown1, err = sr.ReadBytes(1)
+		if err != nil {
+			return err
+		}
 
 		width, err := sr.ReadByte()
 		if err != nil {
@@ -161,7 +158,10 @@ func (f *Font) initGlyphs() error {
 
 		glyph.height = maxCharHeight
 
-		sr.SkipBytes(4)
+		glyph.unknown2, err = sr.ReadBytes(4)
+		if err != nil {
+			return err
+		}
 
 		frame, err := sr.ReadUInt16()
 		if err != nil {
@@ -169,6 +169,11 @@ func (f *Font) initGlyphs() error {
 		}
 
 		glyph.frame = int(frame)
+
+		glyph.unknown3, err = sr.ReadBytes(4)
+		if err != nil {
+			return err
+		}
 
 		glyphs[rune(code)] = glyph
 	}
@@ -182,6 +187,16 @@ func (f *Font) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
 	sw.PushBytes([]byte("Woo!\x01")...)
+	sw.PushBytes(f.unknownHeaderBytes...)
+
+	for c, i := range f.glyphs {
+		sw.PushUint16(uint16(c))
+		sw.PushBytes(i.unknown1...)
+		sw.PushBytes(byte(i.width))
+		sw.PushBytes(i.unknown2...)
+		sw.PushUint16(uint16(i.frame))
+		sw.PushBytes(i.unknown3...)
+	}
 
 	return sw.GetBytes()
 }
