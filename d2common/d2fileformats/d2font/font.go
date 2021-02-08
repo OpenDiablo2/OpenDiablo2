@@ -1,11 +1,14 @@
 package d2font
 
 import (
-	"encoding/binary"
+	//"os"
+
+	//"encoding/binary"
 	"fmt"
 	"image/color"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
@@ -37,6 +40,19 @@ func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 	}
 
 	font.initGlyphs()
+
+	ok := true
+	dw := font.Marshal()
+	for i := range dw {
+		if dw[i] != data[i] {
+			ok = false
+		}
+	}
+
+	_ = ok
+	//fmt.Println(ok)
+	//fmt.Println(len(data) == len(dw))
+	//os.Exit(0)
 
 	return font, nil
 }
@@ -116,21 +132,56 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	return nil
 }
 
-func (f *Font) initGlyphs() {
+func (f *Font) initGlyphs() error {
+	sr := d2datautils.CreateStreamReader(f.table)
+	sr.SkipBytes(12)
+
 	_, maxCharHeight := f.sheet.GetFrameBounds()
 
 	glyphs := make(map[rune]fontGlyph)
 
 	for i := 12; i < len(f.table); i += 14 {
-		code := rune(binary.LittleEndian.Uint16(f.table[i : i+2]))
+		sr.SetPosition(uint64(i))
+
+		code, err := sr.ReadUInt16()
+		if err != nil {
+			return err
+		}
 
 		var glyph fontGlyph
-		glyph.frame = int(binary.LittleEndian.Uint16(f.table[i+8 : i+10]))
-		glyph.width = int(f.table[i+3])
+
+		sr.SkipBytes(1)
+
+		width, err := sr.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		glyph.width = int(width)
+
 		glyph.height = maxCharHeight
 
-		glyphs[code] = glyph
+		sr.SkipBytes(4)
+
+		frame, err := sr.ReadUInt16()
+		if err != nil {
+			return err
+		}
+
+		glyph.frame = int(frame)
+
+		glyphs[rune(code)] = glyph
 	}
 
 	f.glyphs = glyphs
+
+	return nil
+}
+
+func (f *Font) Marshal() []byte {
+	sw := d2datautils.CreateStreamWriter()
+
+	sw.PushBytes([]byte("Woo!\x01")...)
+
+	return sw.GetBytes()
 }
