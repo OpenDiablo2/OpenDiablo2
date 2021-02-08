@@ -2,7 +2,6 @@ package d2asset
 
 import (
 	"fmt"
-	"image/color"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -209,11 +209,11 @@ func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palette
 }
 
 // LoadFont loads a font the resource files
-func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
+func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*d2font.Font, error) {
 	cachePath := fmt.Sprintf("%s;%s;%s", tablePath, spritePath, palettePath)
 
 	if cached, found := am.fonts.Retrieve(cachePath); found {
-		return cached.(*Font), nil
+		return cached.(*d2font.Font), nil
 	}
 
 	sheet, err := am.LoadAnimation(spritePath, palettePath)
@@ -226,16 +226,9 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Fo
 		return nil, err
 	}
 
-	if string(tableData[:5]) != "Woo!\x01" {
-		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
-	}
-
-	am.Debugf(fmtLoadFont, tablePath, spritePath, palettePath)
-
-	font := &Font{
-		table: tableData,
-		sheet: sheet,
-		color: color.White,
+	font, err := d2font.Load(tableData, sheet)
+	if err != nil {
+		return nil, fmt.Errorf("error while loading font table %s: %v", tablePath, err)
 	}
 
 	err = am.fonts.Insert(cachePath, font, defaultCacheEntryWeight)

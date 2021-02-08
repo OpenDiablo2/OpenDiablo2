@@ -1,7 +1,8 @@
-package d2asset
+package d2font
 
 import (
 	"encoding/binary"
+	"fmt"
 	"image/color"
 	"strings"
 
@@ -23,6 +24,23 @@ type Font struct {
 	color  color.Color
 }
 
+// Load loads a new font from byte slice
+func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
+	if string(data[:5]) != "Woo!\x01" {
+		return nil, fmt.Errorf("invalid font table format")
+	}
+
+	font := &Font{
+		table: data,
+		sheet: sheet,
+		color: color.White,
+	}
+
+	font.initGlyphs()
+
+	return font, nil
+}
+
 // SetColor sets the fonts color
 func (f *Font) SetColor(c color.Color) {
 	f.color = c
@@ -30,9 +48,6 @@ func (f *Font) SetColor(c color.Color) {
 
 // GetTextMetrics returns the dimensions of the Font element in pixels
 func (f *Font) GetTextMetrics(text string) (width, height int) {
-	if f.glyphs == nil {
-		f.initGlyphs()
-	}
 
 	var (
 		lineWidth  int

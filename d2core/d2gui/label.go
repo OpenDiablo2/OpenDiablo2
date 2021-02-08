@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // Constants defining the main shades of basic colors
@@ -25,7 +25,7 @@ type Label struct {
 
 	renderer    d2interface.Renderer
 	text        string
-	font        *d2asset.Font
+	font        *d2font.Font
 	surface     d2interface.Surface
 	color       color.RGBA
 	hoverColor  color.RGBA
@@ -35,7 +35,7 @@ type Label struct {
 	blinkTimer  time.Time
 }
 
-func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font, col color.RGBA) (*Label, error) {
+func createLabel(renderer d2interface.Renderer, text string, font *d2font.Font, col color.RGBA) (*Label, error) {
 	label := &Label{
 		font:       font,
 		renderer:   renderer,
