@@ -18,7 +18,7 @@ const (
 	signatureBytesCount     = 5
 	unknownHeaderBytesCount = 7
 	unknown1BytesCount      = 1
-	unknown2BytesCount      = 4
+	unknown2BytesCount      = 3
 	unknown3BytesCount      = 4
 )
 
@@ -31,17 +31,21 @@ type fontGlyph struct {
 	height   int
 }
 
+func (fg *fontGlyph) setHeight(h int) {
+	fg.height = h
+}
+
 // Font represents a displayable font
 type Font struct {
 	unknownHeaderBytes []byte
 	sheet              d2interface.Animation
 	table              []byte
-	glyphs             map[rune]fontGlyph
+	glyphs             map[rune]*fontGlyph
 	color              color.Color
 }
 
 // Load loads a new font from byte slice
-func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
+func Load(data []byte) (*Font, error) {
 	sr := d2datautils.CreateStreamReader(data)
 
 	signature, err := sr.ReadBytes(signatureBytesCount)
@@ -55,7 +59,6 @@ func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 
 	font := &Font{
 		table: data,
-		sheet: sheet,
 		color: color.White,
 	}
 
@@ -70,6 +73,18 @@ func Load(data []byte, sheet d2interface.Animation) (*Font, error) {
 	}
 
 	return font, nil
+}
+
+// SetBackground sets font's background
+func (f *Font) SetBackground(sheet d2interface.Animation) {
+	f.sheet = sheet
+
+	// recalculate max height
+	_, h := f.sheet.GetFrameBounds()
+
+	for i := range f.glyphs {
+		f.glyphs[i].setHeight(h)
+	}
 }
 
 // SetColor sets the fonts color
@@ -142,9 +157,7 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 }
 
 func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
-	_, maxCharHeight := f.sheet.GetFrameBounds()
-
-	glyphs := make(map[rune]fontGlyph)
+	glyphs := make(map[rune]*fontGlyph)
 
 	for i := 12; i < len(f.table); i += 14 {
 		code, err := sr.ReadUInt16()
@@ -154,6 +167,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		var glyph fontGlyph
 
+		// two bytes of 0
 		glyph.unknown1, err = sr.ReadBytes(unknown1BytesCount)
 		if err != nil {
 			return err
@@ -166,8 +180,14 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		glyph.width = int(width)
 
-		glyph.height = maxCharHeight
+		height, err := sr.ReadByte()
+		if err != nil {
+			return err
+		}
 
+		glyph.height = int(height)
+
+		// 1, 0, 0
 		glyph.unknown2, err = sr.ReadBytes(unknown2BytesCount)
 		if err != nil {
 			return err
@@ -180,12 +200,13 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 
 		glyph.frame = int(frame)
 
+		// 1, 0, 0, character code repeated, and further 0.
 		glyph.unknown3, err = sr.ReadBytes(unknown3BytesCount)
 		if err != nil {
 			return err
 		}
 
-		glyphs[rune(code)] = glyph
+		glyphs[rune(code)] = &glyph
 	}
 
 	f.glyphs = glyphs
@@ -204,6 +225,7 @@ func (f *Font) Marshal() []byte {
 		sw.PushUint16(uint16(c))
 		sw.PushBytes(i.unknown1...)
 		sw.PushBytes(byte(i.width))
+		sw.PushBytes(byte(i.height))
 		sw.PushBytes(i.unknown2...)
 		sw.PushUint16(uint16(i.frame))
 		sw.PushBytes(i.unknown3...)
