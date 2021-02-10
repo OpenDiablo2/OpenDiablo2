@@ -24,7 +24,7 @@ func Load(data []byte) (d2interface.Palette, error) {
 	return palette, nil
 }
 
-// Marshal encodes data palettte back into byte slice
+// Marshal encodes data palette back into byte slice
 func (p *DATPalette) Marshal() []byte {
 	result := make([]byte, len(p.colors))
 
