@@ -34,19 +34,19 @@ func (mr *MapRenderer) generateTileCache() {
 		tile := &tiles[idx]
 
 		for i := range tile.Components.Floors {
-			if !tile.Components.Floors[i].Hidden && tile.Components.Floors[i].Prop1 != 0 {
+			if !tile.Components.Floors[i].Hidden() && tile.Components.Floors[i].Prop1 != 0 {
 				mr.generateFloorCache(&tile.Components.Floors[i])
 			}
 		}
 
 		for i := range tile.Components.Shadows {
-			if !tile.Components.Shadows[i].Hidden && tile.Components.Shadows[i].Prop1 != 0 {
+			if !tile.Components.Shadows[i].Hidden() && tile.Components.Shadows[i].Prop1 != 0 {
 				mr.generateShadowCache(&tile.Components.Shadows[i])
 			}
 		}
 
 		for i := range tile.Components.Walls {
-			if !tile.Components.Walls[i].Hidden && tile.Components.Walls[i].Prop1 != 0 {
+			if !tile.Components.Walls[i].Hidden() && tile.Components.Walls[i].Prop1 != 0 {
 				mr.generateWallCache(&tile.Components.Walls[i])
 			}
 		}
