@@ -9,22 +9,32 @@ import (
 )
 
 const (
-	maxActNumber = 5
-	subType1     = 1
-	subType2     = 2
-	v2           = 2
-	v3           = 3
-	v4           = 4
-	v7           = 7
-	v8           = 8
-	v9           = 9
-	v10          = 10
-	v12          = 12
-	v13          = 13
-	v14          = 14
-	v15          = 15
-	v16          = 16
-	v18          = 18
+	subType1 = 1
+	subType2 = 2
+	v2       = 2
+	v3       = 3
+	v4       = 4
+	v7       = 7
+	v8       = 8
+	v9       = 9
+	v10      = 10
+	v12      = 12
+	v13      = 13
+	v14      = 14
+	v15      = 15
+	v16      = 16
+	v18      = 18
+)
+
+const (
+	wallZeroBitmask = 0xFFFFFF00
+	wallZeroOffset  = 8
+
+	wallTypeBitmask = 0x000000FF
+)
+
+const (
+	unknown1BytesCount = 8
 )
 
 // DS1 represents the "stamp" data that is used to build up maps.
@@ -43,10 +53,13 @@ type DS1 struct {
 	NumberOfShadowLayers       int32               // ShadowNum number of shadow layer used
 	NumberOfSubstitutionLayers int32               // SubstitutionNum number of substitution layer used
 	SubstitutionGroupsNum      int32               // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
+	unknown1                   []byte
+	layerStreamTypes           []d2enum.LayerStreamType
+	unknown2                   uint32
+	npcIndexes                 []int
 }
 
 // LoadDS1 loads the specified DS1 file
-//nolint:funlen,gocognit,gocyclo // will refactor later
 func LoadDS1(fileData []byte) (*DS1, error) {
 	ds1 := &DS1{
 		Act:                        1,
@@ -60,74 +73,17 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 
 	var err error
 
-	ds1.Version, err = br.ReadInt32()
+	err = ds1.loadHeader(br)
 	if err != nil {
 		return nil, err
-	}
-
-	ds1.Width, err = br.ReadInt32()
-	if err != nil {
-		return nil, err
-	}
-
-	ds1.Height, err = br.ReadInt32()
-	if err != nil {
-		return nil, err
-	}
-
-	ds1.Width++
-	ds1.Height++
-
-	if ds1.Version >= v8 {
-		ds1.Act, err = br.ReadInt32()
-		if err != nil {
-			return nil, err
-		}
-
-		ds1.Act = d2math.MinInt32(maxActNumber, ds1.Act+1)
-	}
-
-	if ds1.Version >= v10 {
-		ds1.SubstitutionType, err = br.ReadInt32()
-		if err != nil {
-			return nil, err
-		}
-
-		if ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2 {
-			ds1.NumberOfSubstitutionLayers = 1
-		}
-	}
-
-	if ds1.Version >= v3 {
-		// These files reference things that don't exist anymore :-?
-		numberOfFiles, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
-		if err != nil {
-			return nil, err
-		}
-
-		ds1.Files = make([]string, numberOfFiles)
-
-		for i := 0; i < int(numberOfFiles); i++ {
-			ds1.Files[i] = ""
-
-			for {
-				ch, err := br.ReadByte()
-				if err != nil {
-					return nil, err
-				}
-
-				if ch == 0 {
-					break
-				}
-
-				ds1.Files[i] += string(ch)
-			}
-		}
 	}
 
 	if ds1.Version >= v9 && ds1.Version <= v13 {
 		// Skipping two dwords because they are "meaningless"?
-		br.SkipBytes(8) //nolint:gomnd // We don't know what's here
+		ds1.unknown1, err = br.ReadBytes(unknown1BytesCount)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if ds1.Version >= v4 {
@@ -146,7 +102,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		}
 	}
 
-	layerStream := ds1.setupStreamLayerTypes()
+	ds1.layerStreamTypes = ds1.setupStreamLayerTypes()
 
 	ds1.Tiles = make([][]TileRecord, ds1.Height)
 
@@ -160,7 +116,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		}
 	}
 
-	err = ds1.loadLayerStreams(br, layerStream)
+	err = ds1.loadLayerStreams(br)
 	if err != nil {
 		return nil, err
 	}
@@ -181,6 +137,86 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 	}
 
 	return ds1, nil
+}
+
+func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
+	var err error
+
+	ds1.Version, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Width, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Height, err = br.ReadInt32()
+	if err != nil {
+		return err
+	}
+
+	ds1.Width++
+	ds1.Height++
+
+	if ds1.Version >= v8 {
+		ds1.Act, err = br.ReadInt32()
+		if err != nil {
+			return err
+		}
+
+		ds1.Act = d2math.MinInt32(d2enum.ActsNumber, ds1.Act+1)
+	}
+
+	if ds1.Version >= v10 {
+		ds1.SubstitutionType, err = br.ReadInt32()
+		if err != nil {
+			return err
+		}
+
+		if ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2 {
+			ds1.NumberOfSubstitutionLayers = 1
+		}
+	}
+
+	err = ds1.loadFileList(br)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
+	if ds1.Version >= v3 {
+		// These files reference things that don't exist anymore :-?
+		numberOfFiles, err := br.ReadInt32()
+		if err != nil {
+			return err
+		}
+
+		ds1.Files = make([]string, numberOfFiles)
+
+		for i := 0; i < int(numberOfFiles); i++ {
+			ds1.Files[i] = ""
+
+			for {
+				ch, err := br.ReadByte()
+				if err != nil {
+					return err
+				}
+
+				if ch == 0 {
+					break
+				}
+
+				ds1.Files[i] += string(ch)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
@@ -245,7 +281,10 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	}
 
 	if ds1.Version >= v18 {
-		_, _ = br.ReadUInt32()
+		ds1.unknown2, err = br.ReadUInt32()
+		if err != nil {
+			return err
+		}
 	}
 
 	numberOfSubGroups, err := br.ReadInt32()
@@ -340,17 +379,17 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 	}
 
 	for npcIdx := 0; npcIdx < int(numberOfNpcs); npcIdx++ {
-		numPaths, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		numPaths, err := br.ReadInt32() // nolint:govet // I want to re-use this error variable
 		if err != nil {
 			return err
 		}
 
-		npcX, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		npcX, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		npcY, err := br.ReadInt32() //nolint:govet // i want to re-use the err variable...
+		npcY, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
@@ -360,6 +399,8 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 		for idx, ds1Obj := range ds1.Objects {
 			if ds1Obj.X == int(npcX) && ds1Obj.Y == int(npcY) {
 				objIdx = idx
+				ds1.npcIndexes = append(ds1.npcIndexes, idx)
+
 				break
 			}
 		}
@@ -418,7 +459,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int)
 	return err
 }
 
-func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2enum.LayerStreamType) error {
+func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 	var err error
 
 	var dirLookup = []int32{
@@ -427,8 +468,8 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2e
 		0x0F, 0x10, 0x11, 0x12, 0x14,
 	}
 
-	for lIdx := range layerStream {
-		layerStreamType := layerStream[lIdx]
+	for lIdx := range ds1.layerStreamTypes {
+		layerStreamType := ds1.layerStreamTypes[lIdx]
 
 		for y := 0; y < int(ds1.Height); y++ {
 			for x := 0; x < int(ds1.Width); x++ {
@@ -440,16 +481,11 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2e
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Walls[wallIndex].Hidden = byte((dw&0x80000000)>>31) > 0   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Walls[wallIndex].Decode(dw)
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
-					c := int32(dw & 0x000000FF) //nolint:gomnd // Bitmask
+					c := int32(dw & wallTypeBitmask)
 
 					if ds1.Version < v7 {
 						if c < int32(len(dirLookup)) {
@@ -458,22 +494,12 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2e
 					}
 
 					ds1.Tiles[y][x].Walls[wallIndex].Type = d2enum.TileType(c)
-					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & 0xFFFFFF00) >> 8) //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & wallZeroBitmask) >> wallZeroOffset)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					ds1.Tiles[y][x].Floors[floorIndex].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Floors[floorIndex].Hidden = byte((dw&0x80000000)>>31) > 0   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Floors[floorIndex].Decode(dw)
 				case d2enum.LayerStreamShadow:
-					ds1.Tiles[y][x].Shadows[0].Prop1 = byte(dw & 0x000000FF)            //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Sequence = byte((dw & 0x00003F00) >> 8)  //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Unknown1 = byte((dw & 0x000FC000) >> 14) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Style = byte((dw & 0x03F00000) >> 20)    //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Unknown2 = byte((dw & 0x7C000000) >> 26) //nolint:gomnd // Bitmask
-					ds1.Tiles[y][x].Shadows[0].Hidden = byte((dw&0x80000000)>>31) > 0   //nolint:gomnd // Bitmask
+					ds1.Tiles[y][x].Shadows[0].Decode(dw)
 				case d2enum.LayerStreamSubstitute:
 					ds1.Tiles[y][x].Substitutions[0].Unknown = dw
 				}
@@ -482,4 +508,135 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2e
 	}
 
 	return err
+}
+
+// Marshal encodes ds1 back to byte slice
+func (ds1 *DS1) Marshal() []byte {
+	// create stream writer
+	sw := d2datautils.CreateStreamWriter()
+
+	// Step 1 - encode header
+	sw.PushInt32(ds1.Version)
+	sw.PushInt32(ds1.Width - 1)
+	sw.PushInt32(ds1.Height - 1)
+
+	if ds1.Version >= v8 {
+		sw.PushInt32(ds1.Act - 1)
+	}
+
+	if ds1.Version >= v10 {
+		sw.PushInt32(ds1.SubstitutionType)
+	}
+
+	if ds1.Version >= v3 {
+		sw.PushInt32(int32(len(ds1.Files)))
+
+		for _, i := range ds1.Files {
+			sw.PushBytes([]byte(i)...)
+
+			// separator
+			sw.PushBytes(0)
+		}
+	}
+
+	if ds1.Version >= v9 && ds1.Version <= v13 {
+		sw.PushBytes(ds1.unknown1...)
+	}
+
+	if ds1.Version >= v4 {
+		sw.PushInt32(ds1.NumberOfWalls)
+
+		if ds1.Version >= v16 {
+			sw.PushInt32(ds1.NumberOfFloors)
+		}
+	}
+
+	// Step 2 - encode layers
+	ds1.encodeLayers(sw)
+
+	// Step 3 - encode objects
+	if !(ds1.Version < v2) {
+		sw.PushInt32(int32(len(ds1.Objects)))
+
+		for _, i := range ds1.Objects {
+			sw.PushUint32(uint32(i.Type))
+			sw.PushUint32(uint32(i.ID))
+			sw.PushUint32(uint32(i.X))
+			sw.PushUint32(uint32(i.Y))
+			sw.PushUint32(uint32(i.Flags))
+		}
+	}
+
+	// Step 4 - encode substitutions
+	if ds1.Version >= v12 && (ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2) {
+		sw.PushUint32(ds1.unknown2)
+
+		sw.PushUint32(uint32(len(ds1.SubstitutionGroups)))
+
+		for _, i := range ds1.SubstitutionGroups {
+			sw.PushInt32(i.TileX)
+			sw.PushInt32(i.TileY)
+			sw.PushInt32(i.WidthInTiles)
+			sw.PushInt32(i.HeightInTiles)
+			sw.PushInt32(i.Unknown)
+		}
+	}
+
+	// Step 5 - encode NPC's and its paths
+	ds1.encodeNPCs(sw)
+
+	return sw.GetBytes()
+}
+
+func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
+	for lIdx := range ds1.layerStreamTypes {
+		layerStreamType := ds1.layerStreamTypes[lIdx]
+
+		for y := 0; y < int(ds1.Height); y++ {
+			for x := 0; x < int(ds1.Width); x++ {
+				dw := uint32(0)
+
+				switch layerStreamType {
+				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
+					ds1.Tiles[y][x].Walls[wallIndex].Encode(sw)
+				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
+					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
+					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
+					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & wallZeroBitmask) << wallZeroOffset
+
+					sw.PushUint32(dw)
+				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
+					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
+					ds1.Tiles[y][x].Floors[floorIndex].Encode(sw)
+				case d2enum.LayerStreamShadow:
+					ds1.Tiles[y][x].Shadows[0].Encode(sw)
+				case d2enum.LayerStreamSubstitute:
+					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
+				}
+			}
+		}
+	}
+}
+
+func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
+	// Step 5.1 - encode npc's
+	sw.PushUint32(uint32(len(ds1.npcIndexes)))
+
+	// Step 5.2 - enoce npcs' paths
+	for _, i := range ds1.npcIndexes {
+		sw.PushUint32(uint32(len(ds1.Objects[i].Paths)))
+		sw.PushUint32(uint32(ds1.Objects[i].X))
+		sw.PushUint32(uint32(ds1.Objects[i].Y))
+
+		for _, j := range ds1.Objects[i].Paths {
+			sw.PushUint32(uint32(j.Position.X()))
+			sw.PushUint32(uint32(j.Position.Y()))
+
+			if ds1.Version >= v15 {
+				sw.PushUint32(uint32(j.Action))
+			}
+		}
+	}
 }
