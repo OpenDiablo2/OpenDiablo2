@@ -31,7 +31,9 @@ func TestStreamWriterBits16(t *testing.T) {
 	output := sr.GetBytes()
 
 	for i, d := range data {
-		outputInt := uint16(output[bytesPerint16*i]) | uint16(output[bytesPerint16*i+1])<<8
+		// nolint:gomnd // offset in byte slice; bit shifts for uint16
+		outputInt := uint16(output[bytesPerint16*i]) |
+			uint16(output[bytesPerint16*i+1])<<8
 		if outputInt != d {
 			t.Fatalf("sr.PushBits16() pushed %X, but wrote %X instead", d, output[i])
 		}
@@ -49,6 +51,7 @@ func TestStreamWriterBits32(t *testing.T) {
 	output := sr.GetBytes()
 
 	for i, d := range data {
+		// nolint:gomnd // offset in byte slice; bit shifts for uint32
 		outputInt := uint32(output[bytesPerint32*i]) |
 			uint32(output[bytesPerint32*i+1])<<8 |
 			uint32(output[bytesPerint32*i+2])<<16 |
