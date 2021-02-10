@@ -121,7 +121,6 @@ func (c *COF) Unmarshal(fileData []byte) error {
 		layer.Transparent = b[layerTransparent] > 0
 		layer.DrawEffect = d2enum.DrawEffect(b[layerDrawEffect])
 
-		layer.weaponClassByte = b[layerWeaponClass:]
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(
 			string(b[layerWeaponClass:]), badCharacter, "")))
 
@@ -193,7 +192,15 @@ func (c *COF) Marshal() []byte {
 
 		sw.PushBytes(byte(c.CofLayers[i].DrawEffect))
 
-		sw.PushBytes(c.CofLayers[i].weaponClassByte...)
+		s := c.CofLayers[i].WeaponClass.String()
+
+		for j := 0; j < 4; j++ {
+			if j < len(s) {
+				sw.PushBytes(s[j])
+			} else {
+				sw.PushBytes(0)
+			}
+		}
 	}
 
 	for _, i := range c.AnimationFrames {
