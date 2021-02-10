@@ -31,6 +31,10 @@ const (
 )
 
 const (
+	layerWeaponClassLength = 4
+)
+
+const (
 	badCharacter = string(byte(0))
 )
 
@@ -192,11 +196,11 @@ func (c *COF) Marshal() []byte {
 
 		sw.PushBytes(byte(c.CofLayers[i].DrawEffect))
 
-		s := c.CofLayers[i].WeaponClass.String()
+		weaponClassString := c.CofLayers[i].WeaponClass.String()
 
-		for j := 0; j < 4; j++ {
-			if j < len(s) {
-				sw.PushBytes(s[j])
+		for letter := 0; letter < layerWeaponClassLength; letter++ {
+			if letter < len(weaponClassString) {
+				sw.PushBytes(weaponClassString[letter])
 			} else {
 				sw.PushBytes(0)
 			}
