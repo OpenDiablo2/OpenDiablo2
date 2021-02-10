@@ -121,7 +121,6 @@ func (c *COF) Unmarshal(fileData []byte) error {
 		layer.Transparent = b[layerTransparent] > 0
 		layer.DrawEffect = d2enum.DrawEffect(b[layerDrawEffect])
 
-		layer.weaponClassByte = b[layerWeaponClass:]
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(
 			string(b[layerWeaponClass:]), badCharacter, "")))
 
@@ -193,7 +192,22 @@ func (c *COF) Marshal() []byte {
 
 		sw.PushBytes(byte(c.CofLayers[i].DrawEffect))
 
-		sw.PushBytes(c.CofLayers[i].weaponClassByte...)
+		const (
+			maxCodeLength = 3 // we assume item codes to look like 'hax' or 'kit'
+			terminator    = 0
+		)
+
+		weaponCode := c.CofLayers[i].WeaponClass.String()
+
+		for idx, letter := range weaponCode {
+			if idx > maxCodeLength {
+				break
+			}
+
+			sw.PushBytes(byte(letter))
+		}
+
+		sw.PushBytes(terminator)
 	}
 
 	for _, i := range c.AnimationFrames {
