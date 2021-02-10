@@ -58,6 +58,7 @@ func (v *StreamWriter) PushBits(b byte, bits int) {
 	}
 
 	val := b
+
 	for i := 0; i < bits; i++ {
 		v.PushBit(val&1 == 1)
 		val >>= 1
@@ -71,6 +72,7 @@ func (v *StreamWriter) PushBits16(b uint16, bits int) {
 	}
 
 	val := b
+
 	for i := 0; i < bits; i++ {
 		v.PushBit(val&1 == 1)
 		val >>= 1
@@ -84,6 +86,7 @@ func (v *StreamWriter) PushBits32(b uint32, bits int) {
 	}
 
 	val := b
+
 	for i := 0; i < bits; i++ {
 		v.PushBit(val&1 == 1)
 		val >>= 1
