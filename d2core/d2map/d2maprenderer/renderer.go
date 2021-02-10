@@ -359,19 +359,19 @@ func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, e
 
 func (mr *MapRenderer) renderTilePass1(tile *d2mapengine.MapTile, target d2interface.Surface) {
 	for _, wall := range tile.Components.Walls {
-		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
+		if !wall.Hidden() && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}
 
 	for _, floor := range tile.Components.Floors {
-		if !floor.Hidden && floor.Prop1 != 0 {
+		if !floor.Hidden() && floor.Prop1 != 0 {
 			mr.renderFloor(floor, target)
 		}
 	}
 
 	for _, shadow := range tile.Components.Shadows {
-		if !shadow.Hidden && shadow.Prop1 != 0 {
+		if !shadow.Hidden() && shadow.Prop1 != 0 {
 			mr.renderShadow(shadow, target)
 		}
 	}
@@ -379,7 +379,7 @@ func (mr *MapRenderer) renderTilePass1(tile *d2mapengine.MapTile, target d2inter
 
 func (mr *MapRenderer) renderTilePass2(tile *d2mapengine.MapTile, target d2interface.Surface) {
 	for _, wall := range tile.Components.Walls {
-		if !wall.Hidden && wall.Type.UpperWall() {
+		if !wall.Hidden() && wall.Type.UpperWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}
