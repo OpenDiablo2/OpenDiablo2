@@ -31,10 +31,6 @@ const (
 )
 
 const (
-	layerWeaponClassLength = 4
-)
-
-const (
 	badCharacter = string(byte(0))
 )
 
@@ -196,15 +192,22 @@ func (c *COF) Marshal() []byte {
 
 		sw.PushBytes(byte(c.CofLayers[i].DrawEffect))
 
-		weaponClassString := c.CofLayers[i].WeaponClass.String()
+		const (
+			maxCodeLength = 3 // we assume item codes to look like 'hax' or 'kit'
+			terminator    = 0
+		)
 
-		for letter := 0; letter < layerWeaponClassLength; letter++ {
-			if letter < len(weaponClassString) {
-				sw.PushBytes(weaponClassString[letter])
-			} else {
-				sw.PushBytes(0)
+		weaponCode := c.CofLayers[i].WeaponClass.String()
+
+		for idx, letter := range weaponCode {
+			if idx > maxCodeLength {
+				break
 			}
+
+			sw.PushBytes(byte(letter))
 		}
+
+		sw.PushBytes(terminator)
 	}
 
 	for _, i := range c.AnimationFrames {
