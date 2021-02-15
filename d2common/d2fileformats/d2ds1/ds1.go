@@ -54,9 +54,9 @@ type DS1 struct {
 	NumberOfSubstitutionLayers int32               // SubstitutionNum number of substitution layer used
 	SubstitutionGroupsNum      int32               // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
 	unknown1                   []byte
-	layerStreamTypes           []d2enum.LayerStreamType
+	LayerStreamTypes           []d2enum.LayerStreamType
 	unknown2                   uint32
-	npcIndexes                 []int
+	NpcIndexes                 []int
 }
 
 // LoadDS1 loads the specified DS1 file
