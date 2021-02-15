@@ -102,7 +102,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		}
 	}
 
-	ds1.layerStreamTypes = ds1.setupStreamLayerTypes()
+	ds1.LayerStreamTypes = ds1.setupStreamLayerTypes()
 
 	ds1.Tiles = make([][]TileRecord, ds1.Height)
 
@@ -399,7 +399,7 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 		for idx, ds1Obj := range ds1.Objects {
 			if ds1Obj.X == int(npcX) && ds1Obj.Y == int(npcY) {
 				objIdx = idx
-				ds1.npcIndexes = append(ds1.npcIndexes, idx)
+				ds1.NpcIndexes = append(ds1.NpcIndexes, idx)
 
 				break
 			}
@@ -468,8 +468,8 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 		0x0F, 0x10, 0x11, 0x12, 0x14,
 	}
 
-	for lIdx := range ds1.layerStreamTypes {
-		layerStreamType := ds1.layerStreamTypes[lIdx]
+	for lIdx := range ds1.LayerStreamTypes {
+		layerStreamType := ds1.LayerStreamTypes[lIdx]
 
 		for y := 0; y < int(ds1.Height); y++ {
 			for x := 0; x < int(ds1.Width); x++ {
@@ -589,8 +589,8 @@ func (ds1 *DS1) Marshal() []byte {
 }
 
 func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
-	for lIdx := range ds1.layerStreamTypes {
-		layerStreamType := ds1.layerStreamTypes[lIdx]
+	for lIdx := range ds1.LayerStreamTypes {
+		layerStreamType := ds1.LayerStreamTypes[lIdx]
 
 		for y := 0; y < int(ds1.Height); y++ {
 			for x := 0; x < int(ds1.Width); x++ {
@@ -622,10 +622,10 @@ func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
 
 func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
 	// Step 5.1 - encode npc's
-	sw.PushUint32(uint32(len(ds1.npcIndexes)))
+	sw.PushUint32(uint32(len(ds1.NpcIndexes)))
 
 	// Step 5.2 - enoce npcs' paths
-	for _, i := range ds1.npcIndexes {
+	for _, i := range ds1.NpcIndexes {
 		sw.PushUint32(uint32(len(ds1.Objects[i].Paths)))
 		sw.PushUint32(uint32(ds1.Objects[i].X))
 		sw.PushUint32(uint32(ds1.Objects[i].Y))
