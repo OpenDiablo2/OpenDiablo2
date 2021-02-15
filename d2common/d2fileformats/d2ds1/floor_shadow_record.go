@@ -37,7 +37,7 @@ type FloorShadowRecord struct {
 	Unknown1    byte
 	Style       byte
 	Unknown2    byte
-	hidden      byte
+	HiddenBytes byte
 	RandomIndex byte
 	Animated    bool
 	YAdjust     int
@@ -45,7 +45,7 @@ type FloorShadowRecord struct {
 
 // Hidden returns if floor/shadow is hidden
 func (f *FloorShadowRecord) Hidden() bool {
-	return f.hidden > 0
+	return f.HiddenBytes > 0
 }
 
 // Decode decodes floor-shadow record
@@ -55,7 +55,7 @@ func (f *FloorShadowRecord) Decode(dw uint32) {
 	f.Unknown1 = byte((dw & unknown1Bitmask) >> unknown1Offset)
 	f.Style = byte((dw & styleBitmask) >> styleOffset)
 	f.Unknown2 = byte((dw & unknown2Bitmask) >> unknown2Offset)
-	f.hidden = byte((dw & hiddenBitmask) >> hiddenOffset)
+	f.HiddenBytes = byte((dw & hiddenBitmask) >> hiddenOffset)
 }
 
 // Encode adds Floor's bits to stream writter given
@@ -65,5 +65,5 @@ func (f *FloorShadowRecord) Encode(sw *d2datautils.StreamWriter) {
 	sw.PushBits32(uint32(f.Unknown1), unknown1Length)
 	sw.PushBits32(uint32(f.Style), styleLength)
 	sw.PushBits32(uint32(f.Unknown2), unknown2Length)
-	sw.PushBits32(uint32(f.hidden), hiddenLength)
+	sw.PushBits32(uint32(f.HiddenBytes), hiddenLength)
 }
