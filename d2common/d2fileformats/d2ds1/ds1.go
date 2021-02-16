@@ -102,7 +102,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		}
 	}
 
-	ds1.LayerStreamTypes = ds1.setupStreamLayerTypes()
+	ds1.LayerStreamTypes = ds1.SetupStreamLayerTypes()
 
 	ds1.Tiles = make([][]TileRecord, ds1.Height)
 
@@ -328,7 +328,8 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	return err
 }
 
-func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
+// SetupStreamLayerTypes creates slice of layers types
+func (ds1 *DS1) SetupStreamLayerTypes() []d2enum.LayerStreamType {
 	var layerStream []d2enum.LayerStreamType
 
 	if ds1.Version < v4 {
