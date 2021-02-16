@@ -9,7 +9,7 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-      - run: sudo apt-get install -y libgtk-3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1 
+      - run: sudo apt-get --allow-releaseinfo-change update && sudo apt-get install -y libgtk-3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1 
       - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
       - run: go get -v -t -d ./...
       - run: go build .
