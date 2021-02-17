@@ -32,13 +32,17 @@ type FontGlyph struct {
 	height   int
 }
 
-func (fg *FontGlyph) setHeight(h int) {
-	fg.height = h
+func (fg *FontGlyph) SetSize(w, h int) {
+	fg.width, fg.height = w, h
 }
 
 // Size returns glyph's size
 func (fg *FontGlyph) Size() (w, h int) {
 	return fg.width, fg.height
+}
+
+func (fg *FontGlyph) SetFrameIndex(idx int) {
+	fg.frame = idx
 }
 
 // FrameIndex returns glyph's frame
@@ -94,7 +98,7 @@ func (f *Font) SetBackground(sheet d2interface.Animation) {
 	_, h := f.sheet.GetFrameBounds()
 
 	for i := range f.Glyphs {
-		f.Glyphs[i].setHeight(h)
+		f.Glyphs[i].SetSize(f.Glyphs[i].width, h)
 	}
 }
 
