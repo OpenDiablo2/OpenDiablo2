@@ -25,7 +25,7 @@ func levelPresetLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			Scan:         d.Number("Scan") == 1,
 			Pops:         d.Number("Pops"),
 			PopPad:       d.Number("PopPad"),
-			FileCount:    d.Number("Files"),
+			FileCount:    d.Number("files"),
 			Files: [6]string{
 				d.String("File1"),
 				d.String("File2"),

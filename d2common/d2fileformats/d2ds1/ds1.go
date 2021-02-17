@@ -39,34 +39,347 @@ const (
 
 // DS1 represents the "stamp" data that is used to build up maps.
 type DS1 struct {
-	Files                      []string            // FilePtr table of file string pointers
-	Objects                    []Object            // Objects
-	Tiles                      [][]TileRecord      // The tile data for the DS1
-	SubstitutionGroups         []SubstitutionGroup // Substitution groups for the DS1
-	Version                    int32               // The version of the DS1
-	Width                      int32               // Width of map, in # of tiles
-	Height                     int32               // Height of map, in # of tiles
-	Act                        int32               // Act, from 1 to 5. This tells which act table to use for the Objects list
-	SubstitutionType           int32               // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
-	NumberOfWalls              int32               // WallNum number of wall & orientation layers used
-	NumberOfFloors             int32               // number of floor layers used
-	NumberOfShadowLayers       int32               // ShadowNum number of shadow layer used
-	NumberOfSubstitutionLayers int32               // SubstitutionNum number of substitution layer used
-	SubstitutionGroupsNum      int32               // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
-	unknown1                   []byte
-	LayerStreamTypes           []d2enum.LayerStreamType
-	unknown2                   uint32
-	NpcIndexes                 []int
+	files                      []string            // FilePtr table of file string pointers
+	objects                    []Object            // objects
+	tiles                      [][]Tile            // The tile data for the DS1
+	substitutionGroups         []SubstitutionGroup // Substitution groups for the DS1
+	version                    int32               // The version of the DS1
+	width                      int32               // Width of map, in # of tiles
+	height                     int32               // Height of map, in # of tiles
+	act                        int32               // Act, from 1 to 5. This tells which act table to use for the objects list
+	substitutionType           int32               // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
+	numberOfWallLayers         int32               // WallNum number of wall & orientation layers used
+	numberOfFloorLayers        int32               // number of floor layers used
+	numberOfShadowLayers       int32               // ShadowNum number of shadow layer used
+	numberOfSubstitutionLayers int32               // SubstitutionNum number of substitution layer used
+	// substitutionGroupsNum      int32               // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
+
+	dirty            bool // when modifying tiles, need to perform upkeep on ds1 state
+	unknown1         []byte
+	layerStreamTypes []d2enum.LayerStreamType
+	unknown2         uint32
+	npcIndexes       []int
+}
+
+// Files returns a list of file path strings. These correspond to DT1 paths that this DS1 will use.
+func (ds1 *DS1) Files() []string {
+	return ds1.files
+}
+
+// AddFile adds a file path to the list of file paths
+func (ds1 *DS1) AddFile(file string) {
+	if ds1.files == nil {
+		ds1.files = make([]string, 0)
+	}
+
+	ds1.files = append(ds1.files, file)
+}
+
+// RemoveFile removes a file from the files slice
+func (ds1 *DS1) RemoveFile(file string) {
+	for idx := range ds1.files {
+		if ds1.files[idx] == file {
+			ds1.files = append(ds1.files[:idx], ds1.files[idx+1:]...)
+			break
+		}
+	}
+}
+
+// Objects returns the slice of objects found in this ds1
+func (ds1 *DS1) Objects() []Object {
+	return ds1.objects
+}
+
+// AddObject adds an object to this ds1
+func (ds1 *DS1) AddObject(obj Object) {
+	if ds1.objects == nil {
+		ds1.objects = make([]Object, 0)
+	}
+
+	ds1.objects = append(ds1.objects, obj)
+}
+
+// RemoveObject removes the first equivalent object found in this ds1's object list
+func (ds1 *DS1) RemoveObject(obj Object) {
+	for idx := range ds1.objects {
+		if ds1.objects[idx].Equals(&obj) {
+			ds1.objects = append(ds1.objects[:idx], ds1.objects[idx+1:]...)
+			break
+		}
+	}
+}
+
+func defaultTiles() [][]Tile {
+	return [][]Tile{{makeDefaultTile()}}
+}
+
+// Tiles returns the 2-dimensional (y,x) slice of tiles
+func (ds1 *DS1) Tiles() [][]Tile {
+	if ds1.tiles == nil {
+		ds1.SetTiles(defaultTiles())
+	}
+
+	return ds1.tiles
+}
+
+// SetTiles sets the 2-dimensional (y,x) slice of tiles for this ds1
+func (ds1 *DS1) SetTiles(tiles [][]Tile) {
+	if len(tiles) == 0 {
+		tiles = defaultTiles()
+	}
+
+	ds1.tiles = tiles
+	ds1.dirty = true
+}
+
+// Tile returns the tile at the given x,y tile coordinate (nil if x,y is out of bounds)
+func (ds1 *DS1) Tile(x, y int) *Tile {
+	if y >= len(ds1.tiles) {
+		return nil
+	}
+
+	if x >= len(ds1.tiles[y]) {
+		return nil
+	}
+
+	return &ds1.tiles[y][x]
+}
+
+// SetTile sets the tile at the given tile x,y coordinates
+func (ds1 *DS1) SetTile(x, y int, t *Tile) {
+	if ds1.Tile(x, y) == nil {
+		return
+	}
+
+	ds1.tiles[y][x] = *t
+	ds1.dirty = true
+}
+
+// Version returns the ds1's version
+func (ds1 *DS1) Version() int {
+	return int(ds1.version)
+}
+
+// SetVersion sets the ds1's version
+func (ds1 *DS1) SetVersion(v int) {
+	ds1.version = int32(v)
+}
+
+// Width returns te ds1's width
+func (ds1 *DS1) Width() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.width)
+}
+
+// SetWidth sets the ds1's width
+func (ds1 *DS1) SetWidth(w int) {
+	if w <= 1 {
+		w = 1
+	}
+
+	if int(ds1.width) == w {
+		return
+	}
+
+	ds1.dirty = true // we know we're about to edit this ds1
+	defer ds1.update()
+
+	for rowIdx := range ds1.tiles {
+		// if the row has too many tiles
+		if len(ds1.tiles[rowIdx]) > w {
+			// remove the extras
+			ds1.tiles[rowIdx] = ds1.tiles[rowIdx][:w]
+		}
+
+		// if the row doesn't have enough tiles
+		if len(ds1.tiles[rowIdx]) < w {
+			// figure out how many more we need
+			numNeeded := w - len(ds1.tiles[rowIdx])
+			newTiles := make([]Tile, numNeeded)
+
+			// make new default tiles
+			for idx := range newTiles {
+				newTiles[idx] = makeDefaultTile()
+			}
+
+			// add them to this ds1
+			ds1.tiles[rowIdx] = append(ds1.tiles[rowIdx], newTiles...)
+		}
+	}
+}
+
+// Height returns te ds1's height
+func (ds1 *DS1) Height() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.height)
+}
+
+// SetHeight sets the ds1's height
+func (ds1 *DS1) SetHeight(h int) {
+	if h <= 1 {
+		h = 1
+	}
+
+	if int(ds1.height) == h {
+		return
+	}
+
+	if len(ds1.tiles) < h {
+		ds1.dirty = true // we know we're about to edit this ds1
+		defer ds1.update()
+
+		// figure out how many more rows we need
+		numRowsNeeded := h - len(ds1.tiles)
+		newRows := make([][]Tile, numRowsNeeded)
+
+		// populate the new rows with tiles
+		for rowIdx := range newRows {
+			newRows[rowIdx] = make([]Tile, ds1.width)
+
+			for colIdx := range newRows[rowIdx] {
+				newRows[rowIdx][colIdx] = makeDefaultTile()
+			}
+		}
+	}
+
+	// if the ds1 has too many rows
+	if len(ds1.tiles) > h {
+		ds1.dirty = true // we know we're about to edit this ds1
+		defer ds1.update()
+
+		// remove the extras
+		ds1.tiles = ds1.tiles[:h]
+	}
+}
+
+// Size returns te ds1's size (width, height)
+func (ds1 *DS1) Size() (w, h int) {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.width), int(ds1.height)
+}
+
+// SetSize sets the ds1's size (width,height)
+func (ds1 *DS1) SetSize(w, h int) {
+	ds1.SetWidth(w)
+	ds1.SetHeight(h)
+}
+
+// Act returns the ds1's act
+func (ds1 *DS1) Act() int {
+	return int(ds1.act)
+}
+
+// SetAct sets the ds1's act
+func (ds1 *DS1) SetAct(act int) {
+	if act < 0 {
+		act = 0
+	}
+
+	ds1.act = int32(act)
+}
+
+// SubstitutionType returns the ds1's subtitution type
+func (ds1 *DS1) SubstitutionType() int {
+	return int(ds1.substitutionType)
+}
+
+// SetSubstitutionType sets the ds1's subtitution type
+func (ds1 *DS1) SetSubstitutionType(t int) {
+	ds1.substitutionType = int32(t)
+}
+
+// NumberOfWallLayers returns the number of wall layers per tile
+func (ds1 *DS1) NumberOfWallLayers() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.numberOfWallLayers)
+}
+
+// NumberOfFloorLayers returns the number of floor layers per tile
+func (ds1 *DS1) NumberOfFloorLayers() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.numberOfFloorLayers)
+}
+
+// NumberOfShadowLayers returns the number of shadow layers per tile
+func (ds1 *DS1) NumberOfShadowLayers() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.numberOfShadowLayers)
+}
+
+// NumberOfSubstitutionLayers returns the number of substitution layers per tile
+func (ds1 *DS1) NumberOfSubstitutionLayers() int {
+	if ds1.dirty {
+		ds1.update()
+	}
+
+	return int(ds1.numberOfSubstitutionLayers)
+}
+
+// SubstitutionGroups returns the number of wall layers per tile
+func (ds1 *DS1) SubstitutionGroups() []SubstitutionGroup {
+	return ds1.substitutionGroups
+}
+
+// SetSubstitutionGroups sets the substitution groups for the ds1
+func (ds1 *DS1) SetSubstitutionGroups(groups []SubstitutionGroup) {
+	ds1.substitutionGroups = groups
+}
+
+func (ds1 *DS1) update() {
+	ds1.ensureAtLeastOneTile()
+	ds1.enforceAllTileLayersMatch()
+	ds1.updateLayerCounts()
+
+	ds1.SetSize(len(ds1.tiles[0]), len(ds1.tiles))
+
+	ds1.dirty = false
+}
+
+func (ds1 *DS1) ensureAtLeastOneTile() {
+	// guarantee at least one tile exists
+	if len(ds1.tiles) == 0 {
+		ds1.tiles = [][]Tile{{makeDefaultTile()}}
+	}
+}
+
+func (ds1 *DS1) enforceAllTileLayersMatch() {
+
+}
+
+func (ds1 *DS1) updateLayerCounts() {
+	t := ds1.tiles[0][0] // the one tile that is guaranteed to exist
+	ds1.numberOfFloorLayers = int32(len(t.Floors))
+	ds1.numberOfShadowLayers = int32(len(t.Shadows))
+	ds1.numberOfWallLayers = int32(len(t.Walls))
+	ds1.numberOfSubstitutionLayers = int32(len(t.Substitutions))
 }
 
 // LoadDS1 loads the specified DS1 file
 func LoadDS1(fileData []byte) (*DS1, error) {
 	ds1 := &DS1{
-		Act:                        1,
-		NumberOfFloors:             0,
-		NumberOfWalls:              0,
-		NumberOfShadowLayers:       1,
-		NumberOfSubstitutionLayers: 0,
+		act:                        1,
+		numberOfFloorLayers:        0,
+		numberOfWallLayers:         0,
+		numberOfShadowLayers:       1,
+		numberOfSubstitutionLayers: 0,
 	}
 
 	br := d2datautils.CreateStreamReader(fileData)
@@ -78,7 +391,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		return nil, err
 	}
 
-	if ds1.Version >= v9 && ds1.Version <= v13 {
+	if ds1.version >= v9 && ds1.version <= v13 {
 		// Skipping two dwords because they are "meaningless"?
 		ds1.unknown1, err = br.ReadBytes(unknown1BytesCount)
 		if err != nil {
@@ -86,33 +399,33 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		}
 	}
 
-	if ds1.Version >= v4 {
-		ds1.NumberOfWalls, err = br.ReadInt32()
+	if ds1.version >= v4 {
+		ds1.numberOfWallLayers, err = br.ReadInt32()
 		if err != nil {
 			return nil, err
 		}
 
-		if ds1.Version >= v16 {
-			ds1.NumberOfFloors, err = br.ReadInt32()
+		if ds1.version >= v16 {
+			ds1.numberOfFloorLayers, err = br.ReadInt32()
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			ds1.NumberOfFloors = 1
+			ds1.numberOfFloorLayers = 1
 		}
 	}
 
-	ds1.LayerStreamTypes = ds1.setupStreamLayerTypes()
+	ds1.layerStreamTypes = ds1.setupStreamLayerTypes()
 
-	ds1.Tiles = make([][]TileRecord, ds1.Height)
+	ds1.tiles = make([][]Tile, ds1.height)
 
-	for y := range ds1.Tiles {
-		ds1.Tiles[y] = make([]TileRecord, ds1.Width)
-		for x := 0; x < int(ds1.Width); x++ {
-			ds1.Tiles[y][x].Walls = make([]WallRecord, ds1.NumberOfWalls)
-			ds1.Tiles[y][x].Floors = make([]FloorShadowRecord, ds1.NumberOfFloors)
-			ds1.Tiles[y][x].Shadows = make([]FloorShadowRecord, ds1.NumberOfShadowLayers)
-			ds1.Tiles[y][x].Substitutions = make([]SubstitutionRecord, ds1.NumberOfSubstitutionLayers)
+	for y := range ds1.tiles {
+		ds1.tiles[y] = make([]Tile, ds1.width)
+		for x := 0; x < int(ds1.width); x++ {
+			ds1.tiles[y][x].Walls = make([]Wall, ds1.numberOfWallLayers)
+			ds1.tiles[y][x].Floors = make([]Floor, ds1.numberOfFloorLayers)
+			ds1.tiles[y][x].Shadows = make([]Shadow, ds1.numberOfShadowLayers)
+			ds1.tiles[y][x].Substitutions = make([]Substitution, ds1.numberOfSubstitutionLayers)
 		}
 	}
 
@@ -121,7 +434,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		return nil, err
 	}
 
-	err = ds1.loadObjects(br)
+	err = ds1.loadobjects(br)
 	if err != nil {
 		return nil, err
 	}
@@ -142,41 +455,41 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 	var err error
 
-	ds1.Version, err = br.ReadInt32()
+	ds1.version, err = br.ReadInt32()
 	if err != nil {
 		return err
 	}
 
-	ds1.Width, err = br.ReadInt32()
+	ds1.width, err = br.ReadInt32()
 	if err != nil {
 		return err
 	}
 
-	ds1.Height, err = br.ReadInt32()
+	ds1.height, err = br.ReadInt32()
 	if err != nil {
 		return err
 	}
 
-	ds1.Width++
-	ds1.Height++
+	ds1.width++
+	ds1.height++
 
-	if ds1.Version >= v8 {
-		ds1.Act, err = br.ReadInt32()
+	if ds1.version >= v8 {
+		ds1.act, err = br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		ds1.Act = d2math.MinInt32(d2enum.ActsNumber, ds1.Act+1)
+		ds1.act = d2math.MinInt32(d2enum.ActsNumber, ds1.act+1)
 	}
 
-	if ds1.Version >= v10 {
-		ds1.SubstitutionType, err = br.ReadInt32()
+	if ds1.version >= v10 {
+		ds1.substitutionType, err = br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		if ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2 {
-			ds1.NumberOfSubstitutionLayers = 1
+		if ds1.substitutionType == 1 || ds1.substitutionType == 2 {
+			ds1.numberOfSubstitutionLayers = 1
 		}
 	}
 
@@ -189,17 +502,17 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 }
 
 func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
-	if ds1.Version >= v3 {
+	if ds1.version >= v3 {
 		// These files reference things that don't exist anymore :-?
 		numberOfFiles, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		ds1.Files = make([]string, numberOfFiles)
+		ds1.files = make([]string, numberOfFiles)
 
 		for i := 0; i < int(numberOfFiles); i++ {
-			ds1.Files[i] = ""
+			ds1.files[i] = ""
 
 			for {
 				ch, err := br.ReadByte()
@@ -211,7 +524,7 @@ func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
 					break
 				}
 
-				ds1.Files[i] += string(ch)
+				ds1.files[i] += string(ch)
 			}
 		}
 	}
@@ -219,18 +532,18 @@ func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
 	return nil
 }
 
-func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
-	if ds1.Version < v2 {
-		ds1.Objects = make([]Object, 0)
+func (ds1 *DS1) loadobjects(br *d2datautils.StreamReader) error {
+	if ds1.version < v2 {
+		ds1.objects = make([]Object, 0)
 	} else {
-		numberOfObjects, err := br.ReadInt32()
+		numberOfobjects, err := br.ReadInt32()
 		if err != nil {
 			return err
 		}
 
-		ds1.Objects = make([]Object, numberOfObjects)
+		ds1.objects = make([]Object, numberOfobjects)
 
-		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
+		for objIdx := 0; objIdx < int(numberOfobjects); objIdx++ {
 			obj := Object{}
 			objType, err := br.ReadInt32()
 			if err != nil {
@@ -263,7 +576,7 @@ func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
 			obj.Y = int(objY)
 			obj.Flags = int(objFlags)
 
-			ds1.Objects[objIdx] = obj
+			ds1.objects[objIdx] = obj
 		}
 	}
 
@@ -273,14 +586,14 @@ func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
 func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	var err error
 
-	hasSubstitutions := ds1.Version >= v12 && (ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2)
+	hasSubstitutions := ds1.version >= v12 && (ds1.substitutionType == subType1 || ds1.substitutionType == subType2)
 
 	if !hasSubstitutions {
-		ds1.SubstitutionGroups = make([]SubstitutionGroup, 0)
+		ds1.substitutionGroups = make([]SubstitutionGroup, 0)
 		return nil
 	}
 
-	if ds1.Version >= v18 {
+	if ds1.version >= v18 {
 		ds1.unknown2, err = br.ReadUInt32()
 		if err != nil {
 			return err
@@ -292,7 +605,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 		return err
 	}
 
-	ds1.SubstitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
+	ds1.substitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
 
 	for subIdx := 0; subIdx < int(numberOfSubGroups); subIdx++ {
 		newSub := SubstitutionGroup{}
@@ -322,7 +635,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 			return err
 		}
 
-		ds1.SubstitutionGroups[subIdx] = newSub
+		ds1.substitutionGroups[subIdx] = newSub
 	}
 
 	return err
@@ -331,7 +644,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
 	var layerStream []d2enum.LayerStreamType
 
-	if ds1.Version < v4 {
+	if ds1.version < v4 {
 		layerStream = []d2enum.LayerStreamType{
 			d2enum.LayerStreamWall1,
 			d2enum.LayerStreamFloor1,
@@ -342,23 +655,23 @@ func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
 	} else {
 		// nolint:gomnd // constant
 		layerStream = make([]d2enum.LayerStreamType,
-			(ds1.NumberOfWalls*2)+ds1.NumberOfFloors+ds1.NumberOfShadowLayers+ds1.NumberOfSubstitutionLayers)
+			(ds1.numberOfWallLayers*2)+ds1.numberOfFloorLayers+ds1.numberOfShadowLayers+ds1.numberOfSubstitutionLayers)
 
 		layerIdx := 0
-		for i := 0; i < int(ds1.NumberOfWalls); i++ {
+		for i := 0; i < int(ds1.numberOfWallLayers); i++ {
 			layerStream[layerIdx] = d2enum.LayerStreamType(int(d2enum.LayerStreamWall1) + i)
 			layerStream[layerIdx+1] = d2enum.LayerStreamType(int(d2enum.LayerStreamOrientation1) + i)
 			layerIdx += 2
 		}
-		for i := 0; i < int(ds1.NumberOfFloors); i++ {
+		for i := 0; i < int(ds1.numberOfFloorLayers); i++ {
 			layerStream[layerIdx] = d2enum.LayerStreamType(int(d2enum.LayerStreamFloor1) + i)
 			layerIdx++
 		}
-		if ds1.NumberOfShadowLayers > 0 {
+		if ds1.numberOfShadowLayers > 0 {
 			layerStream[layerIdx] = d2enum.LayerStreamShadow
 			layerIdx++
 		}
-		if ds1.NumberOfSubstitutionLayers > 0 {
+		if ds1.numberOfSubstitutionLayers > 0 {
 			layerStream[layerIdx] = d2enum.LayerStreamSubstitute
 		}
 	}
@@ -369,7 +682,7 @@ func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
 func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 	var err error
 
-	if ds1.Version < v14 {
+	if ds1.version < v14 {
 		return err
 	}
 
@@ -396,10 +709,10 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 
 		objIdx := -1
 
-		for idx, ds1Obj := range ds1.Objects {
+		for idx, ds1Obj := range ds1.objects {
 			if ds1Obj.X == int(npcX) && ds1Obj.Y == int(npcY) {
 				objIdx = idx
-				ds1.NpcIndexes = append(ds1.NpcIndexes, idx)
+				ds1.npcIndexes = append(ds1.npcIndexes, idx)
 
 				break
 			}
@@ -411,7 +724,7 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 				return err
 			}
 		} else {
-			if ds1.Version >= v15 {
+			if ds1.version >= v15 {
 				br.SkipBytes(int(numPaths) * 3) //nolint:gomnd // Unknown data
 			} else {
 				br.SkipBytes(int(numPaths) * 2) //nolint:gomnd // Unknown data
@@ -425,8 +738,8 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int) error {
 	var err error
 
-	if ds1.Objects[objIdx].Paths == nil {
-		ds1.Objects[objIdx].Paths = make([]d2path.Path, numPaths)
+	if ds1.objects[objIdx].Paths == nil {
+		ds1.objects[objIdx].Paths = make([]d2path.Path, numPaths)
 	}
 
 	for pathIdx := 0; pathIdx < numPaths; pathIdx++ {
@@ -444,7 +757,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int)
 
 		newPath.Position = d2vector.NewPosition(float64(px), float64(py))
 
-		if ds1.Version >= v15 {
+		if ds1.version >= v15 {
 			action, err := br.ReadInt32()
 			if err != nil {
 				return err
@@ -453,7 +766,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int)
 			newPath.Action = int(action)
 		}
 
-		ds1.Objects[objIdx].Paths[pathIdx] = newPath
+		ds1.objects[objIdx].Paths[pathIdx] = newPath
 	}
 
 	return err
@@ -468,11 +781,11 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 		0x0F, 0x10, 0x11, 0x12, 0x14,
 	}
 
-	for lIdx := range ds1.LayerStreamTypes {
-		layerStreamType := ds1.LayerStreamTypes[lIdx]
+	for lIdx := range ds1.layerStreamTypes {
+		layerStreamType := ds1.layerStreamTypes[lIdx]
 
-		for y := 0; y < int(ds1.Height); y++ {
-			for x := 0; x < int(ds1.Width); x++ {
+		for y := 0; y < int(ds1.height); y++ {
+			for x := 0; x < int(ds1.width); x++ {
 				dw, err := br.ReadUInt32() //nolint:govet // i want to re-use the err variable...
 				if err != nil {
 					return err
@@ -481,27 +794,27 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Decode(dw)
+					ds1.tiles[y][x].Walls[wallIndex].Decode(dw)
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
 					c := int32(dw & wallTypeBitmask)
 
-					if ds1.Version < v7 {
+					if ds1.version < v7 {
 						if c < int32(len(dirLookup)) {
 							c = dirLookup[c]
 						}
 					}
 
-					ds1.Tiles[y][x].Walls[wallIndex].Type = d2enum.TileType(c)
-					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & wallZeroBitmask) >> wallZeroOffset)
+					ds1.tiles[y][x].Walls[wallIndex].Type = d2enum.TileType(c)
+					ds1.tiles[y][x].Walls[wallIndex].Zero = byte((dw & wallZeroBitmask) >> wallZeroOffset)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					ds1.Tiles[y][x].Floors[floorIndex].Decode(dw)
+					ds1.tiles[y][x].Floors[floorIndex].Decode(dw)
 				case d2enum.LayerStreamShadow:
-					ds1.Tiles[y][x].Shadows[0].Decode(dw)
+					ds1.tiles[y][x].Shadows[0].Decode(dw)
 				case d2enum.LayerStreamSubstitute:
-					ds1.Tiles[y][x].Substitutions[0].Unknown = dw
+					ds1.tiles[y][x].Substitutions[0].Unknown = dw
 				}
 			}
 		}
@@ -516,22 +829,22 @@ func (ds1 *DS1) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
 	// Step 1 - encode header
-	sw.PushInt32(ds1.Version)
-	sw.PushInt32(ds1.Width - 1)
-	sw.PushInt32(ds1.Height - 1)
+	sw.PushInt32(ds1.version)
+	sw.PushInt32(ds1.width - 1)
+	sw.PushInt32(ds1.height - 1)
 
-	if ds1.Version >= v8 {
-		sw.PushInt32(ds1.Act - 1)
+	if ds1.version >= v8 {
+		sw.PushInt32(ds1.act - 1)
 	}
 
-	if ds1.Version >= v10 {
-		sw.PushInt32(ds1.SubstitutionType)
+	if ds1.version >= v10 {
+		sw.PushInt32(ds1.substitutionType)
 	}
 
-	if ds1.Version >= v3 {
-		sw.PushInt32(int32(len(ds1.Files)))
+	if ds1.version >= v3 {
+		sw.PushInt32(int32(len(ds1.files)))
 
-		for _, i := range ds1.Files {
+		for _, i := range ds1.files {
 			sw.PushBytes([]byte(i)...)
 
 			// separator
@@ -539,15 +852,15 @@ func (ds1 *DS1) Marshal() []byte {
 		}
 	}
 
-	if ds1.Version >= v9 && ds1.Version <= v13 {
+	if ds1.version >= v9 && ds1.version <= v13 {
 		sw.PushBytes(ds1.unknown1...)
 	}
 
-	if ds1.Version >= v4 {
-		sw.PushInt32(ds1.NumberOfWalls)
+	if ds1.version >= v4 {
+		sw.PushInt32(ds1.numberOfWallLayers)
 
-		if ds1.Version >= v16 {
-			sw.PushInt32(ds1.NumberOfFloors)
+		if ds1.version >= v16 {
+			sw.PushInt32(ds1.numberOfFloorLayers)
 		}
 	}
 
@@ -555,10 +868,10 @@ func (ds1 *DS1) Marshal() []byte {
 	ds1.encodeLayers(sw)
 
 	// Step 3 - encode objects
-	if !(ds1.Version < v2) {
-		sw.PushInt32(int32(len(ds1.Objects)))
+	if !(ds1.version < v2) {
+		sw.PushInt32(int32(len(ds1.objects)))
 
-		for _, i := range ds1.Objects {
+		for _, i := range ds1.objects {
 			sw.PushUint32(uint32(i.Type))
 			sw.PushUint32(uint32(i.ID))
 			sw.PushUint32(uint32(i.X))
@@ -568,12 +881,12 @@ func (ds1 *DS1) Marshal() []byte {
 	}
 
 	// Step 4 - encode substitutions
-	if ds1.Version >= v12 && (ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2) {
+	if ds1.version >= v12 && (ds1.substitutionType == subType1 || ds1.substitutionType == subType2) {
 		sw.PushUint32(ds1.unknown2)
 
-		sw.PushUint32(uint32(len(ds1.SubstitutionGroups)))
+		sw.PushUint32(uint32(len(ds1.substitutionGroups)))
 
-		for _, i := range ds1.SubstitutionGroups {
+		for _, i := range ds1.substitutionGroups {
 			sw.PushInt32(i.TileX)
 			sw.PushInt32(i.TileY)
 			sw.PushInt32(i.WidthInTiles)
@@ -589,31 +902,31 @@ func (ds1 *DS1) Marshal() []byte {
 }
 
 func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
-	for lIdx := range ds1.LayerStreamTypes {
-		layerStreamType := ds1.LayerStreamTypes[lIdx]
+	for lIdx := range ds1.layerStreamTypes {
+		layerStreamType := ds1.layerStreamTypes[lIdx]
 
-		for y := 0; y < int(ds1.Height); y++ {
-			for x := 0; x < int(ds1.Width); x++ {
+		for y := 0; y < int(ds1.height); y++ {
+			for x := 0; x < int(ds1.width); x++ {
 				dw := uint32(0)
 
 				switch layerStreamType {
 				case d2enum.LayerStreamWall1, d2enum.LayerStreamWall2, d2enum.LayerStreamWall3, d2enum.LayerStreamWall4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
-					ds1.Tiles[y][x].Walls[wallIndex].Encode(sw)
+					ds1.tiles[y][x].Walls[wallIndex].Encode(sw)
 				case d2enum.LayerStreamOrientation1, d2enum.LayerStreamOrientation2,
 					d2enum.LayerStreamOrientation3, d2enum.LayerStreamOrientation4:
 					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
-					dw |= uint32(ds1.Tiles[y][x].Walls[wallIndex].Type)
-					dw |= (uint32(ds1.Tiles[y][x].Walls[wallIndex].Zero) & wallZeroBitmask) << wallZeroOffset
+					dw |= uint32(ds1.tiles[y][x].Walls[wallIndex].Type)
+					dw |= (uint32(ds1.tiles[y][x].Walls[wallIndex].Zero) & wallZeroBitmask) << wallZeroOffset
 
 					sw.PushUint32(dw)
 				case d2enum.LayerStreamFloor1, d2enum.LayerStreamFloor2:
 					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
-					ds1.Tiles[y][x].Floors[floorIndex].Encode(sw)
+					ds1.tiles[y][x].Floors[floorIndex].Encode(sw)
 				case d2enum.LayerStreamShadow:
-					ds1.Tiles[y][x].Shadows[0].Encode(sw)
+					ds1.tiles[y][x].Shadows[0].Encode(sw)
 				case d2enum.LayerStreamSubstitute:
-					sw.PushUint32(ds1.Tiles[y][x].Substitutions[0].Unknown)
+					sw.PushUint32(ds1.tiles[y][x].Substitutions[0].Unknown)
 				}
 			}
 		}
@@ -622,19 +935,19 @@ func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
 
 func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
 	// Step 5.1 - encode npc's
-	sw.PushUint32(uint32(len(ds1.NpcIndexes)))
+	sw.PushUint32(uint32(len(ds1.npcIndexes)))
 
 	// Step 5.2 - enoce npcs' paths
-	for _, i := range ds1.NpcIndexes {
-		sw.PushUint32(uint32(len(ds1.Objects[i].Paths)))
-		sw.PushUint32(uint32(ds1.Objects[i].X))
-		sw.PushUint32(uint32(ds1.Objects[i].Y))
+	for _, i := range ds1.npcIndexes {
+		sw.PushUint32(uint32(len(ds1.objects[i].Paths)))
+		sw.PushUint32(uint32(ds1.objects[i].X))
+		sw.PushUint32(uint32(ds1.objects[i].Y))
 
-		for _, j := range ds1.Objects[i].Paths {
+		for _, j := range ds1.objects[i].Paths {
 			sw.PushUint32(uint32(j.Position.X()))
 			sw.PushUint32(uint32(j.Position.Y()))
 
-			if ds1.Version >= v15 {
+			if ds1.version >= v15 {
 				sw.PushUint32(uint32(j.Action))
 			}
 		}

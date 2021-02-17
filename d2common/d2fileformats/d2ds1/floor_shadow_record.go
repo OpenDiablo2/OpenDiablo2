@@ -30,8 +30,8 @@ const (
 	hiddenLength  = 1
 )
 
-// FloorShadowRecord represents a floor or shadow record in a DS1 file.
-type FloorShadowRecord struct {
+// FloorShadow represents a floor or shadow record in a DS1 file (they share a common struct).
+type FloorShadow struct {
 	Prop1       byte
 	Sequence    byte
 	Unknown1    byte
@@ -43,13 +43,19 @@ type FloorShadowRecord struct {
 	YAdjust     int
 }
 
+// Floor represents a floor record in a DS1 file. (it is just an alias of FloorShadow).
+type Floor = FloorShadow
+
+// Shadow represents a shadow record in a DS1 file. (it is just an alias of FloorShadow).
+type Shadow = FloorShadow
+
 // Hidden returns if floor/shadow is hidden
-func (f *FloorShadowRecord) Hidden() bool {
+func (f *Floor) Hidden() bool {
 	return f.HiddenBytes > 0
 }
 
 // Decode decodes floor-shadow record
-func (f *FloorShadowRecord) Decode(dw uint32) {
+func (f *Floor) Decode(dw uint32) {
 	f.Prop1 = byte((dw & prop1Bitmask) >> prop1Offset)
 	f.Sequence = byte((dw & sequenceBitmask) >> sequenceOffset)
 	f.Unknown1 = byte((dw & unknown1Bitmask) >> unknown1Offset)
@@ -59,7 +65,7 @@ func (f *FloorShadowRecord) Decode(dw uint32) {
 }
 
 // Encode adds Floor's bits to stream writter given
-func (f *FloorShadowRecord) Encode(sw *d2datautils.StreamWriter) {
+func (f *Floor) Encode(sw *d2datautils.StreamWriter) {
 	sw.PushBits32(uint32(f.Prop1), prop1Length)
 	sw.PushBits32(uint32(f.Sequence), sequenceLength)
 	sw.PushBits32(uint32(f.Unknown1), unknown1Length)
