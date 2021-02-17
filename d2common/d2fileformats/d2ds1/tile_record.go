@@ -1,9 +1,18 @@
 package d2ds1
 
-// TileRecord represents a tile record in a DS1 file.
-type TileRecord struct {
-	Floors        []FloorShadowRecord  // Collection of floor records
-	Walls         []WallRecord         // Collection of wall records
-	Shadows       []FloorShadowRecord  // Collection of shadow records
-	Substitutions []SubstitutionRecord // Collection of substitutions
+// Tile represents a tile record in a DS1 file.
+type Tile struct {
+	Floors        []Floor        // Collection of floor records
+	Walls         []Wall         // Collection of wall records
+	Shadows       []Shadow       // Collection of shadow records
+	Substitutions []Substitution // Collection of substitutions
+}
+
+func makeDefaultTile() Tile {
+	return Tile{
+		Floors:        []Floor{{}},
+		Walls:         []Wall{{}},
+		Shadows:       []Shadow{{}},
+		Substitutions: []Substitution{{}},
+	}
 }

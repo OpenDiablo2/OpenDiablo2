@@ -20,7 +20,7 @@ func DefaultConfig() *Configuration {
 		VsyncEnabled:    true,
 		SfxVolume:       defaultSfxVolume,
 		BgmVolume:       defaultBgmVolume,
-		MpqPath:         "C:/Program Files (x86)/Diablo II",
+		MpqPath:         "C:/Program files (x86)/Diablo II",
 		Backend:         "Ebiten",
 		MpqLoadOrder: []string{
 			"Patch_D2.mpq",
@@ -41,7 +41,7 @@ func DefaultConfig() *Configuration {
 	switch runtime.GOOS {
 	case "windows":
 		if runtime.GOARCH == "386" {
-			config.MpqPath = "C:/Program Files/Diablo II"
+			config.MpqPath = "C:/Program files/Diablo II"
 		}
 	case "darwin":
 		config.MpqPath = "/Applications/Diablo II/"
@@ -60,7 +60,7 @@ func DefaultConfig() *Configuration {
 		}
 	case "linux":
 		if usr, err := user.Current(); err == nil {
-			config.MpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
+			config.MpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program files (x86)/Diablo II")
 		}
 	}
 
