@@ -215,10 +215,10 @@ func TestDS1_SetTiles(t *testing.T) {
 	ds1 := exampleDS1()
 
 	exampleTile1 := Tile{
-		Floors: []FloorShadow{
+		Floors: []floorShadow{
 			{0, 0, 2, 3, 4, 55, 33, true, 999},
 		},
-		Shadows: []FloorShadow{
+		Shadows: []floorShadow{
 			{2, 4, 5, 33, 6, 7, 0, false, 1024},
 		},
 	}
@@ -227,7 +227,7 @@ func TestDS1_SetTiles(t *testing.T) {
 		Walls: []Wall{
 			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
 		},
-		Shadows: []FloorShadow{
+		Shadows: []floorShadow{
 			{2, 4, 5, 33, 6, 7, 0, false, 1024},
 		},
 	}
@@ -267,14 +267,14 @@ func TestDS1_SetTile(t *testing.T) {
 	ds1 := exampleDS1()
 
 	exampleTile := Tile{
-		Floors: []FloorShadow{
+		Floors: []floorShadow{
 			{5, 8, 9, 4, 3, 4, 2, true, 1024},
 			{8, 22, 7, 9, 6, 3, 0, false, 1024},
 		},
 		Walls: []Wall{
 			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
 		},
-		Shadows: []FloorShadow{
+		Shadows: []floorShadow{
 			{2, 44, 99, 2, 4, 3, 2, true, 933},
 		},
 	}

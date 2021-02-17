@@ -53,7 +53,7 @@ func (mr *MapRenderer) generateTileCache() {
 	}
 }
 
-func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadow) {
+func (mr *MapRenderer) generateFloorCache(tile *d2ds1.Floor) {
 	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), 0)
 
 	var tileData []*d2dt1.Tile
@@ -110,7 +110,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadow) {
 	}
 }
 
-func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadow) {
+func (mr *MapRenderer) generateShadowCache(tile *d2ds1.Shadow) {
 	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), d2enum.TileShadow)
 
 	var tileData *d2dt1.Tile
