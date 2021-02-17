@@ -22,7 +22,8 @@ const (
 	unknown3BytesCount      = 4
 )
 
-type fontGlyph struct {
+// FontGlyph represents a single font glyph
+type FontGlyph struct {
 	unknown1 []byte
 	unknown2 []byte
 	unknown3 []byte
@@ -31,17 +32,17 @@ type fontGlyph struct {
 	height   int
 }
 
-func (fg *fontGlyph) setHeight(h int) {
+func (fg *FontGlyph) setHeight(h int) {
 	fg.height = h
 }
 
 // Size returns glyph's size
-func (fg *fontGlyph) Size() (w, h int) {
+func (fg *FontGlyph) Size() (w, h int) {
 	return fg.width, fg.height
 }
 
 // FrameIndex returns glyph's frame
-func (fg *fontGlyph) FrameIndex() int {
+func (fg *FontGlyph) FrameIndex() int {
 	return fg.frame
 }
 
@@ -50,7 +51,7 @@ type Font struct {
 	unknownHeaderBytes []byte
 	sheet              d2interface.Animation
 	table              []byte
-	Glyphs             map[rune]*fontGlyph
+	Glyphs             map[rune]*FontGlyph
 	color              color.Color
 }
 
@@ -167,7 +168,7 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 }
 
 func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
-	glyphs := make(map[rune]*fontGlyph)
+	glyphs := make(map[rune]*FontGlyph)
 
 	for i := 12; i < len(f.table); i += 14 {
 		code, err := sr.ReadUInt16()
@@ -175,7 +176,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 			return err
 		}
 
-		var glyph fontGlyph
+		var glyph FontGlyph
 
 		// two bytes of 0
 		glyph.unknown1, err = sr.ReadBytes(unknown1BytesCount)
