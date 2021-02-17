@@ -30,8 +30,7 @@ const (
 	hiddenLength  = 1
 )
 
-// FloorShadow represents a floor or shadow record in a DS1 file (they share a common struct).
-type FloorShadow struct {
+type floorShadow struct {
 	Prop1       byte
 	Sequence    byte
 	Unknown1    byte
@@ -43,11 +42,11 @@ type FloorShadow struct {
 	YAdjust     int
 }
 
-// Floor represents a floor record in a DS1 file. (it is just an alias of FloorShadow).
-type Floor = FloorShadow
+// Floor represents a floor record in a DS1 file. (it is just an alias of floorShadow).
+type Floor = floorShadow
 
-// Shadow represents a shadow record in a DS1 file. (it is just an alias of FloorShadow).
-type Shadow = FloorShadow
+// Shadow represents a shadow record in a DS1 file. (it is just an alias of floorShadow).
+type Shadow = floorShadow
 
 // Hidden returns if floor/shadow is hidden
 func (f *Floor) Hidden() bool {
