@@ -32,6 +32,7 @@ type FontGlyph struct {
 	height   int
 }
 
+// SetSize sets glyph's size to w, h
 func (fg *FontGlyph) SetSize(w, h int) {
 	fg.width, fg.height = w, h
 }
@@ -41,6 +42,7 @@ func (fg *FontGlyph) Size() (w, h int) {
 	return fg.width, fg.height
 }
 
+// SetFrameIndex sets frame index to idx
 func (fg *FontGlyph) SetFrameIndex(idx int) {
 	fg.frame = idx
 }
