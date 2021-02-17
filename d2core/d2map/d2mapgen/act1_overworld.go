@@ -284,7 +284,7 @@ func (g *MapGenerator) generateWilderness1Contents(rect d2geom.Rectangle) {
 		for x := 0; x < rect.Width; x++ {
 			tile := g.engine.Tile(rect.Left+x, rect.Top+y)
 			tile.RegionType = d2enum.RegionIdType(levelDetails.LevelType)
-			tile.Components.Floors = []d2ds1.FloorShadowRecord{{Prop1: 1, Style: 0, Sequence: 0}} // wildernessGrass
+			tile.Components.Floors = []d2ds1.FloorShadow{{Prop1: 1, Style: 0, Sequence: 0}} // wildernessGrass
 			tile.PrepareTile(x, y, g.engine)
 		}
 	}
