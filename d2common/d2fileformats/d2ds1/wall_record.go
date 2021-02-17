@@ -14,14 +14,14 @@ type WallRecord struct {
 	Unknown1    byte
 	Style       byte
 	Unknown2    byte
-	hidden      byte
+	HiddenBytes byte
 	RandomIndex byte
 	YAdjust     int
 }
 
 // Hidden returns if wall is hidden
 func (w *WallRecord) Hidden() bool {
-	return w.hidden > 0
+	return w.HiddenBytes > 0
 }
 
 // Decode decodes wall record
@@ -31,7 +31,7 @@ func (w *WallRecord) Decode(dw uint32) {
 	w.Unknown1 = byte((dw & unknown1Bitmask) >> unknown1Offset)
 	w.Style = byte((dw & styleBitmask) >> styleOffset)
 	w.Unknown2 = byte((dw & unknown2Bitmask) >> unknown2Offset)
-	w.hidden = byte((dw & hiddenBitmask) >> hiddenOffset)
+	w.HiddenBytes = byte((dw & hiddenBitmask) >> hiddenOffset)
 }
 
 // Encode adds wall's record's bytes into stream writer given
@@ -41,5 +41,5 @@ func (w *WallRecord) Encode(sw *d2datautils.StreamWriter) {
 	sw.PushBits32(uint32(w.Unknown1), unknown1Length)
 	sw.PushBits32(uint32(w.Style), styleLength)
 	sw.PushBits32(uint32(w.Unknown2), unknown2Length)
-	sw.PushBits32(uint32(w.hidden), hiddenLength)
+	sw.PushBits32(uint32(w.HiddenBytes), hiddenLength)
 }
