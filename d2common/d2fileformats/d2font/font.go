@@ -35,12 +35,22 @@ func (fg *fontGlyph) setHeight(h int) {
 	fg.height = h
 }
 
+// Size returns glyph's size
+func (fg *fontGlyph) Size() (w, h int) {
+	return fg.width, fg.height
+}
+
+// FrameIndex returns glyph's frame
+func (fg *fontGlyph) FrameIndex() int {
+	return fg.frame
+}
+
 // Font represents a displayable font
 type Font struct {
 	unknownHeaderBytes []byte
 	sheet              d2interface.Animation
 	table              []byte
-	glyphs             map[rune]*fontGlyph
+	Glyphs             map[rune]*fontGlyph
 	color              color.Color
 }
 
@@ -82,8 +92,8 @@ func (f *Font) SetBackground(sheet d2interface.Animation) {
 	// recalculate max height
 	_, h := f.sheet.GetFrameBounds()
 
-	for i := range f.glyphs {
-		f.glyphs[i].setHeight(h)
+	for i := range f.Glyphs {
+		f.Glyphs[i].setHeight(h)
 	}
 }
 
@@ -105,7 +115,7 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 			height += lineHeight
 			lineWidth = 0
 			lineHeight = 0
-		} else if glyph, ok := f.glyphs[c]; ok {
+		} else if glyph, ok := f.Glyphs[c]; ok {
 			lineWidth += glyph.width
 			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
 		}
@@ -130,7 +140,7 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 		)
 
 		for _, c := range line {
-			glyph, ok := f.glyphs[c]
+			glyph, ok := f.Glyphs[c]
 			if !ok {
 				continue
 			}
@@ -209,7 +219,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 		glyphs[rune(code)] = &glyph
 	}
 
-	f.glyphs = glyphs
+	f.Glyphs = glyphs
 
 	return nil
 }
@@ -221,7 +231,7 @@ func (f *Font) Marshal() []byte {
 	sw.PushBytes([]byte("Woo!\x01")...)
 	sw.PushBytes(f.unknownHeaderBytes...)
 
-	for c, i := range f.glyphs {
+	for c, i := range f.Glyphs {
 		sw.PushUint16(uint16(c))
 		sw.PushBytes(i.unknown1...)
 		sw.PushBytes(byte(i.width))
