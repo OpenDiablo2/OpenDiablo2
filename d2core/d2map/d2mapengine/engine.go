@@ -118,8 +118,8 @@ func (m *MapEngine) AddDS1(fileName string) {
 		m.Error(err.Error())
 	}
 
-	for idx := range ds1.files {
-		dt1File := ds1.files[idx]
+	for idx := range ds1.Files() {
+		dt1File := ds1.Files()[idx]
 		dt1File = strings.ToLower(dt1File)
 		dt1File = strings.ReplaceAll(dt1File, "c:", "")       // Yes they did...
 		dt1File = strings.ReplaceAll(dt1File, ".tg1", ".dt1") // Yes they did...

@@ -31,7 +31,7 @@ type Stamp struct {
 
 // Size returns the size of the stamp in tiles.
 func (mr *Stamp) Size() d2geom.Size {
-	return d2geom.Size{Width: int(mr.ds1.Width), Height: int(mr.ds1.Height)}
+	return d2geom.Size{Width: mr.ds1.Width(), Height: mr.ds1.Height()}
 }
 
 // LevelPreset returns the level preset ID.
@@ -55,8 +55,8 @@ func (mr *Stamp) RegionPath() string {
 }
 
 // Tile returns the tile at the given x and y tile coordinates.
-func (mr *Stamp) Tile(x, y int) *d2ds1.TileRecord {
-	return &mr.ds1.Tiles[y][x]
+func (mr *Stamp) Tile(x, y int) *d2ds1.Tile {
+	return mr.ds1.Tile(x, y)
 }
 
 // TileData returns the tile data for the tile with given style, sequence and type.
@@ -75,9 +75,9 @@ func (mr *Stamp) TileData(style, sequence int32, tileType d2enum.TileType) *d2dt
 func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity {
 	entities := make([]d2interface.MapEntity, 0)
 
-	for _, object := range mr.ds1.Objects {
+	for _, object := range mr.ds1.Objects() {
 		if object.Type == int(d2enum.ObjectTypeCharacter) {
-			monPreset := mr.factory.asset.Records.Monster.Presets[mr.ds1.Act][object.ID]
+			monPreset := mr.factory.asset.Records.Monster.Presets[int32(mr.ds1.Act())][object.ID]
 			monstat := mr.factory.asset.Records.Monster.Stats[monPreset]
 			// If monstat is nil here it is a place_ type object, idk how to handle those yet.
 			// (See monpreset and monplace txts for reference)
@@ -97,7 +97,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 		if object.Type == int(d2enum.ObjectTypeItem) {
 			// For objects the DS1 ID to objectID is hardcoded in the game
 			// use the lookup table
-			lookup := mr.factory.asset.Records.LookupObject(int(mr.ds1.Act), object.Type, object.ID)
+			lookup := mr.factory.asset.Records.LookupObject(mr.ds1.Act(), object.Type, object.ID)
 
 			if lookup == nil {
 				continue

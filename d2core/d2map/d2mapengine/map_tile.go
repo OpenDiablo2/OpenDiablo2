@@ -8,7 +8,7 @@ import (
 
 // MapTile is a tile placed on the map
 type MapTile struct {
-	Components d2ds1.TileRecord
+	Components d2ds1.Tile
 	RegionType d2enum.RegionIdType
 	SubTiles   [25]d2dt1.SubTileFlags
 }
