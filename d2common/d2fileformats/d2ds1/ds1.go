@@ -140,6 +140,10 @@ func (ds1 *DS1) SetTiles(tiles [][]Tile) {
 
 // Tile returns the tile at the given x,y tile coordinate (nil if x,y is out of bounds)
 func (ds1 *DS1) Tile(x, y int) *Tile {
+	if ds1.dirty {
+		ds1.update()
+	}
+
 	if y >= len(ds1.tiles) {
 		return nil
 	}
