@@ -35,12 +35,20 @@ func (fg *fontGlyph) setHeight(h int) {
 	fg.height = h
 }
 
+func (fg *fontGlyph) GetSize() (w, h int) {
+	return fg.width, fg.height
+}
+
+func (fg *fontGlyph) GetFrameIndex() int {
+	return fg.frame
+}
+
 // Font represents a displayable font
 type Font struct {
 	unknownHeaderBytes []byte
 	sheet              d2interface.Animation
 	table              []byte
-	glyphs             map[rune]*fontGlyph
+	Glyphs             map[rune]*fontGlyph
 	color              color.Color
 }
 
