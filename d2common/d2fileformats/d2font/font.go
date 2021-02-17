@@ -35,13 +35,13 @@ func (fg *fontGlyph) setHeight(h int) {
 	fg.height = h
 }
 
-// GetSize returns glyph's size
-func (fg *fontGlyph) GetSize() (w, h int) {
+// Size returns glyph's size
+func (fg *fontGlyph) Size() (w, h int) {
 	return fg.width, fg.height
 }
 
-// GetFrameIndex returns glyph's frame
-func (fg *fontGlyph) GetFrameIndex() int {
+// FrameIndex returns glyph's frame
+func (fg *fontGlyph) FrameIndex() int {
 	return fg.frame
 }
 
