@@ -177,7 +177,7 @@ func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 		// 1, 0, 0, character code repeated, and further 0.
 		sr.SkipBytes(unknown3BytesCount)
 
-		glyph := d2fontglyph.Create(int(width), int(height), int(frame))
+		glyph := d2fontglyph.Create(int(frame), int(width), int(height))
 
 		glyphs[rune(code)] = glyph
 	}
