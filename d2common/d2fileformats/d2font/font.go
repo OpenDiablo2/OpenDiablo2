@@ -16,6 +16,8 @@ const (
 )
 
 const (
+	numHeaderBytes          = 12
+	bytesPerGlyph           = 14
 	signatureBytesCount     = 5
 	unknownHeaderBytesCount = 7
 	unknown1BytesCount      = 1
@@ -147,13 +149,13 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 	glyphs := make(map[rune]*d2fontglyph.FontGlyph)
 
-	for i := 12; i < len(f.table); i += 14 {
+	for i := numHeaderBytes; i < len(f.table); i += bytesPerGlyph {
 		code, err := sr.ReadUInt16()
 		if err != nil {
 			return err
 		}
 
-		// two bytes of 0
+		// byte of 0
 		sr.SkipBytes(unknown1BytesCount)
 
 		width, err := sr.ReadByte()
