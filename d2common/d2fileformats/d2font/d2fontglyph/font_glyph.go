@@ -8,7 +8,7 @@ func Create(frame, width, height int) *FontGlyph {
 	result := &FontGlyph{
 		unknown1: []byte{0},
 		unknown2: []byte{1, 0, 0},
-		unknown3: []byte{0, 0, 0, 0, 0},
+		unknown3: []byte{0, 0, 0, 0},
 		frame:    frame,
 		width:    width,
 		height:   height,
