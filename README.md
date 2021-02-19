@@ -3,7 +3,7 @@
 
 ![Logo](d2logo.png)
 
-James Hennessy Update
+James Hennessy Update, added new sounds to engine
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)\
