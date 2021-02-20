@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font/d2fontglyph"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
@@ -15,6 +16,8 @@ const (
 )
 
 const (
+	numHeaderBytes          = 12
+	bytesPerGlyph           = 14
 	signatureBytesCount     = 5
 	unknownHeaderBytesCount = 7
 	unknown1BytesCount      = 1
@@ -22,42 +25,12 @@ const (
 	unknown3BytesCount      = 4
 )
 
-// FontGlyph represents a single font glyph
-type FontGlyph struct {
-	unknown1 []byte
-	unknown2 []byte
-	unknown3 []byte
-	frame    int
-	width    int
-	height   int
-}
-
-// SetSize sets glyph's size to w, h
-func (fg *FontGlyph) SetSize(w, h int) {
-	fg.width, fg.height = w, h
-}
-
-// Size returns glyph's size
-func (fg *FontGlyph) Size() (w, h int) {
-	return fg.width, fg.height
-}
-
-// SetFrameIndex sets frame index to idx
-func (fg *FontGlyph) SetFrameIndex(idx int) {
-	fg.frame = idx
-}
-
-// FrameIndex returns glyph's frame
-func (fg *FontGlyph) FrameIndex() int {
-	return fg.frame
-}
-
 // Font represents a displayable font
 type Font struct {
 	unknownHeaderBytes []byte
 	sheet              d2interface.Animation
 	table              []byte
-	Glyphs             map[rune]*FontGlyph
+	Glyphs             map[rune]*d2fontglyph.FontGlyph
 	color              color.Color
 }
 
@@ -100,7 +73,7 @@ func (f *Font) SetBackground(sheet d2interface.Animation) {
 	_, h := f.sheet.GetFrameBounds()
 
 	for i := range f.Glyphs {
-		f.Glyphs[i].SetSize(f.Glyphs[i].width, h)
+		f.Glyphs[i].SetSize(f.Glyphs[i].Width(), h)
 	}
 }
 
@@ -123,8 +96,8 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 			lineWidth = 0
 			lineHeight = 0
 		} else if glyph, ok := f.Glyphs[c]; ok {
-			lineWidth += glyph.width
-			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
+			lineWidth += glyph.Width()
+			lineHeight = d2math.MaxInt(lineHeight, glyph.Height())
 		}
 	}
 
@@ -152,16 +125,16 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 				continue
 			}
 
-			if err := f.sheet.SetCurrentFrame(glyph.frame); err != nil {
+			if err := f.sheet.SetCurrentFrame(glyph.FrameIndex()); err != nil {
 				return err
 			}
 
 			f.sheet.Render(target)
 
-			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
+			lineHeight = d2math.MaxInt(lineHeight, glyph.Height())
 			lineLength++
 
-			target.PushTranslation(glyph.width, 0)
+			target.PushTranslation(glyph.Width(), 0)
 		}
 
 		target.PopN(lineLength)
@@ -174,56 +147,41 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 }
 
 func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
-	glyphs := make(map[rune]*FontGlyph)
+	glyphs := make(map[rune]*d2fontglyph.FontGlyph)
 
-	for i := 12; i < len(f.table); i += 14 {
+	for i := numHeaderBytes; i < len(f.table); i += bytesPerGlyph {
 		code, err := sr.ReadUInt16()
 		if err != nil {
 			return err
 		}
 
-		var glyph FontGlyph
-
-		// two bytes of 0
-		glyph.unknown1, err = sr.ReadBytes(unknown1BytesCount)
-		if err != nil {
-			return err
-		}
+		// byte of 0
+		sr.SkipBytes(unknown1BytesCount)
 
 		width, err := sr.ReadByte()
 		if err != nil {
 			return err
 		}
 
-		glyph.width = int(width)
-
 		height, err := sr.ReadByte()
 		if err != nil {
 			return err
 		}
 
-		glyph.height = int(height)
-
 		// 1, 0, 0
-		glyph.unknown2, err = sr.ReadBytes(unknown2BytesCount)
-		if err != nil {
-			return err
-		}
+		sr.SkipBytes(unknown2BytesCount)
 
 		frame, err := sr.ReadUInt16()
 		if err != nil {
 			return err
 		}
 
-		glyph.frame = int(frame)
-
 		// 1, 0, 0, character code repeated, and further 0.
-		glyph.unknown3, err = sr.ReadBytes(unknown3BytesCount)
-		if err != nil {
-			return err
-		}
+		sr.SkipBytes(unknown3BytesCount)
 
-		glyphs[rune(code)] = &glyph
+		glyph := d2fontglyph.Create(int(frame), int(width), int(height))
+
+		glyphs[rune(code)] = glyph
 	}
 
 	f.Glyphs = glyphs
@@ -240,12 +198,12 @@ func (f *Font) Marshal() []byte {
 
 	for c, i := range f.Glyphs {
 		sw.PushUint16(uint16(c))
-		sw.PushBytes(i.unknown1...)
-		sw.PushBytes(byte(i.width))
-		sw.PushBytes(byte(i.height))
-		sw.PushBytes(i.unknown2...)
-		sw.PushUint16(uint16(i.frame))
-		sw.PushBytes(i.unknown3...)
+		sw.PushBytes(i.Unknown1()...)
+		sw.PushBytes(byte(i.Width()))
+		sw.PushBytes(byte(i.Height()))
+		sw.PushBytes(i.Unknown2()...)
+		sw.PushUint16(uint16(i.FrameIndex()))
+		sw.PushBytes(i.Unknown3()...)
 	}
 
 	return sw.GetBytes()
