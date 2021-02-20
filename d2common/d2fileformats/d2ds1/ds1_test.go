@@ -1,8 +1,6 @@
 package d2ds1
 
 import (
-	"fmt"
-
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -48,11 +46,16 @@ func exampleDS1() *DS1 {
 }
 
 // checks, if DS1 structure could be marshaled and unmarshaled
-func testIfRestorable(ds1 *DS1) error {
+func testIfRestorable(ds1 *DS1, test func(ds1 *DS1)) error {
+	test(ds1)
+
 	var err error
 
 	data := ds1.Marshal()
-	_, err = LoadDS1(data)
+	newDS1, err := LoadDS1(data)
+	_ = newDS1
+
+	test(newDS1)
 
 	return err
 }
@@ -94,11 +97,13 @@ func TestDS1_AddFile(t *testing.T) {
 
 	numAfter := len(ds1.files)
 
-	if (numBefore + 1) != numAfter {
-		t.Error("unexpected number of files in ds1")
+	test := func(ds1 *DS1) {
+		if (numBefore + 1) != numAfter {
+			t.Error("unexpected number of files in ds1")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -106,35 +111,37 @@ func TestDS1_AddFile(t *testing.T) {
 func TestDS1_RemoveFile(t *testing.T) {
 	ds1 := exampleDS1()
 
-	numBefore := len(ds1.files)
+	test := func(ds1 *DS1) {
+		numBefore := len(ds1.files)
 
-	err := ds1.RemoveFile("nonexistant file")
-	if err == nil {
-		t.Fatal("file 'nonexistant file' doesn't exist but ds1.RemoveFile doesn't return error")
+		err := ds1.RemoveFile("nonexistant file")
+		if err == nil {
+			t.Fatal("file 'nonexistant file' doesn't exist but ds1.RemoveFile doesn't return error")
+		}
+
+		if len(ds1.files) != numBefore {
+			t.Error("file removed when it should not have been")
+		}
+
+		filename := "c.ds1"
+
+		ds1.AddFile(filename)
+
+		if len(ds1.files) == numBefore {
+			t.Error("file not added when it should have been")
+		}
+
+		err = ds1.RemoveFile(filename)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if len(ds1.files) != numBefore {
+			t.Error("file not removed when it should have been")
+		}
 	}
 
-	if len(ds1.files) != numBefore {
-		t.Error("file removed when it should not have been")
-	}
-
-	filename := "c.ds1"
-
-	ds1.AddFile(filename)
-
-	if len(ds1.files) == numBefore {
-		t.Error("file not added when it should have been")
-	}
-
-	err = ds1.RemoveFile(filename)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(ds1.files) != numBefore {
-		t.Error("file not removed when it should have been")
-	}
-
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -160,11 +167,13 @@ func TestDS1_AddObject(t *testing.T) {
 
 	numAfter := len(ds1.objects)
 
-	if (numBefore + 1) != numAfter {
-		t.Error("unexpected number of objects in ds1")
+	test := func(ds1 *DS1) {
+		if (numBefore + 1) != numAfter {
+			t.Error("unexpected number of objects in ds1")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -184,11 +193,13 @@ func TestDS1_RemoveObject(t *testing.T) {
 
 	ds1.RemoveObject(obj)
 
-	if len(ds1.objects) == numBefore {
-		t.Error("did not remove object when expected")
+	test := func(ds1 *DS1) {
+		if len(ds1.objects) == numBefore {
+			t.Error("did not remove object when expected")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -218,17 +229,29 @@ func TestDS1_SetTiles(t *testing.T) {
 		Floors: []floorShadow{
 			{0, 0, 2, 3, 4, 55, 33, true, 999},
 		},
-		Shadows: []floorShadow{
-			{2, 4, 5, 33, 6, 7, 0, false, 1024},
-		},
-	}
-
-	exampleTile2 := Tile{
 		Walls: []Wall{
 			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
 		},
 		Shadows: []floorShadow{
 			{2, 4, 5, 33, 6, 7, 0, false, 1024},
+		},
+		Substitutions: []Substitution{
+			{1024},
+		},
+	}
+
+	exampleTile2 := Tile{
+		Floors: []floorShadow{
+			{0, 0, 2, 3, 4, 55, 33, true, 999},
+		},
+		Walls: []Wall{
+			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
+		},
+		Shadows: []floorShadow{
+			{2, 4, 5, 33, 6, 7, 0, false, 1024},
+		},
+		Substitutions: []Substitution{
+			{1234},
 		},
 	}
 
@@ -244,12 +267,16 @@ func TestDS1_SetTiles(t *testing.T) {
 		t.Fatal("unexpected tile was set")
 	}
 
-	if ds1.tiles[0][1].Walls[0] != exampleTile2.Walls[0] {
+	if ds1.tiles[0][0].Walls[0] != exampleTile2.Walls[0] {
 		t.Fatal("unexpected tile was set")
 	}
 
-	if len(ds1.tiles[0][1].Walls) != len(exampleTile2.Walls) {
+	if len(ds1.tiles[0][0].Walls) != len(exampleTile2.Walls) {
 		t.Fatal("unexpected tile was set")
+	}
+
+	if err := testIfRestorable(ds1, func(_ *DS1) {}); err != nil {
+		t.Errorf("unable to restore: %v", err)
 	}
 }
 
@@ -268,28 +295,36 @@ func TestDS1_SetTile(t *testing.T) {
 
 	exampleTile := Tile{
 		Floors: []floorShadow{
-			{5, 8, 9, 4, 3, 4, 2, true, 1024},
-			{8, 22, 7, 9, 6, 3, 0, false, 1024},
+			{5, 8, 9, 4, 3, 0, 0, true, 1024},
 		},
 		Walls: []Wall{
-			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
+			{2, 0, 4, 5, 3, 2, 3, 0, 33, 99},
 		},
 		Shadows: []floorShadow{
 			{2, 44, 99, 2, 4, 3, 2, true, 933},
+		},
+		Substitutions: []Substitution{
+			{10244},
 		},
 	}
 
 	ds1.SetTile(0, 0, &exampleTile)
 
-	if ds1.tiles[0][0].Floors[0] != exampleTile.Floors[0] {
-		t.Fatal("unexpected tile was set")
+	test := func(ds1 *DS1) {
+		if ds1.tiles[0][0].Floors[0].Prop1 != exampleTile.Floors[0].Prop1 {
+			t.Fatal("c1.unexpected tile was set")
+		}
+
+		if ds1.tiles[0][0].Walls[0].Zero != exampleTile.Walls[0].Zero {
+			t.Fatal("c1.unexpected tile was set")
+		}
+
+		if len(ds1.tiles[0][0].Walls) != len(exampleTile.Walls) {
+			t.Fatal("c2.unexpected tile was set")
+		}
 	}
 
-	if len(ds1.tiles[0][0].Walls) != len(exampleTile.Walls) {
-		t.Fatal("unexpected tile was set")
-	}
-
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -311,11 +346,13 @@ func TestDS1_SetVersion(t *testing.T) {
 
 	ds1.SetVersion(newVersion)
 
-	if newVersion != int(ds1.version) {
-		t.Fatal("ds1.SetVersion set version incorrectly")
+	test := func(ds1 *DS1) {
+		if newVersion != int(ds1.version) {
+			t.Fatal("ds1.SetVersion set version incorrectly")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -335,11 +372,13 @@ func TestDS1_SetWidth(t *testing.T) {
 
 	ds1.SetWidth(int(newWidth))
 
-	if newWidth != ds1.width {
-		t.Fatal("unexpected width after set")
+	test := func(ds1 *DS1) {
+		if newWidth != ds1.width {
+			t.Fatal("unexpected width after set")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -359,12 +398,13 @@ func TestDS1_SetHeight(t *testing.T) {
 
 	ds1.SetHeight(int(newHeight))
 
-	if newHeight != ds1.height {
-		fmt.Println(newHeight, ds1.height)
-		t.Fatal("unexpected heigth after set")
+	test := func(ds1 *DS1) {
+		if newHeight != ds1.height {
+			t.Fatal("unexpected heigth after set")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -386,15 +426,17 @@ func TestDS1_SetAct(t *testing.T) {
 		t.Error("act cannot be less than 0")
 	}
 
-	nice := 69420
+	nice := 5
 
 	ds1.SetAct(nice)
 
-	if int(ds1.act) != nice {
-		t.Error("unexpected value for act")
+	test := func(ds1 *DS1) {
+		if int(ds1.act) != nice {
+			t.Error("unexpected value for act")
+		}
 	}
 
-	if err := testIfRestorable(ds1); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
