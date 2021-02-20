@@ -135,7 +135,9 @@ func (ds1 *DS1) SetTiles(tiles [][]Tile) {
 	}
 
 	ds1.tiles = tiles
+	ds1.layerStreamTypes = ds1.setupStreamLayerTypes()
 	ds1.dirty = true
+	ds1.update()
 }
 
 // Tile returns the tile at the given x,y tile coordinate (nil if x,y is out of bounds)

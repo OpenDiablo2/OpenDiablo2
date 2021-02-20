@@ -54,7 +54,7 @@ func (f *Floor) Hidden() bool {
 }
 
 // Decode decodes floor-shadow record
-func (f *Floor) Decode(dw uint32) {
+func (f *floorShadow) Decode(dw uint32) {
 	f.Prop1 = byte((dw & prop1Bitmask) >> prop1Offset)
 	f.Sequence = byte((dw & sequenceBitmask) >> sequenceOffset)
 	f.Unknown1 = byte((dw & unknown1Bitmask) >> unknown1Offset)
@@ -64,7 +64,7 @@ func (f *Floor) Decode(dw uint32) {
 }
 
 // Encode adds Floor's bits to stream writter given
-func (f *Floor) Encode(sw *d2datautils.StreamWriter) {
+func (f *floorShadow) Encode(sw *d2datautils.StreamWriter) {
 	sw.PushBits32(uint32(f.Prop1), prop1Length)
 	sw.PushBits32(uint32(f.Sequence), sequenceLength)
 	sw.PushBits32(uint32(f.Unknown1), unknown1Length)
