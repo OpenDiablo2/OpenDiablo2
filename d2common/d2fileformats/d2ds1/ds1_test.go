@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 )
 
 func exampleDS1() *DS1 {
@@ -11,18 +12,38 @@ func exampleDS1() *DS1 {
 		files: []string{"a.dt1", "b.dt1"},
 		objects: []Object{
 			{0, 0, 0, 0, 0, nil},
-			{0, 1, 0, 0, 0, nil},
+			{0, 1, 0, 0, 0, []d2path.Path{{}}},
 			{0, 2, 0, 0, 0, nil},
 			{0, 3, 0, 0, 0, nil},
 		},
 		tiles: [][]Tile{ // 2x2
 			{
-				Tile{[]Floor{{}}, []Wall{{}}, []Shadow{{}}, []Substitution{}},
-				Tile{[]Floor{{}}, []Wall{{}}, []Shadow{{}}, []Substitution{}},
+				Tile{
+					[]Floor{{}},
+					[]Wall{{}},
+					[]Shadow{{}},
+					[]Substitution{{}},
+				},
+				Tile{
+					[]Floor{{}},
+					[]Wall{{}},
+					[]Shadow{{}},
+					[]Substitution{{}},
+				},
 			},
 			{
-				Tile{[]Floor{{}}, []Wall{{}}, []Shadow{{}}, []Substitution{}},
-				Tile{[]Floor{{}}, []Wall{{}}, []Shadow{{}}, []Substitution{}},
+				Tile{
+					[]Floor{{}},
+					[]Wall{{}},
+					[]Shadow{{}},
+					[]Substitution{{}},
+				},
+				Tile{
+					[]Floor{{}},
+					[]Wall{{}},
+					[]Shadow{{}},
+					[]Substitution{{}},
+				},
 			},
 		},
 		substitutionGroups:         nil,
@@ -35,13 +56,7 @@ func exampleDS1() *DS1 {
 		numberOfFloorLayers:        1,
 		numberOfShadowLayers:       1,
 		numberOfSubstitutionLayers: 1,
-		layerStreamTypes: []d2enum.LayerStreamType{
-			d2enum.LayerStreamWall1,
-			d2enum.LayerStreamOrientation1,
-			d2enum.LayerStreamFloor1,
-			d2enum.LayerStreamShadow,
-		},
-		npcIndexes: []int{},
+		npcIndexes:                 []int{},
 	}
 }
 
@@ -52,12 +67,15 @@ func testIfRestorable(ds1 *DS1, test func(ds1 *DS1)) error {
 	var err error
 
 	data := ds1.Marshal()
+
 	newDS1, err := LoadDS1(data)
-	_ = newDS1
+	if err != nil {
+		return err
+	}
 
 	test(newDS1)
 
-	return err
+	return nil
 }
 
 func TestDS1_Marshal(t *testing.T) {
@@ -73,6 +91,10 @@ func TestDS1_Marshal(t *testing.T) {
 
 	if b.width != a.width {
 		t.Error("new ds1 does not match original")
+	}
+
+	if len(b.tiles) != len(a.tiles) {
+		t.Error("new ds1 does not batch original")
 	}
 }
 
@@ -227,22 +249,21 @@ func TestDS1_SetTiles(t *testing.T) {
 
 	exampleTile1 := Tile{
 		Floors: []floorShadow{
-			{0, 0, 2, 3, 4, 55, 33, true, 999},
+			{8, 7, 2, 3, 4, 55, 33, true, 999},
 		},
 		Walls: []Wall{
+			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
 			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
 		},
 		Shadows: []floorShadow{
 			{2, 4, 5, 33, 6, 7, 0, false, 1024},
-		},
-		Substitutions: []Substitution{
-			{1024},
 		},
 	}
 
 	exampleTile2 := Tile{
 		Floors: []floorShadow{
-			{0, 0, 2, 3, 4, 55, 33, true, 999},
+			{9, 9, 2, 3, 4, 55, 33, true, 999},
+			{9, 8, 2, 3, 102, 55, 33, true, 999},
 		},
 		Walls: []Wall{
 			{2, 3, 4, 5, 3, 2, 3, 0, 33, 99},
@@ -250,32 +271,31 @@ func TestDS1_SetTiles(t *testing.T) {
 		Shadows: []floorShadow{
 			{2, 4, 5, 33, 6, 7, 0, false, 1024},
 		},
-		Substitutions: []Substitution{
-			{1234},
-		},
 	}
 
-	tiles := [][]Tile{{exampleTile1, exampleTile2}}
+	tiles := [][]Tile{{exampleTile1, exampleTile2}, {exampleTile2, exampleTile1}}
 
 	ds1.SetTiles(tiles)
 
-	if ds1.tiles[0][0].Floors[0] != exampleTile1.Floors[0] {
-		t.Fatal("unexpected tile was set")
+	test := func(ds1 *DS1) {
+		if ds1.tiles[0][0].Floors[0].Prop1 != exampleTile1.Floors[0].Prop1 {
+			t.Fatal("1,unexpected tile was set")
+		}
+
+		if len(ds1.tiles[0][0].Walls) != len(exampleTile1.Walls) {
+			t.Fatal("2,unexpected tile was set")
+		}
+
+		if ds1.tiles[0][1].Walls[0].Style != exampleTile2.Walls[0].Style {
+			t.Fatal("3,unexpected tile was set")
+		}
+
+		if len(ds1.tiles[0][0].Walls) != len(exampleTile1.Walls) {
+			t.Fatal("4,unexpected tile was set")
+		}
 	}
 
-	if len(ds1.tiles[0][0].Walls) != len(exampleTile1.Walls) {
-		t.Fatal("unexpected tile was set")
-	}
-
-	if ds1.tiles[0][0].Walls[0] != exampleTile2.Walls[0] {
-		t.Fatal("unexpected tile was set")
-	}
-
-	if len(ds1.tiles[0][0].Walls) != len(exampleTile2.Walls) {
-		t.Fatal("unexpected tile was set")
-	}
-
-	if err := testIfRestorable(ds1, func(_ *DS1) {}); err != nil {
+	if err := testIfRestorable(ds1, test); err != nil {
 		t.Errorf("unable to restore: %v", err)
 	}
 }
@@ -299,12 +319,10 @@ func TestDS1_SetTile(t *testing.T) {
 		},
 		Walls: []Wall{
 			{2, 0, 4, 5, 3, 2, 3, 0, 33, 99},
+			{5, 8, 9, 4, 3, 0, 0, 124, 221, 12},
 		},
 		Shadows: []floorShadow{
 			{2, 44, 99, 2, 4, 3, 2, true, 933},
-		},
-		Substitutions: []Substitution{
-			{10244},
 		},
 	}
 
@@ -312,15 +330,15 @@ func TestDS1_SetTile(t *testing.T) {
 
 	test := func(ds1 *DS1) {
 		if ds1.tiles[0][0].Floors[0].Prop1 != exampleTile.Floors[0].Prop1 {
-			t.Fatal("c1.unexpected tile was set")
+			t.Fatal("unexpected tile was set")
 		}
 
 		if ds1.tiles[0][0].Walls[0].Zero != exampleTile.Walls[0].Zero {
-			t.Fatal("c1.unexpected tile was set")
+			t.Fatal("unexpected tile was set")
 		}
 
 		if len(ds1.tiles[0][0].Walls) != len(exampleTile.Walls) {
-			t.Fatal("c2.unexpected tile was set")
+			t.Fatal("unexpected tile was set")
 		}
 	}
 
@@ -471,11 +489,91 @@ func TestDS1_NumberOfWalls(t *testing.T) {
 	}
 }
 
+func TestDS1_SetNumberOfWalls(t *testing.T) {
+	ds1 := exampleDS1()
+
+	newNumber := int32(2)
+
+	ds1.SetNumberOfWallLayers(newNumber)
+
+	test := func(ds1 *DS1) {
+		if len(ds1.tiles[0][0].Walls) != int(newNumber) {
+			t.Fatal("unexpected walls length set")
+		}
+
+		if ds1.NumberOfWallLayers() != int(newNumber) {
+			t.Fatal("unexpected walls length set")
+		}
+	}
+
+	if err := testIfRestorable(ds1, test); err != nil {
+		t.Errorf("unable to restore: %v", err)
+	}
+
+	newNumber = 1
+
+	ds1.SetNumberOfWallLayers(newNumber)
+
+	test = func(ds1 *DS1) {
+		if len(ds1.tiles[0][0].Walls) != int(newNumber) {
+			t.Fatal("unexpected walls length set")
+		}
+
+		if ds1.NumberOfWallLayers() != int(newNumber) {
+			t.Fatal("unexpected walls length set")
+		}
+	}
+
+	if err := testIfRestorable(ds1, test); err != nil {
+		t.Errorf("unable to restore: %v", err)
+	}
+}
+
 func TestDS1_NumberOfFloors(t *testing.T) {
 	ds1 := exampleDS1()
 
 	if ds1.NumberOfFloorLayers() != int(ds1.numberOfFloorLayers) {
 		t.Error("unexpected number of floor layers")
+	}
+}
+
+func TestDS1_SetNumberOfFloors(t *testing.T) {
+	ds1 := exampleDS1()
+
+	newNumber := int32(2)
+
+	ds1.SetNumberOfFloorLayers(newNumber)
+
+	test := func(ds1 *DS1) {
+		if len(ds1.tiles[0][0].Floors) != int(newNumber) {
+			t.Fatal("unexpected floors length set")
+		}
+
+		if ds1.numberOfFloorLayers != newNumber {
+			t.Fatal("unexpected floors length set")
+		}
+	}
+
+	if err := testIfRestorable(ds1, test); err != nil {
+		t.Errorf("unable to restore: %v", err)
+	}
+
+	newNumber = 1
+
+	ds1.SetNumberOfFloorLayers(newNumber)
+
+	test = func(ds1 *DS1) {
+		if len(ds1.tiles[0][0].Floors) != int(newNumber) {
+			t.Fatal("unexpected floors length set")
+		}
+
+		if ds1.numberOfFloorLayers != newNumber {
+			t.Fatal("unexpected floors length set")
+		}
+	}
+
+	if err := testIfRestorable(ds1, test); err != nil {
+		t.Errorf("unable to restore: %v", err)
 	}
 }
 
@@ -524,5 +622,29 @@ func TestDS1_SetSubstitutionGroups(t *testing.T) {
 
 	if ds1.substitutionGroups[0] != newGroup[0] {
 		t.Fatal("unexpected substitution group added")
+	}
+}
+
+func TestDS1_setupStreamLayerTypes(t *testing.T) {
+	ds1 := exampleDS1()
+
+	lst := []d2enum.LayerStreamType{
+		d2enum.LayerStreamWall1,
+		d2enum.LayerStreamOrientation1,
+		d2enum.LayerStreamFloor1,
+		d2enum.LayerStreamShadow,
+		d2enum.LayerStreamSubstitute,
+	}
+
+	layerStreamTypes := ds1.setupStreamLayerTypes()
+
+	if len(lst) != len(layerStreamTypes) {
+		t.Fatal("unexpected length")
+	}
+
+	for i := range lst {
+		if lst[i] != layerStreamTypes[i] {
+			t.Fatal("Unexpected type was set")
+		}
 	}
 }
