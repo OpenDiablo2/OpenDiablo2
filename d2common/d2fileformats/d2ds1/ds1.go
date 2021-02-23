@@ -2,6 +2,7 @@ package d2ds1
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -56,10 +57,9 @@ type DS1 struct {
 	numberOfSubstitutionLayers int32               // SubstitutionNum number of substitution layer used
 	// substitutionGroupsNum      int32               // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
 
-	dirty      bool // when modifying tiles, need to perform upkeep on ds1 state
-	unknown1   []byte
-	unknown2   uint32
-	npcIndexes []int
+	dirty    bool // when modifying tiles, need to perform upkeep on ds1 state
+	unknown1 []byte
+	unknown2 uint32
 }
 
 // Files returns a list of file path strings.
@@ -323,35 +323,42 @@ func (ds1 *DS1) NumberOfWallLayers() int {
 }
 
 // SetNumberOfWallLayers sets new number of tiles' walls
-func (ds1 *DS1) SetNumberOfWallLayers(n int32) {
-	for y := range ds1.tiles {
-		for x := range ds1.tiles[y] {
-			for v := int32(0); v < n-int32(len(ds1.tiles[y][x].Walls)); v++ {
-				ds1.tiles[y][x].Walls = append(ds1.tiles[y][x].Walls, Wall{})
-			}
-		}
+func (ds1 *DS1) SetNumberOfWallLayers(n int32) error {
+	if n > d2enum.MaxNumberOfWalls {
+		return fmt.Errorf("cannot set number of walls to %d: number of walls is greater than %d", n, d2enum.MaxNumberOfWalls)
 	}
-
-	// if n = number of walls, do nothing
-	if n == ds1.numberOfWallLayers {
-		return
-	}
-
-	ds1.dirty = true
-	defer ds1.update()
 
 	for y := range ds1.tiles {
 		for x := range ds1.tiles[y] {
-			newWalls := make([]Wall, n)
-			for v := int32(0); v < n; v++ {
-				newWalls[v] = ds1.tiles[y][x].Walls[v]
+			// ugh, I don't know, WHY do I nned to use
+			// helper variable, but other way
+			// simply doesn't work
+			newWalls := ds1.tiles[y][x].Walls
+			for v := int32(0); v < (n - int32(len(ds1.tiles[y][x].Walls))); v++ {
+				newWalls = append(newWalls, Wall{0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 			}
 
 			ds1.tiles[y][x].Walls = newWalls
 		}
 	}
 
+	// if n = number of walls, do nothing
+	if n == ds1.numberOfWallLayers {
+		return nil
+	}
+
+	for y := range ds1.tiles {
+		for x := range ds1.tiles[y] {
+			ds1.tiles[y][x].Walls = ds1.tiles[y][x].Walls[:n]
+		}
+	}
+
 	ds1.numberOfWallLayers = n
+
+	ds1.dirty = true
+	ds1.update()
+
+	return nil
 }
 
 // NumberOfFloorLayers returns the number of floor layers per tile
@@ -364,21 +371,25 @@ func (ds1 *DS1) NumberOfFloorLayers() int {
 }
 
 // SetNumberOfFloorLayers sets new number of tiles' floors
-func (ds1 *DS1) SetNumberOfFloorLayers(n int32) {
-	// calculate, how much walls is missing
-	missingFloors := n - ds1.numberOfFloorLayers
+func (ds1 *DS1) SetNumberOfFloorLayers(n int32) error {
+	if n > d2enum.MaxNumberOfFloors {
+		return fmt.Errorf("cannot set number of floors to %d: number is greater than %d", n, d2enum.MaxNumberOfFloors)
+	}
 
 	for y := range ds1.tiles {
 		for x := range ds1.tiles[y] {
-			for v := int32(0); v < missingFloors; v++ {
-				ds1.tiles[y][x].Floors = append(ds1.tiles[y][x].Floors, Floor{})
+			newFloors := ds1.tiles[y][x].Floors
+			for v := int32(0); v < (n - int32(len(ds1.tiles[y][x].Floors))); v++ {
+				newFloors = append(newFloors, Floor{})
 			}
+
+			ds1.tiles[y][x].Floors = newFloors
 		}
 	}
 
 	// if n = number of walls, do nothing
 	if n == ds1.numberOfFloorLayers {
-		return
+		return nil
 	}
 
 	ds1.dirty = true
@@ -396,6 +407,8 @@ func (ds1 *DS1) SetNumberOfFloorLayers(n int32) {
 	}
 
 	ds1.numberOfFloorLayers = n
+
+	return nil
 }
 
 // NumberOfShadowLayers returns the number of shadow layers per tile
@@ -434,6 +447,7 @@ func (ds1 *DS1) update() {
 	ds1.SetSize(len(ds1.tiles[0]), len(ds1.tiles))
 
 	maxWalls := ds1.numberOfWallLayers
+
 	for y := range ds1.tiles {
 		for x := range ds1.tiles[y] {
 			if len(ds1.tiles[y][x].Walls) > int(maxWalls) {
@@ -442,7 +456,25 @@ func (ds1 *DS1) update() {
 		}
 	}
 
-	ds1.SetNumberOfWallLayers(maxWalls)
+	err := ds1.SetNumberOfWallLayers(maxWalls)
+	if err != nil {
+		log.Print(err)
+	}
+
+	maxFloors := ds1.numberOfFloorLayers
+
+	for y := range ds1.tiles {
+		for x := range ds1.tiles[y] {
+			if len(ds1.tiles[y][x].Floors) > int(maxFloors) {
+				maxFloors = int32(len(ds1.tiles[y][x].Floors))
+			}
+		}
+	}
+
+	err = ds1.SetNumberOfFloorLayers(maxFloors)
+	if err != nil {
+		log.Print(err)
+	}
 
 	ds1.dirty = false
 }
@@ -733,7 +765,8 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	return err
 }
 
-func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
+// GetStreamLayerTypes returns layers used in ds1
+func (ds1 *DS1) GetStreamLayerTypes() []d2enum.LayerStreamType {
 	var layerStream []d2enum.LayerStreamType
 
 	if ds1.version < v4 {
@@ -804,7 +837,6 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 		for idx, ds1Obj := range ds1.objects {
 			if ds1Obj.X == int(npcX) && ds1Obj.Y == int(npcY) {
 				objIdx = idx
-				ds1.npcIndexes = append(ds1.npcIndexes, idx)
 
 				break
 			}
@@ -869,7 +901,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 		0x0F, 0x10, 0x11, 0x12, 0x14,
 	}
 
-	layerStreamTypes := ds1.setupStreamLayerTypes()
+	layerStreamTypes := ds1.GetStreamLayerTypes()
 
 	for _, layerStreamType := range layerStreamTypes {
 		for y := 0; y < int(ds1.height); y++ {
@@ -990,7 +1022,7 @@ func (ds1 *DS1) Marshal() []byte {
 }
 
 func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
-	layerStreamTypes := ds1.setupStreamLayerTypes()
+	layerStreamTypes := ds1.GetStreamLayerTypes()
 
 	for _, layerStreamType := range layerStreamTypes {
 		for y := 0; y < int(ds1.height); y++ {
@@ -1022,21 +1054,29 @@ func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
 }
 
 func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
+	objectsWithPaths := make([]int, 0)
+
+	for n, obj := range ds1.objects {
+		if len(obj.Paths) != 0 {
+			objectsWithPaths = append(objectsWithPaths, n)
+		}
+	}
+
 	// Step 5.1 - encode npc's
-	sw.PushUint32(uint32(len(ds1.npcIndexes)))
+	sw.PushUint32(uint32(len(objectsWithPaths)))
 
 	// Step 5.2 - enoce npcs' paths
-	for _, i := range ds1.npcIndexes {
-		sw.PushUint32(uint32(len(ds1.objects[i].Paths)))
-		sw.PushUint32(uint32(ds1.objects[i].X))
-		sw.PushUint32(uint32(ds1.objects[i].Y))
+	for objectIdx := range objectsWithPaths {
+		sw.PushUint32(uint32(len(ds1.objects[objectIdx].Paths)))
+		sw.PushUint32(uint32(ds1.objects[objectIdx].X))
+		sw.PushUint32(uint32(ds1.objects[objectIdx].Y))
 
-		for _, j := range ds1.objects[i].Paths {
-			sw.PushUint32(uint32(j.Position.X()))
-			sw.PushUint32(uint32(j.Position.Y()))
+		for _, path := range ds1.objects[objectIdx].Paths {
+			sw.PushUint32(uint32(path.Position.X()))
+			sw.PushUint32(uint32(path.Position.Y()))
 
 			if ds1.version >= v15 {
-				sw.PushUint32(uint32(j.Action))
+				sw.PushUint32(uint32(path.Action))
 			}
 		}
 	}
