@@ -35,5 +35,6 @@ func TestPL2_MarshalUnmarshal(t *testing.T) {
 	}
 
 	if pl2.DarkendColorShift.Indices[0] != newPL2.DarkendColorShift.Indices[0] {
+		t.Fatal("unexpected index set")
 	}
 }
