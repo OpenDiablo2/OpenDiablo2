@@ -1,7 +1,8 @@
 package d2tbl
 
 import (
-	"errors"
+	"fmt"
+
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
@@ -16,14 +17,14 @@ func (td TextDictionary) loadHashEntries(hashEntries []*textDictionaryHashEntry,
 
 		active, err := br.ReadByte()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading active: %v", err)
 		}
 
 		entry.IsActive = active > 0
 
 		entry.Index, err = br.ReadUInt16()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading Index: %v", err)
 		}
 
 		entry.HashValue, err = br.ReadUInt32()
@@ -55,7 +56,7 @@ func (td TextDictionary) loadHashEntries(hashEntries []*textDictionaryHashEntry,
 		}
 
 		if err := td.loadHashEntry(idx, hashEntries[idx], br); err != nil {
-			return err
+			return fmt.Errorf("loading entry %d: %v", idx, err)
 		}
 	}
 
@@ -67,7 +68,7 @@ func (td TextDictionary) loadHashEntry(idx int, hashEntry *textDictionaryHashEnt
 
 	nameVal, err := br.ReadBytes(int(hashEntry.NameLength - 1))
 	if err != nil {
-		return err
+		return fmt.Errorf("reading name value: %v", err)
 	}
 
 	value := string(nameVal)
@@ -125,19 +126,32 @@ func LoadTextDictionary(dictionaryData []byte) (TextDictionary, error) {
 
 	var err error
 
+	/*
+		number of indicates
+		(https://d2mods.info/forum/viewtopic.php?p=202077#p202077)
+		Indices ...
+		An array of WORD. Each entry is an index into the hash table.
+		The actual string key index in the .bin file is an index into this table.
+		So to get a string from a key index ...
+	*/
 	numberOfElements, err := br.ReadUInt16()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading number of elements: %v", err)
 	}
 
 	hashTableSize, err := br.ReadUInt32()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading hash table size: %v", err)
 	}
 
 	// Version (always 0)
-	if _, err = br.ReadByte(); err != nil {
-		return nil, errors.New("error reading Version record")
+	version, err := br.ReadByte()
+	if err != nil {
+		return nil, fmt.Errorf("reading version: %v", err)
+	}
+
+	if version != 0 {
+		return nil, fmt.Errorf("version isn't equal to 0")
 	}
 
 	_, _ = br.ReadUInt32() // StringOffset
@@ -152,7 +166,7 @@ func LoadTextDictionary(dictionaryData []byte) (TextDictionary, error) {
 	for i := 0; i < int(numberOfElements); i++ {
 		elementIndex[i], err = br.ReadUInt16()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("reading element index %d: %v", i, err)
 		}
 	}
 
@@ -160,8 +174,78 @@ func LoadTextDictionary(dictionaryData []byte) (TextDictionary, error) {
 
 	err = lookupTable.loadHashEntries(hashEntries, br)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("loading has entries: %v", err)
 	}
 
 	return lookupTable, nil
+}
+
+// Marshal encodes text dictionary back into byte slice
+func (td *TextDictionary) Marshal() []byte {
+	sw := d2datautils.CreateStreamWriter()
+
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/1043
+	sw.PushBytes(0, 0)
+
+	sw.PushUint16(0)
+
+	sw.PushInt32(int32(len(*td)))
+
+	// version (always 0)
+	sw.PushBytes(0)
+
+	// offset of start of data (unnecessary for our decoder)
+	sw.PushUint32(0)
+
+	// Max retry count for a hash hit.
+	sw.PushUint32(0)
+
+	// offset to end of data (noop)
+	sw.PushUint32(0)
+
+	// indicates (len = 0, so nothing here)
+
+	// nolint:gomnd // 17 comes from the size of one "data-header index"
+	// dataPos is a position, when we're placing data stream
+	dataPos := len(sw.GetBytes()) + 17*len(*td)
+
+	for key, value := range *td {
+		// non-zero if record is used (for us, every record is used ;-)
+		sw.PushBytes(1)
+
+		// generally unused;
+		// 	string key index (used in .bin)
+		sw.PushUint16(0)
+
+		// also unused in our decoder
+		// 	calculated hash of the string.
+		sw.PushUint32(0)
+
+		sw.PushUint32(uint32(dataPos))
+		dataPos += len(key) + 1
+
+		sw.PushUint32(uint32(dataPos))
+		dataPos += len(value) + 1
+
+		sw.PushUint16(uint16(len(value) + 0))
+	}
+
+	// data stream: put all data in appropiate order
+	for key, value := range *td {
+		for _, i := range key {
+			sw.PushBytes(byte(i))
+		}
+
+		// 0 as separator
+		sw.PushBytes(0)
+
+		for _, i := range value {
+			sw.PushBytes(byte(i))
+		}
+
+		// 0 as separator
+		sw.PushBytes(0)
+	}
+
+	return sw.GetBytes()
 }
