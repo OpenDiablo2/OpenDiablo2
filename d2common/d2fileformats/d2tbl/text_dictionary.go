@@ -29,22 +29,22 @@ func (td TextDictionary) loadHashEntries(hashEntries []*textDictionaryHashEntry,
 
 		entry.HashValue, err = br.ReadUInt32()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading hash value: %v", err)
 		}
 
 		entry.IndexString, err = br.ReadUInt32()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading index string pos: %v", err)
 		}
 
 		entry.NameString, err = br.ReadUInt32()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading name string pos: %v", err)
 		}
 
 		entry.NameLength, err = br.ReadUInt16()
 		if err != nil {
-			return err
+			return fmt.Errorf("reading name length: %v", err)
 		}
 
 		hashEntries[i] = &entry
@@ -84,7 +84,7 @@ func (td TextDictionary) loadHashEntry(idx int, hashEntry *textDictionaryHashEnt
 		}
 
 		if err != nil {
-			return err
+			return fmt.Errorf("reading kay char: %v", err)
 		}
 
 		key += string(b)
