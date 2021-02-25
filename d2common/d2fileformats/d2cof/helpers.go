@@ -21,7 +21,7 @@ func (c *COF) Duration() float64 {
 		milliseconds = 1000
 	)
 
-	frameDelay := milliseconds / c.SpeedToFPS()
+	frameDelay := milliseconds / c.FPS()
 
 	return float64(c.FramesPerDirection) * frameDelay
 }
