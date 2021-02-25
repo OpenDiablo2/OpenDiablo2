@@ -230,7 +230,7 @@ func (td *TextDictionary) Marshal() []byte {
 		sw.PushUint16(uint16(len(value) + 1))
 	}
 
-	// data stream: put all data in appropiate order
+	// data stream: put all data in appropriate order
 	for key, value := range *td {
 		for _, i := range key {
 			sw.PushBytes(byte(i))

@@ -1,8 +1,6 @@
 package d2tbl
 
 import (
-	"fmt"
-
 	"testing"
 )
 
@@ -27,10 +25,11 @@ func TestTBL_Marshal(t *testing.T) {
 
 	for key, value := range *tbl {
 		newValue, ok := newTbl[key]
-		fmt.Println(newValue, value)
+
 		if !ok {
 			t.Fatal("string wasn't encoded to table")
 		}
+
 		if newValue != value {
 			t.Fatal("unexpected value set")
 		}
