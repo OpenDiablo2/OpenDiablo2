@@ -6,9 +6,9 @@ import (
 
 func exampleData() *TextDictionary {
 	result := &TextDictionary{
-		"abc":       "def",
-		"someStr":   "Some long string",
-		"lolstring": "lol",
+		"abc":        "def",
+		"someStr":    "Some long string",
+		"teststring": "TeSt",
 	}
 
 	return result
