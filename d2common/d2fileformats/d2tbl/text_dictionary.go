@@ -144,14 +144,10 @@ func LoadTextDictionary(dictionaryData []byte) (TextDictionary, error) {
 		return nil, fmt.Errorf("reading hash table size: %v", err)
 	}
 
-	// Version (always 0)
-	version, err := br.ReadByte()
+	// Version
+	_, err = br.ReadByte()
 	if err != nil {
 		return nil, fmt.Errorf("reading version: %v", err)
-	}
-
-	if version != 0 {
-		return nil, fmt.Errorf("version isn't equal to 0")
 	}
 
 	_, _ = br.ReadUInt32() // StringOffset
