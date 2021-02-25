@@ -41,3 +41,13 @@ func Load(data []byte) (*PL2, error) {
 
 	return result, nil
 }
+
+func (p *PL2) Marshal() []byte {
+	restruct.EnableExprBeta()
+	data, err := restruct.Pack(binary.LittleEndian, p)
+	if err != nil {
+		panic(err)
+	}
+
+	return data
+}
