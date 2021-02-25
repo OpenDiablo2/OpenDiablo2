@@ -65,18 +65,17 @@ type AssetManager struct {
 	*d2util.Logger
 	*d2loader.Loader
 
-	tables           []*d2tbl.TextDictionary
-	dt1s             d2interface.Cache
-	ds1s             d2interface.Cache
-	cofs             d2interface.Cache
-	dccs             d2interface.Cache
-	animations       d2interface.Cache
-	fonts            d2interface.Cache
-	palettes         d2interface.Cache
-	transforms       d2interface.Cache
-	Records          *d2records.RecordManager
-	language         string
-	languageModifier int
+	tables     []d2tbl.TextDictionary
+	dt1s       d2interface.Cache
+	ds1s       d2interface.Cache
+	cofs       d2interface.Cache
+	dccs       d2interface.Cache
+	animations d2interface.Cache
+	fonts      d2interface.Cache
+	palettes   d2interface.Cache
+	transforms d2interface.Cache
+	Records    *d2records.RecordManager
+	language   string
 }
 
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
@@ -268,7 +267,7 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 }
 
 // LoadStringTable loads a string table from the given path
-func (am *AssetManager) LoadStringTable(tablePath string) (*d2tbl.TextDictionary, error) {
+func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary, error) {
 	data, err := am.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
@@ -302,7 +301,7 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 	}
 
 	for idx := range am.tables {
-		if value, found := am.tables[idx].Entries[key]; found {
+		if value, found := am.tables[idx][key]; found {
 			return value
 		}
 	}
