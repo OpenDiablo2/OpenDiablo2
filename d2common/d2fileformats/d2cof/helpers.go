@@ -14,3 +14,14 @@ func (c *COF) SpeedToFPS() float64 {
 
 	return fps
 }
+
+// Duration returns animation's duration
+func (c *COF) Duration() float64 {
+	const (
+		milliseconds = 1000
+	)
+
+	frameDelay := milliseconds / c.SpeedToFPS()
+
+	return float64(c.FramesPerDirection) * frameDelay
+}
