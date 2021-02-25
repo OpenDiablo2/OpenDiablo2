@@ -227,7 +227,7 @@ func (td *TextDictionary) Marshal() []byte {
 		sw.PushUint32(uint32(dataPos))
 		dataPos += len(value) + 1
 
-		sw.PushUint16(uint16(len(value) + 0))
+		sw.PushUint16(uint16(len(value) + 1))
 	}
 
 	// data stream: put all data in appropiate order

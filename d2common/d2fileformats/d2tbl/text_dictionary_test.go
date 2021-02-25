@@ -19,13 +19,20 @@ func exampleData() *TextDictionary {
 func TestTBL_Marshal(t *testing.T) {
 	tbl := exampleData()
 	data := tbl.Marshal()
+
 	newTbl, err := LoadTextDictionary(data)
 	if err != nil {
 		t.Error(err)
 	}
 
-	_, ok := newTbl["lolstring"]
-	if !ok {
-		t.Fatal("no string found")
+	for key, value := range *tbl {
+		newValue, ok := newTbl[key]
+		fmt.Println(newValue, value)
+		if !ok {
+			t.Fatal("string wasn't encoded to table")
+		}
+		if newValue != value {
+			t.Fatal("unexpected value set")
+		}
 	}
 }
