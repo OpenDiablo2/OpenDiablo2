@@ -56,6 +56,7 @@ func (ad *AnimationData) GetRecords(name string) []*AnimationDataRecord {
 	return ad.entries[name]
 }
 
+// GetRecordsCount returns number of animation data records
 func (ad *AnimationData) GetRecordsCount() int {
 	return len(ad.entries)
 }
@@ -160,8 +161,10 @@ func (ad *AnimationData) Marshal() []byte {
 
 	// keys - all entries in animationData
 	keys := make([]string, len(ad.entries))
+
 	// we must manually add index
 	idx := 0
+
 	for i := range ad.entries {
 		keys[idx] = i
 		idx++
@@ -169,11 +172,13 @@ func (ad *AnimationData) Marshal() []byte {
 
 	// name terminates current name
 	name := 0
+
 	// recordIdx determinates current record index
 	recordIdx := 0
 
 	// numberOfEntries is a number of entries in all map indexes
 	var numberOfEntries int = 0
+
 	for i := 0; i < len(keys); i++ {
 		numberOfEntries += len(ad.entries[keys[i]])
 	}
@@ -181,16 +186,18 @@ func (ad *AnimationData) Marshal() []byte {
 	for idx := 0; idx < numBlocks; idx++ {
 		// number of records (max is maxRecordsPerObject)
 		l := 0
+
+		switch {
 		// first condition: end up with all this and push 0 to dhe end
-		if numberOfEntries == 0 {
+		case numberOfEntries == 0:
 			sw.PushUint32(0)
 			continue
+		case numberOfEntries < maxRecordsPerBlock:
 			// second condition - if number of entries left is smaller than
 			// maxRecordsPerBlock, push...
-		} else if numberOfEntries < maxRecordsPerBlock {
-			l = int(numberOfEntries)
+			l = numberOfEntries
 			sw.PushUint32(uint32(l))
-		} else {
+		default:
 			// else use maxRecordsPerBlock
 			l = maxRecordsPerBlock
 			sw.PushUint32(maxRecordsPerBlock)
@@ -198,6 +205,7 @@ func (ad *AnimationData) Marshal() []byte {
 
 		for currentRecordIdx := 0; currentRecordIdx < l; currentRecordIdx++ {
 			numberOfEntries--
+
 			if recordIdx == len(ad.entries[keys[name]]) {
 				recordIdx = 0
 				name++
@@ -208,8 +216,8 @@ func (ad *AnimationData) Marshal() []byte {
 
 			name := animationRecord.name
 			missingZeroBytes := byteCountName - len(name)
-			fmt.Println(name)
 			sw.PushBytes([]byte(name)...)
+
 			for i := 0; i < missingZeroBytes; i++ {
 				sw.PushBytes(0)
 			}

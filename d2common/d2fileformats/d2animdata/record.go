@@ -8,10 +8,12 @@ type AnimationDataRecord struct {
 	events             map[int]AnimationEvent
 }
 
+// FramesPerDirection returns frames per direction value
 func (r *AnimationDataRecord) FramesPerDirection() int {
 	return int(r.framesPerDirection)
 }
 
+// Speed returns animation's speed
 func (r *AnimationDataRecord) Speed() int {
 	return int(r.speed)
 }
