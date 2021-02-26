@@ -5,7 +5,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.15.6
+      - image: circleci/golang:1.15.8
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
