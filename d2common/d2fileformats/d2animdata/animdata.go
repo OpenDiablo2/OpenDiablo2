@@ -147,8 +147,85 @@ func Load(data []byte) (*AnimationData, error) {
 	}
 
 	if reader.Position() != uint64(len(data)) {
-		return nil, errors.New("unable to parse animation data")
+		return nil, fmt.Errorf("unable to parse animation data: %d != %d", reader.Position(), len(data))
 	}
 
 	return animdata, nil
+}
+
+// Marshal encodes animation data back into byte slice
+// basing on AnimationData.records
+func (ad *AnimationData) Marshal() []byte {
+	sw := d2datautils.CreateStreamWriter()
+
+	// keys - all entries in animationData
+	keys := make([]string, len(ad.entries))
+	// we must manually add index
+	idx := 0
+	for i := range ad.entries {
+		keys[idx] = i
+		idx++
+	}
+
+	// name terminates current name
+	name := 0
+	// recordIdx determinates current record index
+	recordIdx := 0
+
+	// numberOfEntries is a number of entries in all map indexes
+	var numberOfEntries int = 0
+	for i := 0; i < len(keys); i++ {
+		numberOfEntries += len(ad.entries[keys[i]])
+	}
+
+	for idx := 0; idx < numBlocks; idx++ {
+		// number of records (max is maxRecordsPerObject)
+		l := 0
+		// first condition: end up with all this and push 0 to dhe end
+		if numberOfEntries == 0 {
+			sw.PushUint32(0)
+			continue
+			// second condition - if number of entries left is smaller than
+			// maxRecordsPerBlock, push...
+		} else if numberOfEntries < maxRecordsPerBlock {
+			l = int(numberOfEntries)
+			sw.PushUint32(uint32(l))
+		} else {
+			// else use maxRecordsPerBlock
+			l = maxRecordsPerBlock
+			sw.PushUint32(maxRecordsPerBlock)
+		}
+
+		for currentRecordIdx := 0; currentRecordIdx < l; currentRecordIdx++ {
+			numberOfEntries--
+			if recordIdx == len(ad.entries[keys[name]]) {
+				recordIdx = 0
+				name++
+			}
+
+			animationRecord := ad.entries[keys[name]][recordIdx]
+			recordIdx++
+
+			name := animationRecord.name
+			missingZeroBytes := byteCountName - len(name)
+			fmt.Println(name)
+			sw.PushBytes([]byte(name)...)
+			for i := 0; i < missingZeroBytes; i++ {
+				sw.PushBytes(0)
+			}
+
+			sw.PushUint32(animationRecord.framesPerDirection)
+			sw.PushUint16(animationRecord.speed)
+
+			for i := 0; i < byteCountSpeedPadding; i++ {
+				sw.PushBytes(0)
+			}
+
+			for event := 0; event < numEvents; event++ {
+				sw.PushBytes(byte(animationRecord.events[event]))
+			}
+		}
+	}
+
+	return sw.GetBytes()
 }

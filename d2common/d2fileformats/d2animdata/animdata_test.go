@@ -1,10 +1,56 @@
 package d2animdata
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
 )
+
+func exampleData() *AnimationData {
+	testEntries := []*AnimationDataRecord{
+		&AnimationDataRecord{
+			"TST",
+			5, 8,
+			map[int]AnimationEvent{
+				1: AnimationEventNone,
+			},
+		},
+		&AnimationDataRecord{
+			"TST",
+			8, 3,
+			map[int]AnimationEvent{
+				2: AnimationEventNone,
+			},
+		},
+	}
+
+	testEntries2 := []*AnimationDataRecord{
+		&AnimationDataRecord{
+			"TTT",
+			7, 8,
+			map[int]AnimationEvent{
+				1: AnimationEventNone,
+			},
+		},
+		&AnimationDataRecord{
+			"TTT",
+			8, 9,
+			map[int]AnimationEvent{
+				8: AnimationEventNone,
+			},
+		},
+	}
+
+	result := &AnimationData{
+		entries: map[string][]*AnimationDataRecord{
+			"TST": testEntries,
+			"TTT": testEntries2,
+		},
+	}
+
+	return result
+}
 
 func TestLoad(t *testing.T) {
 	testFile, fileErr := os.Open("testdata/AnimData.d2")
@@ -152,5 +198,59 @@ func TestAnimationDataRecord_FPS(t *testing.T) {
 
 	if fps != float64(speedBaseFPS)/2 {
 		t.Error("incorrect fps")
+	}
+}
+
+func TestAnimationDataRecord_Marshal(t *testing.T) {
+	file, fileErr := os.Open("testdata/AnimData.d2")
+	if fileErr != nil {
+		t.Error("cannot open test data file")
+		return
+	}
+
+	data := make([]byte, 0)
+	buf := make([]byte, 16)
+
+	for {
+		numRead, err := file.Read(buf)
+
+		data = append(data, buf[:numRead]...)
+
+		if err != nil {
+			break
+		}
+	}
+
+	ad, err := Load(data)
+	if err != nil {
+		t.Error(err)
+	}
+	newData := ad.Marshal()
+	newAd, err := Load(newData)
+	if err != nil {
+		t.Error(err)
+	}
+
+	keys1 := make([]string, 0)
+	for i := range ad.entries {
+		keys1 = append(keys1, i)
+	}
+	keys2 := make([]string, 0)
+	for i := range newAd.entries {
+		keys2 = append(keys2, i)
+	}
+
+	if len(keys1) != len(keys2) {
+		t.Fatalf("unexpected length of keys in first and second dict: %d, %d", len(keys1), len(keys2))
+	}
+
+	fmt.Println(len(ad.entries["TST"]))
+	for key := range newAd.entries {
+		for n, i := range newAd.entries[key] {
+			fmt.Println(i.speed, ad.entries[key][n].speed)
+			if i.speed != ad.entries[key][n].speed {
+				t.Fatal("unexpected record set")
+			}
+		}
 	}
 }
