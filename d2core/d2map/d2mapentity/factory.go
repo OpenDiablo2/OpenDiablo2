@@ -108,8 +108,8 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	result.mapEntity.uuid = id
 	result.SetSpeed(baseWalkSpeed)
 	result.mapEntity.directioner = result.rotate
-	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 
+	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 	if err != nil {
 		panic(err)
 	}

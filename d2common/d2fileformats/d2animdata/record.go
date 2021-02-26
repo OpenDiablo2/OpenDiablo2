@@ -8,6 +8,14 @@ type AnimationDataRecord struct {
 	events             map[int]AnimationEvent
 }
 
+func (r *AnimationDataRecord) FramesPerDirection() int {
+	return int(r.framesPerDirection)
+}
+
+func (r *AnimationDataRecord) Speed() int {
+	return int(r.speed)
+}
+
 // FPS returns the frames per second for this animation record
 func (r *AnimationDataRecord) FPS() float64 {
 	speedf := float64(r.speed)

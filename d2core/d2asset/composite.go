@@ -265,9 +265,9 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		return nil, err
 	}
 
-	animationKey := strings.ToLower(c.token + animationMode.String() + weaponClass)
+	animationKey := strings.ToUpper(c.token + animationMode.String() + weaponClass)
 
-	animationData := c.Records.Animation.Data[animationKey]
+	animationData := c.Records.Animation.Data.GetRecords(animationKey)
 	if len(animationData) == 0 {
 		return nil, errors.New("could not find Animation data")
 	}
@@ -277,8 +277,8 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		animationMode:  animationMode,
 		weaponClass:    weaponClass,
 		layers:         make([]d2interface.Animation, d2enum.CompositeTypeMax),
-		frameCount:     animationData[0].FramesPerDirection,
-		animationSpeed: 1.0 / (float64(animationData[0].AnimationSpeed) * speedUnit), //nolint:gomnd // taking inverse
+		frameCount:     animationData[0].FramesPerDirection(),
+		animationSpeed: 1.0 / (float64(animationData[0].Speed()) * speedUnit), //nolint:gomnd // taking inverse
 	}
 
 	for _, cofLayer := range cof.CofLayers {

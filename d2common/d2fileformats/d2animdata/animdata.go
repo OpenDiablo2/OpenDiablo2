@@ -56,6 +56,10 @@ func (ad *AnimationData) GetRecords(name string) []*AnimationDataRecord {
 	return ad.entries[name]
 }
 
+func (ad *AnimationData) GetRecordsCount() int {
+	return len(ad.entries)
+}
+
 // Load loads the data into an AnimationData struct
 //nolint:gocognit,funlen // can't reduce
 func Load(data []byte) (*AnimationData, error) {
