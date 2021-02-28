@@ -224,7 +224,13 @@ func (td *TextDictionary) Marshal() []byte {
 		sw.PushUint32(0)
 
 		sw.PushUint32(uint32(dataPos))
-		dataPos += len(key) + 1
+
+		if key[0] == '#' {
+			// 1 for X, and 1 for separator
+			dataPos += 2
+		} else {
+			dataPos += len(key) + 1
+		}
 
 		sw.PushUint32(uint32(dataPos))
 		dataPos += len(value) + 1
@@ -235,6 +241,10 @@ func (td *TextDictionary) Marshal() []byte {
 	// data stream: put all data in appropriate order
 	for _, key := range keys {
 		value := (*td)[key]
+
+		if key[0] == '#' {
+			key = "x"
+		}
 
 		for _, i := range key {
 			sw.PushBytes(byte(i))

@@ -6,8 +6,11 @@ import (
 
 func exampleData() *TextDictionary {
 	result := &TextDictionary{
-		"abc":        "def",
-		"someStr":    "Some long string",
+		"abc":     "def",
+		"someStr": "Some long string",
+		// #2 is non-named (X: OK)
+		// so 2 is an index in map
+		"#2":         "OK",
 		"teststring": "TeStxwsas123 long strin122*8:wq",
 	}
 
