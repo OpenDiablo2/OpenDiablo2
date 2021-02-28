@@ -1,16 +1,15 @@
 package d2tbl
 
 import (
+	"fmt"
+
 	"testing"
 )
 
 func exampleData() *TextDictionary {
 	result := &TextDictionary{
-		"abc":     "def",
-		"someStr": "Some long string",
-		// #2 is non-named (X: OK)
-		// so 2 is an index in map
-		"#2":         "OK",
+		"abc":        "def",
+		"someStr":    "Some long string",
 		"teststring": "TeStxwsas123 long strin122*8:wq",
 	}
 
@@ -25,6 +24,8 @@ func TestTBL_Marshal(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	fmt.Println(newTbl)
 
 	for key, value := range *tbl {
 		newValue, ok := newTbl[key]
