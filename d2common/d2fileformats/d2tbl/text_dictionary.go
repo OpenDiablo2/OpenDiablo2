@@ -185,7 +185,12 @@ func (td *TextDictionary) Marshal() []byte {
 
 	sw.PushUint16(0)
 
-	sw.PushInt32(int32(len(*td)))
+	keys := make([]string, 0)
+	for key := range *td {
+		keys = append(keys, key)
+	}
+
+	sw.PushInt32(int32(len(keys)))
 
 	// version (always 0)
 	sw.PushBytes(0)
@@ -205,7 +210,8 @@ func (td *TextDictionary) Marshal() []byte {
 	// dataPos is a position, when we're placing data stream
 	dataPos := len(sw.GetBytes()) + 17*len(*td)
 
-	for key, value := range *td {
+	for _, key := range keys {
+		value := (*td)[key]
 		// non-zero if record is used (for us, every record is used ;-)
 		sw.PushBytes(1)
 
@@ -227,7 +233,8 @@ func (td *TextDictionary) Marshal() []byte {
 	}
 
 	// data stream: put all data in appropriate order
-	for key, value := range *td {
+	for _, key := range keys {
+		value := (*td)[key]
 		for _, i := range key {
 			sw.PushBytes(byte(i))
 		}
