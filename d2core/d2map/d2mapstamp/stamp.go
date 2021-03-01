@@ -54,9 +54,45 @@ func (mr *Stamp) RegionPath() string {
 	return mr.regionPath
 }
 
+type Tile struct {
+	Walls []d2ds1.Tile
+	Orientations []d2ds1.Tile
+	Floors []d2ds1.Tile
+	Shadows []d2ds1.Tile
+	Substitutions []d2ds1.Tile
+}
+
 // Tile returns the tile at the given x and y tile coordinates.
-func (mr *Stamp) Tile(x, y int) *d2ds1.Tile {
-	return mr.ds1.Tile(x, y)
+func (mr *Stamp) Tile(x, y int) *Tile {
+	t := &Tile{
+		Walls:         make([]d2ds1.Tile, len(mr.ds1.Walls)),
+		Orientations:  make([]d2ds1.Tile, len(mr.ds1.Orientations)),
+		Floors:        make([]d2ds1.Tile, len(mr.ds1.Floors)),
+		Shadows:       make([]d2ds1.Tile, len(mr.ds1.Shadows)),
+		Substitutions: make([]d2ds1.Tile, len(mr.ds1.Substitutions)),
+	}
+
+	for idx := range mr.ds1.Walls {
+		t.Walls[idx] = *mr.ds1.Walls[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Orientations {
+		t.Orientations[idx] = *mr.ds1.Orientations[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Floors {
+		t.Floors[idx] = *mr.ds1.Floors[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Shadows {
+		t.Shadows[idx] = *mr.ds1.Shadows[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Substitutions {
+		t.Substitutions[idx] = *mr.ds1.Substitutions[idx].Tile(x, y)
+	}
+
+	return t
 }
 
 // TileData returns the tile data for the tile with given style, sequence and type.
@@ -75,9 +111,9 @@ func (mr *Stamp) TileData(style, sequence int32, tileType d2enum.TileType) *d2dt
 func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity {
 	entities := make([]d2interface.MapEntity, 0)
 
-	for _, object := range mr.ds1.Objects() {
+	for _, object := range mr.ds1.Objects {
 		if object.Type == int(d2enum.ObjectTypeCharacter) {
-			monPreset := mr.factory.asset.Records.Monster.Presets[int32(mr.ds1.Act())][object.ID]
+			monPreset := mr.factory.asset.Records.Monster.Presets[mr.ds1.Act][object.ID]
 			monstat := mr.factory.asset.Records.Monster.Stats[monPreset]
 			// If monstat is nil here it is a place_ type object, idk how to handle those yet.
 			// (See monpreset and monplace txts for reference)
@@ -97,7 +133,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 		if object.Type == int(d2enum.ObjectTypeItem) {
 			// For objects the DS1 ID to objectID is hardcoded in the game
 			// use the lookup table
-			lookup := mr.factory.asset.Records.LookupObject(mr.ds1.Act(), object.Type, object.ID)
+			lookup := mr.factory.asset.Records.LookupObject(int(mr.ds1.Act), object.Type, object.ID)
 
 			if lookup == nil {
 				continue

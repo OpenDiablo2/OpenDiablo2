@@ -87,7 +87,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 		panic(err)
 	}
 
-	stamp.ds1, err = d2ds1.LoadDS1(fileData)
+	stamp.ds1, err = d2ds1.Unmarshal(fileData)
 	if err != nil {
 		f.Error(err.Error())
 		return nil

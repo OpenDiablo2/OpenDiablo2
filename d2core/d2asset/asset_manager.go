@@ -517,7 +517,7 @@ func (am *AssetManager) LoadDS1(ds1Path string) (*d2ds1.DS1, error) {
 		return nil, err
 	}
 
-	ds1, err := d2ds1.LoadDS1(fileData)
+	ds1, err := d2ds1.Unmarshal(fileData)
 	if err != nil {
 		return nil, err
 	}

@@ -393,7 +393,7 @@ func (mr *MapRenderer) renderTilePass3(tile *d2mapengine.MapTile, target d2inter
 	}
 }
 
-func (mr *MapRenderer) renderFloor(tile d2ds1.Floor, target d2interface.Surface) {
+func (mr *MapRenderer) renderFloor(tile d2ds1.Tile, target d2interface.Surface) {
 	var img d2interface.Surface
 	if !tile.Animated {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
@@ -415,7 +415,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.Floor, target d2interface.Surface)
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderWall(tile d2ds1.Wall, viewport *Viewport, target d2interface.Surface) {
+func (mr *MapRenderer) renderWall(tile d2ds1.Tile, viewport *Viewport, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		mr.Warningf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
@@ -431,7 +431,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.Wall, viewport *Viewport, target d2
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderShadow(tile d2ds1.Shadow, target d2interface.Surface) {
+func (mr *MapRenderer) renderShadow(tile d2ds1.Tile, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		mr.Warningf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
