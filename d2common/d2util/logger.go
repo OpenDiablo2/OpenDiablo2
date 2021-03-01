@@ -136,12 +136,13 @@ func (l *Logger) Errorf(fmtMsg string, args ...interface{}) {
 
 // Fatal logs an fatal error message and exits programm
 func (l *Logger) Fatal(msg string) {
+	defer os.Exit(1)
+
 	if l == nil || l.level < LogLevelFatal {
 		return
 	}
 
 	l.print(LogLevelFatal, msg)
-	os.Exit(1)
 }
 
 // Fatalf formats and then logs a error message
