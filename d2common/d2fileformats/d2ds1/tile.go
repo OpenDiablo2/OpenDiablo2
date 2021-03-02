@@ -32,8 +32,6 @@ const (
 )
 
 type tileCommonFields struct {
-	Type        d2enum.TileType
-	Zero        byte
 	Prop1       byte
 	Sequence    byte
 	Unknown1    byte
@@ -52,11 +50,17 @@ type tileSubstitutionFields struct {
 	Substitution uint32 // unknown
 }
 
+type tileWallFields struct {
+	Type d2enum.TileType
+	Zero byte
+}
+
 // Tile represents a tile record in a DS1 file.
 type Tile struct {
 	tileCommonFields
 	tileFloorShadowFields
 	tileSubstitutionFields
+	tileWallFields
 }
 
 // Hidden returns if wall is hidden

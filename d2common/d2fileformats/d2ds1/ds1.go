@@ -42,7 +42,7 @@ type DS1 struct {
 const (
 	defaultNumFloors        = 1
 	defaultNumShadows       = maxShadowLayers
-	defaultNumSubstitutions = maxSubstitutionLayers
+	defaultNumSubstitutions = 0
 )
 
 // Unmarshal the given bytes to a DS1 struct
@@ -154,8 +154,8 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 		return fmt.Errorf("reading height: %v", err)
 	}
 
-	//width++
-	//height++
+	width++
+	height++
 
 	ds1.SetSize(int(width), int(height))
 
@@ -506,7 +506,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 						}
 					}
 
-					tile := ds1.Orientations[wallIndex].Tile(x, y)
+					tile := ds1.Walls[wallIndex].Tile(x, y)
 					tile.Type = d2enum.TileType(c)
 					tile.Zero = byte((dw & wallZeroBitmask) >> wallZeroOffset)
 				case layerStreamFloor1, layerStreamFloor2:

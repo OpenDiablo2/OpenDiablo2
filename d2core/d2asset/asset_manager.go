@@ -519,7 +519,7 @@ func (am *AssetManager) LoadDS1(ds1Path string) (*d2ds1.DS1, error) {
 
 	ds1, err := d2ds1.Unmarshal(fileData)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("loading ds1 file %s: %v", "/data/global/tiles"+ds1Path, err)
 	}
 
 	if err := am.dt1s.Insert(ds1Path, ds1, defaultCacheEntryWeight); err != nil {
