@@ -26,7 +26,7 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Status
 
-At the moment (december 2020) the game starts, you can select any character and run around Act1 town.
+At the moment (march 2020) the game starts, you can select any character and run around Act1 town.
 You can also open any of the game's panels.
 
 Much work has been made in the background, but a lot of work still has to be done for the game to be playable.
