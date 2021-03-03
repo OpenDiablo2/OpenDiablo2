@@ -5,7 +5,7 @@
 # License: GNU GPLv3
 
 version="0.0.8"
-go_version="1.13.4"
+go_version="1.16"
 echo "OpenDiablo 2 Build Script $version"
 
 #=================================================
