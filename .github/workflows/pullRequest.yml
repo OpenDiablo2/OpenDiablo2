@@ -22,7 +22,7 @@ jobs:
 
             -   name: Run golangci-lint
                 continue-on-error: false
-                uses: golangci/golangci-lint-action@v2.4.0
+                uses: golangci/golangci-lint-action@v2.5.1
                 with:
                     version: v1.32
 
