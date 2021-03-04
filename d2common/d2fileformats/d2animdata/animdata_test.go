@@ -262,7 +262,10 @@ func TestAnimationData_AddEntry(t *testing.T) {
 		entries: make(map[string][]*AnimationDataRecord),
 	}
 
-	ad.AddEntry("a")
+	err := ad.AddEntry("a")
+	if err != nil {
+		t.Error(err)
+	}
 
 	if _, found := ad.entries["a"]; !found {
 		t.Fatal("entry wasn't added")
@@ -276,7 +279,10 @@ func TestAnimationData_DeleteEntry(t *testing.T) {
 		},
 	}
 
-	ad.DeleteEntry("a")
+	err := ad.DeleteEntry("a")
+	if err != nil {
+		t.Error(err)
+	}
 
 	if _, found := ad.entries["a"]; found {
 		t.Fatal("Entry wasn't deleted")

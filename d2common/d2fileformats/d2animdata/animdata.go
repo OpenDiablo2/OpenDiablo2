@@ -92,6 +92,7 @@ func (ad *AnimationData) DeleteRecord(name string, recordIdx int) error {
 	return nil
 }
 
+// AddEntry adds a new animation entry with name given
 func (ad *AnimationData) AddEntry(name string) error {
 	_, found := ad.entries[name]
 	if found {
@@ -103,6 +104,7 @@ func (ad *AnimationData) AddEntry(name string) error {
 	return nil
 }
 
+// DeleteEntry deltees entry with specified name
 func (ad *AnimationData) DeleteEntry(name string) error {
 	_, found := ad.entries[name]
 	if !found {
