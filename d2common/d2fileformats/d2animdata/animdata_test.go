@@ -155,7 +155,7 @@ func TestAnimationDataRecord_FPS(t *testing.T) {
 	}
 }
 
-func TestAnimationDataRecord_Marshal(t *testing.T) {
+func TestAnimationData_Marshal(t *testing.T) {
 	file, fileErr := os.Open("testdata/AnimData.d2")
 	if fileErr != nil {
 		t.Error("cannot open test data file")
@@ -207,5 +207,84 @@ func TestAnimationDataRecord_Marshal(t *testing.T) {
 				t.Fatal("unexpected record set")
 			}
 		}
+	}
+}
+
+func TestAnimationData_DeleteRecord(t *testing.T) {
+	ad := &AnimationData{
+		entries: map[string][]*AnimationDataRecord{
+			"a": {
+				{name: "a", speed: 1, framesPerDirection: 1},
+				{name: "a", speed: 2, framesPerDirection: 2},
+				{name: "a", speed: 3, framesPerDirection: 3},
+			},
+		},
+	}
+
+	err := ad.DeleteRecord("a", 1)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(ad.entries["a"]) != 2 {
+		t.Fatal("Delete record error")
+	}
+
+	if ad.entries["a"][1].speed != 3 {
+		t.Fatal("Invalid index deleted")
+	}
+}
+
+func TestAnimationData_PushRecord(t *testing.T) {
+	ad := &AnimationData{
+		entries: map[string][]*AnimationDataRecord{
+			"a": {
+				{name: "a", speed: 1, framesPerDirection: 1},
+				{name: "a", speed: 2, framesPerDirection: 2},
+			},
+		},
+	}
+
+	ad.PushRecord("a")
+
+	if len(ad.entries["a"]) != 3 {
+		t.Fatal("No record was pushed")
+	}
+
+	if ad.entries["a"][2].name != "a" {
+		t.Fatal("unexpected name of new record was set")
+	}
+}
+
+func TestAnimationData_AddEntry(t *testing.T) {
+	ad := &AnimationData{
+		entries: make(map[string][]*AnimationDataRecord),
+	}
+
+	err := ad.AddEntry("a")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, found := ad.entries["a"]; !found {
+		t.Fatal("entry wasn't added")
+	}
+}
+
+func TestAnimationData_DeleteEntry(t *testing.T) {
+	ad := &AnimationData{
+		entries: map[string][]*AnimationDataRecord{
+			"a": {{}, {}},
+		},
+	}
+
+	err := ad.DeleteEntry("a")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, found := ad.entries["a"]; found {
+		t.Fatal("Entry wasn't deleted")
 	}
 }

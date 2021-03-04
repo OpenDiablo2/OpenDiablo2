@@ -61,6 +61,61 @@ func (ad *AnimationData) GetRecordsCount() int {
 	return len(ad.entries)
 }
 
+// PushRecord adds a new record to entry named 'name'
+func (ad *AnimationData) PushRecord(name string) {
+	ad.entries[name] = append(
+		ad.entries[name],
+		&AnimationDataRecord{
+			name: name,
+		},
+	)
+}
+
+// DeleteRecord teletes specified index from specified entry
+func (ad *AnimationData) DeleteRecord(name string, recordIdx int) error {
+	newRecords := make([]*AnimationDataRecord, 0)
+
+	for n, i := range ad.entries[name] {
+		if n == recordIdx {
+			continue
+		}
+
+		newRecords = append(newRecords, i)
+	}
+
+	if len(ad.entries[name]) == len(newRecords) {
+		return fmt.Errorf("index %d not found", recordIdx)
+	}
+
+	ad.entries[name] = newRecords
+
+	return nil
+}
+
+// AddEntry adds a new animation entry with name given
+func (ad *AnimationData) AddEntry(name string) error {
+	_, found := ad.entries[name]
+	if found {
+		return fmt.Errorf("entry of name %s already exist", name)
+	}
+
+	ad.entries[name] = make([]*AnimationDataRecord, 0)
+
+	return nil
+}
+
+// DeleteEntry deltees entry with specified name
+func (ad *AnimationData) DeleteEntry(name string) error {
+	_, found := ad.entries[name]
+	if !found {
+		return fmt.Errorf("entry named %s doesn't exist", name)
+	}
+
+	delete(ad.entries, name)
+
+	return nil
+}
+
 // Load loads the data into an AnimationData struct
 //nolint:gocognit,funlen // can't reduce
 func Load(data []byte) (*AnimationData, error) {
