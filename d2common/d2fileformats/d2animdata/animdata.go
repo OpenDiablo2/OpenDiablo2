@@ -61,6 +61,7 @@ func (ad *AnimationData) GetRecordsCount() int {
 	return len(ad.entries)
 }
 
+// PushRecord adds a new record to entry named 'name'
 func (ad *AnimationData) PushRecord(name string) {
 	ad.entries[name] = append(
 		ad.entries[name],
@@ -70,8 +71,10 @@ func (ad *AnimationData) PushRecord(name string) {
 	)
 }
 
+// DeleteRecord teletes specified index from specified entry
 func (ad *AnimationData) DeleteRecord(name string, recordIdx int) error {
 	newRecords := make([]*AnimationDataRecord, 0)
+
 	for n, i := range ad.entries[name] {
 		if n == recordIdx {
 			continue
