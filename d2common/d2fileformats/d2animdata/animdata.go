@@ -92,6 +92,28 @@ func (ad *AnimationData) DeleteRecord(name string, recordIdx int) error {
 	return nil
 }
 
+func (ad *AnimationData) AddEntry(name string) error {
+	_, found := ad.entries[name]
+	if found {
+		return fmt.Errorf("entry of name %s already exist", name)
+	}
+
+	ad.entries[name] = make([]*AnimationDataRecord, 0)
+
+	return nil
+}
+
+func (ad *AnimationData) DeleteEntry(name string) error {
+	_, found := ad.entries[name]
+	if !found {
+		return fmt.Errorf("entry named %s doesn't exist", name)
+	}
+
+	delete(ad.entries, name)
+
+	return nil
+}
+
 // Load loads the data into an AnimationData struct
 //nolint:gocognit,funlen // can't reduce
 func Load(data []byte) (*AnimationData, error) {

@@ -256,3 +256,29 @@ func TestAnimationData_PushRecord(t *testing.T) {
 		t.Fatal("unexpected name of new record was set")
 	}
 }
+
+func TestAnimationData_AddEntry(t *testing.T) {
+	ad := &AnimationData{
+		entries: make(map[string][]*AnimationDataRecord),
+	}
+
+	ad.AddEntry("a")
+
+	if _, found := ad.entries["a"]; !found {
+		t.Fatal("entry wasn't added")
+	}
+}
+
+func TestAnimationData_DeleteEntry(t *testing.T) {
+	ad := &AnimationData{
+		entries: map[string][]*AnimationDataRecord{
+			"a": {{}, {}},
+		},
+	}
+
+	ad.DeleteEntry("a")
+
+	if _, found := ad.entries["a"]; found {
+		t.Fatal("Entry wasn't deleted")
+	}
+}
