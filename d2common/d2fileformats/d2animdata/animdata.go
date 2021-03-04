@@ -61,6 +61,34 @@ func (ad *AnimationData) GetRecordsCount() int {
 	return len(ad.entries)
 }
 
+func (ad *AnimationData) PushRecord(name string) {
+	ad.entries[name] = append(
+		ad.entries[name],
+		&AnimationDataRecord{
+			name: name,
+		},
+	)
+}
+
+func (ad *AnimationData) DeleteRecord(name string, recordIdx int) error {
+	newRecords := make([]*AnimationDataRecord, 0)
+	for n, i := range ad.entries[name] {
+		if n == recordIdx {
+			continue
+		}
+
+		newRecords = append(newRecords, i)
+	}
+
+	if len(ad.entries[name]) == len(newRecords) {
+		return fmt.Errorf("index %d not found", recordIdx)
+	}
+
+	ad.entries[name] = newRecords
+
+	return nil
+}
+
 // Load loads the data into an AnimationData struct
 //nolint:gocognit,funlen // can't reduce
 func Load(data []byte) (*AnimationData, error) {
