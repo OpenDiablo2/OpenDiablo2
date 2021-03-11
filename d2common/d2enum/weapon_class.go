@@ -25,6 +25,7 @@ const (
 	WeaponClassTwoHandToHand                           // ht2
 )
 
+// Name returns a full name of weapon class
 func (w WeaponClass) Name() string {
 	strings := map[WeaponClass]string{
 		WeaponClassNone:                 "None",
