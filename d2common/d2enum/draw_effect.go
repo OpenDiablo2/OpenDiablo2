@@ -61,7 +61,7 @@ func (d DrawEffect) String() string {
 
 	drawEffect, found := strings[d]
 	if !found {
-		return "Unknown"
+		return unknown
 	}
 
 	return drawEffect

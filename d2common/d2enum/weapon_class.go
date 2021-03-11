@@ -46,7 +46,7 @@ func (w WeaponClass) Name() string {
 
 	weaponClass, found := strings[w]
 	if !found {
-		return "Unknown"
+		return unknown
 	}
 
 	return weaponClass
