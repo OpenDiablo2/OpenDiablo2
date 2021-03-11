@@ -14,5 +14,5 @@ func (p *PL2Color24Bits) RGBA() uint32 {
 
 // SetRGBA sets PL2Color's value to rgba given
 func (p *PL2Color24Bits) SetRGBA(rgba uint32) {
-	p.R, p.G, p.B, _ = toComponent(rgba)
+	p.R, p.G, p.B = toComponent(rgba)
 }

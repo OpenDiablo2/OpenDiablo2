@@ -24,7 +24,7 @@ func (p *PL2Color) RGBA() uint32 {
 
 // SetRGBA sets PL2Color's value to rgba given
 func (p *PL2Color) SetRGBA(rgba uint32) {
-	p.R, p.G, p.B, _ = toComponent(rgba)
+	p.R, p.G, p.B = toComponent(rgba)
 }
 
 func toComposite(w, x, y, z uint8) uint32 {
@@ -36,11 +36,10 @@ func toComposite(w, x, y, z uint8) uint32 {
 	return composite
 }
 
-func toComponent(wxyz uint32) (w, x, y, z uint8) {
+func toComponent(wxyz uint32) (w, x, y uint8) {
 	w = uint8(wxyz >> bitShift24 & mask)
 	x = uint8(wxyz >> bitShift16 & mask)
 	y = uint8(wxyz >> bitShift8 & mask)
-	z = uint8(wxyz >> bitShift0 & mask)
 
-	return w, x, y, z
+	return w, x, y
 }
