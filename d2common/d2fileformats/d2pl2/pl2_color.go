@@ -5,6 +5,8 @@ const (
 	bitShift8
 	bitShift16
 	bitShift24
+
+	mask = 0xff
 )
 
 // PL2Color represents an RGBA color
@@ -15,14 +17,12 @@ type PL2Color struct {
 	_ uint8
 }
 
-const (
-	mask = 0xff
-)
-
+// RGBA returns RGBA values of PL2Color
 func (p *PL2Color) RGBA() uint32 {
 	return toComposite(p.R, p.G, p.B, mask)
 }
 
+// SetRGBA sets PL2Color's value to rgba given
 func (p *PL2Color) SetRGBA(rgba uint32) {
 	p.R, p.G, p.B, _ = toComponent(rgba)
 }
