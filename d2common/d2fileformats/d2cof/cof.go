@@ -193,7 +193,7 @@ func (c *COF) Marshal() []byte {
 	sw.PushBytes(c.unknownBodyBytes...)
 
 	for i := range c.CofLayers {
-		sw.PushBytes(byte(c.CofLayers[i].Type.Int()))
+		sw.PushBytes(byte(c.CofLayers[i].Type))
 		sw.PushBytes(c.CofLayers[i].Shadow)
 
 		if c.CofLayers[i].Selectable {
