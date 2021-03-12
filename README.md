@@ -1,4 +1,5 @@
 # OpenDiablo2
+
 [![CircleCI](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master.svg?style=svg)](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master)
 
 ![Logo](d2logo.png)
@@ -8,7 +9,7 @@
 [Support us on Patreon](https://www.patreon.com/bePatron?u=37261055)
 
 We are also working on a toolset:\
-[https://github.com/OpenDiablo2/HellSpawner](https://github.com/OpenDiablo2/HellSpawner)\
+<https://github.com/OpenDiablo2/HellSpawner>\
 Please consider helping out with this project as well!
 
 ## About this project
@@ -25,7 +26,7 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Status
 
-At the moment (december 2020) the game starts, you can select any character and run around Act1 town.
+At the moment (march 2021) the game starts, you can select any character and run around Act1 town.
 You can also open any of the game's panels.
 
 Much work has been made in the background, but a lot of work still has to be done for the game to be playable.
@@ -59,14 +60,14 @@ for tasks on our discord server.
 **As of Oct. 26, 2020 we will no longer be accepting pull requests that introduce lint errors.**
 
 We use `golangci-lint` to catch lint errors, and we require all contributors to install and use
- it. Installation instructions can be found [here](https://golangci-lint.run/usage/install/).
+it. Installation instructions can be found [here](https://golangci-lint.run/usage/install/).
 
 ## VS Code Extensions
 
 The following extensions are recommended for working with this project:
 
--   ms-vscode.go
--   defaltd.go-coverage-viewer
+*   ms-vscode.go
+*   defaltd.go-coverage-viewer
 
 When you open the workspace for the first time, Visual Studio Code will automatically suggest these extensions for installation.
 
@@ -76,7 +77,7 @@ then clicking on `Edit in settings.json`. Just paste that section where appropri
 ## Configuration
 
 The engine is configured via the `config.json` file. By default, the configuration assumes that you have installed Diablo 2 and the
-expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
+expansion via the official Blizzard Diablo 2 installers using the default file paths. If you are not on Windows, or have installed
 the game in a different location, the base path may have to be adjusted.
 
 ## Profiling
@@ -124,9 +125,9 @@ which will be updated over time with new requirements.
 
 ## Additional Credits
 
--   Diablo2 Logo
-    -   Jose Pardilla (th3-prophetman)
--   DT1 File Specifications
-    -   Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
--   Other Specifications and general info
-    -   Various users on [Phrozen Keep](https://d2mods.info/home.php)
+*   Diablo2 Logo
+    *   Jose Pardilla (th3-prophetman)
+*   DT1 File Specifications
+    *   Paul SIRAMY (http://paul.siramy.free.fr/\_divers/dt1\_doc/)
+*   Other Specifications and general info
+    *   Various users on [Phrozen Keep](https://d2mods.info/home.php)
