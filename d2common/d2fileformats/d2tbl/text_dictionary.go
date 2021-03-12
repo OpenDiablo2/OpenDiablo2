@@ -2,7 +2,6 @@ package d2tbl
 
 import (
 	"fmt"
-
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
@@ -190,7 +189,7 @@ func (td *TextDictionary) Marshal() []byte {
 		keys = append(keys, key)
 	}
 
-	sw.PushInt32(int32(len(keys)))
+	sw.PushUint32(uint32(len(keys)))
 
 	// version (always 0)
 	sw.PushBytes(0)
@@ -246,16 +245,12 @@ func (td *TextDictionary) Marshal() []byte {
 			key = "x"
 		}
 
-		for _, i := range key {
-			sw.PushBytes(byte(i))
-		}
+		sw.PushBytes([]byte(key)...)
 
 		// 0 as separator
 		sw.PushBytes(0)
 
-		for _, i := range value {
-			sw.PushBytes(byte(i))
-		}
+		sw.PushBytes([]byte(value)...)
 
 		// 0 as separator
 		sw.PushBytes(0)
