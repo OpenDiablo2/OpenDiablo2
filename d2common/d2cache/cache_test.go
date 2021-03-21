@@ -4,12 +4,20 @@ import (
 	"testing"
 )
 
-
 func TestCacheInsert(t *testing.T) {
 	cache := CreateCache(1)
 	insertError := cache.Insert("A", "", 1)
 	if insertError != nil {
 		t.Fatalf("Cache insert resulted in unexpected error: %s", insertError)
+	}
+}
+
+// TODO: do we want cache insert to fail if we add a node with weight > budget?
+func TestCacheInsertWithinBudget(t *testing.T) {
+	cache := CreateCache(1)
+	insertError := cache.Insert("A", "", 2)
+	if insertError == nil {
+		t.Fatalf("Cache insert of node weight larger than budget did not result in error")
 	}
 }
 
@@ -80,4 +88,3 @@ func TestClear(t *testing.T) {
 		t.Fatal("Still able to retrieve nodes after cache was cleared")
 	}
 }
-
