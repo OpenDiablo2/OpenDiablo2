@@ -16,8 +16,8 @@ func TestCacheInsert(t *testing.T) {
 func TestCacheInsertWithinBudget(t *testing.T) {
 	cache := CreateCache(1)
 	insertError := cache.Insert("A", "", 2)
-	if insertError == nil {
-		t.Fatalf("Cache insert of node weight larger than budget did not result in error")
+	if insertError != nil {
+		t.Fatalf("Cache insert resulted in unexpected error: %s", insertError)
 	}
 }
 
