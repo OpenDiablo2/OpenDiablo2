@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 )
 
-func exampleData() *DS1 {
+func exampleData() *DS1 { //nolint:funlen // not a big deal if this is long func
 	exampleFloor1 := Tile{
 		// common fields
 		tileCommonFields: tileCommonFields{

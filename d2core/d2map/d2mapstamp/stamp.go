@@ -54,11 +54,13 @@ func (mr *Stamp) RegionPath() string {
 	return mr.regionPath
 }
 
+// Tile represents a map tile, which can have a variable amount of floors, walls, shadows as layers.
+// Typically, there will be an Orientation layer for each wall layer.
 type Tile struct {
-	Walls []d2ds1.Tile
-	Orientations []d2ds1.Tile
-	Floors []d2ds1.Tile
-	Shadows []d2ds1.Tile
+	Walls         []d2ds1.Tile
+	Orientations  []d2ds1.Tile
+	Floors        []d2ds1.Tile
+	Shadows       []d2ds1.Tile
 	Substitutions []d2ds1.Tile
 }
 

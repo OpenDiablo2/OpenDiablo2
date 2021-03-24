@@ -58,9 +58,9 @@ type tileWallFields struct {
 // Tile represents a tile record in a DS1 file.
 type Tile struct {
 	tileCommonFields
-	tileFloorShadowFields
 	tileSubstitutionFields
 	tileWallFields
+	tileFloorShadowFields
 }
 
 // Hidden returns if wall is hidden

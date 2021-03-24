@@ -4,17 +4,17 @@ type ds1version int
 
 const (
 	v3  ds1version = 3
-	v4             = 4
-	v7             = 7
-	v8             = 8
-	v9             = 9
-	v10            = 10
-	v12            = 12
-	v13            = 13
-	v14            = 14
-	v15            = 15
-	v16            = 16
-	v18            = 18
+	v4  ds1version = 4
+	v7  ds1version = 7
+	v8  ds1version = 8
+	v9  ds1version = 9
+	v10 ds1version = 10
+	v12 ds1version = 12
+	v13 ds1version = 13
+	v14 ds1version = 14
+	v15 ds1version = 15
+	v16 ds1version = 16
+	v18 ds1version = 18
 )
 
 func (v ds1version) hasUnknown1Bytes() bool {

@@ -46,23 +46,23 @@ func Test_ds1Layers_PopWall(t *testing.T) {}
 
 func Test_ds1Layers_Push(t *testing.T) {
 	t.Run("Floor", func(t *testing.T) {
-		test_ds1Layers_PushLayer(floorLayerGroup, t)
+		ds1layerTest(floorLayerGroup, t)
 	})
 
 	t.Run("Wall", func(t *testing.T) {
-		test_ds1Layers_PushLayer(wallLayerGroup, t)
+		ds1layerTest(wallLayerGroup, t)
 	})
 
 	t.Run("Orientation", func(t *testing.T) {
-		test_ds1Layers_PushLayer(orientationLayerGroup, t)
+		ds1layerTest(orientationLayerGroup, t)
 	})
 
 	t.Run("Shadow", func(t *testing.T) {
-		test_ds1Layers_PushLayer(shadowLayerGroup, t)
+		ds1layerTest(shadowLayerGroup, t)
 	})
 
 	t.Run("Substitution", func(t *testing.T) {
-		test_ds1Layers_PushLayer(substitutionLayerGroup, t)
+		ds1layerTest(substitutionLayerGroup, t)
 	})
 }
 
@@ -70,7 +70,7 @@ func Test_ds1Layers_Push(t *testing.T) {
 // when we push a layer, we expect an increment, and when we push a bunch of times,
 // we expect to never exceed the max. we also expect to be able to retrieve a non-nil
 // layer after we push.
-func test_ds1Layers_PushLayer(lt layerGroupType, t *testing.T) {
+func ds1layerTest(lt layerGroupType, t *testing.T) { //nolint:funlen // no biggie
 	layers := &ds1Layers{}
 
 	// we need to set up some shit to handle the test in a generic way
@@ -139,14 +139,5 @@ func test_ds1Layers_PushLayer(lt layerGroupType, t *testing.T) {
 	push()
 	push()
 	push()
-	push()
 	check(max)
 }
-
-func test_ds1Layers_PopLayer(lt layerGroupType, t *testing.T) {}
-
-func test_ds1Layers_InsertLayer(lt layerGroupType, t *testing.T) {}
-
-func test_ds1Layers_DeleteLayer(lt layerGroupType, t *testing.T) {}
-
-func test_ds1Layers_GetLayer(lt layerGroupType, t *testing.T) {}

@@ -54,79 +54,14 @@ func Unmarshal(fileData []byte) (*DS1, error) {
 func (ds1 *DS1) Unmarshal(fileData []byte) (*DS1, error) {
 	ds1.ds1Layers = &ds1Layers{}
 
-	br := d2datautils.CreateStreamReader(fileData)
+	stream := d2datautils.CreateStreamReader(fileData)
 
-	var err error
-
-	var numWalls, numFloors, numShadows, numSubstitutions int32
-
-	numFloors = defaultNumFloors
-	numShadows = defaultNumShadows
-	numSubstitutions = defaultNumSubstitutions
-
-	err = ds1.loadHeader(br)
-	if err != nil {
+	if err := ds1.loadHeader(stream); err != nil {
 		return nil, fmt.Errorf("loading header: %v", err)
 	}
 
-	if ds1.version.hasUnknown1Bytes() {
-		ds1.unknown1, err = br.ReadBytes(unknown1BytesCount)
-		if err != nil {
-			return nil, fmt.Errorf("reading unknown1: %v", err)
-		}
-	}
-
-	if ds1.version.specifiesWalls() {
-		numWalls, err = br.ReadInt32()
-		if err != nil {
-			return nil, fmt.Errorf("reading wall number: %v", err)
-		}
-
-		if ds1.version.specifiesFloors() {
-			numFloors, err = br.ReadInt32()
-			if err != nil {
-				return nil, fmt.Errorf("reading number of Floors: %v", err)
-			}
-		}
-	}
-
-	for ; numWalls > 0; numWalls-- {
-		ds1.PushWall(&layer{})
-		ds1.PushOrientation(&layer{})
-	}
-
-	for ; numShadows > 0; numShadows-- {
-		ds1.PushShadow(&layer{})
-	}
-
-	for ; numFloors > 0; numFloors-- {
-		ds1.PushFloor(&layer{})
-	}
-
-	for ; numSubstitutions > 0; numSubstitutions-- {
-		ds1.PushSubstitution(&layer{})
-	}
-
-	ds1.SetSize(ds1.width, ds1.height)
-
-	err = ds1.loadLayerStreams(br)
-	if err != nil {
-		return nil, fmt.Errorf("loading layer streams: %v", err)
-	}
-
-	err = ds1.loadObjects(br)
-	if err != nil {
-		return nil, fmt.Errorf("loading Objects: %v", err)
-	}
-
-	err = ds1.loadSubstitutions(br)
-	if err != nil {
-		return nil, fmt.Errorf("loading Substitutions: %v", err)
-	}
-
-	err = ds1.loadNPCs(br)
-	if err != nil {
-		return nil, fmt.Errorf("loading npc's: %v", err)
+	if err := ds1.loadBody(stream); err != nil {
+		return nil, fmt.Errorf("loading body: %v", err)
 	}
 
 	return ds1, nil
@@ -183,6 +118,76 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 	err = ds1.loadFileList(br)
 	if err != nil {
 		return fmt.Errorf("loading file list: %v", err)
+	}
+
+	return nil
+}
+
+func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
+	var numWalls, numFloors, numShadows, numSubstitutions int32
+
+	numFloors = defaultNumFloors
+	numShadows = defaultNumShadows
+	numSubstitutions = defaultNumSubstitutions
+
+	if ds1.version.hasUnknown1Bytes() {
+		var err error
+
+		ds1.unknown1, err = stream.ReadBytes(unknown1BytesCount)
+		if err != nil {
+			return fmt.Errorf("reading unknown1: %v", err)
+		}
+	}
+
+	if ds1.version.specifiesWalls() {
+		var err error
+
+		numWalls, err = stream.ReadInt32()
+		if err != nil {
+			return fmt.Errorf("reading wall number: %v", err)
+		}
+
+		if ds1.version.specifiesFloors() {
+			numFloors, err = stream.ReadInt32()
+			if err != nil {
+				return fmt.Errorf("reading number of Floors: %v", err)
+			}
+		}
+	}
+
+	for ; numWalls > 0; numWalls-- {
+		ds1.PushWall(&layer{})
+		ds1.PushOrientation(&layer{})
+	}
+
+	for ; numShadows > 0; numShadows-- {
+		ds1.PushShadow(&layer{})
+	}
+
+	for ; numFloors > 0; numFloors-- {
+		ds1.PushFloor(&layer{})
+	}
+
+	for ; numSubstitutions > 0; numSubstitutions-- {
+		ds1.PushSubstitution(&layer{})
+	}
+
+	ds1.SetSize(ds1.width, ds1.height)
+
+	if err := ds1.loadLayerStreams(stream); err != nil {
+		return fmt.Errorf("loading layer streams: %v", err)
+	}
+
+	if err := ds1.loadObjects(stream); err != nil {
+		return fmt.Errorf("loading Objects: %v", err)
+	}
+
+	if err := ds1.loadSubstitutions(stream); err != nil {
+		return fmt.Errorf("loading Substitutions: %v", err)
+	}
+
+	if err := ds1.loadNPCs(stream); err != nil {
+		return fmt.Errorf("loading npc's: %v", err)
 	}
 
 	return nil
@@ -614,8 +619,8 @@ func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
 	layerStreamTypes := ds1.getLayerSchema()
 
 	for _, layerStreamType := range layerStreamTypes {
-		for y := 0; y < int(ds1.height); y++ {
-			for x := 0; x < int(ds1.width); x++ {
+		for y := 0; y < ds1.height; y++ {
+			for x := 0; x < ds1.width; x++ {
 				dw := uint32(0)
 
 				switch layerStreamType {
