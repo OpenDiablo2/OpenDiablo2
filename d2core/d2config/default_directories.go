@@ -6,10 +6,7 @@ import (
 )
 
 const (
-	od2ConfigDirName = "OpenDiablo2"
-)
-
-const (
+	od2ConfigDirName  = "OpenDiablo2"
 	od2ConfigFileName = "config.json"
 )
 
