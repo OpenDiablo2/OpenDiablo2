@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testData = []byte{33, 23, 4, 33, 192, 243}
+var testData = []byte{33, 23, 4, 33, 192, 243} //nolint:gochecknoglobals
 
 func TestBitmuncherCopy(t *testing.T) {
 	bm1 := CreateBitMuncher(testData, 0)
