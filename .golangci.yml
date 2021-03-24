@@ -57,9 +57,8 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
-    - maligned
+    - fieldalignment
     - misspell
     - nakedret
     - prealloc
@@ -78,11 +77,18 @@ linters:
 
 run:
   timeout: 5m
+  tests: true
   skip-dirs:
     - .github
     - build
     - web
 
 issues:
+  exclude-rules:
+    - linters:
+        - funlen
+      # Disable 'funlen' linter for test functions.
+      # It's common for table-driven tests to be more than 60 characters long
+      source: "^func Test"
   max-same-issues: 0
   exclude-use-default: false
