@@ -3,9 +3,6 @@ package d2ds1
 import (
 	"testing"
 
-	"log"
-	"os"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 )
@@ -98,8 +95,8 @@ func exampleData() *DS1 {
 
 	result := &DS1{
 		ds1Layers: &ds1Layers{
-			width:  20,
-			height: 80,
+			width:  2,
+			height: 2,
 			Floors: layerGroup{
 				// number of floors (one floor)
 				{
@@ -188,35 +185,13 @@ func exampleData() *DS1 {
 	return result
 }
 
-func TestDS1_Load(t *testing.T) {
-	testFile, fileErr := os.Open("testdata/testdata.ds1")
-	if fileErr != nil {
-		t.Error("cannot open test data file")
-		return
-	}
+func TestDS1_MarshalUnmarshal(t *testing.T) {
+	ds1 := exampleData()
 
-	data := make([]byte, 0)
-	buf := make([]byte, 16)
-
-	for {
-		numRead, err := testFile.Read(buf)
-
-		data = append(data, buf[:numRead]...)
-
-		if err != nil {
-			break
-		}
-	}
+	data := ds1.Marshal()
 
 	_, loadErr := Unmarshal(data)
 	if loadErr != nil {
 		t.Error(loadErr)
 	}
-
-	err := testFile.Close()
-	if err != nil {
-		t.Fail()
-		log.Print(err)
-	}
-
 }

@@ -475,7 +475,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int)
 }
 
 func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
-	var dirLookup = []int32{
+	dirLookup := []int32{
 		0x00, 0x01, 0x02, 0x01, 0x02, 0x03, 0x03, 0x05, 0x05, 0x06,
 		0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
 		0x0F, 0x10, 0x11, 0x12, 0x14,
@@ -513,9 +513,9 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 					floorIndex := int(layerStreamType) - int(layerStreamFloor1)
 					ds1.Floors[floorIndex].Tile(x, y).DecodeFloor(dw)
 				case layerStreamShadow1:
-					ds1.Floors[0].Tile(x, y).DecodeShadow(dw)
+					ds1.Shadows[0].Tile(x, y).DecodeShadow(dw)
 				case layerStreamSubstitute1:
-					ds1.Floors[0].Tile(x, y).Substitution = dw
+					ds1.Substitutions[0].Tile(x, y).Substitution = dw
 				}
 			}
 		}
@@ -529,145 +529,144 @@ func (ds1 *DS1) SetSize(w, h int) {
 	ds1.ds1Layers.SetSize(w, h)
 }
 
-//
-// // Marshal encodes ds1 back to byte slice
-// func (ds1 *DS1) Marshal() []byte {
-// 	// create stream writer
-// 	sw := d2datautils.CreateStreamWriter()
-//
-// 	// Step 1 - encode header
-// 	sw.PushInt32(ds1.version)
-// 	sw.PushInt32(ds1.width - 1)
-// 	sw.PushInt32(ds1.height - 1)
-//
-// 	if ds1.version >= v8 {
-// 		sw.PushInt32(ds1.Act - 1)
-// 	}
-//
-// 	if ds1.version >= v10 {
-// 		sw.PushInt32(ds1.substitutionType)
-// 	}
-//
-// 	if ds1.version >= v3 {
-// 		sw.PushInt32(int32(len(ds1.Files)))
-//
-// 		for _, i := range ds1.Files {
-// 			sw.PushBytes([]byte(i)...)
-//
-// 			// separator
-// 			sw.PushBytes(0)
-// 		}
-// 	}
-//
-// 	if ds1.version >= v9 && ds1.version <= v13 {
-// 		sw.PushBytes(ds1.unknown1...)
-// 	}
-//
-// 	if ds1.version >= v4 {
-// 		sw.PushInt32(ds1.numberOfWallLayers)
-//
-// 		if ds1.version >= v16 {
-// 			sw.PushInt32(ds1.numberOfFloorLayers)
-// 		}
-// 	}
-//
-// 	// Step 2 - encode grid
-// 	ds1.encodeLayers(sw)
-//
-// 	// Step 3 - encode Objects
-// 	if !(ds1.version < v2) {
-// 		sw.PushInt32(int32(len(ds1.Objects)))
-//
-// 		for _, i := range ds1.Objects {
-// 			sw.PushUint32(uint32(i.Type))
-// 			sw.PushUint32(uint32(i.ID))
-// 			sw.PushUint32(uint32(i.X))
-// 			sw.PushUint32(uint32(i.Y))
-// 			sw.PushUint32(uint32(i.Flags))
-// 		}
-// 	}
-//
-// 	// Step 4 - encode Substitutions
-// 	if ds1.version >= v12 && (ds1.substitutionType == subType1 || ds1.substitutionType == subType2) {
-// 		sw.PushUint32(ds1.unknown2)
-//
-// 		sw.PushUint32(uint32(len(ds1.substitutionGroups)))
-//
-// 		for _, i := range ds1.substitutionGroups {
-// 			sw.PushInt32(i.TileX)
-// 			sw.PushInt32(i.TileY)
-// 			sw.PushInt32(i.WidthInTiles)
-// 			sw.PushInt32(i.HeightInTiles)
-// 			sw.PushInt32(i.Unknown)
-// 		}
-// 	}
-//
-// 	// Step 5 - encode NPC's and its paths
-// 	ds1.encodeNPCs(sw)
-//
-// 	return sw.GetBytes()
-// }
-//
-// func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
-// 	/*
-// 		layerStreamTypes := ds1.getLayerSchema()
-//
-// 		for _, layerStreamType := range layerStreamTypes {
-// 			for y := 0; y < int(ds1.height); y++ {
-// 				for x := 0; x < int(ds1.width); x++ {
-// 					dw := uint32(0)
-//
-// 					switch layerStreamType {
-// 					case layerStreamWall1, layerStreamWall2, layerStreamWall3, layerStreamWall4:
-// 						wallIndex := int(layerStreamType) - int(layerStreamWall1)
-// 						ds1.tiles[y][x].Walls[wallIndex].Encode(sw)
-// 					case layerStreamOrientation1, layerStreamOrientation2,
-// 						layerStreamOrientation3, layerStreamOrientation4:
-// 						wallIndex := int(layerStreamType) - int(layerStreamOrientation1)
-// 						dw |= uint32(ds1.tiles[y][x].Walls[wallIndex].Type)
-// 						dw |= (uint32(ds1.tiles[y][x].Walls[wallIndex].Zero) & wallZeroBitmask) << wallZeroOffset
-//
-// 						sw.PushUint32(dw)
-// 					case layerStreamFloor1, layerStreamFloor2:
-// 						floorIndex := int(layerStreamType) - int(layerStreamFloor1)
-// 						ds1.tiles[y][x].Floors[floorIndex].Encode(sw)
-// 					case d2enum.layerStreamShadow1:
-// 						ds1.tiles[y][x].Shadows[0].Encode(sw)
-// 					case d2enum.layerStreamSubstitute1:
-// 						sw.PushUint32(ds1.tiles[y][x].Substitutions[0].Unknown)
-// 					}
-// 				}
-// 			}
-// 		}
-// 	*/
-// }
-//
-// func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
-// 	objectsWithPaths := make([]int, 0)
-//
-// 	for n, obj := range ds1.Objects {
-// 		if len(obj.Paths) != 0 {
-// 			objectsWithPaths = append(objectsWithPaths, n)
-// 		}
-// 	}
-//
-// 	// Step 5.1 - encode npc's
-// 	sw.PushUint32(uint32(len(objectsWithPaths)))
-//
-// 	// Step 5.2 - enoce npcs' paths
-// 	for objectIdx := range objectsWithPaths {
-// 		sw.PushUint32(uint32(len(ds1.Objects[objectIdx].Paths)))
-// 		sw.PushUint32(uint32(ds1.Objects[objectIdx].X))
-// 		sw.PushUint32(uint32(ds1.Objects[objectIdx].Y))
-//
-// 		for _, path := range ds1.Objects[objectIdx].Paths {
-// 			sw.PushUint32(uint32(path.Position.X()))
-// 			sw.PushUint32(uint32(path.Position.Y()))
-//
-// 			if ds1.version >= v15 {
-// 				sw.PushUint32(uint32(path.Action))
-// 			}
-// 		}
-// 	}
-// }
-//
+// Marshal encodes ds1 back to byte slice
+func (ds1 *DS1) Marshal() []byte {
+	// create stream writer
+	sw := d2datautils.CreateStreamWriter()
+
+	// Step 1 - encode header
+	sw.PushInt32(int32(ds1.version))
+	sw.PushInt32(int32(ds1.width - 1))
+	sw.PushInt32(int32(ds1.height - 1))
+
+	if ds1.version.specifiesAct() {
+		sw.PushInt32(ds1.Act - 1)
+	}
+
+	if ds1.version.specifiesSubstitutionType() {
+		sw.PushInt32(ds1.substitutionType)
+	}
+
+	if ds1.version.hasFileList() {
+		sw.PushInt32(int32(len(ds1.Files)))
+
+		for _, i := range ds1.Files {
+			sw.PushBytes([]byte(i)...)
+
+			// separator
+			sw.PushBytes(0)
+		}
+	}
+
+	if ds1.version.hasUnknown1Bytes() {
+		sw.PushBytes(ds1.unknown1...)
+	}
+
+	if ds1.version.specifiesWalls() {
+		sw.PushInt32(int32(len(ds1.Walls)))
+
+		if ds1.version.specifiesFloors() {
+			sw.PushInt32(int32(len(ds1.Walls)))
+		}
+	}
+
+	// Step 2 - encode grid
+	ds1.encodeLayers(sw)
+
+	// Step 3 - encode Objects
+	if ds1.version.hasObjects() {
+		sw.PushInt32(int32(len(ds1.Objects)))
+
+		for _, i := range ds1.Objects {
+			sw.PushUint32(uint32(i.Type))
+			sw.PushUint32(uint32(i.ID))
+			sw.PushUint32(uint32(i.X))
+			sw.PushUint32(uint32(i.Y))
+			sw.PushUint32(uint32(i.Flags))
+		}
+	}
+
+	// Step 4 - encode Substitutions
+	hasSubstitutions := ds1.version.hasSubstitutions() &&
+		(ds1.substitutionType == subType1 || ds1.substitutionType == subType2)
+
+	if hasSubstitutions {
+		sw.PushUint32(ds1.unknown2)
+
+		sw.PushUint32(uint32(len(ds1.substitutionGroups)))
+
+		for _, i := range ds1.substitutionGroups {
+			sw.PushInt32(i.TileX)
+			sw.PushInt32(i.TileY)
+			sw.PushInt32(i.WidthInTiles)
+			sw.PushInt32(i.HeightInTiles)
+			sw.PushInt32(i.Unknown)
+		}
+	}
+
+	// Step 5 - encode NPC's and its paths
+	ds1.encodeNPCs(sw)
+
+	return sw.GetBytes()
+}
+
+func (ds1 *DS1) encodeLayers(sw *d2datautils.StreamWriter) {
+	layerStreamTypes := ds1.getLayerSchema()
+
+	for _, layerStreamType := range layerStreamTypes {
+		for y := 0; y < int(ds1.height); y++ {
+			for x := 0; x < int(ds1.width); x++ {
+				dw := uint32(0)
+
+				switch layerStreamType {
+				case layerStreamWall1, layerStreamWall2, layerStreamWall3, layerStreamWall4:
+					wallIndex := int(layerStreamType) - int(layerStreamWall1)
+					ds1.Walls[wallIndex].Tile(x, y).EncodeWall(sw)
+				case layerStreamOrientation1, layerStreamOrientation2,
+					layerStreamOrientation3, layerStreamOrientation4:
+					wallIndex := int(layerStreamType) - int(layerStreamOrientation1)
+					dw |= uint32(ds1.Walls[wallIndex].Tile(x, y).Type)
+					dw |= (uint32(ds1.Walls[wallIndex].Tile(x, y).Zero) & wallZeroBitmask) << wallZeroOffset
+
+					sw.PushUint32(dw)
+				case layerStreamFloor1, layerStreamFloor2:
+					floorIndex := int(layerStreamType) - int(layerStreamFloor1)
+					ds1.Floors[floorIndex].Tile(x, y).EncodeFloor(sw)
+				case layerStreamShadow1:
+					ds1.Shadows[0].Tile(x, y).EncodeShadow(sw)
+				case layerStreamSubstitute1:
+					sw.PushUint32(ds1.Substitutions[0].Tile(x, y).Substitution)
+				}
+			}
+		}
+	}
+}
+
+func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
+	objectsWithPaths := make([]int, 0)
+
+	for n, obj := range ds1.Objects {
+		if len(obj.Paths) != 0 {
+			objectsWithPaths = append(objectsWithPaths, n)
+		}
+	}
+
+	// Step 5.1 - encode npc's
+	sw.PushUint32(uint32(len(objectsWithPaths)))
+
+	// Step 5.2 - enoce npcs' paths
+	for objectIdx := range objectsWithPaths {
+		sw.PushUint32(uint32(len(ds1.Objects[objectIdx].Paths)))
+		sw.PushUint32(uint32(ds1.Objects[objectIdx].X))
+		sw.PushUint32(uint32(ds1.Objects[objectIdx].Y))
+
+		for _, path := range ds1.Objects[objectIdx].Paths {
+			sw.PushUint32(uint32(path.Position.X()))
+			sw.PushUint32(uint32(path.Position.Y()))
+
+			if ds1.version >= v15 {
+				sw.PushUint32(uint32(path.Action))
+			}
+		}
+	}
+}
