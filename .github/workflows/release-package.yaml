@@ -25,6 +25,8 @@ jobs:
           wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod a+x appimagetool-x86_64.AppImage
 
+      - name: download go dependencies
+        run: go get -d ./...
 
       - name: Build .bin package
         run: go build -o OpenDiablo2.bin .
@@ -43,7 +45,7 @@ jobs:
           echo -e "[Desktop Entry]\n
           Type=Application\n
           Name=OpenDiablo2\n
-          Icon=./d2logo.png
+          Icon=d2logo.png
           NoDisplay=false\n
           StartupNotify=true\n
           Categories=Game;\n" >> OpenDiablo2.AppDir/Desktop.desktop
