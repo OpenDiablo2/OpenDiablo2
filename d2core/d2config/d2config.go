@@ -3,7 +3,6 @@ package d2config
 import (
 	"encoding/json"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -24,7 +23,7 @@ type Configuration struct {
 
 // Save saves the configuration object to disk
 func (c *Configuration) Save() error {
-	configDir := path.Dir(c.path)
+	configDir := filepath.Dir(c.path)
 	if err := os.MkdirAll(configDir, 0750); err != nil {
 		return err
 	}
