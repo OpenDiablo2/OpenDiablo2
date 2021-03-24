@@ -1,0 +1,73 @@
+name: go-package
+
+on:
+  push:
+    branches: ['releases']
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: 1.16
+          id: go
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev
+          sudo apt-get install -y appstream
+          wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod a+x appimagetool-x86_64.AppImage
+
+
+      - name: Build .bin package
+        run: go build -o OpenDiablo2.bin .
+
+      - name: create ouput dir
+        run: |
+          mkdir OpenDiablo2.AppDir
+          cp d2logo.png OpenDiablo2.AppDir
+
+      - name: build go package
+        run: |
+          go build -o OpenDiablo2.AppDir/main.bin
+
+      - name: create .desktop entry
+        run: |
+          echo -e "[Desktop Entry]\n
+          Type=Application\n
+          Name=OpenDiablo2\n
+          Icon=./d2logo.png
+          NoDisplay=false\n
+          StartupNotify=true\n
+          Categories=Game;\n" >> OpenDiablo2.AppDir/Desktop.desktop
+
+      - name: create AppRun
+        run: |
+          echo "#!/bin/sh
+          cd \"\$(dirname \"\$0\")\"
+          exec ./main.bin" >> OpenDiablo2.AppDir/AppRun
+          chmod 755 OpenDiablo2.AppDir/AppRun
+
+      - name: building AppImage
+        run: ./appimagetool-x86_64.AppImage OpenDiablo2.AppDir OpenDiablo2.AppImage
+
+      - name: Build package
+        run: GOOS="windows" go build -o OpenDiablo2.exe .
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "OpenDiablo2"
+          files: |
+            OpenDiablo2.bin
+            OpenDiablo2.AppImage
+            OpenDiablo2.exe
