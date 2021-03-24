@@ -1,17 +1,11 @@
 package d2datautils
 
-import (
-	"testing"
-)
+import "testing"
 
-func getTestData() []byte {
-	result := []byte{33, 23, 4, 33, 192, 243}
-
-	return result
-}
+var testData = []byte{33, 23, 4, 33, 192, 243}
 
 func TestBitmuncherCopy(t *testing.T) {
-	bm1 := CreateBitMuncher(getTestData(), 0)
+	bm1 := CreateBitMuncher(testData, 0)
 	bm2 := CopyBitMuncher(bm1)
 
 	for i := range bm1.data {
@@ -22,7 +16,7 @@ func TestBitmuncherCopy(t *testing.T) {
 }
 
 func TestBitmuncherSetOffset(t *testing.T) {
-	bm := CreateBitMuncher(getTestData(), 0)
+	bm := CreateBitMuncher(testData, 0)
 	bm.SetOffset(5)
 
 	if bm.Offset() != 5 {
@@ -31,7 +25,7 @@ func TestBitmuncherSetOffset(t *testing.T) {
 }
 
 func TestBitmuncherSteBitsRead(t *testing.T) {
-	bm := CreateBitMuncher(getTestData(), 0)
+	bm := CreateBitMuncher(testData, 0)
 	bm.SetBitsRead(8)
 
 	if bm.BitsRead() != 8 {
@@ -40,8 +34,7 @@ func TestBitmuncherSteBitsRead(t *testing.T) {
 }
 
 func TestBitmuncherReadBit(t *testing.T) {
-	td := getTestData()
-	bm := CreateBitMuncher(td, 0)
+	bm := CreateBitMuncher(testData, 0)
 
 	var result byte
 
@@ -50,46 +43,91 @@ func TestBitmuncherReadBit(t *testing.T) {
 		result |= byte(v) << byte(i)
 	}
 
-	if result != td[0] {
+	if result != testData[0] {
 		t.Fatal("result of rpeated 8 times get bit didn't return expected byte")
 	}
 }
 
 func TestBitmuncherGetBits(t *testing.T) {
-	td := getTestData()
-	bm := CreateBitMuncher(td, 0)
+	bm := CreateBitMuncher(testData, 0)
 
-	res := bm.GetBits(bitsPerByte)
-
-	if byte(res) != td[0] {
+	if byte(bm.GetBits(bitsPerByte)) != testData[0] {
 		t.Fatal("get bits didn't return expected value")
 	}
 }
 
+func TestBitmuncherGetNoBits(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	if bm.GetBits(0) != 0 {
+		t.Fatal("get bits didn't return expected value: 0")
+	}
+}
+
+func TestBitmuncherGetSignedBits(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	result := bm.GetSignedBits(6)
+	expected := -31
+	if result != expected {
+		t.Fatal("get signed bits didn't return expected value", result, expected)
+	}
+}
+
+func TestBitmuncherGetNoSignedBits(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	result := bm.GetSignedBits(0)
+	expected := 0
+	if result != expected {
+		t.Fatal("get signed bits didn't return expected value", result, expected)
+	}
+}
+
+func TestBitmuncherGetOneSignedBit(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	result := bm.GetSignedBits(1)
+	expected := -1
+	if result != expected {
+		t.Fatal("get signed bits didn't return expected value", result, expected)
+	}
+}
+
 func TestBitmuncherSkipBits(t *testing.T) {
-	td := getTestData()
-	bm := CreateBitMuncher(td, 0)
+	bm := CreateBitMuncher(testData, 0)
 
 	bm.SkipBits(bitsPerByte)
 
-	if bm.GetByte() != td[1] {
+	if bm.GetByte() != testData[1] {
 		t.Fatal("skipping 8 bits didn't moved bit muncher's position into next byte")
 	}
 }
 
 func TestBitmuncherGetInt32(t *testing.T) {
-	td := getTestData()
-	bm := CreateBitMuncher(td, 0)
+	bm := CreateBitMuncher(testData, 0)
 
 	var testInt int32
 
 	for i := 0; i < bytesPerint32; i++ {
-		testInt |= int32(td[i]) << int32(bitsPerByte*i)
+		testInt |= int32(testData[i]) << int32(bitsPerByte*i)
 	}
 
-	bmInt := bm.GetInt32()
-
-	if bmInt != testInt {
+	if bm.GetInt32() != testInt {
 		t.Fatal("int32 value wasn't returned properly")
+	}
+}
+
+func TestBitmuncherGetUint32(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	var testUint uint32
+
+	for i := 0; i < bytesPerint32; i++ {
+		testUint |= uint32(testData[i]) << uint32(bitsPerByte*i)
+	}
+
+	if bm.GetUInt32() != testUint {
+		t.Fatal("uint32 value wasn't returned properly")
 	}
 }
