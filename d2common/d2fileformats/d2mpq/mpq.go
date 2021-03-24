@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -201,5 +200,5 @@ func openIgnoreCase(mpqPath string) (*os.File, error) {
 		}
 	}
 
-	return os.Open(path.Join(mpqDir, mpqName)) //nolint:gosec // Will fix later
+	return os.Open(filepath.Join(mpqDir, mpqName)) //nolint:gosec // Will fix later
 }

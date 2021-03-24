@@ -2,7 +2,7 @@ package d2config
 
 import (
 	"os/user"
-	"path"
+	"path/filepath"
 	"runtime"
 )
 
@@ -47,7 +47,7 @@ func DefaultConfig() *Configuration {
 		config.MpqPath = "/Applications/Diablo II/"
 	case "linux":
 		if usr, err := user.Current(); err == nil {
-			config.MpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
+			config.MpqPath = filepath.Join(usr.HomeDir, ".wine", "drive_c", "Program Files (x86)", "Diablo II")
 		}
 	}
 

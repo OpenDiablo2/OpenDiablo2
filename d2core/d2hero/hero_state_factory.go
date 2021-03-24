@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -82,7 +81,7 @@ func (f *HeroStateFactory) GetAllHeroStates() ([]*HeroState, error) {
 			continue
 		}
 
-		gameState := f.LoadHeroState(path.Join(basePath, file.Name()))
+		gameState := f.LoadHeroState(filepath.Join(basePath, file.Name()))
 		if gameState == nil || gameState.HeroType == d2enum.HeroNone {
 
 		} else if gameState.Stats == nil || gameState.Skills == nil {
@@ -224,7 +223,7 @@ func (f *HeroStateFactory) getGameBaseSavePath() (string, error) {
 		return "", err
 	}
 
-	return path.Join(configDir, "OpenDiablo2/Saves"), nil
+	return filepath.Join(configDir, "OpenDiablo2", "Saves"), nil
 }
 
 func (f *HeroStateFactory) getFirstFreeFileName() string {
@@ -232,7 +231,7 @@ func (f *HeroStateFactory) getFirstFreeFileName() string {
 	basePath, _ := f.getGameBaseSavePath()
 
 	for {
-		filePath := path.Join(basePath, strconv.Itoa(i)+".od2")
+		filePath := filepath.Join(basePath, strconv.Itoa(i)+".od2")
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
 			return filePath
 		}
@@ -246,7 +245,7 @@ func (f *HeroStateFactory) Save(state *HeroState) error {
 		state.FilePath = f.getFirstFreeFileName()
 	}
 
-	if err := os.MkdirAll(path.Dir(state.FilePath), mkdirPermission); err != nil {
+	if err := os.MkdirAll(filepath.Dir(state.FilePath), mkdirPermission); err != nil {
 		return err
 	}
 
