@@ -241,6 +241,7 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 	configAsset, _ := a.asset.LoadAsset(configBaseName)
 
 	config := &d2config.Configuration{}
+	config.SetPath(d2config.DefaultConfigPath())
 
 	// create the default if not found
 	if configAsset == nil {

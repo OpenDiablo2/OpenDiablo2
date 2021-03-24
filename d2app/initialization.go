@@ -54,11 +54,11 @@ func (a *App) initialize() error {
 }
 
 const (
-	fmtErrSourceNotFound = `file not found: %s
+	fmtErrSourceNotFound = `file not found: %q
 
-Please check your config file at %s
+Please check your config file at %q
 
-Also, verify that the MPQ files exist at %s
+Also, verify that the MPQ files exist at %q
 
 Capitalization in the file name matters.
 `
