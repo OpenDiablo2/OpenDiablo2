@@ -72,7 +72,7 @@ type Credits struct {
 
 // LoadContributors loads the contributors data from file
 func (v *Credits) LoadContributors() []string {
-	file, err := os.Open(filepath.Join("./", "CONTRIBUTORS"))
+	file, err := os.Open(filepath.Join(".", "CONTRIBUTORS"))
 	if err != nil || file == nil {
 		v.Warning("CONTRIBUTORS file is missing")
 		return []string{"MISSING CONTRIBUTOR FILES!"}

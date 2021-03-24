@@ -223,7 +223,7 @@ func (f *HeroStateFactory) getGameBaseSavePath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(configDir, "OpenDiablo2/Saves"), nil
+	return filepath.Join(configDir, "OpenDiablo2", "Saves"), nil
 }
 
 func (f *HeroStateFactory) getFirstFreeFileName() string {

@@ -60,7 +60,7 @@ func DefaultConfig() *Configuration {
 		}
 	case "linux":
 		if usr, err := user.Current(); err == nil {
-			config.MpqPath = filepath.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
+			config.MpqPath = filepath.Join(usr.HomeDir, ".wine", "drive_c", "Program Files (x86)", "Diablo II")
 		}
 	}
 
