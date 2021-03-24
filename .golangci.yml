@@ -23,11 +23,12 @@ linters-settings:
   golint:
     min-confidence: 0.8
   govet:
+    enable:
+      - fieldalignment
     check-shadowing: true
+
   lll:
     line-length: 140
-  maligned:
-    suggest-new: true
   misspell:
     locale: US
 
@@ -58,7 +59,6 @@ linters:
     - govet
     - ineffassign
     - lll
-    - fieldalignment
     - misspell
     - nakedret
     - prealloc
@@ -90,5 +90,6 @@ issues:
       # Disable 'funlen' linter for test functions.
       # It's common for table-driven tests to be more than 60 characters long
       source: "^func Test"
+  max-issues-per-linter: 0
   max-same-issues: 0
   exclude-use-default: false
