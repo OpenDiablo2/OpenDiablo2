@@ -18,15 +18,20 @@ linters-settings:
     disabled-checks:
   gocyclo:
     min-complexity: 15
+  gofmt:
+    simplify: true
   goimports:
     local-prefixes: github.com/OpenDiablo2/OpenDiablo2
   golint:
     min-confidence: 0.8
   govet:
-    enable:
-      - fieldalignment
+    enable-all: true
     check-shadowing: true
-
+    disable:
+      # While struct sizes could be smaller if fields aligned properly, that also leads
+      # to possibly non-intuitive layout of struct fields (harder to read). Disable
+      # `fieldalignment` check here until we evaluate if it is worthwhile.
+      - fieldalignment
   lll:
     line-length: 140
   misspell:
