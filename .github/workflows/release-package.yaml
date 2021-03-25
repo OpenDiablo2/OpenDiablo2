@@ -2,7 +2,7 @@ name: go-package
 
 on:
   push:
-    branches: ['releases']
+    branches: ['master']
 
 jobs:
   build-packages:
