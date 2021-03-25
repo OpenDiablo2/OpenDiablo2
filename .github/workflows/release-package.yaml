@@ -2,7 +2,7 @@ name: go-package
 
 on:
   push:
-    branches: ['master']
+    branches: ['releases']
 
 jobs:
   build-packages:
@@ -31,17 +31,11 @@ jobs:
       - name: Build .bin package
         run: go build -o OpenDiablo2.bin .
 
-      - name: create ouput dir
+      - name: create AppDir (init of building AppImage)
         run: |
           mkdir OpenDiablo2.AppDir
           cp d2logo.png OpenDiablo2.AppDir
-
-      - name: build go package
-        run: |
-          go build -o OpenDiablo2.AppDir/main.bin
-
-      - name: create .desktop entry
-        run: |
+          cp OpenDiablo2.bin OpenDiablo2.AppDir/main.bin
           echo -e "[Desktop Entry]\n
           Type=Application\n
           Name=OpenDiablo2\n
@@ -49,9 +43,6 @@ jobs:
           NoDisplay=false\n
           StartupNotify=true\n
           Categories=Game;\n" >> OpenDiablo2.AppDir/Desktop.desktop
-
-      - name: create AppRun
-        run: |
           echo "#!/bin/sh
           cd \"\$(dirname \"\$0\")\"
           exec ./main.bin" >> OpenDiablo2.AppDir/AppRun
@@ -60,10 +51,11 @@ jobs:
       - name: building AppImage
         run: ./appimagetool-x86_64.AppImage OpenDiablo2.AppDir OpenDiablo2.AppImage
 
-      - name: Build package
+      - name: Build .exe package
         run: GOOS="windows" go build -o OpenDiablo2.exe .
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Upload packages to release
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
