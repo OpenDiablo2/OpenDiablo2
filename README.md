@@ -1,6 +1,7 @@
 # OpenDiablo2
 
 [![CircleCI](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master.svg?style=svg)](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/OpenDiablo2/OpenDiablo2)](https://goreportcard.com/report/github.com/OpenDiablo2/OpenDiablo2)
 
 ![Logo](d2logo.png)
 
