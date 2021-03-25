@@ -20,7 +20,6 @@ The engine is written in Go and is cross platform.
 
 > The project does not ship with the assets or content required to play Diablo 2.
 You must have a legally purchased copy of [Diablo 2](https://us.shop.battle.net/en-us/product/diablo-ii) and its expansion [Lord of Destruction](https://us.shop.battle.net/en-us/product/diablo-ii-lord-of-destruction) installed on your computer in order to run that game on this engine.
-If you have an original copy of the disks, those files should work fine as well.
 
 If you like to contribute to OpenDiablo2, please be so kind to read our [Contribution Policy](./docs/CONTRIBUTING.md) first.
 
@@ -28,26 +27,28 @@ If you like to contribute to OpenDiablo2, please be so kind to read our [Contrib
 
 ## Documentation
 
-### For Users
+_Stay awhile and listen_ ...
+
+### ⚡ Project Info
+
+* 👉 **[Current Status](./docs/status.md)** 👈 - what you should focus on
+* [Roadmap](./docs/roadmap.md) - Planning ahead
+* Design - High-level overview of the OpenDiablo2 org and its projects
+* FAQ - Common questions from new people to the project
+
+### ⭐ For Users
 
 * Buy the official game from Blizzard
 * Locate the MPQ files
 * Install OpenDiablo2 to your system (Linux/Windows/MacOS)
 * [Run it](./docs/play.md) - How to play the game
 
-### For Developers
+### 🔥 For Developers
 
 * [Building](./docs/building.md) - Instructions for building the project
 * [Development](./docs/development.md) - Instructions for developers who want to contribute
 * [Profiling](.docs/profiling.md) - Debug performance issues
 * [Debugging](.docs/debug.md) - Common errors and pitfalls
-
-### For Contributors
-
-* Design - High-level overview of the OpenDiablo2 org and its projects
-* [Current Status](./docs/status.md) - What you should focus on
-* [Roadmap](./docs/roadmap.md) - Planning ahead
-* FAQ - Common questions from new people to the project
 
 ## Screenshots
 
