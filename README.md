@@ -38,17 +38,17 @@ _Stay awhile and listen_ ...
 
 ### ⭐ For Users
 
-* Buy the official game from Blizzard
-* Locate the MPQ files
-* Install OpenDiablo2 to your system (Linux/Windows/MacOS)
+* [Purchase](./docs/purchase.md) - Buy the official game from Blizzard
+* [MPQ](./docs/mpq.md) - Locate the MPQ files
+* [Install](./docs/install.md) - Install OpenDiablo2 to your system (Linux/Windows/MacOS)
 * [Run it](./docs/play.md) - How to play the game
 
 ### 🔥 For Developers
 
 * [Building](./docs/building.md) - Instructions for building the project
 * [Development](./docs/development.md) - Instructions for developers who want to contribute
-* [Profiling](.docs/profiling.md) - Debug performance issues
-* [Debugging](.docs/debug.md) - Common errors and pitfalls
+* [Profiling](./docs/profiling.md) - Debug performance issues
+* [Debugging](./docs/debug.md) - Common errors and pitfalls
 
 ## Screenshots
 
