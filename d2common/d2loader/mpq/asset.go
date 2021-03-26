@@ -2,7 +2,6 @@ package mpq
 
 import (
 	"fmt"
-	"io"
 	"path/filepath"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -42,12 +41,7 @@ func (a *Asset) Path() string {
 
 // Read will read asset data into the given buffer
 func (a *Asset) Read(buf []byte) (n int, err error) {
-	totalRead, err := a.stream.Read(buf)
-	if totalRead == 0 {
-		return 0, io.EOF
-	}
-
-	return totalRead, err
+	return a.stream.Read(buf)
 }
 
 // Seek will seek the read position for the next read operation

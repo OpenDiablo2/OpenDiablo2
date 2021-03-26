@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -509,7 +510,9 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 
 		switch buttonState(i) {
 		case buttonStatePressed, buttonStatePressedToggled:
+			// nolint:gomnd // constant offset
 			textOffsetX = -2
+			// nolint:gomnd // constant offset
 			textOffsetY = 2
 		}
 
@@ -530,7 +533,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 	return button, nil
 }
 
-func (l *Layout) loadFont(fontStyle FontStyle) (*d2asset.Font, error) {
+func (l *Layout) loadFont(fontStyle FontStyle) (*d2font.Font, error) {
 	config := getFontStyleConfig(fontStyle)
 	if config == nil {
 		return nil, errors.New("invalid font style")

@@ -1,12 +1,22 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-    build:
-        docker:
-            - image: circleci/golang:1.14
-        working_directory: /go/src/github.com/OpenDiablo2/OpenDiablo2
-        steps:
-            - checkout
-            - run: sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
-            - run: go get -v -t -d ./...
-            - run: go build .
-#- run: go test -v ./...
+  build:
+    docker:
+      - image: circleci/golang:1.16
+    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    steps:
+      - checkout
+      - run: sudo apt-get --allow-releaseinfo-change update && sudo apt-get install -y libgtk-3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+      - run: go get -v -t -d ./...
+      - run: go build .
+      - run: xvfb-run --auto-servernum go test -v -race ./...
+      - run: golangci-lint run ./...
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build

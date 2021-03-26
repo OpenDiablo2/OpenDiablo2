@@ -167,6 +167,8 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 			actions.partyToggle,
 			m.asset.TranslateString("minipanelparty"),
 		}
+
+		// nolint:gomnd // party buton is 3 in order
 		btn := m.createButton(partyContent, x+(3*buttonWidth), y, buttonHeight)
 		m.panelGroup.AddWidget(btn)
 		idxOffset++
@@ -329,6 +331,16 @@ func (m *miniPanel) SetMovedLeft(moveLeft bool) {
 	}
 
 	m.movedLeft = moveLeft
+}
+
+func (m *miniPanel) ResetPosition() {
+	if m.movedLeft {
+		m.undoMoveLeft()
+		m.movedLeft = false
+	} else if m.movedRight {
+		m.undoMoveRight()
+		m.movedRight = false
+	}
 }
 
 func (m *miniPanel) SetMovedRight(moveRight bool) {

@@ -5,9 +5,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2animdata"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
@@ -39,7 +38,7 @@ type RecordManager struct {
 	*d2util.Logger
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
 	Animation    struct {
-		Data  d2data.AnimationData
+		Data  *d2animdata.AnimationData
 		Token struct {
 			Player    PlayerTypes
 			Composite CompositeTypes

@@ -303,6 +303,7 @@ func (s *ebitenSurface) colorToColorM(clr color.Color) ebiten.ColorM {
 		return emptyColorM
 	}
 
+	// nolint:gomnd // byte values
 	key := colorMCacheKey(cr | (cg << 8) | (cb << 16) | (ca << 24))
 	e, ok := s.colorMCache[key]
 

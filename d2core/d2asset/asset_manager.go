@@ -2,14 +2,23 @@ package d2asset
 
 import (
 	"fmt"
-	"image/color"
+	"io"
+	"io/ioutil"
+	"path/filepath"
 	"strconv"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -20,7 +29,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 )
 
@@ -33,6 +41,10 @@ const (
 	fontBudget             = 128
 	paletteBudget          = 64
 	paletteTransformBudget = 64
+	dt1Budget              = 4096 * 2048 * 128
+	ds1Budget              = 4096 * 2048 * 128
+	cofBudget              = 4096 * 2048 * 128
+	dccBudget              = 4096 * 2048 * 128
 )
 
 const (
@@ -52,13 +64,19 @@ const (
 type AssetManager struct {
 	*d2util.Logger
 	*d2loader.Loader
-	tables     []d2tbl.TextDictionary
-	animations d2interface.Cache
-	fonts      d2interface.Cache
-	palettes   d2interface.Cache
-	transforms d2interface.Cache
-	Records    *d2records.RecordManager
-	language   string
+
+	tables           []d2tbl.TextDictionary
+	dt1s             d2interface.Cache
+	ds1s             d2interface.Cache
+	cofs             d2interface.Cache
+	dccs             d2interface.Cache
+	animations       d2interface.Cache
+	fonts            d2interface.Cache
+	palettes         d2interface.Cache
+	transforms       d2interface.Cache
+	Records          *d2records.RecordManager
+	language         string
+	languageModifier int
 }
 
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
@@ -69,7 +87,7 @@ func (am *AssetManager) SetLogLevel(level d2util.LogLevel) {
 }
 
 // LoadAsset loads an asset
-func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
+func (am *AssetManager) LoadAsset(filePath string) (io.ReadSeeker, error) {
 	data, err := am.Loader.Load(filePath)
 	if err != nil {
 		errStr := fmt.Sprintf(fmtLoadAsset, filePath, err.Error())
@@ -81,19 +99,19 @@ func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
 }
 
 // LoadFileStream streams an MPQ file from a source file path
-func (am *AssetManager) LoadFileStream(filePath string) (d2interface.DataStream, error) {
+func (am *AssetManager) LoadFileStream(filePath string) (io.ReadSeeker, error) {
 	am.Logger.Debugf("Loading FileStream: %s", filePath)
 	return am.LoadAsset(filePath)
 }
 
 // LoadFile loads an entire file from a source file path as a []byte
-func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
+func (am *AssetManager) LoadFile(filePath string) ([]byte, error) { // I DO NOT LIKE THIS! - Essial
 	fileAsset, err := am.LoadAsset(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := fileAsset.Data()
+	data, err := ioutil.ReadAll(fileAsset)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +121,11 @@ func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func (am *AssetManager) FileExists(filePath string) (bool, error) {
+	filePath = filepath.Clean(filePath)
+
 	am.Logger.Debugf("Checking if file exists %s", filePath)
 
-	if loadedAsset, err := am.Loader.Load(filePath); err != nil || loadedAsset == nil {
-		return false, err
-	}
-
-	return true, nil
+	return am.Loader.Exists(filePath), nil
 }
 
 // LoadLanguage loads language from resource path
@@ -127,6 +143,7 @@ func (am *AssetManager) LoadLanguage(languagePath string) string {
 	am.Infof("Language: %s", language)
 
 	am.language = language
+	am.languageModifier = d2resource.GetLabelModifier(language)
 
 	return language
 }
@@ -147,11 +164,6 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 	am.Debugf(fmtLoadAnimation, animationPath, palettePath, effect)
 
-	animAsset, err := am.LoadAsset(animationPath)
-	if err != nil {
-		return nil, err
-	}
-
 	palette, err := am.LoadPalette(palettePath)
 	if err != nil {
 		return nil, err
@@ -159,7 +171,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 	var animation d2interface.Animation
 
-	switch animAsset.Type() {
+	switch types.Ext2AssetType(filepath.Ext(animationPath)) {
 	case types.AssetTypeDC6:
 		animation, err = am.loadDC6(animationPath, palette, effect)
 		if err != nil {
@@ -171,7 +183,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("unknown Animation format for file: %s", animAsset.Path())
+		return nil, fmt.Errorf("unknown Animation format for file: %s", animationPath)
 	}
 
 	err = am.animations.Insert(cachePath, animation, defaultCacheEntryWeight)
@@ -197,11 +209,11 @@ func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palette
 }
 
 // LoadFont loads a font the resource files
-func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
+func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*d2font.Font, error) {
 	cachePath := fmt.Sprintf("%s;%s;%s", tablePath, spritePath, palettePath)
 
 	if cached, found := am.fonts.Retrieve(cachePath); found {
-		return cached.(*Font), nil
+		return cached.(*d2font.Font), nil
 	}
 
 	sheet, err := am.LoadAnimation(spritePath, palettePath)
@@ -214,17 +226,14 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Fo
 		return nil, err
 	}
 
-	if string(tableData[:5]) != "Woo!\x01" {
-		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
-	}
-
 	am.Debugf(fmtLoadFont, tablePath, spritePath, palettePath)
 
-	font := &Font{
-		table: tableData,
-		sheet: sheet,
-		color: color.White,
+	font, err := d2font.Load(tableData)
+	if err != nil {
+		return nil, fmt.Errorf("error while loading font table %s: %v", tablePath, err)
 	}
+
+	font.SetBackground(sheet)
 
 	err = am.fonts.Insert(cachePath, font, defaultCacheEntryWeight)
 
@@ -237,12 +246,7 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 		return cached.(d2interface.Palette), nil
 	}
 
-	paletteAsset, err := am.LoadAsset(palettePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if paletteAsset.Type() != types.AssetTypePalette {
+	if types.Ext2AssetType(filepath.Ext(palettePath)) != types.AssetTypePalette {
 		return nil, fmt.Errorf("not an instance of a palette: %s", palettePath)
 	}
 
@@ -270,9 +274,9 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 		return nil, err
 	}
 
-	table := d2tbl.LoadTextDictionary(data)
-	if table == nil {
-		return nil, fmt.Errorf("table not found: %s", tablePath)
+	table, err := d2tbl.LoadTextDictionary(data)
+	if err != nil {
+		return table, err
 	}
 
 	am.Debugf(fmtLoadStringTable, tablePath)
@@ -283,7 +287,8 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 }
 
 // TranslateString returns the translation of the given string. The string is retrieved from
-// the loaded string tables.
+// the loaded string tables. If input value is int (e.g. from d2enum/numeric_labels.go)
+// output string is translation for # + input
 func (am *AssetManager) TranslateString(input interface{}) string {
 	var key string
 
@@ -292,6 +297,8 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 		key = s
 	case fmt.Stringer:
 		key = s.String()
+	case int:
+		key = fmt.Sprintf("#%d", d2enum.BaseLabelNumbers(s+am.languageModifier))
 	}
 
 	for idx := range am.tables {
@@ -303,11 +310,6 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
 	// log.Panicf("Could not find a string for the key '%s'", key)
 	return key
-}
-
-// TranslateLabel translates the label taking into account its shift in the table
-func (am *AssetManager) TranslateLabel(label int) string {
-	return am.TranslateString(fmt.Sprintf("#%d", d2enum.BaseLabelNumbers(label+d2resource.GetLabelModifier(am.language))))
 }
 
 // LoadPaletteTransform loads a palette transform file
@@ -390,12 +392,7 @@ func (am *AssetManager) loadDC6(path string,
 // loadDCC creates an Animation from d2dcc.DCC and d2dat.DATPalette
 func (am *AssetManager) loadDCC(path string,
 	palette d2interface.Palette, effect d2enum.DrawEffect) (d2interface.Animation, error) {
-	dccData, err := am.LoadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	dcc, err := d2dcc.Load(dccData)
+	dcc, err := am.LoadDCC(path)
 	if err != nil {
 		return nil, err
 	}
@@ -448,6 +445,10 @@ func (am *AssetManager) commandAssetSpam(term d2interface.Terminal) func([]strin
 		am.fonts.SetVerbose(verbose)
 		am.transforms.SetVerbose(verbose)
 		am.animations.SetVerbose(verbose)
+		am.dt1s.SetVerbose(verbose)
+		am.ds1s.SetVerbose(verbose)
+		am.dccs.SetVerbose(verbose)
+		am.cofs.SetVerbose(verbose)
 
 		return nil
 	}
@@ -474,6 +475,102 @@ func (am *AssetManager) commandAssetClear([]string) error {
 	am.transforms.Clear()
 	am.animations.Clear()
 	am.fonts.Clear()
+	am.dt1s.Clear()
+	am.ds1s.Clear()
+	am.dccs.Clear()
+	am.cofs.Clear()
 
 	return nil
+}
+
+// LoadDT1 loads and returns the given path as a DT1
+func (am *AssetManager) LoadDT1(dt1Path string) (*d2dt1.DT1, error) {
+	if dt1Value, found := am.dt1s.Retrieve(dt1Path); found {
+		return dt1Value.(*d2dt1.DT1), nil
+	}
+
+	fileData, err := am.LoadFile("/data/global/tiles/" + dt1Path)
+	if err != nil {
+		return nil, fmt.Errorf("could not load /data/global/tiles/%s", dt1Path)
+	}
+
+	dt1, err := d2dt1.LoadDT1(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := am.dt1s.Insert(dt1Path, dt1, defaultCacheEntryWeight); err != nil {
+		return nil, err
+	}
+
+	return dt1, nil
+}
+
+// LoadDS1 loads and returns the given path as a DS1
+func (am *AssetManager) LoadDS1(ds1Path string) (*d2ds1.DS1, error) {
+	if ds1Value, found := am.dt1s.Retrieve(ds1Path); found {
+		return ds1Value.(*d2ds1.DS1), nil
+	}
+
+	fileData, err := am.LoadFile("/data/global/tiles/" + ds1Path)
+	if err != nil {
+		return nil, err
+	}
+
+	ds1, err := d2ds1.LoadDS1(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := am.dt1s.Insert(ds1Path, ds1, defaultCacheEntryWeight); err != nil {
+		return nil, err
+	}
+
+	return ds1, nil
+}
+
+// LoadCOF loads and returns the given path as a COF
+func (am *AssetManager) LoadCOF(cofPath string) (*d2cof.COF, error) {
+	if cofValue, found := am.cofs.Retrieve(cofPath); found {
+		return cofValue.(*d2cof.COF), nil
+	}
+
+	fileData, err := am.LoadFile(cofPath)
+	if err != nil {
+		return nil, err
+	}
+
+	cof, err := d2cof.Unmarshal(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := am.cofs.Insert(cofPath, cof, defaultCacheEntryWeight); err != nil {
+		return nil, err
+	}
+
+	return cof, nil
+}
+
+// LoadDCC loads and returns the given path as a DCC
+func (am *AssetManager) LoadDCC(dccPath string) (*d2dcc.DCC, error) {
+	if dccValue, found := am.dccs.Retrieve(dccPath); found {
+		return dccValue.(*d2dcc.DCC), nil
+	}
+
+	fileData, err := am.LoadFile(dccPath)
+	if err != nil {
+		return nil, err
+	}
+
+	dcc, err := d2dcc.Load(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := am.dccs.Insert(dccPath, dcc, defaultCacheEntryWeight); err != nil {
+		return nil, err
+	}
+
+	return dcc, nil
 }

@@ -9,6 +9,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
+const (
+	baseMinx = 100000
+	baseMiny = 100000
+	baseMaxx = -100000
+	baseMaxy = -100000
+)
+
 const cellsPerRow = 4
 
 // DCCDirection represents a DCCDirection file.
@@ -37,7 +44,9 @@ type DCCDirection struct {
 }
 
 // CreateDCCDirection creates an instance of a DCCDirection.
+// nolint:funlen // no need to reduce
 func CreateDCCDirection(bm *d2datautils.BitMuncher, file *DCC) *DCCDirection {
+	// nolint:gomnd // constant
 	var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
 
 	result := &DCCDirection{
@@ -53,10 +62,10 @@ func CreateDCCDirection(bm *d2datautils.BitMuncher, file *DCC) *DCCDirection {
 		Frames:           make([]*DCCDirectionFrame, file.FramesPerDirection),
 	}
 
-	minx := 100000
-	miny := 100000
-	maxx := -100000
-	maxy := -100000
+	minx := baseMinx
+	miny := baseMiny
+	maxx := baseMaxx
+	maxy := baseMaxy
 
 	// Load the frame headers
 	for frameIdx := 0; frameIdx < file.FramesPerDirection; frameIdx++ {
@@ -73,12 +82,14 @@ func CreateDCCDirection(bm *d2datautils.BitMuncher, file *DCC) *DCCDirection {
 		log.Panic("Optional bits in DCC data is not currently supported.")
 	}
 
+	// nolint:gomnd // byte operation
 	if (result.CompressionFlags & 0x2) > 0 {
 		result.EqualCellsBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
 	}
 
 	result.PixelMaskBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
 
+	// nolint:gomnd // byte operation
 	if (result.CompressionFlags & 0x1) > 0 {
 		result.EncodingTypeBitsreamSize = int(bm.GetBits(20))   //nolint:gomnd // binary data
 		result.RawPixelCodesBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
@@ -412,9 +423,12 @@ func (v *DCCDirection) calculateCells() {
 		for i := 0; i < v.HorizontalCellCount-1; i++ {
 			cellWidths[i] = 4
 		}
+
+		// nolint:gomnd // constant
 		cellWidths[v.HorizontalCellCount-1] = v.Box.Width - (4 * (v.HorizontalCellCount - 1))
 	}
 	// Calculate the cell heights
+	// nolint:gomnd // constant
 	cellHeights := make([]int, v.VerticalCellCount)
 	if v.VerticalCellCount == 1 {
 		cellHeights[0] = v.Box.Height
@@ -422,6 +436,8 @@ func (v *DCCDirection) calculateCells() {
 		for i := 0; i < v.VerticalCellCount-1; i++ {
 			cellHeights[i] = 4
 		}
+
+		// nolint:gomnd // constant
 		cellHeights[v.VerticalCellCount-1] = v.Box.Height - (4 * (v.VerticalCellCount - 1))
 	}
 	// Set the cell widths and heights in the cell buffer

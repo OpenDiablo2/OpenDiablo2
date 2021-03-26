@@ -108,8 +108,8 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	result.mapEntity.uuid = id
 	result.SetSpeed(baseWalkSpeed)
 	result.mapEntity.directioner = result.rotate
-	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 
+	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 	if err != nil {
 		panic(err)
 	}
@@ -237,7 +237,6 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 		return nil, err
 	}
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/767
 	animation.Rewind()
 	animation.ResetPlayedCount()
 

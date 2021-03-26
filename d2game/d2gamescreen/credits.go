@@ -3,7 +3,7 @@ package d2gamescreen
 import (
 	"bufio"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -72,7 +72,7 @@ type Credits struct {
 
 // LoadContributors loads the contributors data from file
 func (v *Credits) LoadContributors() []string {
-	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
+	file, err := os.Open(filepath.Join(".", "CONTRIBUTORS"))
 	if err != nil || file == nil {
 		v.Warning("CONTRIBUTORS file is missing")
 		return []string{"MISSING CONTRIBUTOR FILES!"}
@@ -106,7 +106,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(d2enum.ExitLabel))
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(d2enum.ExitLabel))
 	v.exitButton.SetPosition(charSelExitBtnX, charSelExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	loading.Progress(fourtyPercent)

@@ -37,11 +37,8 @@ const mouseBtnActionsThreshold = 0.25
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
 	leftSkill actionableType = iota
-	newStats
 	xp
-	walkRun
 	stamina
-	newSkills
 	rightSkill
 	hpGlobe
 	manaGlobe
@@ -53,30 +50,15 @@ const (
 	leftSkillWidth,
 	leftSkillHeight = 117, 550, 50, 50
 
-	newStatsX,
-	newStatsY,
-	newStatsWidth,
-	newStatsHeight = 206, 563, 30, 30
-
 	xpX,
 	xpY,
 	xpWidth,
 	xpHeight = 253, 560, 125, 5
 
-	walkRunX,
-	walkRunY,
-	walkRunWidth,
-	walkRunHeight = 255, 573, 17, 20
-
 	staminaX,
 	staminaY,
 	staminaWidth,
 	staminaHeight = 273, 573, 105, 20
-
-	newSkillsX,
-	newSkillsY,
-	newSkillsWidth,
-	newSkillsHeight = 562, 563, 30, 30
 
 	rightSkillX,
 	rightSkillY,
@@ -127,6 +109,7 @@ func NewGameControls(
 	audioProvider d2interface.AudioProvider,
 	l d2util.LogLevel,
 	isSinglePlayer bool,
+	players map[string]*d2mapentity.Player,
 ) (*GameControls, error) {
 	var inventoryRecordKey string
 
@@ -156,35 +139,17 @@ func NewGameControls(
 			Width:  leftSkillWidth,
 			Height: leftSkillHeight,
 		}},
-		{newStats, d2geom.Rectangle{
-			Left:   newStatsX,
-			Top:    newStatsY,
-			Width:  newStatsWidth,
-			Height: newStatsHeight,
-		}},
 		{xp, d2geom.Rectangle{
 			Left:   xpX,
 			Top:    xpY,
 			Width:  xpWidth,
 			Height: xpHeight,
 		}},
-		{walkRun, d2geom.Rectangle{
-			Left:   walkRunX,
-			Top:    walkRunY,
-			Width:  walkRunWidth,
-			Height: walkRunHeight,
-		}},
 		{stamina, d2geom.Rectangle{
 			Left:   staminaX,
 			Top:    staminaY,
 			Width:  staminaWidth,
 			Height: staminaHeight,
-		}},
-		{newSkills, d2geom.Rectangle{
-			Left:   newSkillsX,
-			Top:    newSkillsY,
-			Width:  newSkillsWidth,
-			Height: newSkillsHeight,
 		}},
 		{rightSkill, d2geom.Rectangle{
 			Left:   rightSkillX,
@@ -208,6 +173,7 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
+
 	questLog := NewQuestLog(asset, ui, l, audioProvider, hero.Act)
 
 	inventory, err := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
@@ -267,6 +233,11 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
+	if !isSinglePlayer {
+		PartyPanel := NewPartyPanel(asset, ui, hero.Name(), l, hero, hero.Stats, players)
+		gc.PartyPanel = PartyPanel
+	}
+
 	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, gc, mapRenderer)
 	gc.hud = hud
 
@@ -309,6 +280,7 @@ type GameControls struct {
 	hud                    *HUD
 	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
+	PartyPanel             *PartyPanel
 	questLog               *QuestLog
 	HelpOverlay            *HelpOverlay
 	bottomMenuRect         *d2geom.Rectangle
@@ -395,6 +367,10 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
 		g.toggleInventoryPanel()
+	case d2enum.TogglePartyPanel:
+		if !g.isSinglePlayer {
+			g.togglePartyPanel()
+		}
 	case d2enum.ToggleSkillTreePanel:
 		g.toggleSkilltreePanel()
 	case d2enum.ToggleCharacterPanel:
@@ -530,6 +506,10 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 
 	g.hud.OnMouseMove(event)
 
+	if g.PartyPanel != nil {
+		g.PartyPanel.OnMouseMove(event)
+	}
+
 	return false
 }
 
@@ -587,9 +567,13 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) clearLeftScreenSide() {
 	g.heroStatsPanel.Close()
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Close()
+	}
+
 	g.questLog.Close()
 	g.hud.skillSelectMenu.ClosePanels()
-	g.hud.miniPanel.SetMovedRight(false)
 	g.updateLayout()
 }
 
@@ -597,7 +581,6 @@ func (g *GameControls) clearRightScreenSide() {
 	g.inventory.Close()
 	g.skilltree.Close()
 	g.hud.skillSelectMenu.ClosePanels()
-	g.hud.miniPanel.SetMovedLeft(false)
 	g.updateLayout()
 }
 
@@ -609,28 +592,26 @@ func (g *GameControls) clearScreen() {
 }
 
 func (g *GameControls) openLeftPanel(panel Panel) {
-	if !g.HelpOverlay.IsOpen() {
+	if !g.HelpOverlay.IsOpen() && !g.escapeMenu.IsOpen() {
 		isOpen := panel.IsOpen()
 
 		g.clearLeftScreenSide()
 
 		if !isOpen {
 			panel.Open()
-			g.hud.miniPanel.SetMovedRight(true)
 			g.updateLayout()
 		}
 	}
 }
 
 func (g *GameControls) openRightPanel(panel Panel) {
-	if !g.HelpOverlay.IsOpen() {
+	if !g.HelpOverlay.IsOpen() && !g.escapeMenu.IsOpen() {
 		isOpen := panel.IsOpen()
 
 		g.clearRightScreenSide()
 
 		if !isOpen {
 			panel.Open()
-			g.hud.miniPanel.SetMovedLeft(true)
 			g.updateLayout()
 		}
 	}
@@ -640,7 +621,12 @@ func (g *GameControls) toggleHeroStatsPanel() {
 	g.openLeftPanel(g.heroStatsPanel)
 }
 
+func (g *GameControls) togglePartyPanel() {
+	g.openLeftPanel(g.PartyPanel)
+}
+
 func (g *GameControls) onCloseHeroStatsPanel() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleLeftSkillPanel() {
@@ -662,6 +648,7 @@ func (g *GameControls) toggleQuestLog() {
 }
 
 func (g *GameControls) onCloseQuestLog() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleHelpOverlay() {
@@ -679,6 +666,7 @@ func (g *GameControls) toggleInventoryPanel() {
 }
 
 func (g *GameControls) onCloseInventory() {
+	g.updateLayout()
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
@@ -686,6 +674,7 @@ func (g *GameControls) toggleSkilltreePanel() {
 }
 
 func (g *GameControls) onCloseSkilltree() {
+	g.updateLayout()
 }
 
 func (g *GameControls) openEscMenu() {
@@ -701,6 +690,11 @@ func (g *GameControls) Load() {
 	g.inventory.Load()
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Load()
+	}
+
 	g.questLog.Load()
 	g.HelpOverlay.Load()
 
@@ -709,6 +703,7 @@ func (g *GameControls) Load() {
 
 	miniPanelActions := &miniPanelActions{
 		characterToggle: g.toggleHeroStatsPanel,
+		partyToggle:     g.togglePartyPanel,
 		inventoryToggle: g.toggleInventoryPanel,
 		skilltreeToggle: g.toggleSkilltreePanel,
 		menuToggle:      g.openEscMenu,
@@ -723,6 +718,10 @@ func (g *GameControls) Advance(elapsed float64) error {
 	g.hud.Advance(elapsed)
 	g.inventory.Advance(elapsed)
 	g.questLog.Advance(elapsed)
+
+	if g.PartyPanel != nil {
+		g.PartyPanel.Advance(elapsed)
+	}
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
@@ -741,16 +740,27 @@ func (g *GameControls) updateLayout() {
 
 	switch {
 	case isRightPanelOpen == isLeftPanelOpen:
+		g.hud.miniPanel.ResetPosition()
 		g.mapRenderer.ViewportDefault()
 	case isRightPanelOpen:
+		g.hud.miniPanel.SetMovedRight(true)
 		g.mapRenderer.ViewportToLeft()
 	case isLeftPanelOpen:
+		g.hud.miniPanel.SetMovedLeft(true)
 		g.mapRenderer.ViewportToRight()
 	}
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
+	var partyPanel bool
+
+	if g.PartyPanel != nil {
+		partyPanel = g.PartyPanel.IsOpen()
+	} else {
+		partyPanel = false
+	}
+
+	return g.heroStatsPanel.IsOpen() || partyPanel || g.questLog.IsOpen() || g.inventory.moveGoldPanel.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
@@ -795,11 +805,11 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 
 // Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
-	if err := g.renderPanels(target); err != nil {
+	if err := g.hud.Render(target); err != nil {
 		return err
 	}
 
-	if err := g.hud.Render(target); err != nil {
+	if err := g.renderPanels(target); err != nil {
 		return err
 	}
 
@@ -857,11 +867,8 @@ func (g *GameControls) ToggleManaStats() {
 func (g *GameControls) onHoverActionable(item actionableType) {
 	hoverMap := map[actionableType]func(){
 		leftSkill:  func() {},
-		newStats:   func() {},
 		xp:         func() {},
-		walkRun:    func() {},
 		stamina:    func() {},
-		newSkills:  func() {},
 		rightSkill: func() {},
 		hpGlobe:    func() {},
 		manaGlobe:  func() {},
@@ -883,24 +890,12 @@ func (g *GameControls) onClickActionable(item actionableType) {
 			g.toggleLeftSkillPanel()
 		},
 
-		newStats: func() {
-			g.Info("New Stats Selector Action Pressed")
-		},
-
 		xp: func() {
 			g.Info("XP Action Pressed")
 		},
 
-		walkRun: func() {
-			g.Info("Walk/Run Action Pressed")
-		},
-
 		stamina: func() {
 			g.Info("Stamina Action Pressed")
-		},
-
-		newSkills: func() {
-			g.Info("New Skills Selector Action Pressed")
 		},
 
 		rightSkill: func() {

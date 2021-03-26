@@ -7,7 +7,7 @@ const (
 // DecodeTileGfxData decodes tile graphics data for a slice of dt1 blocks
 func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset, tileWidth int32) {
 	for _, block := range blocks {
-		if block.Format == BlockFormatIsometric {
+		if block.Format() == BlockFormatIsometric {
 			// 3D isometric decoding
 			xjump := []int32{14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14}
 			nbpix := []int32{4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4}

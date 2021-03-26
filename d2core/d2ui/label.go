@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2font"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -19,7 +19,7 @@ type Label struct {
 	*BaseWidget
 	text            string
 	Alignment       HorizontalAlign
-	font            *d2asset.Font
+	font            *d2font.Font
 	Color           map[int]color.Color
 	backgroundColor color.Color
 
@@ -166,6 +166,7 @@ func (v *Label) getAlignOffset(textWidth int) int {
 	case HorizontalAlignLeft:
 		return 0
 	case HorizontalAlignCenter:
+		// nolint:gomnd // center of label = 1/2 of it
 		return -textWidth / 2
 	case HorizontalAlignRight:
 		return -textWidth

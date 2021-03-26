@@ -2,12 +2,11 @@ package d2mpq
 
 import (
 	"bufio"
-	"encoding/binary"
 	"errors"
+	"fmt"
+	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -19,33 +18,11 @@ var _ d2interface.Archive = &MPQ{} // Static check to confirm struct conforms to
 
 // MPQ represents an MPQ archive
 type MPQ struct {
-	filePath          string
-	file              *os.File
-	hashEntryMap      HashEntryMap
-	blockTableEntries []BlockTableEntry
-	data              Data
-}
-
-// Data Represents a MPQ file
-type Data struct {
-	Magic             [4]byte
-	HeaderSize        uint32
-	ArchiveSize       uint32
-	FormatVersion     uint16
-	BlockSize         uint16
-	HashTableOffset   uint32
-	BlockTableOffset  uint32
-	HashTableEntries  uint32
-	BlockTableEntries uint32
-}
-
-// HashTableEntry represents a hashed file entry in the MPQ file
-type HashTableEntry struct { // 16 bytes
-	NamePartA  uint32
-	NamePartB  uint32
-	Locale     uint16
-	Platform   uint16
-	BlockIndex uint32
+	filePath string
+	file     *os.File
+	hashes   map[uint64]*Hash
+	blocks   []*Block
+	header   Header
 }
 
 // PatchInfo represents patch info for the MPQ.
@@ -53,296 +30,110 @@ type PatchInfo struct {
 	Length   uint32   // Length of patch info header, in bytes
 	Flags    uint32   // Flags. 0x80000000 = MD5 (?)
 	DataSize uint32   // Uncompressed size of the patch file
-	Md5      [16]byte // MD5 of the entire patch file after decompression
+	MD5      [16]byte // MD5 of the entire patch file after decompression
 }
 
-// FileFlag represents flags for a file record in the MPQ archive
-type FileFlag uint32
-
-const (
-	// FileImplode - File is compressed using PKWARE Data compression library
-	FileImplode FileFlag = 0x00000100
-	// FileCompress - File is compressed using combination of compression methods
-	FileCompress FileFlag = 0x00000200
-	// FileEncrypted - The file is encrypted
-	FileEncrypted FileFlag = 0x00010000
-	// FileFixKey - The decryption key for the file is altered according to the position of the file in the archive
-	FileFixKey FileFlag = 0x00020000
-	// FilePatchFile - The file contains incremental patch for an existing file in base MPQ
-	FilePatchFile FileFlag = 0x00100000
-	// FileSingleUnit - Instead of being divided to 0x1000-bytes blocks, the file is stored as single unit
-	FileSingleUnit FileFlag = 0x01000000
-	// FileDeleteMarker - File is a deletion marker, indicating that the file no longer exists. This is used to allow patch
-	// archives to delete files present in lower-priority archives in the search chain. The file usually
-	// has length of 0 or 1 byte and its name is a hash
-	FileDeleteMarker FileFlag = 0x02000000
-	// FileSectorCrc - File has checksums for each sector. Ignored if file is not compressed or imploded.
-	FileSectorCrc FileFlag = 0x04000000
-	// FileExists - Set if file exists, reset when the file was deleted
-	FileExists FileFlag = 0x80000000
-)
-
-// BlockTableEntry represents an entry in the block table
-type BlockTableEntry struct { // 16 bytes
-	FilePosition         uint32
-	CompressedFileSize   uint32
-	UncompressedFileSize uint32
-	Flags                FileFlag
-	// Local Stuff...
-	FileName       string
-	EncryptionSeed uint32
-}
-
-// HasFlag returns true if the specified flag is present
-func (v BlockTableEntry) HasFlag(flag FileFlag) bool {
-	return (v.Flags & flag) != 0
-}
-
-// Load loads an MPQ file and returns a MPQ structure
-func Load(fileName string) (d2interface.Archive, error) {
-	result := &MPQ{filePath: fileName}
+// New loads an MPQ file and only reads the header
+func New(fileName string) (*MPQ, error) {
+	mpq := &MPQ{filePath: fileName}
 
 	var err error
 	if runtime.GOOS == "linux" {
-		result.file, err = openIgnoreCase(fileName)
+		mpq.file, err = openIgnoreCase(fileName)
 	} else {
-		result.file, err = os.Open(fileName) //nolint:gosec // Will fix later
+		mpq.file, err = os.Open(fileName) //nolint:gosec // Will fix later
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := result.readHeader(); err != nil {
-		return nil, err
+	if err := mpq.readHeader(); err != nil {
+		return nil, fmt.Errorf("failed to read reader: %v", err)
 	}
 
-	return result, nil
+	return mpq, nil
 }
 
-func openIgnoreCase(mpqPath string) (*os.File, error) {
-	// First see if file exists with specified case
-	mpqFile, err := os.Open(mpqPath) //nolint:gosec // Will fix later
-	if err == nil {
-		return mpqFile, err
-	}
-
-	mpqName := filepath.Base(mpqPath)
-	mpqDir := filepath.Dir(mpqPath)
-
-	files, err := ioutil.ReadDir(mpqDir)
+// FromFile loads an MPQ file and returns a MPQ structure
+func FromFile(fileName string) (*MPQ, error) {
+	mpq, err := New(fileName)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, file := range files {
-		if strings.EqualFold(file.Name(), mpqName) {
-			mpqName = file.Name()
-			break
-		}
+	if err := mpq.readHashTable(); err != nil {
+		return nil, fmt.Errorf("failed to read hash table: %v", err)
 	}
 
-	file, err := os.Open(path.Join(mpqDir, mpqName)) //nolint:gosec // Will fix later
+	if err := mpq.readBlockTable(); err != nil {
+		return nil, fmt.Errorf("failed to read block table: %v", err)
+	}
 
-	return file, err
+	return mpq, nil
 }
 
-func (v *MPQ) readHeader() error {
-	err := binary.Read(v.file, binary.LittleEndian, &v.data)
-
-	if err != nil {
-		return err
+// getFileBlockData gets a block table entry
+func (mpq *MPQ) getFileBlockData(fileName string) (*Block, error) {
+	fileEntry, ok := mpq.hashes[hashFilename(fileName)]
+	if !ok {
+		return nil, errors.New("file not found")
 	}
 
-	if string(v.data.Magic[:]) != "MPQ\x1A" {
-		return errors.New("invalid mpq header")
+	if fileEntry.BlockIndex >= uint32(len(mpq.blocks)) {
+		return nil, errors.New("invalid block index")
 	}
 
-	err = v.loadHashTable()
-	if err != nil {
-		return err
-	}
-
-	v.loadBlockTable()
-
-	return nil
-}
-
-func (v *MPQ) loadHashTable() error {
-	_, err := v.file.Seek(int64(v.data.HashTableOffset), 0)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	hashData := make([]uint32, v.data.HashTableEntries*4) //nolint:gomnd // // Decryption magic
-	hash := make([]byte, 4)
-
-	for i := range hashData {
-		_, err := v.file.Read(hash)
-		if err != nil {
-			log.Print(err)
-		}
-
-		hashData[i] = binary.LittleEndian.Uint32(hash)
-	}
-
-	decrypt(hashData, hashString("(hash table)", 3))
-
-	for i := uint32(0); i < v.data.HashTableEntries; i++ {
-		v.hashEntryMap.Insert(&HashTableEntry{
-			NamePartA: hashData[i*4],
-			NamePartB: hashData[(i*4)+1],
-			// https://github.com/OpenDiablo2/OpenDiablo2/issues/812
-			Locale:     uint16(hashData[(i*4)+2] >> 16),    //nolint:gomnd // // binary data
-			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF), //nolint:gomnd // // binary data
-			BlockIndex: hashData[(i*4)+3],
-		})
-	}
-
-	return nil
-}
-
-func (v *MPQ) loadBlockTable() {
-	_, err := v.file.Seek(int64(v.data.BlockTableOffset), 0)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	blockData := make([]uint32, v.data.BlockTableEntries*4) //nolint:gomnd // // binary data
-	hash := make([]byte, 4)
-
-	for i := range blockData {
-		_, err = v.file.Read(hash) //nolint:errcheck // Will fix later
-		if err != nil {
-			log.Print(err)
-		}
-
-		blockData[i] = binary.LittleEndian.Uint32(hash)
-	}
-
-	decrypt(blockData, hashString("(block table)", 3))
-
-	for i := uint32(0); i < v.data.BlockTableEntries; i++ {
-		v.blockTableEntries = append(v.blockTableEntries, BlockTableEntry{
-			FilePosition:         blockData[(i * 4)],
-			CompressedFileSize:   blockData[(i*4)+1],
-			UncompressedFileSize: blockData[(i*4)+2],
-			Flags:                FileFlag(blockData[(i*4)+3]),
-		})
-	}
-}
-
-func decrypt(data []uint32, seed uint32) {
-	seed2 := uint32(0xeeeeeeee) //nolint:gomnd // Decryption magic
-
-	for i := 0; i < len(data); i++ {
-		seed2 += cryptoLookup(0x400 + (seed & 0xff)) //nolint:gomnd // Decryption magic
-		result := data[i]
-		result ^= seed + seed2
-
-		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
-		data[i] = result
-	}
-}
-
-func decryptBytes(data []byte, seed uint32) {
-	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd // Decryption magic
-	for i := 0; i < len(data)-3; i += 4 {
-		seed2 += cryptoLookup(0x400 + (seed & 0xFF)) //nolint:gomnd // Decryption magic
-		result := binary.LittleEndian.Uint32(data[i : i+4])
-		result ^= seed + seed2
-		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
-
-		data[i+0] = uint8(result & 0xff)         //nolint:gomnd // Decryption magic
-		data[i+1] = uint8((result >> 8) & 0xff)  //nolint:gomnd // Decryption magic
-		data[i+2] = uint8((result >> 16) & 0xff) //nolint:gomnd // Decryption magic
-		data[i+3] = uint8((result >> 24) & 0xff) //nolint:gomnd // Decryption magic
-	}
-}
-
-func hashString(key string, hashType uint32) uint32 {
-	seed1 := uint32(0x7FED7FED) //nolint:gomnd // Decryption magic
-	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd // Decryption magic
-
-	/* prepare seeds. */
-	for _, char := range strings.ToUpper(key) {
-		seed1 = cryptoLookup((hashType*0x100)+uint32(char)) ^ (seed1 + seed2)
-		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
-	}
-
-	return seed1
-}
-
-// GetFileBlockData gets a block table entry
-func (v *MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
-	fileEntry, found := v.hashEntryMap.Find(fileName)
-
-	if !found || fileEntry.BlockIndex >= uint32(len(v.blockTableEntries)) {
-		return BlockTableEntry{}, errors.New("file not found")
-	}
-
-	return v.blockTableEntries[fileEntry.BlockIndex], nil
+	return mpq.blocks[fileEntry.BlockIndex], nil
 }
 
 // Close closes the MPQ file
-func (v *MPQ) Close() {
-	err := v.file.Close()
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-// FileExists checks the mpq to see if the file exists
-func (v *MPQ) FileExists(fileName string) bool {
-	return v.hashEntryMap.Contains(fileName)
+func (mpq *MPQ) Close() error {
+	return mpq.file.Close()
 }
 
 // ReadFile reads a file from the MPQ and returns a memory stream
-func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
-	fileBlockData, err := v.getFileBlockData(fileName)
+func (mpq *MPQ) ReadFile(fileName string) ([]byte, error) {
+	fileBlockData, err := mpq.getFileBlockData(fileName)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	fileBlockData.FileName = strings.ToLower(fileName)
 
-	fileBlockData.calculateEncryptionSeed()
-	mpqStream, err := CreateStream(v, fileBlockData, fileName)
-
+	stream, err := CreateStream(mpq, fileBlockData, fileName)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	buffer := make([]byte, fileBlockData.UncompressedFileSize)
-	mpqStream.Read(buffer, 0, fileBlockData.UncompressedFileSize)
+	if _, err := stream.Read(buffer, 0, fileBlockData.UncompressedFileSize); err != nil {
+		return []byte{}, err
+	}
 
 	return buffer, nil
 }
 
 // ReadFileStream reads the mpq file data and returns a stream
-func (v *MPQ) ReadFileStream(fileName string) (d2interface.DataStream, error) {
-	fileBlockData, err := v.getFileBlockData(fileName)
-
+func (mpq *MPQ) ReadFileStream(fileName string) (d2interface.DataStream, error) {
+	fileBlockData, err := mpq.getFileBlockData(fileName)
 	if err != nil {
 		return nil, err
 	}
 
 	fileBlockData.FileName = strings.ToLower(fileName)
-	fileBlockData.calculateEncryptionSeed()
 
-	mpqStream, err := CreateStream(v, fileBlockData, fileName)
+	stream, err := CreateStream(mpq, fileBlockData, fileName)
 	if err != nil {
 		return nil, err
 	}
 
-	return &MpqDataStream{stream: mpqStream}, nil
+	return &MpqDataStream{stream: stream}, nil
 }
 
 // ReadTextFile reads a file and returns it as a string
-func (v *MPQ) ReadTextFile(fileName string) (string, error) {
-	data, err := v.ReadFile(fileName)
+func (mpq *MPQ) ReadTextFile(fileName string) (string, error) {
+	data, err := mpq.ReadFile(fileName)
 
 	if err != nil {
 		return "", err
@@ -351,20 +142,9 @@ func (v *MPQ) ReadTextFile(fileName string) (string, error) {
 	return string(data), nil
 }
 
-func (v *BlockTableEntry) calculateEncryptionSeed() {
-	fileName := path.Base(v.FileName)
-	v.EncryptionSeed = hashString(fileName, 3)
-
-	if !v.HasFlag(FileFixKey) {
-		return
-	}
-
-	v.EncryptionSeed = (v.EncryptionSeed + v.FilePosition) ^ v.UncompressedFileSize
-}
-
-// GetFileList returns the list of files in this MPQ
-func (v *MPQ) GetFileList() ([]string, error) {
-	data, err := v.ReadFile("(listfile)")
+// Listfile returns the list of files in this MPQ
+func (mpq *MPQ) Listfile() ([]string, error) {
+	data, err := mpq.ReadFile("(listfile)")
 
 	if err != nil {
 		return nil, err
@@ -384,16 +164,44 @@ func (v *MPQ) GetFileList() ([]string, error) {
 }
 
 // Path returns the MPQ file path
-func (v *MPQ) Path() string {
-	return v.filePath
+func (mpq *MPQ) Path() string {
+	return mpq.filePath
 }
 
 // Contains returns bool for whether the given filename exists in the mpq
-func (v *MPQ) Contains(filename string) bool {
-	return v.hashEntryMap.Contains(filename)
+func (mpq *MPQ) Contains(filename string) bool {
+	_, ok := mpq.hashes[hashFilename(filename)]
+	return ok
 }
 
 // Size returns the size of the mpq in bytes
-func (v *MPQ) Size() uint32 {
-	return v.data.ArchiveSize
+func (mpq *MPQ) Size() uint32 {
+	return mpq.header.ArchiveSize
+}
+
+func openIgnoreCase(mpqPath string) (*os.File, error) {
+	// First see if file exists with specified case
+	mpqFile, err := os.Open(mpqPath) //nolint:gosec // Will fix later
+	if err != nil {
+		mpqName := filepath.Base(mpqPath)
+		mpqDir := filepath.Dir(mpqPath)
+
+		var files []fs.FileInfo
+		files, err = ioutil.ReadDir(mpqDir)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, file := range files {
+			if strings.EqualFold(file.Name(), mpqName) {
+				mpqName = file.Name()
+				break
+			}
+		}
+
+		return os.Open(filepath.Join(mpqDir, mpqName)) //nolint:gosec // Will fix later
+	}
+
+	return mpqFile, err
 }

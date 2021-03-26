@@ -77,3 +77,42 @@ func NewSubTileFlags(data byte) SubTileFlags {
 		Unknown3:        data&128 == 128,
 	}
 }
+
+// Encode encodes SubTileFlags back to byte
+func (s *SubTileFlags) Encode() byte {
+	var b byte
+
+	if s.BlockWalk {
+		b |= 1
+	}
+
+	if s.BlockLOS {
+		b |= 2
+	}
+
+	if s.BlockJump {
+		b |= 4
+	}
+
+	if s.BlockPlayerWalk {
+		b |= 8
+	}
+
+	if s.Unknown1 {
+		b |= 16
+	}
+
+	if s.BlockLight {
+		b |= 32
+	}
+
+	if s.Unknown2 {
+		b |= 64
+	}
+
+	if s.Unknown3 {
+		b |= 128
+	}
+
+	return b
+}

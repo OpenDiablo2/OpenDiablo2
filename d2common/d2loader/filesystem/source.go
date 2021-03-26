@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -22,21 +23,14 @@ func (s *Source) Type() types.SourceType {
 }
 
 // Open opens a file with the given sub-path within the Root dir of the file system source
-func (s *Source) Open(subPath string) (asset.Asset, error) {
-	file, err := os.Open(s.fullPath(subPath))
+func (s *Source) Open(subPath string) (io.ReadSeeker, error) {
+	return os.Open(s.fullPath(subPath))
+}
 
-	if err == nil {
-		a := &Asset{
-			assetType: types.Ext2AssetType(filepath.Ext(subPath)),
-			source:    s,
-			path:      subPath,
-			file:      file,
-		}
-
-		return a, nil
-	}
-
-	return nil, err
+// Exists returns true if the file exists
+func (s *Source) Exists(subPath string) bool {
+	_, err := os.Stat(s.fullPath(subPath))
+	return os.IsExist(err)
 }
 
 func (s *Source) fullPath(subPath string) string {

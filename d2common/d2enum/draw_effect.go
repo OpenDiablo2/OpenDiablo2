@@ -45,3 +45,24 @@ const (
 func (d DrawEffect) Transparent() bool {
 	return d != DrawEffectNone
 }
+
+func (d DrawEffect) String() string {
+	strings := map[DrawEffect]string{
+		DrawEffectPctTransparency25: "25% alpha",
+		DrawEffectPctTransparency50: "50% alpha",
+		DrawEffectPctTransparency75: "75% alpha",
+		DrawEffectModulate:          "Modulate",
+		DrawEffectBurn:              "Burn",
+		DrawEffectNormal:            "Normal",
+		DrawEffectMod2XTrans:        "Mod2XTrans",
+		DrawEffectMod2X:             "Mod2X",
+		DrawEffectNone:              "None",
+	}
+
+	drawEffect, found := strings[d]
+	if !found {
+		return unknown
+	}
+
+	return drawEffect
+}

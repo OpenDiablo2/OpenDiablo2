@@ -69,3 +69,36 @@ func (tile TileType) Special() bool {
 
 	return false
 }
+
+func (tile TileType) String() string {
+	strings := map[TileType]string{
+		TileFloor:                              "floor",
+		TileLeftWall:                           "Left Wall",
+		TileRightWall:                          "Upper Wall",
+		TileRightPartOfNorthCornerWall:         "Upper part of an Upper-Left corner",
+		TileLeftPartOfNorthCornerWall:          "Left part of an Upper-Left corner",
+		TileLeftEndWall:                        "Upper-Right corner",
+		TileRightEndWall:                       "Lower-Left corner",
+		TileSouthCornerWall:                    "Lower-Right corner",
+		TileLeftWallWithDoor:                   "Left Wall with Door object, but not always",
+		TileRightWallWithDoor:                  "Upper Wall with Door object, but not always",
+		TileSpecialTile1:                       "special",
+		TileSpecialTile2:                       "special",
+		TilePillarsColumnsAndStandaloneObjects: "billars, collumns or standalone object",
+		TileShadow:                             "shadow",
+		TileTree:                               "wall/object",
+		TileRoof:                               "roof",
+		TileLowerWallsEquivalentToLeftWall:     "lower wall (left wall)",
+		TileLowerWallsEquivalentToRightWall:    "lower wall (right wall)",
+		TileLowerWallsEquivalentToRightLeftNorthCornerWall: "lower wall (north corner wall)",
+		TileLowerWallsEquivalentToSouthCornerwall:          "lower wall (south corner wall)",
+	}
+
+	str, found := strings[tile]
+
+	if !found {
+		str = "unknown"
+	}
+
+	return str
+}

@@ -258,7 +258,6 @@ func (h *HUD) loadCustomWidgets() {
 }
 
 func (h *HUD) loadSkillResources() {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 	if err != nil {
 		h.Error(err.Error())
@@ -313,21 +312,6 @@ func (h *HUD) loadTooltips() {
 	labelY := staminaExperienceY - halfLabelHeight
 	h.staminaTooltip.SetPosition(labelX, labelY)
 
-	// runwalk tooltip
-	h.runWalkTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
-	rect = &h.actionableRegions[walkRun].rect
-
-	halfButtonWidth = rect.Width >> 1
-	halfButtonHeight := rect.Height >> 1
-
-	centerX = rect.Left + halfButtonWidth
-	centerY := rect.Top + halfButtonHeight
-
-	_, labelHeight = h.runWalkTooltip.GetSize()
-	labelX = centerX
-	labelY = centerY - halfButtonHeight - labelHeight
-	h.runWalkTooltip.SetPosition(labelX, labelY)
-
 	// experience tooltip
 	h.experienceTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
 	rect = &h.actionableRegions[stamina].rect
@@ -348,8 +332,21 @@ func (h *HUD) loadUIButtons() {
 	h.runButton = h.uiManager.NewButton(d2ui.ButtonTypeRun, "")
 	h.runButton.SetPosition(runButtonX, runButtonY)
 	h.runButton.OnActivated(func() { h.onToggleRunButton(false) })
-	h.runButton.SetTooltip(h.runWalkTooltip)
+
+	h.runWalkTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	// we must set text first, and then we're getting its height
 	h.updateRunTooltipText()
+
+	bw, bh := h.runButton.GetSize()
+	_, lh := h.runWalkTooltip.GetSize()
+	// nolint:gomnd // dividing by 2 (const)
+	labelX := runButtonX + bw/2
+	// nolint:gomnd // dividing by 2 (const)
+	labelY := runButtonY - bh/2 - lh/2
+
+	h.runWalkTooltip.SetPosition(labelX, labelY)
+	h.runButton.SetTooltip(h.runWalkTooltip)
+
 	h.panelGroup.AddWidget(h.runButton)
 
 	if h.hero.IsRunToggled() {
@@ -376,7 +373,6 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 	h.hero.ToggleRunWalk()
 	h.updateRunTooltipText()
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	h.hero.SetIsRunning(h.hero.IsRunToggled())
 }
 

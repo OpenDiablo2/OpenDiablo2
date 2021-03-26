@@ -88,11 +88,18 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
-	if err := term.Bind("mapdebugvis", "set map debug visualization level", nil, result.commandMapDebugVis); err != nil {
+	var name, desc, level string
+
+	name, desc = "mapdebugvis", "set map debug visualization level"
+	level = "level"
+
+	if err := term.Bind(name, desc, []string{level}, result.commandMapDebugVis); err != nil {
 		result.Errorf("could not bind the mapdebugvis action, err: %v", err)
 	}
 
-	if err := term.Bind("entitydebugvis", "set entity debug visualization level", nil, result.commandEntityDebugVis); err != nil {
+	name, desc = "entitydebugvis", "set entity debug visualization level"
+
+	if err := term.Bind(name, desc, []string{level}, result.commandEntityDebugVis); err != nil {
 		result.Errorf("could not bind the entitydebugvis action, err: %v", err)
 	}
 
@@ -109,6 +116,10 @@ func (mr *MapRenderer) UnbindTerminalCommands(term d2interface.Terminal) error {
 }
 
 func (mr *MapRenderer) commandMapDebugVis(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("invalid argument supplied")
+	}
+
 	level, err := strconv.Atoi(args[0])
 	if err != nil {
 		return fmt.Errorf("invalid argument supplied")
@@ -348,19 +359,19 @@ func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, e
 
 func (mr *MapRenderer) renderTilePass1(tile *d2mapengine.MapTile, target d2interface.Surface) {
 	for _, wall := range tile.Components.Walls {
-		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
+		if !wall.Hidden() && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}
 
 	for _, floor := range tile.Components.Floors {
-		if !floor.Hidden && floor.Prop1 != 0 {
+		if !floor.Hidden() && floor.Prop1 != 0 {
 			mr.renderFloor(floor, target)
 		}
 	}
 
 	for _, shadow := range tile.Components.Shadows {
-		if !shadow.Hidden && shadow.Prop1 != 0 {
+		if !shadow.Hidden() && shadow.Prop1 != 0 {
 			mr.renderShadow(shadow, target)
 		}
 	}
@@ -368,7 +379,7 @@ func (mr *MapRenderer) renderTilePass1(tile *d2mapengine.MapTile, target d2inter
 
 func (mr *MapRenderer) renderTilePass2(tile *d2mapengine.MapTile, target d2interface.Surface) {
 	for _, wall := range tile.Components.Walls {
-		if !wall.Hidden && wall.Type.UpperWall() {
+		if !wall.Hidden() && wall.Type.UpperWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}

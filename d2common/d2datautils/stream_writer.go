@@ -1,10 +1,15 @@
 package d2datautils
 
-import "bytes"
+import (
+	"bytes"
+	"log"
+)
 
 // StreamWriter allows you to create a byte array by streaming in writes of various sizes
 type StreamWriter struct {
-	data *bytes.Buffer
+	data      *bytes.Buffer
+	bitOffset int
+	bitCache  byte
 }
 
 // CreateStreamWriter creates a new StreamWriter instance
@@ -21,9 +26,71 @@ func (v *StreamWriter) GetBytes() []byte {
 	return v.data.Bytes()
 }
 
-// PushByte writes a byte to the stream
-func (v *StreamWriter) PushByte(val byte) {
-	v.data.WriteByte(val)
+// PushBytes writes a bytes to the stream
+func (v *StreamWriter) PushBytes(b ...byte) {
+	for _, i := range b {
+		v.data.WriteByte(i)
+	}
+}
+
+// PushBit pushes single bit into stream
+// WARNING: if you'll use PushBit, offset'll be less than 8, and if you'll
+// use another Push... method, bits'll not be pushed
+func (v *StreamWriter) PushBit(b bool) {
+	if b {
+		v.bitCache |= (1 << v.bitOffset)
+	}
+	v.bitOffset++
+
+	if v.bitOffset != bitsPerByte {
+		return
+	}
+
+	v.PushBytes(v.bitCache)
+	v.bitCache = 0
+	v.bitOffset = 0
+}
+
+// PushBits pushes bits (with max range 8)
+func (v *StreamWriter) PushBits(b byte, bits int) {
+	if bits > bitsPerByte {
+		log.Print("input bits number must be less (or equal) than 8")
+	}
+
+	val := b
+
+	for i := 0; i < bits; i++ {
+		v.PushBit(val&1 == 1)
+		val >>= 1
+	}
+}
+
+// PushBits16 pushes bits (with max range 16)
+func (v *StreamWriter) PushBits16(b uint16, bits int) {
+	if bits > bitsPerByte*bytesPerint16 {
+		log.Print("input bits number must be less (or equal) than 16")
+	}
+
+	val := b
+
+	for i := 0; i < bits; i++ {
+		v.PushBit(val&1 == 1)
+		val >>= 1
+	}
+}
+
+// PushBits32 pushes bits (with max range 32)
+func (v *StreamWriter) PushBits32(b uint32, bits int) {
+	if bits > bitsPerByte*bytesPerint32 {
+		log.Print("input bits number must be less (or equal) than 32")
+	}
+
+	val := b
+
+	for i := 0; i < bits; i++ {
+		v.PushBit(val&1 == 1)
+		val >>= 1
+	}
 }
 
 // PushInt16 writes a int16 word to the stream

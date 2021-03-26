@@ -30,3 +30,50 @@ func NewMaterialFlags(data uint16) MaterialFlags {
 		Snow:         data&0x0400 == 0x0400,
 	}
 }
+
+// Encode encodes MaterialFlags back to uint16
+func (m *MaterialFlags) Encode() uint16 {
+	var b uint16 = 0x000
+
+	if m.Other {
+		b |= 0x0001
+	}
+
+	if m.Water {
+		b |= 0x0002
+	}
+
+	if m.WoodObject {
+		b |= 0x0004
+	}
+
+	if m.InsideStone {
+		b |= 0x0008
+	}
+
+	if m.OutsideStone {
+		b |= 0x0010
+	}
+
+	if m.Dirt {
+		b |= 0x0020
+	}
+
+	if m.Sand {
+		b |= 0x0040
+	}
+
+	if m.Wood {
+		b |= 0x0080
+	}
+
+	if m.Lava {
+		b |= 0x0100
+	}
+
+	if m.Snow {
+		b |= 0x0400
+	}
+
+	return b
+}

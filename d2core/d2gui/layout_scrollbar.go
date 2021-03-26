@@ -67,6 +67,7 @@ const (
 func NewLayoutScrollbar(parentLayout, targetLayout *Layout) *LayoutScrollbar {
 	parentW, parentH := parentLayout.GetSize()
 	_, targetH := targetLayout.GetSize()
+	// nolint:gomnd // constant
 	gutterHeight := parentH - (2 * textSliderPartHeight)
 	viewportPercentage := oneHundredPercent - (float32(targetH-parentH) / float32(targetH))
 	sliderHeight := int(float32(gutterHeight) * viewportPercentage)
@@ -139,8 +140,10 @@ func (scrollbar *LayoutScrollbar) Load(ui *d2ui.UIManager) error {
 	arrowDownSprite.SetPosition(arrowDownX, arrowDownY+textSliderPartHeight)
 	scrollbar.arrowDownSprite = arrowDownSprite
 
+	// nolint:gomnd // constant
 	gutterParts := int(math.Ceil(float64(scrollbar.gutterHeight+(2*textSliderPartHeight)) / float64(textSliderPartHeight)))
 	sliderParts := int(math.Ceil(float64(scrollbar.sliderHeight) / float64(textSliderPartHeight)))
+	// nolint:gomnd // constant
 	gutterX, gutterY := arrowUpX, arrowUpY+(2*textSliderPartHeight)-1
 	i := 0
 

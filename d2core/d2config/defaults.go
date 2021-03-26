@@ -2,7 +2,7 @@ package d2config
 
 import (
 	"os/user"
-	"path"
+	"path/filepath"
 	"runtime"
 )
 
@@ -23,7 +23,7 @@ func DefaultConfig() *Configuration {
 		MpqPath:         "C:/Program Files (x86)/Diablo II",
 		Backend:         "Ebiten",
 		MpqLoadOrder: []string{
-			"Patch_D2.mpq",
+			"patch_d2.mpq",
 			"d2exp.mpq",
 			"d2xmusic.mpq",
 			"d2xtalk.mpq",
@@ -45,22 +45,9 @@ func DefaultConfig() *Configuration {
 		}
 	case "darwin":
 		config.MpqPath = "/Applications/Diablo II/"
-		config.MpqLoadOrder = []string{
-			"Diablo II Patch",
-			"Diablo II Expansion Data",
-			"Diablo II Expansion Movies",
-			"Diablo II Expansion Music",
-			"Diablo II Expansion Speech",
-			"Diablo II Game Data",
-			"Diablo II Graphics",
-			"Diablo II Movies",
-			"Diablo II Music",
-			"Diablo II Sounds",
-			"Diablo II Speech",
-		}
 	case "linux":
 		if usr, err := user.Current(); err == nil {
-			config.MpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
+			config.MpqPath = filepath.Join(usr.HomeDir, ".wine", "drive_c", "Program Files (x86)", "Diablo II")
 		}
 	}
 

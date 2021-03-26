@@ -32,6 +32,10 @@ func NewAssetManager(logLevel d2util.LogLevel) (*AssetManager, error) {
 		fonts:      d2cache.CreateCache(fontBudget),
 		palettes:   d2cache.CreateCache(paletteBudget),
 		transforms: d2cache.CreateCache(paletteTransformBudget),
+		dt1s:       d2cache.CreateCache(dt1Budget),
+		ds1s:       d2cache.CreateCache(ds1Budget),
+		cofs:       d2cache.CreateCache(cofBudget),
+		dccs:       d2cache.CreateCache(dccBudget),
 		Records:    records,
 	}
 

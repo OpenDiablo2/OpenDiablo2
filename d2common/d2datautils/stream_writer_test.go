@@ -4,18 +4,75 @@ import (
 	"testing"
 )
 
-func TestStreamWriterByte(t *testing.T) {
+func TestStreamWriterBits(t *testing.T) {
 	sr := CreateStreamWriter()
-	data := []byte{0x12, 0x34, 0x56, 0x78}
+	data := []byte{221, 19}
 
-	for _, d := range data {
-		sr.PushByte(d)
+	for _, i := range data {
+		sr.PushBits(i, bitsPerByte)
 	}
 
 	output := sr.GetBytes()
 	for i, d := range data {
 		if output[i] != d {
-			t.Fatalf("sr.PushByte() pushed %X, but wrote %X instead", d, output[i])
+			t.Fatalf("sr.PushBits() pushed %X, but wrote %X instead", d, output[i])
+		}
+	}
+}
+
+func TestStreamWriterBits16(t *testing.T) {
+	sr := CreateStreamWriter()
+	data := []uint16{1024, 19}
+
+	for _, i := range data {
+		sr.PushBits16(i, bitsPerByte*bytesPerint16)
+	}
+
+	output := sr.GetBytes()
+
+	for i, d := range data {
+		// nolint:gomnd // offset in byte slice; bit shifts for uint16
+		outputInt := uint16(output[bytesPerint16*i]) |
+			uint16(output[bytesPerint16*i+1])<<8
+		if outputInt != d {
+			t.Fatalf("sr.PushBits16() pushed %X, but wrote %X instead", d, output[i])
+		}
+	}
+}
+
+func TestStreamWriterBits32(t *testing.T) {
+	sr := CreateStreamWriter()
+	data := []uint32{19324, 87}
+
+	for _, i := range data {
+		sr.PushBits32(i, bitsPerByte*bytesPerint32)
+	}
+
+	output := sr.GetBytes()
+
+	for i, d := range data {
+		// nolint:gomnd // offset in byte slice; bit shifts for uint32
+		outputInt := uint32(output[bytesPerint32*i]) |
+			uint32(output[bytesPerint32*i+1])<<8 |
+			uint32(output[bytesPerint32*i+2])<<16 |
+			uint32(output[bytesPerint32*i+3])<<24
+
+		if outputInt != d {
+			t.Fatalf("sr.PushBits32() pushed %X, but wrote %X instead", d, output[i])
+		}
+	}
+}
+
+func TestStreamWriterByte(t *testing.T) {
+	sr := CreateStreamWriter()
+	data := []byte{0x12, 0x34, 0x56, 0x78}
+
+	sr.PushBytes(data...)
+
+	output := sr.GetBytes()
+	for i, d := range data {
+		if output[i] != d {
+			t.Fatalf("sr.PushBytes() pushed %X, but wrote %X instead", d, output[i])
 		}
 	}
 }

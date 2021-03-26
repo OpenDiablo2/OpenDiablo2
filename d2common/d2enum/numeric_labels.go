@@ -1,8 +1,10 @@
 package d2enum
 
-// there are labels for "numeric labels (see AssetManager.TranslateLabel)
+// there are labels for "numeric labels (see AssetManager.TranslateString)
 const (
-	CancelLabel = iota
+	RepairAll = iota
+	_
+	CancelLabel
 	CopyrightLabel
 	AllRightsReservedLabel
 	SinglePlayerLabel
@@ -62,6 +64,8 @@ const (
 // BaseLabelNumbers returns base label value (#n in english string table table)
 func BaseLabelNumbers(idx int) int {
 	baseLabelNumbers := []int{
+		128, // repairAll
+		127,
 		// main menu labels
 		1612, // CANCEL
 		1613, // (c) 2000 Blizzard Entertainment

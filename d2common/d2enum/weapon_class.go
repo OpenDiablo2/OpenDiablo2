@@ -24,3 +24,31 @@ const (
 	WeaponClassOneHandToHand                           // ht1
 	WeaponClassTwoHandToHand                           // ht2
 )
+
+// Name returns a full name of weapon class
+func (w WeaponClass) Name() string {
+	strings := map[WeaponClass]string{
+		WeaponClassNone:                 "None",
+		WeaponClassHandToHand:           "Hand To Hand",
+		WeaponClassBow:                  "Bow",
+		WeaponClassOneHandSwing:         "One Hand Swing",
+		WeaponClassOneHandThrust:        "One Hand Thrust",
+		WeaponClassStaff:                "Staff",
+		WeaponClassTwoHandSwing:         "Two Hand Swing",
+		WeaponClassTwoHandThrust:        "Two Hand Thrust",
+		WeaponClassCrossbow:             "Crossbow",
+		WeaponClassLeftJabRightSwing:    "Left Jab Right Swing",
+		WeaponClassLeftJabRightThrust:   "Left Jab Right Thrust",
+		WeaponClassLeftSwingRightSwing:  "Left Swing Right Swing",
+		WeaponClassLeftSwingRightThrust: "Left Swing Right Thrust",
+		WeaponClassOneHandToHand:        "One Hand To Hand",
+		WeaponClassTwoHandToHand:        "Two Hand To Hand",
+	}
+
+	weaponClass, found := strings[w]
+	if !found {
+		return unknown
+	}
+
+	return weaponClass
+}

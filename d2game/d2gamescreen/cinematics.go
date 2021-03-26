@@ -97,14 +97,14 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
 	v.cinematicsLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.cinematicsLabel.SetText(v.asset.TranslateLabel(d2enum.SelectCinematicLabel))
+	v.cinematicsLabel.SetText(v.asset.TranslateString(d2enum.SelectCinematicLabel))
 	v.cinematicsLabel.Color[0] = d2util.Color(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
 }
 
 func (v *Cinematics) createButtons() {
 	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
-		v.asset.TranslateString(v.asset.TranslateLabel(d2enum.CancelLabel)))
+		v.asset.TranslateString(v.asset.TranslateString(d2enum.CancelLabel)))
 	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
 	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
 
@@ -176,7 +176,11 @@ func (v *Cinematics) playVideo(path string) {
 		return
 	}
 
-	v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
+	v.videoDecoder, err = d2video.CreateBinkDecoder(videoBytes)
+	if err != nil {
+		v.Error(err.Error())
+		return
+	}
 }
 
 // Render renders the credits screen
