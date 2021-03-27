@@ -68,7 +68,6 @@ type Tile struct {
 func (mr *Stamp) Tile(x, y int) *Tile {
 	t := &Tile{
 		Walls:         make([]d2ds1.Tile, len(mr.ds1.Walls)),
-		Orientations:  make([]d2ds1.Tile, len(mr.ds1.Orientations)),
 		Floors:        make([]d2ds1.Tile, len(mr.ds1.Floors)),
 		Shadows:       make([]d2ds1.Tile, len(mr.ds1.Shadows)),
 		Substitutions: make([]d2ds1.Tile, len(mr.ds1.Substitutions)),
@@ -76,10 +75,6 @@ func (mr *Stamp) Tile(x, y int) *Tile {
 
 	for idx := range mr.ds1.Walls {
 		t.Walls[idx] = *mr.ds1.Walls[idx].Tile(x, y)
-	}
-
-	for idx := range mr.ds1.Orientations {
-		t.Orientations[idx] = *mr.ds1.Orientations[idx].Tile(x, y)
 	}
 
 	for idx := range mr.ds1.Floors {
@@ -147,7 +142,6 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 				// nolint:gomnd // constant
 				entity, err := mr.entity.NewObject((tileOffsetX*5)+object.X,
 					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
-
 				if err != nil {
 					panic(err)
 				}

@@ -6,8 +6,6 @@ import (
 
 func Test_ds1Layers_DeleteFloor(t *testing.T) {}
 
-func Test_ds1Layers_DeleteOrientation(t *testing.T) {}
-
 func Test_ds1Layers_DeleteShadow(t *testing.T) {}
 
 func Test_ds1Layers_DeleteSubstitution(t *testing.T) {}
@@ -16,27 +14,78 @@ func Test_ds1Layers_DeleteWall(t *testing.T) {}
 
 func Test_ds1Layers_GetFloor(t *testing.T) {}
 
-func Test_ds1Layers_GetOrientation(t *testing.T) {}
-
 func Test_ds1Layers_GetShadow(t *testing.T) {}
 
 func Test_ds1Layers_GetSubstitution(t *testing.T) {}
 
 func Test_ds1Layers_GetWall(t *testing.T) {}
 
-func Test_ds1Layers_InsertFloor(t *testing.T) {}
+func Test_ds1Layers_Insert(t *testing.T) {
+	t.Run("Floors", func(t *testing.T) {
+		ds1LayersInsert(t, floorLayerGroup)
+	})
+	t.Run("Walls", func(t *testing.T) {
+		ds1LayersInsert(t, wallLayerGroup)
+	})
+	t.Run("Shadows", func(t *testing.T) {
+		ds1LayersInsert(t, shadowLayerGroup)
+	})
+	t.Run("Substitution", func(t *testing.T) {
+		ds1LayersInsert(t, substitutionLayerGroup)
+	})
+}
 
-func Test_ds1Layers_InsertOrientation(t *testing.T) {}
+func ds1LayersInsert(t *testing.T, lt layerGroupType) {
+	ds1 := DS1{}
 
-func Test_ds1Layers_InsertShadow(t *testing.T) {}
+	layers := make([]*layer, getMaxGroupLen(lt)+1)
 
-func Test_ds1Layers_InsertSubstitution(t *testing.T) {}
+	for i := range layers {
+		i := i
+		layers[i] = &layer{}
+		layers[i].tiles = make(tileGrid, 1)
+		layers[i].tiles[0] = make(tileRow, 1)
+		layers[i].SetSize(3, 3)
+		layers[i].tiles[0][0].Prop1 = byte(i)
+	}
 
-func Test_ds1Layers_InsertWall(t *testing.T) {}
+	ds1.ds1Layers = &ds1Layers{}
+
+	var insert func(i int)
+
+	group := ds1.getLayersGroup(lt)
+
+	switch lt {
+	case floorLayerGroup:
+		insert = func(i int) { ds1.InsertFloor(0, layers[i]) }
+	case wallLayerGroup:
+		insert = func(i int) { ds1.InsertWall(0, layers[i]) }
+	case shadowLayerGroup:
+		insert = func(i int) { ds1.InsertShadow(0, layers[i]) }
+	case substitutionLayerGroup:
+		insert = func(i int) { ds1.InsertSubstitution(0, layers[i]) }
+	default:
+		t.Fatal("unknown layer type given")
+	}
+
+	for i := range layers {
+		insert(i)
+	}
+
+	if len(*group) != getMaxGroupLen(lt) {
+		t.Fatal("unexpected floor len after setting")
+	}
+
+	idx := 0
+	for i := len(layers) - 2; i > 0; i-- {
+		if (*group)[idx].tiles[0][0].Prop1 != byte(i) {
+			t.Fatal("unexpected tile inserted")
+		}
+		idx++
+	}
+}
 
 func Test_ds1Layers_PopFloor(t *testing.T) {}
-
-func Test_ds1Layers_PopOrientation(t *testing.T) {}
 
 func Test_ds1Layers_PopShadow(t *testing.T) {}
 
@@ -51,10 +100,6 @@ func Test_ds1Layers_Push(t *testing.T) {
 
 	t.Run("Wall", func(t *testing.T) {
 		ds1layerTest(wallLayerGroup, t)
-	})
-
-	t.Run("Orientation", func(t *testing.T) {
-		ds1layerTest(orientationLayerGroup, t)
 	})
 
 	t.Run("Shadow", func(t *testing.T) {
@@ -106,11 +151,6 @@ func ds1layerTest(lt layerGroupType, t *testing.T) { //nolint:funlen // no biggi
 		get = layers.GetWall
 		max = maxWallLayers
 		group = &layers.Walls
-	case orientationLayerGroup:
-		push = func() { layers.PushOrientation(&layer{}) }
-		get = layers.GetOrientation
-		max = maxOrientationLayers
-		group = &layers.Orientations
 	case shadowLayerGroup:
 		push = func() { layers.PushShadow(&layer{}) }
 		get = layers.GetShadow
