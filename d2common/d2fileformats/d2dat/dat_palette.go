@@ -15,6 +15,7 @@ type DATPalette struct {
 	colors [numColors]d2interface.Color
 }
 
+// New creates a new dat palette
 func New() *DATPalette {
 	result := &DATPalette{}
 	for i := range result.colors {
