@@ -6,12 +6,9 @@ func Create(frame, width, height int) *FontGlyph {
 	// nolint:gomnd // thes bytes are constant
 	// comes from https://d2mods.info/forum/viewtopic.php?t=42044
 	result := &FontGlyph{
-		unknown1: []byte{0},
-		unknown2: []byte{1, 0, 0},
-		unknown3: []byte{0, 0, 0, 0},
-		frame:    frame,
-		width:    width,
-		height:   height,
+		frame:  frame,
+		width:  width,
+		height: height,
 	}
 
 	return result
@@ -19,12 +16,9 @@ func Create(frame, width, height int) *FontGlyph {
 
 // FontGlyph represents a single font glyph
 type FontGlyph struct {
-	unknown1 []byte
-	unknown2 []byte
-	unknown3 []byte
-	frame    int
-	width    int
-	height   int
+	frame  int
+	width  int
+	height int
 }
 
 // SetSize sets glyph's size to w, h
@@ -59,15 +53,15 @@ func (fg *FontGlyph) FrameIndex() int {
 
 // Unknown1 returns unknowns bytes
 func (fg *FontGlyph) Unknown1() []byte {
-	return fg.unknown1
+	return []byte{0}
 }
 
 // Unknown2 returns unknowns bytes
 func (fg *FontGlyph) Unknown2() []byte {
-	return fg.unknown2
+	return []byte{1, 0, 0}
 }
 
 // Unknown3 returns unknowns bytes
 func (fg *FontGlyph) Unknown3() []byte {
-	return fg.unknown3
+	return []byte{0, 0, 0, 0}
 }
