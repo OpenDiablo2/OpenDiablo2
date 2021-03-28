@@ -15,6 +15,15 @@ type DATPalette struct {
 	colors [numColors]d2interface.Color
 }
 
+func New() *DATPalette {
+	result := &DATPalette{}
+	for i := range result.colors {
+		result.colors[i] = &DATColor{}
+	}
+
+	return result
+}
+
 // NumColors returns the number of colors in the palette
 func (p *DATPalette) NumColors() int {
 	return len(p.colors)
