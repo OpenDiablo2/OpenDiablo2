@@ -22,20 +22,6 @@ const (
 type tileRow []Tile     // index is x coordinate
 type tileGrid []tileRow // index is y coordinate
 
-type grid interface {
-	Width() int
-	SetWidth(w int) grid
-
-	Height() int
-	SetHeight(h int) grid
-
-	Size() (w, h int)
-	SetSize(w, h int) grid
-
-	Tile(x, y int) *Tile
-	SetTile(x, y int, t *Tile)
-}
-
 type layer struct {
 	tiles tileGrid
 }
@@ -64,7 +50,7 @@ func (l *layer) Width() int {
 	return len(l.tiles[0])
 }
 
-func (l *layer) SetWidth(w int) grid {
+func (l *layer) SetWidth(w int) *layer {
 	if w < 1 {
 		w = 1
 	}
@@ -102,7 +88,7 @@ func (l *layer) Height() int {
 	return len(l.tiles)
 }
 
-func (l *layer) SetHeight(h int) grid {
+func (l *layer) SetHeight(h int) *layer {
 	if h < 1 {
 		h = 1
 	}
@@ -138,6 +124,6 @@ func (l *layer) Size() (w, h int) {
 	return l.Width(), l.Height()
 }
 
-func (l *layer) SetSize(w, h int) grid {
+func (l *layer) SetSize(w, h int) *layer {
 	return l.SetWidth(w).SetHeight(h)
 }
