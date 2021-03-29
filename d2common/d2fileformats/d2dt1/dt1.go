@@ -179,9 +179,6 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 		tile.Blocks = make([]Block, numBlocks)
 
 		br.SkipBytes(numUnknownTileBytes4)
-		if err != nil {
-			return nil, err
-		}
 
 		result.Tiles[tileIdx] = tile
 	}
@@ -202,9 +199,6 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			}
 
 			br.SkipBytes(numUnknownBlockBytes)
-			if err != nil {
-				return nil, err
-			}
 
 			result.Tiles[tileIdx].Blocks[blockIdx].GridX, err = br.ReadByte()
 			if err != nil {
@@ -227,9 +221,6 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			}
 
 			br.SkipBytes(numUnknownBlockBytes)
-			if err != nil {
-				return nil, err
-			}
 
 			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset, err = br.ReadInt32()
 			if err != nil {
