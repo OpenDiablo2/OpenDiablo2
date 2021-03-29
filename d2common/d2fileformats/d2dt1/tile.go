@@ -2,10 +2,7 @@ package d2dt1
 
 // Tile is a representation of a map tile
 type Tile struct {
-	unknown1           []byte
 	unknown2           []byte
-	unknown3           []byte
-	unknown4           []byte
 	Direction          int32
 	RoofHeight         int16
 	MaterialFlags      MaterialFlags
@@ -19,4 +16,16 @@ type Tile struct {
 	blockHeaderPointer int32
 	blockHeaderSize    int32
 	Blocks             []Block
+}
+
+func (t *Tile) unknown1() []byte {
+	return make([]byte, numUnknownTileBytes1)
+}
+
+func (t *Tile) unknown3() []byte {
+	return make([]byte, numUnknownTileBytes3)
+}
+
+func (t *Tile) unknown4() []byte {
+	return make([]byte, numUnknownTileBytes4)
 }

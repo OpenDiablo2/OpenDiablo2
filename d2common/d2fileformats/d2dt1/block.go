@@ -2,8 +2,6 @@ package d2dt1
 
 // Block represents a DT1 block
 type Block struct {
-	unknown1    []byte
-	unknown2    []byte
 	X           int16
 	Y           int16
 	GridX       byte
@@ -21,4 +19,12 @@ func (b *Block) Format() BlockDataFormat {
 	}
 
 	return BlockFormatRLE
+}
+
+func (b *Block) unknown1() []byte {
+	return make([]byte, numUnknownBlockBytes)
+}
+
+func (b *Block) unknown2() []byte {
+	return make([]byte, numUnknownBlockBytes)
 }

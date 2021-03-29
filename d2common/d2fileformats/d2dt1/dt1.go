@@ -26,16 +26,26 @@ const (
 	numUnknownTileBytes2  = 4
 	numUnknownTileBytes3  = 7
 	numUnknownTileBytes4  = 12
+	numUnknownBlockBytes  = 2
 )
 
 // DT1 represents a DT1 file.
 type DT1 struct {
-	majorVersion       int32
-	minorVersion       int32
-	unknownHeaderBytes []byte
-	numberOfTiles      int32
-	bodyPosition       int32
-	Tiles              []Tile
+	majorVersion  int32
+	minorVersion  int32
+	numberOfTiles int32
+	bodyPosition  int32
+	Tiles         []Tile
+}
+
+// New creates a new DT1
+func New() *DT1 {
+	result := &DT1{
+		majorVersion: knownMajorVersion,
+		minorVersion: knownMinorVersion,
+	}
+
+	return result
 }
 
 // LoadDT1 loads a DT1 record
@@ -61,10 +71,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 		return nil, fmt.Errorf(fmtErr, result.majorVersion, result.minorVersion)
 	}
 
-	result.unknownHeaderBytes, err = br.ReadBytes(numUnknownHeaderBytes)
-	if err != nil {
-		return nil, err
-	}
+	br.SkipBytes(numUnknownHeaderBytes)
 
 	result.numberOfTiles, err = br.ReadInt32()
 	if err != nil {
@@ -112,10 +119,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			return nil, err
 		}
 
-		tile.unknown1, err = br.ReadBytes(numUnknownTileBytes1)
-		if err != nil {
-			return nil, err
-		}
+		br.SkipBytes(numUnknownTileBytes1)
 
 		tile.Type, err = br.ReadInt32()
 		if err != nil {
@@ -153,10 +157,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 			tile.SubTileFlags[i] = NewSubTileFlags(subtileFlagBytes)
 		}
 
-		tile.unknown3, err = br.ReadBytes(numUnknownTileBytes3)
-		if err != nil {
-			return nil, err
-		}
+		br.SkipBytes(numUnknownTileBytes3)
 
 		tile.blockHeaderPointer, err = br.ReadInt32()
 		if err != nil {
@@ -177,7 +178,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 
 		tile.Blocks = make([]Block, numBlocks)
 
-		tile.unknown4, err = br.ReadBytes(numUnknownTileBytes4)
+		br.SkipBytes(numUnknownTileBytes4)
 		if err != nil {
 			return nil, err
 		}
@@ -200,8 +201,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				return nil, err
 			}
 
-			//nolint:gomnd // Unknown data
-			result.Tiles[tileIdx].Blocks[blockIdx].unknown1, err = br.ReadBytes(2)
+			br.SkipBytes(numUnknownBlockBytes)
 			if err != nil {
 				return nil, err
 			}
@@ -226,8 +226,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 				return nil, err
 			}
 
-			//nolint:gomnd // Unknown data
-			result.Tiles[tileIdx].Blocks[blockIdx].unknown2, err = br.ReadBytes(2)
+			br.SkipBytes(numUnknownBlockBytes)
 			if err != nil {
 				return nil, err
 			}
@@ -260,7 +259,7 @@ func (d *DT1) Marshal() []byte {
 	// header
 	sw.PushInt32(d.majorVersion)
 	sw.PushInt32(d.minorVersion)
-	sw.PushBytes(d.unknownHeaderBytes...)
+	sw.PushBytes(d.unknownHeaderBytes()...)
 	sw.PushInt32(d.numberOfTiles)
 	sw.PushInt32(d.bodyPosition)
 
@@ -271,7 +270,7 @@ func (d *DT1) Marshal() []byte {
 		sw.PushUint16(d.Tiles[i].MaterialFlags.Encode())
 		sw.PushInt32(d.Tiles[i].Height)
 		sw.PushInt32(d.Tiles[i].Width)
-		sw.PushBytes(d.Tiles[i].unknown1...)
+		sw.PushBytes(d.Tiles[i].unknown1()...)
 		sw.PushInt32(d.Tiles[i].Type)
 		sw.PushInt32(d.Tiles[i].Style)
 		sw.PushInt32(d.Tiles[i].Sequence)
@@ -282,11 +281,11 @@ func (d *DT1) Marshal() []byte {
 			sw.PushBytes(j.Encode())
 		}
 
-		sw.PushBytes(d.Tiles[i].unknown3...)
+		sw.PushBytes(d.Tiles[i].unknown3()...)
 		sw.PushInt32(d.Tiles[i].blockHeaderPointer)
 		sw.PushInt32(d.Tiles[i].blockHeaderSize)
 		sw.PushInt32(int32(len(d.Tiles[i].Blocks)))
-		sw.PushBytes(d.Tiles[i].unknown4...)
+		sw.PushBytes(d.Tiles[i].unknown4()...)
 	}
 
 	// we must sort blocks first
@@ -308,12 +307,12 @@ func (d *DT1) Marshal() []byte {
 		for j := range blocks[keys[i]] {
 			sw.PushInt16(blocks[keys[i]][j].X)
 			sw.PushInt16(blocks[keys[i]][j].Y)
-			sw.PushBytes(blocks[keys[i]][j].unknown1...)
+			sw.PushBytes(blocks[keys[i]][j].unknown1()...)
 			sw.PushBytes(blocks[keys[i]][j].GridX)
 			sw.PushBytes(blocks[keys[i]][j].GridY)
 			sw.PushInt16(blocks[keys[i]][j].format)
 			sw.PushInt32(blocks[keys[i]][j].Length)
-			sw.PushBytes(blocks[keys[i]][j].unknown2...)
+			sw.PushBytes(blocks[keys[i]][j].unknown2()...)
 			sw.PushInt32(blocks[keys[i]][j].FileOffset)
 		}
 
@@ -324,4 +323,9 @@ func (d *DT1) Marshal() []byte {
 	}
 
 	return sw.GetBytes()
+}
+
+func (d *DT1) unknownHeaderBytes() []byte {
+	result := make([]byte, numUnknownHeaderBytes)
+	return result
 }
