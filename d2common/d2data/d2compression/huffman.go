@@ -323,6 +323,7 @@ func adjustTree(newNode *linkedNode) {
 		// insert current after prev
 		if prev == nil {
 			log.Fatal("previous frame not defined!")
+			break
 		}
 
 		temp := prev.next
