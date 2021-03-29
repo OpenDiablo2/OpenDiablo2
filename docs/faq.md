@@ -28,7 +28,7 @@ Until we rectify this issue, your best bet is to just ask a lot of questions, an
 
 First off, you should be familiar with the gameplay.
 Apart from that, you only need to know some basic information about Diablo 2 mod-making.
-For example, you have to know the basic game's file formats, such as `MPQ`, `DC6`, `DS1`, `DT`, etc.
+For example, you have to know the basic game's file formats, such as `MPQ`, `DC6`, `DS1`, `DT1`, etc.
 You can find a lot of good info in `#file-formats` channel on our Discord server and on [PhrozenKeep] (the d2 modding community forum).
 There are [plenty useful information for the Diablo II file formats](https://d2mods.info/forum/viewtopic.php?f=7&t=724) and other info such as the [Levels.txt](https://d2mods.info/forum/viewtopic.php?t=6754) file.
 
@@ -36,7 +36,8 @@ There are [plenty useful information for the Diablo II file formats](https://d2m
 
 Writing tests (in isolation) for something in the codebase is difficult because of the high level of coupling.
 The solution was found at [ECS], which is fantastic at de-coupling game code.
-[Akara] is the [ECS] implementation for Go we have selected, and it's been under development by our very own developer [Gravestench](https://github.com/gravestench).
+[Akara] is the [ECS] implementation for Go we have selected.
+For more information visit the [Akara] repository.
 Using [Akara] we are able to test individual components in isolation without problems.
 
 > Q: What's [AbyssEngine]?
