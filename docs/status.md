@@ -25,3 +25,4 @@ Feel free to contribute!
 
 [AbyssEngine]: https://github.com/OpenDiablo2/AbyssEngine
 [OpenDiablo2]: https://github.com/OpenDiablo2/OpenDiablo2
+[HellSpawner]: https://github.com/OpenDiablo2/HellSpawner
