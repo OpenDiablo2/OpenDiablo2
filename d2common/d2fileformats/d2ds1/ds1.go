@@ -57,11 +57,11 @@ func (ds1 *DS1) Unmarshal(fileData []byte) (*DS1, error) {
 	stream := d2datautils.CreateStreamReader(fileData)
 
 	if err := ds1.loadHeader(stream); err != nil {
-		return nil, fmt.Errorf("loading header: %v", err)
+		return nil, fmt.Errorf("loading header: %w", err)
 	}
 
 	if err := ds1.loadBody(stream); err != nil {
-		return nil, fmt.Errorf("loading body: %v", err)
+		return nil, fmt.Errorf("loading body: %w", err)
 	}
 
 	return ds1, nil
@@ -74,19 +74,19 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 
 	v, err := br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading version: %v", err)
+		return fmt.Errorf("reading version: %w", err)
 	}
 
 	ds1.version = ds1version(v)
 
 	width, err = br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading width: %v", err)
+		return fmt.Errorf("reading width: %w", err)
 	}
 
 	height, err = br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading height: %v", err)
+		return fmt.Errorf("reading height: %w", err)
 	}
 
 	width++
@@ -97,7 +97,7 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 	if ds1.version.specifiesAct() {
 		ds1.Act, err = br.ReadInt32()
 		if err != nil {
-			return fmt.Errorf("reading Act: %v", err)
+			return fmt.Errorf("reading Act: %w", err)
 		}
 
 		ds1.Act = d2math.MinInt32(d2enum.ActsNumber, ds1.Act+1)
@@ -106,7 +106,7 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 	if ds1.version.specifiesSubstitutionType() {
 		ds1.substitutionType, err = br.ReadInt32()
 		if err != nil {
-			return fmt.Errorf("reading substitution type: %v", err)
+			return fmt.Errorf("reading substitution type: %w", err)
 		}
 
 		switch ds1.substitutionType {
@@ -117,7 +117,7 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 
 	err = ds1.loadFileList(br)
 	if err != nil {
-		return fmt.Errorf("loading file list: %v", err)
+		return fmt.Errorf("loading file list: %w", err)
 	}
 
 	return nil
@@ -135,7 +135,7 @@ func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
 
 		ds1.unknown1, err = stream.ReadBytes(unknown1BytesCount)
 		if err != nil {
-			return fmt.Errorf("reading unknown1: %v", err)
+			return fmt.Errorf("reading unknown1: %w", err)
 		}
 	}
 
@@ -144,13 +144,13 @@ func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
 
 		numWalls, err = stream.ReadInt32()
 		if err != nil {
-			return fmt.Errorf("reading wall number: %v", err)
+			return fmt.Errorf("reading wall number: %w", err)
 		}
 
 		if ds1.version.specifiesFloors() {
 			numFloors, err = stream.ReadInt32()
 			if err != nil {
-				return fmt.Errorf("reading number of Floors: %v", err)
+				return fmt.Errorf("reading number of Floors: %w", err)
 			}
 		}
 	}
@@ -174,19 +174,19 @@ func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
 	ds1.SetSize(ds1.width, ds1.height)
 
 	if err := ds1.loadLayerStreams(stream); err != nil {
-		return fmt.Errorf("loading layer streams: %v", err)
+		return fmt.Errorf("loading layer streams: %w", err)
 	}
 
 	if err := ds1.loadObjects(stream); err != nil {
-		return fmt.Errorf("loading Objects: %v", err)
+		return fmt.Errorf("loading Objects: %w", err)
 	}
 
 	if err := ds1.loadSubstitutions(stream); err != nil {
-		return fmt.Errorf("loading Substitutions: %v", err)
+		return fmt.Errorf("loading Substitutions: %w", err)
 	}
 
 	if err := ds1.loadNPCs(stream); err != nil {
-		return fmt.Errorf("loading npc's: %v", err)
+		return fmt.Errorf("loading npc's: %w", err)
 	}
 
 	return nil
@@ -200,7 +200,7 @@ func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
 	// These Files reference things that don't exist anymore :-?
 	numberOfFiles, err := br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading number of Files: %v", err)
+		return fmt.Errorf("reading number of Files: %w", err)
 	}
 
 	ds1.Files = make([]string, numberOfFiles)
@@ -211,7 +211,7 @@ func (ds1 *DS1) loadFileList(br *d2datautils.StreamReader) error {
 		for {
 			ch, err := br.ReadByte()
 			if err != nil {
-				return fmt.Errorf("reading file character: %v", err)
+				return fmt.Errorf("reading file character: %w", err)
 			}
 
 			if ch == 0 {
@@ -233,7 +233,7 @@ func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) error {
 
 	numObjects, err := br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading number of Objects: %v", err)
+		return fmt.Errorf("reading number of Objects: %w", err)
 	}
 
 	ds1.Objects = make([]Object, numObjects)
@@ -292,13 +292,13 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	if ds1.version.hasUnknown2Bytes() {
 		ds1.unknown2, err = br.ReadUInt32()
 		if err != nil {
-			return fmt.Errorf("reading unknown 2: %v", err)
+			return fmt.Errorf("reading unknown 2: %w", err)
 		}
 	}
 
 	numberOfSubGroups, err := br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading number of sub groups: %v", err)
+		return fmt.Errorf("reading number of sub groups: %w", err)
 	}
 
 	ds1.substitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
@@ -397,7 +397,7 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 
 	numberOfNpcs, err := br.ReadInt32()
 	if err != nil {
-		return fmt.Errorf("reading number of npcs: %v", err)
+		return fmt.Errorf("reading number of npcs: %w", err)
 	}
 
 	for npcIdx := 0; npcIdx < int(numberOfNpcs); npcIdx++ {
@@ -492,7 +492,7 @@ func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader) error {
 			for x := 0; x < ds1.width; x++ {
 				dw, err := br.ReadUInt32()
 				if err != nil {
-					return fmt.Errorf("reading layer's dword: %v", err)
+					return fmt.Errorf("reading layer's dword: %w", err)
 				}
 
 				switch layerStreamType {
