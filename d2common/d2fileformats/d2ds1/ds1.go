@@ -35,7 +35,7 @@ type DS1 struct {
 	version          ds1version
 	Act              int32 // Act, from 1 to 5. This tells which Act table to use for the Objects list
 	SubstitutionType int32 // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
-	unknown1         []byte
+	unknown1         [unknown1BytesCount]byte
 	unknown2         uint32
 }
 
@@ -133,10 +133,12 @@ func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
 	if ds1.version.hasUnknown1Bytes() {
 		var err error
 
-		ds1.unknown1, err = stream.ReadBytes(unknown1BytesCount)
+		bytes, err := stream.ReadBytes(unknown1BytesCount)
 		if err != nil {
 			return fmt.Errorf("reading unknown1: %w", err)
 		}
+
+		copy(ds1.unknown1[:], bytes[:unknown1BytesCount])
 	}
 
 	if ds1.version.specifiesWalls() {
@@ -563,7 +565,7 @@ func (ds1 *DS1) Marshal() []byte {
 	}
 
 	if ds1.version.hasUnknown1Bytes() {
-		sw.PushBytes(ds1.unknown1...)
+		sw.PushBytes(ds1.unknown1[:]...)
 	}
 
 	if ds1.version.specifiesWalls() {
