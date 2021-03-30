@@ -674,3 +674,17 @@ func (ds1 *DS1) encodeNPCs(sw *d2datautils.StreamWriter) {
 		}
 	}
 }
+
+// Version returns the ds1 version
+func (ds1 *DS1) Version() int {
+	return int(ds1.version)
+}
+
+// SetVersion sets the ds1 version, can not be negative.
+func (ds1 *DS1) SetVersion(v int) {
+	if v < 0 {
+		v = 0
+	}
+
+	ds1.version = ds1version(v)
+}
