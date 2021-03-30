@@ -34,7 +34,7 @@ _Stay awhile and listen_ ...
 * 👉 **[Current Status](./docs/status.md)** 👈 - what you should focus on
 * [Roadmap](./docs/roadmap.md) - Planning ahead
 * Design - High-level overview of the OpenDiablo2 org and its projects
-* FAQ - Common questions from new people to the project
+* [FAQ](./docs/faq.md) - Common questions from new people to the project
 
 ### ⭐ For Users
 
