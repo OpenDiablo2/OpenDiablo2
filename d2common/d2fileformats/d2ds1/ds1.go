@@ -340,7 +340,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 func (ds1 *DS1) getLayerSchema() []layerStreamType {
 	var layerStream []layerStreamType
 
-	if ds1.version < v4 {
+	if ds1.version.hasStandardLayers() {
 		layerStream = []layerStreamType{
 			layerStreamWall1,
 			layerStreamFloor1,
@@ -391,7 +391,7 @@ func (ds1 *DS1) getLayerSchema() []layerStreamType {
 func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 	var err error
 
-	if ds1.version < v14 {
+	if !ds1.version.specifiesNPCs() {
 		return nil
 	}
 
@@ -432,7 +432,7 @@ func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) error {
 				return fmt.Errorf("loading paths for NPC %d: %v", npcIdx, err)
 			}
 		} else {
-			if ds1.version >= v15 {
+			if ds1.version.specifiesNPCActions() {
 				br.SkipBytes(int(numPaths) * 3) //nolint:gomnd // Unknown data
 			} else {
 				br.SkipBytes(int(numPaths) * 2) //nolint:gomnd // Unknown data
@@ -463,7 +463,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int)
 
 		newPath.Position = d2vector.NewPosition(float64(px), float64(py))
 
-		if ds1.version >= v15 {
+		if ds1.version.specifiesNPCActions() {
 			action, err := br.ReadInt32()
 			if err != nil {
 				return fmt.Errorf("reading action for path %d: %v", pathIdx, err)

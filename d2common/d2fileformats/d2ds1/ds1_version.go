@@ -36,6 +36,11 @@ func (v ds1version) specifiesSubstitutionType() bool {
 	return v >= v10
 }
 
+func (v ds1version) hasStandardLayers() bool {
+	// 1 of each layer, very simple ds1
+	return v < v4
+}
+
 func (v ds1version) specifiesWalls() bool {
 	// just after header, specifies number of Walls
 	return v >= v4
@@ -56,4 +61,12 @@ func (v ds1version) hasObjects() bool {
 
 func (v ds1version) hasSubstitutions() bool {
 	return v >= v12
+}
+
+func (v ds1version) specifiesNPCs() bool {
+	return v > v14
+}
+
+func (v ds1version) specifiesNPCActions() bool {
+	return v > v15
 }
