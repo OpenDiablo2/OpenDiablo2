@@ -34,7 +34,7 @@ type DS1 struct {
 
 	version          ds1version
 	Act              int32 // Act, from 1 to 5. This tells which Act table to use for the Objects list
-	substitutionType int32 // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
+	SubstitutionType int32 // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
 	unknown1         []byte
 	unknown2         uint32
 }
@@ -104,12 +104,12 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 	}
 
 	if ds1.version.specifiesSubstitutionType() {
-		ds1.substitutionType, err = br.ReadInt32()
+		ds1.SubstitutionType, err = br.ReadInt32()
 		if err != nil {
 			return fmt.Errorf("reading substitution type: %w", err)
 		}
 
-		switch ds1.substitutionType {
+		switch ds1.SubstitutionType {
 		case subType1, subType2:
 			ds1.PushSubstitution(&layer{})
 		}
@@ -282,7 +282,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 	var err error
 
 	hasSubstitutions := ds1.version.hasSubstitutions() &&
-		(ds1.substitutionType == subType1 || ds1.substitutionType == subType2)
+		(ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2)
 
 	if !hasSubstitutions {
 		ds1.substitutionGroups = make([]SubstitutionGroup, 0)
@@ -548,7 +548,7 @@ func (ds1 *DS1) Marshal() []byte {
 	}
 
 	if ds1.version.specifiesSubstitutionType() {
-		sw.PushInt32(ds1.substitutionType)
+		sw.PushInt32(ds1.SubstitutionType)
 	}
 
 	if ds1.version.hasFileList() {
@@ -592,7 +592,7 @@ func (ds1 *DS1) Marshal() []byte {
 
 	// Step 4 - encode Substitutions
 	hasSubstitutions := ds1.version.hasSubstitutions() &&
-		(ds1.substitutionType == subType1 || ds1.substitutionType == subType2)
+		(ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2)
 
 	if hasSubstitutions {
 		sw.PushUint32(ds1.unknown2)
