@@ -7,7 +7,7 @@ func Test_layers(t *testing.T) {
 		fmtWidthHeightError = "unexpected wall layer width/height: %dx%d"
 	)
 
-	l := &layer{}
+	l := &Layer{}
 
 	l.SetSize(0, 0)
 

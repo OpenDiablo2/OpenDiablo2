@@ -19,14 +19,18 @@ const (
 	layerStreamSubstitute1
 )
 
-type tileRow []Tile     // index is x coordinate
-type tileGrid []tileRow // index is y coordinate
+type (
+	tileRow  []Tile    // index is x coordinate
+	tileGrid []tileRow // index is y coordinate
+)
 
-type layer struct {
+// Layer is an abstraction of a tile grid with some helper methods
+type Layer struct {
 	tiles tileGrid
 }
 
-func (l *layer) Tile(x, y int) *Tile {
+// Tile returns the tile at the given x,y coordinate in the grid, or nil if empty.
+func (l *Layer) Tile(x, y int) *Tile {
 	if l.Width() < x || l.Height() < y {
 		return nil
 	}
@@ -34,7 +38,8 @@ func (l *layer) Tile(x, y int) *Tile {
 	return &l.tiles[y][x]
 }
 
-func (l *layer) SetTile(x, y int, t *Tile) {
+// SetTile sets the tile at the given x,y coordinate in the tile grid
+func (l *Layer) SetTile(x, y int, t *Tile) {
 	if l.Width() > x || l.Height() > y {
 		return
 	}
@@ -42,7 +47,8 @@ func (l *layer) SetTile(x, y int, t *Tile) {
 	l.tiles[y][x] = *t
 }
 
-func (l *layer) Width() int {
+// Width returns the width of the tile grid
+func (l *Layer) Width() int {
 	if len(l.tiles[0]) < 1 {
 		l.SetWidth(1)
 	}
@@ -50,7 +56,8 @@ func (l *layer) Width() int {
 	return len(l.tiles[0])
 }
 
-func (l *layer) SetWidth(w int) *layer {
+// SetWidth sets the width of the tile grid, minimum of 1
+func (l *Layer) SetWidth(w int) *Layer {
 	if w < 1 {
 		w = 1
 	}
@@ -80,7 +87,8 @@ func (l *layer) SetWidth(w int) *layer {
 	return l
 }
 
-func (l *layer) Height() int {
+// Height returns the height of the tile grid
+func (l *Layer) Height() int {
 	if len(l.tiles) < 1 {
 		l.SetHeight(1)
 	}
@@ -88,7 +96,8 @@ func (l *layer) Height() int {
 	return len(l.tiles)
 }
 
-func (l *layer) SetHeight(h int) *layer {
+// SetHeight sets the height of the tile grid, minimum of 1
+func (l *Layer) SetHeight(h int) *Layer {
 	if h < 1 {
 		h = 1
 	}
@@ -120,10 +129,12 @@ func (l *layer) SetHeight(h int) *layer {
 	return l
 }
 
-func (l *layer) Size() (w, h int) {
+// Size returns the width and height of the tile grid
+func (l *Layer) Size() (w, h int) {
 	return l.Width(), l.Height()
 }
 
-func (l *layer) SetSize(w, h int) *layer {
+// SetSize sets the width and height of the tile grid
+func (l *Layer) SetSize(w, h int) *Layer {
 	return l.SetWidth(w).SetHeight(h)
 }
