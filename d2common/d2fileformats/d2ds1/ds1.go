@@ -30,7 +30,7 @@ type DS1 struct {
 	*ds1Layers
 	Files              []string            // FilePtr table of file string pointers
 	Objects            []Object            // Objects
-	substitutionGroups []SubstitutionGroup // Substitution groups for the DS1
+	SubstitutionGroups []SubstitutionGroup // Substitution groups for the DS1
 
 	version          ds1version
 	Act              int32 // Act, from 1 to 5. This tells which Act table to use for the Objects list
@@ -287,7 +287,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 		(ds1.SubstitutionType == subType1 || ds1.SubstitutionType == subType2)
 
 	if !hasSubstitutions {
-		ds1.substitutionGroups = make([]SubstitutionGroup, 0)
+		ds1.SubstitutionGroups = make([]SubstitutionGroup, 0)
 		return nil
 	}
 
@@ -303,7 +303,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 		return fmt.Errorf("reading number of sub groups: %w", err)
 	}
 
-	ds1.substitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
+	ds1.SubstitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
 
 	for subIdx := 0; subIdx < int(numberOfSubGroups); subIdx++ {
 		newSub := SubstitutionGroup{}
@@ -333,7 +333,7 @@ func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) error {
 			return fmt.Errorf("reading substitution's %d unknown: %v", subIdx, err)
 		}
 
-		ds1.substitutionGroups[subIdx] = newSub
+		ds1.SubstitutionGroups[subIdx] = newSub
 	}
 
 	return err
@@ -599,9 +599,9 @@ func (ds1 *DS1) Marshal() []byte {
 	if hasSubstitutions {
 		sw.PushUint32(ds1.unknown2)
 
-		sw.PushUint32(uint32(len(ds1.substitutionGroups)))
+		sw.PushUint32(uint32(len(ds1.SubstitutionGroups)))
 
-		for _, i := range ds1.substitutionGroups {
+		for _, i := range ds1.SubstitutionGroups {
 			sw.PushInt32(i.TileX)
 			sw.PushInt32(i.TileY)
 			sw.PushInt32(i.WidthInTiles)
