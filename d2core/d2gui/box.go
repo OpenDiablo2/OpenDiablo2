@@ -388,7 +388,7 @@ func (box *Box) setupTitle(sectionHeight int) error {
 }
 
 func (box *Box) setupOptions(sectionHeight int) error {
-	box.contentLayout.SetSize(box.width, (box.height - sectionHeight))
+	box.contentLayout.SetSize(box.width, box.height-sectionHeight)
 
 	if !box.disableBorder {
 		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)

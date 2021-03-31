@@ -2,13 +2,14 @@ package d2mapengine
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 )
 
 // MapTile is a tile placed on the map
 type MapTile struct {
-	Components d2ds1.TileRecord
+	Components d2mapstamp.Tile
 	RegionType d2enum.RegionIdType
 	SubTiles   [25]d2dt1.SubTileFlags
 }
