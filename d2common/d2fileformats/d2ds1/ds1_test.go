@@ -220,3 +220,28 @@ func TestDS1_SetSize(t *testing.T) {
 		t.Fatal("unexpected width/height after setting size")
 	}
 }
+
+func Test_getLayerSchema(t *testing.T) {
+	ds1 := exampleData()
+
+	expected := map[int]layerStreamType{
+		0: layerStreamWall1,
+		1: layerStreamOrientation1,
+		2: layerStreamWall2,
+		3: layerStreamOrientation2,
+		4: layerStreamFloor1,
+		5: layerStreamShadow1,
+	}
+
+	schema := ds1.getLayerSchema()
+
+	if len(schema) != len(expected) {
+		t.Fatal("unexpected schema length")
+	}
+
+	for idx := range expected {
+		if schema[idx] != expected[idx] {
+			t.Fatal("unexpected layer type in schema")
+		}
+	}
+}
