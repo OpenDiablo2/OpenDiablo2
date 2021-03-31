@@ -41,7 +41,7 @@ func DefaultConfig() *Configuration {
 	switch runtime.GOOS {
 	case "windows":
 		if runtime.GOARCH == "386" {
-			config.MpqPath = "C:/Program files/Diablo II"
+			config.MpqPath = "C:/Program Files/Diablo II"
 		}
 	case "darwin":
 		config.MpqPath = "/Applications/Diablo II/"
