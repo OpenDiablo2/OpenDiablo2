@@ -194,3 +194,29 @@ func TestDS1_MarshalUnmarshal(t *testing.T) {
 		t.Error(loadErr)
 	}
 }
+
+func TestDS1_Version(t *testing.T) {
+	ds1 := exampleData()
+
+	v := ds1.Version()
+
+	ds1.SetVersion(v + 1)
+
+	if ds1.Version() == v {
+		t.Fatal("expected different ds1 version")
+	}
+}
+
+func TestDS1_SetSize(t *testing.T) {
+	ds1 := exampleData()
+
+	w, h := ds1.Size()
+
+	ds1.SetSize(w+1, h-1)
+
+	w2, h2 := ds1.Size()
+
+	if w2 != (w+1) || h2 != (h-1) {
+		t.Fatal("unexpected width/height after setting size")
+	}
+}
