@@ -126,6 +126,7 @@ func (l *ds1Layers) SetHeight(h int) {
 func (l *ds1Layers) push(t layerGroupType, layer *Layer) {
 	l.ensureInit()
 	l.cull()
+	layer.SetSize(l.Size())
 
 	group := l.getLayersGroup(t)
 
@@ -183,6 +184,8 @@ func (l *ds1Layers) insert(t layerGroupType, idx int, newLayer *Layer) {
 	if newLayer == nil {
 		return
 	}
+
+	newLayer.SetSize(l.Size())
 
 	group := l.getLayersGroup(t)
 	if group == nil {
