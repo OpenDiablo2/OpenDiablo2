@@ -111,7 +111,7 @@ func (ds1 *DS1) loadHeader(br *d2datautils.StreamReader) error {
 
 		switch ds1.SubstitutionType {
 		case subType1, subType2:
-			ds1.PushSubstitution(&layer{})
+			ds1.PushSubstitution(&Layer{})
 		}
 	}
 
@@ -158,19 +158,19 @@ func (ds1 *DS1) loadBody(stream *d2datautils.StreamReader) error {
 	}
 
 	for ; numWalls > 0; numWalls-- {
-		ds1.PushWall(&layer{})
+		ds1.PushWall(&Layer{})
 	}
 
 	for ; numShadows > 0; numShadows-- {
-		ds1.PushShadow(&layer{})
+		ds1.PushShadow(&Layer{})
 	}
 
 	for ; numFloors > 0; numFloors-- {
-		ds1.PushFloor(&layer{})
+		ds1.PushFloor(&Layer{})
 	}
 
 	for ; numSubstitutions > 0; numSubstitutions-- {
-		ds1.PushSubstitution(&layer{})
+		ds1.PushSubstitution(&Layer{})
 	}
 
 	ds1.SetSize(ds1.width, ds1.height)

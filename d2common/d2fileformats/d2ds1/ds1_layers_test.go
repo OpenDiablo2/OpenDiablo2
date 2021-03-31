@@ -74,17 +74,17 @@ func Test_ds1Layers_Get(t *testing.T) {
 func ds1LayersGet(t *testing.T, lt layerGroupType) {
 	ds1 := exampleData()
 
-	var get func(i int) *layer
+	var get func(i int) *Layer
 
 	switch lt {
 	case floorLayerGroup:
-		get = func(i int) *layer { return ds1.GetFloor(0) }
+		get = func(i int) *Layer { return ds1.GetFloor(0) }
 	case wallLayerGroup:
-		get = func(i int) *layer { return ds1.GetWall(0) }
+		get = func(i int) *Layer { return ds1.GetWall(0) }
 	case shadowLayerGroup:
-		get = func(i int) *layer { return ds1.GetShadow(0) }
+		get = func(i int) *Layer { return ds1.GetShadow(0) }
 	case substitutionLayerGroup:
-		get = func(i int) *layer { return ds1.GetSubstitution(0) }
+		get = func(i int) *Layer { return ds1.GetSubstitution(0) }
 	default:
 		t.Fatal("unknown layer type given")
 		return
@@ -116,11 +116,11 @@ func Test_ds1Layers_Insert(t *testing.T) {
 func ds1LayersInsert(t *testing.T, lt layerGroupType) {
 	ds1 := DS1{}
 
-	layers := make([]*layer, getMaxGroupLen(lt)+1)
+	layers := make([]*Layer, getMaxGroupLen(lt)+1)
 
 	for i := range layers {
 		i := i
-		layers[i] = &layer{}
+		layers[i] = &Layer{}
 		layers[i].tiles = make(tileGrid, 1)
 		layers[i].tiles[0] = make(tileRow, 1)
 		layers[i].SetSize(3, 3)
@@ -184,14 +184,14 @@ func Test_ds1Layers_Pop(t *testing.T) {
 func ds1layerPop(lt layerGroupType, t *testing.T) {
 	ds1 := exampleData()
 
-	var pop func() *layer
+	var pop func() *Layer
 
 	var numBefore, numAfter int
 
 	switch lt {
 	case floorLayerGroup:
 		numBefore = len(ds1.Floors)
-		pop = func() *layer {
+		pop = func() *Layer {
 			l := ds1.PopFloor()
 			numAfter = len(ds1.Floors)
 
@@ -199,7 +199,7 @@ func ds1layerPop(lt layerGroupType, t *testing.T) {
 		}
 	case wallLayerGroup:
 		numBefore = len(ds1.Walls)
-		pop = func() *layer {
+		pop = func() *Layer {
 			l := ds1.PopWall()
 			numAfter = len(ds1.Walls)
 
@@ -207,7 +207,7 @@ func ds1layerPop(lt layerGroupType, t *testing.T) {
 		}
 	case shadowLayerGroup:
 		numBefore = len(ds1.Shadows)
-		pop = func() *layer {
+		pop = func() *Layer {
 			l := ds1.PopShadow()
 			numAfter = len(ds1.Shadows)
 
@@ -215,7 +215,7 @@ func ds1layerPop(lt layerGroupType, t *testing.T) {
 		}
 	case substitutionLayerGroup:
 		numBefore = len(ds1.Substitutions)
-		pop = func() *layer {
+		pop = func() *Layer {
 			l := ds1.PopSubstitution()
 			numAfter = len(ds1.Substitutions)
 
@@ -271,7 +271,7 @@ func ds1layerPush(lt layerGroupType, t *testing.T) { //nolint:funlen // no biggi
 	// we need to set up some shit to handle the test in a generic way
 	var push func()
 
-	var get func(idx int) *layer
+	var get func(idx int) *Layer
 
 	var max int
 
@@ -292,22 +292,22 @@ func ds1layerPush(lt layerGroupType, t *testing.T) { //nolint:funlen // no biggi
 
 	switch lt {
 	case floorLayerGroup:
-		push = func() { layers.PushFloor(&layer{}) }
+		push = func() { layers.PushFloor(&Layer{}) }
 		get = layers.GetFloor
 		max = maxFloorLayers
 		group = &layers.Floors
 	case wallLayerGroup:
-		push = func() { layers.PushWall(&layer{}) }
+		push = func() { layers.PushWall(&Layer{}) }
 		get = layers.GetWall
 		max = maxWallLayers
 		group = &layers.Walls
 	case shadowLayerGroup:
-		push = func() { layers.PushShadow(&layer{}) }
+		push = func() { layers.PushShadow(&Layer{}) }
 		get = layers.GetShadow
 		max = maxShadowLayers
 		group = &layers.Shadows
 	case substitutionLayerGroup:
-		push = func() { layers.PushSubstitution(&layer{}) }
+		push = func() { layers.PushSubstitution(&Layer{}) }
 		get = layers.GetSubstitution
 		max = maxSubstitutionLayers
 		group = &layers.Substitutions

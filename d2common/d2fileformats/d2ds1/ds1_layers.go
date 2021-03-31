@@ -16,7 +16,7 @@ const (
 	substitutionLayerGroup
 )
 
-type layerGroup []*layer
+type layerGroup []*Layer
 
 type ds1Layers struct {
 	width, height int
@@ -123,7 +123,7 @@ func (l *ds1Layers) SetHeight(h int) {
 }
 
 // generic push func for all layer types
-func (l *ds1Layers) push(t layerGroupType, layer *layer) {
+func (l *ds1Layers) push(t layerGroupType, layer *Layer) {
 	l.ensureInit()
 	l.cull()
 
@@ -137,7 +137,7 @@ func (l *ds1Layers) push(t layerGroupType, layer *layer) {
 }
 
 // generic pop func for all layer types
-func (l *ds1Layers) pop(t layerGroupType) *layer {
+func (l *ds1Layers) pop(t layerGroupType) *Layer {
 	l.ensureInit()
 	l.cull()
 
@@ -146,7 +146,7 @@ func (l *ds1Layers) pop(t layerGroupType) *layer {
 		return nil
 	}
 
-	var theLayer *layer
+	var theLayer *Layer
 
 	// remove last layer of slice and return it
 	if len(*group) > 0 {
@@ -160,7 +160,7 @@ func (l *ds1Layers) pop(t layerGroupType) *layer {
 	return nil
 }
 
-func (l *ds1Layers) get(t layerGroupType, idx int) *layer {
+func (l *ds1Layers) get(t layerGroupType, idx int) *Layer {
 	l.ensureInit()
 	l.cull()
 
@@ -176,7 +176,7 @@ func (l *ds1Layers) get(t layerGroupType, idx int) *layer {
 	return (*group)[idx]
 }
 
-func (l *ds1Layers) insert(t layerGroupType, idx int, newLayer *layer) {
+func (l *ds1Layers) insert(t layerGroupType, idx int, newLayer *Layer) {
 	l.ensureInit()
 	l.cull()
 
@@ -207,7 +207,7 @@ func (l *ds1Layers) insert(t layerGroupType, idx int, newLayer *layer) {
 	//		idx=1
 	//		newLayer=c
 	// 		existing layerGroup is [a, b]
-	newGroup := append((*group)[:idx], append([]*layer{newLayer}, (*group)[idx:]...)...)
+	newGroup := append((*group)[:idx], append([]*Layer{newLayer}, (*group)[idx:]...)...)
 	*group = newGroup
 }
 
@@ -229,20 +229,20 @@ func (l *ds1Layers) delete(t layerGroupType, idx int) {
 	l.cull()
 }
 
-func (l *ds1Layers) GetFloor(idx int) *layer {
+func (l *ds1Layers) GetFloor(idx int) *Layer {
 	return l.get(floorLayerGroup, idx)
 }
 
-func (l *ds1Layers) PushFloor(floor *layer) *ds1Layers {
+func (l *ds1Layers) PushFloor(floor *Layer) *ds1Layers {
 	l.push(floorLayerGroup, floor)
 	return l
 }
 
-func (l *ds1Layers) PopFloor() *layer {
+func (l *ds1Layers) PopFloor() *Layer {
 	return l.pop(floorLayerGroup)
 }
 
-func (l *ds1Layers) InsertFloor(idx int, newFloor *layer) {
+func (l *ds1Layers) InsertFloor(idx int, newFloor *Layer) {
 	l.insert(floorLayerGroup, idx, newFloor)
 }
 
@@ -250,20 +250,20 @@ func (l *ds1Layers) DeleteFloor(idx int) {
 	l.delete(floorLayerGroup, idx)
 }
 
-func (l *ds1Layers) GetWall(idx int) *layer {
+func (l *ds1Layers) GetWall(idx int) *Layer {
 	return l.get(wallLayerGroup, idx)
 }
 
-func (l *ds1Layers) PushWall(wall *layer) *ds1Layers {
+func (l *ds1Layers) PushWall(wall *Layer) *ds1Layers {
 	l.push(wallLayerGroup, wall)
 	return l
 }
 
-func (l *ds1Layers) PopWall() *layer {
+func (l *ds1Layers) PopWall() *Layer {
 	return l.pop(wallLayerGroup)
 }
 
-func (l *ds1Layers) InsertWall(idx int, newWall *layer) {
+func (l *ds1Layers) InsertWall(idx int, newWall *Layer) {
 	l.insert(wallLayerGroup, idx, newWall)
 }
 
@@ -271,20 +271,20 @@ func (l *ds1Layers) DeleteWall(idx int) {
 	l.delete(wallLayerGroup, idx)
 }
 
-func (l *ds1Layers) GetShadow(idx int) *layer {
+func (l *ds1Layers) GetShadow(idx int) *Layer {
 	return l.get(shadowLayerGroup, idx)
 }
 
-func (l *ds1Layers) PushShadow(shadow *layer) *ds1Layers {
+func (l *ds1Layers) PushShadow(shadow *Layer) *ds1Layers {
 	l.push(shadowLayerGroup, shadow)
 	return l
 }
 
-func (l *ds1Layers) PopShadow() *layer {
+func (l *ds1Layers) PopShadow() *Layer {
 	return l.pop(shadowLayerGroup)
 }
 
-func (l *ds1Layers) InsertShadow(idx int, newShadow *layer) {
+func (l *ds1Layers) InsertShadow(idx int, newShadow *Layer) {
 	l.insert(shadowLayerGroup, idx, newShadow)
 }
 
@@ -292,20 +292,20 @@ func (l *ds1Layers) DeleteShadow(idx int) {
 	l.delete(shadowLayerGroup, idx)
 }
 
-func (l *ds1Layers) GetSubstitution(idx int) *layer {
+func (l *ds1Layers) GetSubstitution(idx int) *Layer {
 	return l.get(substitutionLayerGroup, idx)
 }
 
-func (l *ds1Layers) PushSubstitution(sub *layer) *ds1Layers {
+func (l *ds1Layers) PushSubstitution(sub *Layer) *ds1Layers {
 	l.push(substitutionLayerGroup, sub)
 	return l
 }
 
-func (l *ds1Layers) PopSubstitution() *layer {
+func (l *ds1Layers) PopSubstitution() *Layer {
 	return l.pop(substitutionLayerGroup)
 }
 
-func (l *ds1Layers) InsertSubstitution(idx int, newSubstitution *layer) {
+func (l *ds1Layers) InsertSubstitution(idx int, newSubstitution *Layer) {
 	l.insert(substitutionLayerGroup, idx, newSubstitution)
 }
 

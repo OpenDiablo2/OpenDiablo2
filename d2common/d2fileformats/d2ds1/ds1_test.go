@@ -174,7 +174,7 @@ func exampleData() *DS1 { //nolint:funlen // not a big deal if this is long func
 			{0, 2, 0, 0, 0, nil},
 			{0, 3, 0, 0, 0, nil},
 		},
-		substitutionGroups: nil,
+		SubstitutionGroups: nil,
 		version:            17,
 		Act:                1,
 		SubstitutionType:   0,
