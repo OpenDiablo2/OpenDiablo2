@@ -572,7 +572,7 @@ func (ds1 *DS1) Marshal() []byte {
 		sw.PushInt32(int32(len(ds1.Walls)))
 
 		if ds1.version.specifiesFloors() {
-			sw.PushInt32(int32(len(ds1.Walls)))
+			sw.PushInt32(int32(len(ds1.Floors)))
 		}
 	}
 
