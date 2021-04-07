@@ -15,8 +15,24 @@ const (
 	FloorLayerGroup LayerGroupType = iota
 	WallLayerGroup
 	ShadowLayerGroup
-	Substitutionlayergroup
+	SubstitutionLayerGroup
 )
+
+func (l LayerGroupType) String() string {
+	switch l {
+	case FloorLayerGroup:
+		return "floor"
+	case WallLayerGroup:
+		return "wall"
+	case ShadowLayerGroup:
+		return "shadow"
+	case SubstitutionLayerGroup:
+		return "substitution"
+	}
+
+	// should not be reached
+	return "unknown"
+}
 
 type layerGroup []*Layer
 
@@ -51,12 +67,12 @@ func (l *ds1Layers) cull() {
 	l.cullNilLayers(FloorLayerGroup)
 	l.cullNilLayers(WallLayerGroup)
 	l.cullNilLayers(ShadowLayerGroup)
-	l.cullNilLayers(Substitutionlayergroup)
+	l.cullNilLayers(SubstitutionLayerGroup)
 }
 
 // removes nil layers of given layer group type
 func (l *ds1Layers) cullNilLayers(t LayerGroupType) {
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return
 	}
@@ -65,9 +81,9 @@ func (l *ds1Layers) cullNilLayers(t LayerGroupType) {
 	// exit culling procedure when no nil layers are found in entire group.
 culling:
 	for {
-		for idx := len(*group) - 1; idx > 0; idx-- {
+		for idx := len(*group) - 1; idx >= 0; idx-- {
 			if (*group)[idx] == nil {
-				*group = (*group)[:idx]
+				*group = append((*group)[:idx], (*group)[idx+1:]...)
 				continue culling
 			}
 		}
@@ -89,14 +105,14 @@ func (l *ds1Layers) SetSize(w, h int) {
 	l.enforceSize(FloorLayerGroup)
 	l.enforceSize(WallLayerGroup)
 	l.enforceSize(ShadowLayerGroup)
-	l.enforceSize(Substitutionlayergroup)
+	l.enforceSize(SubstitutionLayerGroup)
 }
 
 func (l *ds1Layers) enforceSize(t LayerGroupType) {
 	l.ensureInit()
 	l.cull()
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return
 	}
@@ -130,9 +146,9 @@ func (l *ds1Layers) push(t LayerGroupType, layer *Layer) {
 	l.cull()
 	layer.SetSize(l.Size())
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 
-	max := getMaxGroupLen(t)
+	max := GetMaxGroupLen(t)
 
 	if len(*group) < max {
 		*group = append(*group, layer)
@@ -144,7 +160,7 @@ func (l *ds1Layers) pop(t LayerGroupType) *Layer {
 	l.ensureInit()
 	l.cull()
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return nil
 	}
@@ -167,7 +183,7 @@ func (l *ds1Layers) get(t LayerGroupType, idx int) *Layer {
 	l.ensureInit()
 	l.cull()
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return nil
 	}
@@ -189,12 +205,12 @@ func (l *ds1Layers) insert(t LayerGroupType, idx int, newLayer *Layer) {
 
 	newLayer.SetSize(l.Size())
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return
 	}
 
-	if len(*group)+1 > getMaxGroupLen(t) {
+	if len(*group)+1 > GetMaxGroupLen(t) {
 		return
 	}
 
@@ -220,7 +236,7 @@ func (l *ds1Layers) delete(t LayerGroupType, idx int) {
 	l.ensureInit()
 	l.cull()
 
-	group := l.getLayersGroup(t)
+	group := l.GetLayersGroup(t)
 	if group == nil {
 		return
 	}
@@ -298,27 +314,28 @@ func (l *ds1Layers) DeleteShadow(idx int) {
 }
 
 func (l *ds1Layers) GetSubstitution(idx int) *Layer {
-	return l.get(Substitutionlayergroup, idx)
+	return l.get(SubstitutionLayerGroup, idx)
 }
 
 func (l *ds1Layers) PushSubstitution(sub *Layer) *ds1Layers {
-	l.push(Substitutionlayergroup, sub)
+	l.push(SubstitutionLayerGroup, sub)
 	return l
 }
 
 func (l *ds1Layers) PopSubstitution() *Layer {
-	return l.pop(Substitutionlayergroup)
+	return l.pop(SubstitutionLayerGroup)
 }
 
 func (l *ds1Layers) InsertSubstitution(idx int, newSubstitution *Layer) {
-	l.insert(Substitutionlayergroup, idx, newSubstitution)
+	l.insert(SubstitutionLayerGroup, idx, newSubstitution)
 }
 
 func (l *ds1Layers) DeleteSubstitution(idx int) {
 	l.delete(ShadowLayerGroup, idx)
 }
 
-func (l *ds1Layers) getLayersGroup(t LayerGroupType) (group *layerGroup) {
+// GetLayersGroup returns layer group depending on type given
+func (l *ds1Layers) GetLayersGroup(t LayerGroupType) (group *layerGroup) {
 	switch t {
 	case FloorLayerGroup:
 		group = &l.Floors
@@ -326,7 +343,7 @@ func (l *ds1Layers) getLayersGroup(t LayerGroupType) (group *layerGroup) {
 		group = &l.Walls
 	case ShadowLayerGroup:
 		group = &l.Shadows
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		group = &l.Substitutions
 	default:
 		return nil
@@ -335,7 +352,8 @@ func (l *ds1Layers) getLayersGroup(t LayerGroupType) (group *layerGroup) {
 	return group
 }
 
-func getMaxGroupLen(t LayerGroupType) (max int) {
+// GetMaxGroupLen returns maximum length of layer group of type given
+func GetMaxGroupLen(t LayerGroupType) (max int) {
 	switch t {
 	case FloorLayerGroup:
 		max = maxFloorLayers
@@ -343,7 +361,7 @@ func getMaxGroupLen(t LayerGroupType) (max int) {
 		max = maxWallLayers
 	case ShadowLayerGroup:
 		max = maxShadowLayers
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		max = maxSubstitutionLayers
 	default:
 		return 0

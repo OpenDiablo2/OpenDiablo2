@@ -15,7 +15,7 @@ func Test_ds1Layers_Delete(t *testing.T) {
 		ds1LayersDelete(t, ShadowLayerGroup)
 	})
 	t.Run("Substitution", func(t *testing.T) {
-		ds1LayersDelete(t, Substitutionlayergroup)
+		ds1LayersDelete(t, SubstitutionLayerGroup)
 	})
 }
 
@@ -42,7 +42,7 @@ func ds1LayersDelete(t *testing.T, lt LayerGroupType) {
 		del = func(i int) { ds1.DeleteWall(0) }
 	case ShadowLayerGroup:
 		del = func(i int) { ds1.DeleteShadow(0) }
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		del = func(i int) { ds1.DeleteSubstitution(0) }
 	default:
 		t.Fatal("unknown layer type given")
@@ -67,7 +67,7 @@ func Test_ds1Layers_Get(t *testing.T) {
 		ds1LayersGet(t, ShadowLayerGroup)
 	})
 	t.Run("Substitution", func(t *testing.T) {
-		ds1LayersGet(t, Substitutionlayergroup)
+		ds1LayersGet(t, SubstitutionLayerGroup)
 	})
 }
 
@@ -83,7 +83,7 @@ func ds1LayersGet(t *testing.T, lt LayerGroupType) {
 		get = func(i int) *Layer { return ds1.GetWall(0) }
 	case ShadowLayerGroup:
 		get = func(i int) *Layer { return ds1.GetShadow(0) }
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		get = func(i int) *Layer { return ds1.GetSubstitution(0) }
 	default:
 		t.Fatal("unknown layer type given")
@@ -93,7 +93,7 @@ func ds1LayersGet(t *testing.T, lt LayerGroupType) {
 	layer := get(0)
 
 	// example has nil substitution layer, maybe we need another test
-	if layer == nil && lt != Substitutionlayergroup {
+	if layer == nil && lt != SubstitutionLayerGroup {
 		t.Errorf("layer expected")
 	}
 }
@@ -109,14 +109,14 @@ func Test_ds1Layers_Insert(t *testing.T) {
 		ds1LayersInsert(t, ShadowLayerGroup)
 	})
 	t.Run("Substitution", func(t *testing.T) {
-		ds1LayersInsert(t, Substitutionlayergroup)
+		ds1LayersInsert(t, SubstitutionLayerGroup)
 	})
 }
 
 func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 	ds1 := DS1{}
 
-	layers := make([]*Layer, getMaxGroupLen(lt)+1)
+	layers := make([]*Layer, GetMaxGroupLen(lt)+1)
 
 	for i := range layers {
 		i := i
@@ -131,7 +131,7 @@ func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 
 	var insert func(i int)
 
-	group := ds1.getLayersGroup(lt)
+	group := ds1.GetLayersGroup(lt)
 
 	switch lt {
 	case FloorLayerGroup:
@@ -140,7 +140,7 @@ func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 		insert = func(i int) { ds1.InsertWall(0, layers[i]) }
 	case ShadowLayerGroup:
 		insert = func(i int) { ds1.InsertShadow(0, layers[i]) }
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		insert = func(i int) { ds1.InsertSubstitution(0, layers[i]) }
 	default:
 		t.Fatal("unknown layer type given")
@@ -150,7 +150,7 @@ func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 		insert(i)
 	}
 
-	if len(*group) != getMaxGroupLen(lt) {
+	if len(*group) != GetMaxGroupLen(lt) {
 		t.Fatal("unexpected floor len after setting")
 	}
 
@@ -177,7 +177,7 @@ func Test_ds1Layers_Pop(t *testing.T) {
 	})
 
 	t.Run("Substitution", func(t *testing.T) {
-		ds1layerPop(Substitutionlayergroup, t)
+		ds1layerPop(SubstitutionLayerGroup, t)
 	})
 }
 
@@ -213,7 +213,7 @@ func ds1layerPop(lt LayerGroupType, t *testing.T) {
 
 			return l
 		}
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		numBefore = len(ds1.Substitutions)
 		pop = func() *Layer {
 			l := ds1.PopSubstitution()
@@ -257,7 +257,7 @@ func Test_ds1Layers_Push(t *testing.T) {
 	})
 
 	t.Run("Substitution", func(t *testing.T) {
-		ds1layerPush(Substitutionlayergroup, t)
+		ds1layerPush(SubstitutionLayerGroup, t)
 	})
 }
 
@@ -306,7 +306,7 @@ func ds1layerPush(lt LayerGroupType, t *testing.T) { //nolint:funlen // no biggi
 		get = layers.GetShadow
 		max = maxShadowLayers
 		group = &layers.Shadows
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		push = func() { layers.PushSubstitution(&Layer{}) }
 		get = layers.GetSubstitution
 		max = maxSubstitutionLayers
