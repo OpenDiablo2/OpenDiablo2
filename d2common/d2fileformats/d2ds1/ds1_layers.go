@@ -15,7 +15,7 @@ const (
 	FloorLayerGroup LayerGroupType = iota
 	WallLayerGroup
 	ShadowLayerGroup
-	Substitutionlayergroup
+	SubstitutionLayerGroup
 )
 
 type layerGroup []*Layer
@@ -51,7 +51,7 @@ func (l *ds1Layers) cull() {
 	l.cullNilLayers(FloorLayerGroup)
 	l.cullNilLayers(WallLayerGroup)
 	l.cullNilLayers(ShadowLayerGroup)
-	l.cullNilLayers(Substitutionlayergroup)
+	l.cullNilLayers(SubstitutionLayerGroup)
 }
 
 // removes nil layers of given layer group type
@@ -89,7 +89,7 @@ func (l *ds1Layers) SetSize(w, h int) {
 	l.enforceSize(FloorLayerGroup)
 	l.enforceSize(WallLayerGroup)
 	l.enforceSize(ShadowLayerGroup)
-	l.enforceSize(Substitutionlayergroup)
+	l.enforceSize(SubstitutionLayerGroup)
 }
 
 func (l *ds1Layers) enforceSize(t LayerGroupType) {
@@ -298,20 +298,20 @@ func (l *ds1Layers) DeleteShadow(idx int) {
 }
 
 func (l *ds1Layers) GetSubstitution(idx int) *Layer {
-	return l.get(Substitutionlayergroup, idx)
+	return l.get(SubstitutionLayerGroup, idx)
 }
 
 func (l *ds1Layers) PushSubstitution(sub *Layer) *ds1Layers {
-	l.push(Substitutionlayergroup, sub)
+	l.push(SubstitutionLayerGroup, sub)
 	return l
 }
 
 func (l *ds1Layers) PopSubstitution() *Layer {
-	return l.pop(Substitutionlayergroup)
+	return l.pop(SubstitutionLayerGroup)
 }
 
 func (l *ds1Layers) InsertSubstitution(idx int, newSubstitution *Layer) {
-	l.insert(Substitutionlayergroup, idx, newSubstitution)
+	l.insert(SubstitutionLayerGroup, idx, newSubstitution)
 }
 
 func (l *ds1Layers) DeleteSubstitution(idx int) {
@@ -326,7 +326,7 @@ func (l *ds1Layers) getLayersGroup(t LayerGroupType) (group *layerGroup) {
 		group = &l.Walls
 	case ShadowLayerGroup:
 		group = &l.Shadows
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		group = &l.Substitutions
 	default:
 		return nil
@@ -343,7 +343,7 @@ func getMaxGroupLen(t LayerGroupType) (max int) {
 		max = maxWallLayers
 	case ShadowLayerGroup:
 		max = maxShadowLayers
-	case Substitutionlayergroup:
+	case SubstitutionLayerGroup:
 		max = maxSubstitutionLayers
 	default:
 		return 0
