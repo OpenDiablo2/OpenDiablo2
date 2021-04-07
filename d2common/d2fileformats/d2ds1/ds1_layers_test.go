@@ -131,7 +131,7 @@ func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 
 	var insert func(i int)
 
-	group := ds1.getLayersGroup(lt)
+	group := ds1.GetLayersGroup(lt)
 
 	switch lt {
 	case FloorLayerGroup:
