@@ -18,6 +18,22 @@ const (
 	SubstitutionLayerGroup
 )
 
+func (l LayerGroupType) String() string {
+	switch l {
+	case FloorLayerGroup:
+		return "floor"
+	case WallLayerGroup:
+		return "wall"
+	case ShadowLayerGroup:
+		return "shadow"
+	case SubstitutionLayerGroup:
+		return "substitution"
+	}
+
+	// should not be reached
+	return "unknown"
+}
+
 type layerGroup []*Layer
 
 type ds1Layers struct {
