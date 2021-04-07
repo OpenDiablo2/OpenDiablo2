@@ -232,7 +232,7 @@ func (ad *AnimationData) Marshal() []byte {
 	recordIdx := 0
 
 	// numberOfEntries is a number of entries in all map indexes
-	var numberOfEntries int = 0
+	var numberOfEntries = 0
 
 	for i := 0; i < len(keys); i++ {
 		numberOfEntries += len(ad.entries[keys[i]])

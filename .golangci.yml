@@ -18,16 +18,22 @@ linters-settings:
     disabled-checks:
   gocyclo:
     min-complexity: 15
+  gofmt:
+    simplify: true
   goimports:
     local-prefixes: github.com/OpenDiablo2/OpenDiablo2
   golint:
     min-confidence: 0.8
   govet:
+    enable-all: true
     check-shadowing: true
+    disable:
+      # While struct sizes could be smaller if fields aligned properly, that also leads
+      # to possibly non-intuitive layout of struct fields (harder to read). Disable
+      # `fieldalignment` check here until we evaluate if it is worthwhile.
+      - fieldalignment
   lll:
     line-length: 140
-  maligned:
-    suggest-new: true
   misspell:
     locale: US
 
@@ -57,9 +63,7 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
-    - maligned
     - misspell
     - nakedret
     - prealloc
@@ -78,11 +82,19 @@ linters:
 
 run:
   timeout: 5m
+  tests: true
   skip-dirs:
     - .github
     - build
     - web
 
 issues:
+  exclude-rules:
+    - linters:
+        - funlen
+      # Disable 'funlen' linter for test functions.
+      # It's common for table-driven tests to be more than 60 characters long
+      source: "^func Test"
+  max-issues-per-linter: 0
   max-same-issues: 0
   exclude-use-default: false

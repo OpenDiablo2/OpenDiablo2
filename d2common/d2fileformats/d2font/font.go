@@ -27,11 +27,10 @@ const (
 
 // Font represents a displayable font
 type Font struct {
-	unknownHeaderBytes []byte
-	sheet              d2interface.Animation
-	table              []byte
-	Glyphs             map[rune]*d2fontglyph.FontGlyph
-	color              color.Color
+	sheet  d2interface.Animation
+	table  []byte
+	Glyphs map[rune]*d2fontglyph.FontGlyph
+	color  color.Color
 }
 
 // Load loads a new font from byte slice
@@ -52,10 +51,7 @@ func Load(data []byte) (*Font, error) {
 		color: color.White,
 	}
 
-	font.unknownHeaderBytes, err = sr.ReadBytes(unknownHeaderBytesCount)
-	if err != nil {
-		return nil, err
-	}
+	sr.SkipBytes(unknownHeaderBytesCount)
 
 	err = font.initGlyphs(sr)
 	if err != nil {
@@ -149,10 +145,11 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 func (f *Font) initGlyphs(sr *d2datautils.StreamReader) error {
 	glyphs := make(map[rune]*d2fontglyph.FontGlyph)
 
-	for i := numHeaderBytes; i < len(f.table); i += bytesPerGlyph {
+	// for i := numHeaderBytes; i < len(f.table); i += bytesPerGlyph {
+	for i := numHeaderBytes; true; i += bytesPerGlyph {
 		code, err := sr.ReadUInt16()
 		if err != nil {
-			return err
+			break
 		}
 
 		// byte of 0
@@ -194,7 +191,13 @@ func (f *Font) Marshal() []byte {
 	sw := d2datautils.CreateStreamWriter()
 
 	sw.PushBytes([]byte("Woo!\x01")...)
-	sw.PushBytes(f.unknownHeaderBytes...)
+
+	// unknown header bytes - constant
+	sw.PushBytes([]byte{1, 0, 0, 0, 0, 1}...)
+
+	// Expected Height of character cell and Expected Width of character cell
+	// not used in decoder
+	sw.PushBytes([]byte{0, 0}...)
 
 	for c, i := range f.Glyphs {
 		sw.PushUint16(uint16(c))

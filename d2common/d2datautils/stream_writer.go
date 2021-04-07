@@ -38,7 +38,7 @@ func (v *StreamWriter) PushBytes(b ...byte) {
 // use another Push... method, bits'll not be pushed
 func (v *StreamWriter) PushBit(b bool) {
 	if b {
-		v.bitCache |= (1 << v.bitOffset)
+		v.bitCache |= 1 << v.bitOffset
 	}
 	v.bitOffset++
 

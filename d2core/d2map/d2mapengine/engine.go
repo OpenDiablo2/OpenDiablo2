@@ -115,7 +115,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 
 	ds1, err := m.asset.LoadDS1(fileName)
 	if err != nil {
-		m.Error(err.Error())
+		m.Fatalf("Loading ds1: %v", err)
 	}
 
 	for idx := range ds1.Files {

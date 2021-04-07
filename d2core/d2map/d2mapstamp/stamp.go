@@ -31,7 +31,7 @@ type Stamp struct {
 
 // Size returns the size of the stamp in tiles.
 func (mr *Stamp) Size() d2geom.Size {
-	return d2geom.Size{Width: int(mr.ds1.Width), Height: int(mr.ds1.Height)}
+	return d2geom.Size{Width: mr.ds1.Width(), Height: mr.ds1.Height()}
 }
 
 // LevelPreset returns the level preset ID.
@@ -54,9 +54,42 @@ func (mr *Stamp) RegionPath() string {
 	return mr.regionPath
 }
 
+// Tile represents a map tile, which can have a variable amount of floors, walls, shadows as layers.
+// Typically, there will be an Orientation layer for each wall layer.
+type Tile struct {
+	Walls         []d2ds1.Tile
+	Orientations  []d2ds1.Tile
+	Floors        []d2ds1.Tile
+	Shadows       []d2ds1.Tile
+	Substitutions []d2ds1.Tile
+}
+
 // Tile returns the tile at the given x and y tile coordinates.
-func (mr *Stamp) Tile(x, y int) *d2ds1.TileRecord {
-	return &mr.ds1.Tiles[y][x]
+func (mr *Stamp) Tile(x, y int) *Tile {
+	t := &Tile{
+		Walls:         make([]d2ds1.Tile, len(mr.ds1.Walls)),
+		Floors:        make([]d2ds1.Tile, len(mr.ds1.Floors)),
+		Shadows:       make([]d2ds1.Tile, len(mr.ds1.Shadows)),
+		Substitutions: make([]d2ds1.Tile, len(mr.ds1.Substitutions)),
+	}
+
+	for idx := range mr.ds1.Walls {
+		t.Walls[idx] = *mr.ds1.Walls[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Floors {
+		t.Floors[idx] = *mr.ds1.Floors[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Shadows {
+		t.Shadows[idx] = *mr.ds1.Shadows[idx].Tile(x, y)
+	}
+
+	for idx := range mr.ds1.Substitutions {
+		t.Substitutions[idx] = *mr.ds1.Substitutions[idx].Tile(x, y)
+	}
+
+	return t
 }
 
 // TileData returns the tile data for the tile with given style, sequence and type.
@@ -109,7 +142,6 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 				// nolint:gomnd // constant
 				entity, err := mr.entity.NewObject((tileOffsetX*5)+object.X,
 					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
-
 				if err != nil {
 					panic(err)
 				}
