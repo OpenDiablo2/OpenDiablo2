@@ -116,7 +116,7 @@ func Test_ds1Layers_Insert(t *testing.T) {
 func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 	ds1 := DS1{}
 
-	layers := make([]*Layer, getMaxGroupLen(lt)+1)
+	layers := make([]*Layer, GetMaxGroupLen(lt)+1)
 
 	for i := range layers {
 		i := i
@@ -150,7 +150,7 @@ func ds1LayersInsert(t *testing.T, lt LayerGroupType) {
 		insert(i)
 	}
 
-	if len(*group) != getMaxGroupLen(lt) {
+	if len(*group) != GetMaxGroupLen(lt) {
 		t.Fatal("unexpected floor len after setting")
 	}
 

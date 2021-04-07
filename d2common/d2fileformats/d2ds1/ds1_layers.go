@@ -132,7 +132,7 @@ func (l *ds1Layers) push(t LayerGroupType, layer *Layer) {
 
 	group := l.getLayersGroup(t)
 
-	max := getMaxGroupLen(t)
+	max := GetMaxGroupLen(t)
 
 	if len(*group) < max {
 		*group = append(*group, layer)
@@ -194,7 +194,7 @@ func (l *ds1Layers) insert(t LayerGroupType, idx int, newLayer *Layer) {
 		return
 	}
 
-	if len(*group)+1 > getMaxGroupLen(t) {
+	if len(*group)+1 > GetMaxGroupLen(t) {
 		return
 	}
 
@@ -335,7 +335,8 @@ func (l *ds1Layers) getLayersGroup(t LayerGroupType) (group *layerGroup) {
 	return group
 }
 
-func getMaxGroupLen(t LayerGroupType) (max int) {
+// GetMaxGroupLen returns maximum length of layer group of type given
+func GetMaxGroupLen(t LayerGroupType) (max int) {
 	switch t {
 	case FloorLayerGroup:
 		max = maxFloorLayers
