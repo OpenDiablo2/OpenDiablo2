@@ -81,9 +81,9 @@ func (l *ds1Layers) cullNilLayers(t LayerGroupType) {
 	// exit culling procedure when no nil layers are found in entire group.
 culling:
 	for {
-		for idx := len(*group) - 1; idx > 0; idx-- {
+		for idx := len(*group) - 1; idx >= 0; idx-- {
 			if (*group)[idx] == nil {
-				*group = (*group)[:idx]
+				*group = append((*group)[:idx], (*group)[idx+1:]...)
 				continue culling
 			}
 		}
