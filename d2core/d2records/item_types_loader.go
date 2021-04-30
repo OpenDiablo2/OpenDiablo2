@@ -1,6 +1,8 @@
 package d2records
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
@@ -125,6 +127,10 @@ func updateEquivalencies(
 	itemType *ItemTypeRecord,
 	checked []string,
 ) {
+	if itemType == nil {
+		log.Fatal("invalid data file. Please ensure, yo're using the newest patch_d2.mpq file!")
+	}
+
 	if itemType.Code == "" {
 		return
 	}
