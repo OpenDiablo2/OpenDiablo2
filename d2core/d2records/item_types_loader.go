@@ -128,7 +128,7 @@ func updateEquivalencies(
 	checked []string,
 ) {
 	if itemType == nil {
-		log.Fatal("invalid data file. Please ensure, yo're using the newest patch_d2.mpq file!")
+		log.Fatal("invalid data file. Please ensure, you're using the newest patch_d2.mpq file!")
 	}
 
 	if itemType.Code == "" {
