@@ -50,6 +50,12 @@ func TestBitmuncherGetBits(t *testing.T) {
 	assert.Equal(t, byte(bm.GetBits(bitsPerByte)), testData[0], "get bits didn't return expected value")
 }
 
+func TestBitmuncherGetBytes(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	assert.Equal(t, bm.GetBytes(4), testData[0:4], "get bytes didn't return expected value")
+}
+
 func TestBitmuncherGetNoBits(t *testing.T) {
 	bm := CreateBitMuncher(testData, 0)
 
@@ -80,6 +86,30 @@ func TestBitmuncherSkipBits(t *testing.T) {
 	bm.SkipBits(bitsPerByte)
 
 	assert.Equal(t, bm.GetByte(), testData[1], "skipping 8 bits didn't moved bit muncher's position into next byte")
+}
+
+func TestBitmuncherGetInt16(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	var testInt int16
+
+	for i := 0; i < bytesPerint16; i++ {
+		testInt |= int16(testData[i]) << int16(bitsPerByte*i)
+	}
+
+	assert.Equal(t, bm.GetInt16(), testInt, "int16 value wasn't returned properly")
+}
+
+func TestBitmuncherGetUint16(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	var testUint uint16
+
+	for i := 0; i < bytesPerint16; i++ {
+		testUint |= uint16(testData[i]) << uint16(bitsPerByte*i)
+	}
+
+	assert.Equal(t, bm.GetUInt16(), testUint, "uint16 value wasn't returned properly")
 }
 
 func TestBitmuncherGetInt32(t *testing.T) {
