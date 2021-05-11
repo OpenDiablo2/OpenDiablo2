@@ -12,6 +12,7 @@ const (
 	byteLen                   = 8
 	oneBit                    = 0x01
 	fourBytes                 = byteLen * 4
+	twoBytes                  = byteLen * 2
 )
 
 // CreateBitMuncher Creates a BitMuncher
@@ -79,6 +80,16 @@ func (v *BitMuncher) GetByte() byte {
 	return byte(v.GetBits(byteLen))
 }
 
+// GetInt16 reads an int16 from data
+func (v *BitMuncher) GetInt16() int16 {
+	return int16(v.MakeSigned(v.GetBits(twoBytes), twoBytes))
+}
+
+// GetUInt16 reads an unsigned uint16 from data
+func (v *BitMuncher) GetUInt16() uint16 {
+	return uint16(v.GetBits(twoBytes))
+}
+
 // GetInt32 reads an int32 from data
 func (v *BitMuncher) GetInt32() int32 {
 	return v.MakeSigned(v.GetBits(fourBytes), fourBytes)
@@ -99,6 +110,16 @@ func (v *BitMuncher) GetBits(bits int) uint32 {
 	result := uint32(0)
 	for i := 0; i < bits; i++ {
 		result |= v.GetBit() << uint(i)
+	}
+
+	return result
+}
+
+// GetBytes returns byte slice of `n` length.
+func (v *BitMuncher) GetBytes(n int) (result []byte) {
+	result = make([]byte, n)
+	for i := 0; i < n; i++ {
+		result[i] = v.GetByte()
 	}
 
 	return result
