@@ -228,8 +228,7 @@ func (l *ds1Layers) insert(t LayerGroupType, idx int, newLayer *Layer) {
 	//		idx=1
 	//		newLayer=c
 	// 		existing layerGroup is [a, b]
-	newGroup := append((*group)[:idx], append([]*Layer{newLayer}, (*group)[idx:]...)...)
-	*group = newGroup
+	*group = append((*group)[:idx], append([]*Layer{newLayer}, (*group)[idx:]...)...)
 }
 
 func (l *ds1Layers) delete(t LayerGroupType, idx int) {
