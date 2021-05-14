@@ -11,3 +11,18 @@ const (
 	// DifficultyHell is the hell difficulty
 	DifficultyHell
 )
+
+func (d *DifficultyType) String() string {
+	lookup := map[DifficultyType]string{
+		DifficultyNormal:    "normal",
+		DifficultyNightmare: "nightmare",
+		DifficultyHell:      "hell",
+	}
+
+	s, ok := lookup[d]
+	if !ok {
+		return "unknown"
+	}
+
+	return s
+}
