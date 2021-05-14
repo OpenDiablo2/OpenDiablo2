@@ -97,6 +97,7 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 	}
 
 	pp.partyIndexes = partyIndexes
+	pp.indexes = indexes
 
 	pp.Logger = d2util.NewLogger()
 	pp.Logger.SetLevel(l)
@@ -231,7 +232,7 @@ func (pi *partyIndex) setNameTooltipText() {
 
 // setColor sets appropriate labels' colors
 func (pi *partyIndex) setColor(relations d2enum.PlayersRelationships) {
-	var color = d2util.Color(white)
+	color := d2util.Color(white)
 
 	switch relations {
 	case d2enum.PlayerRelationEnemy:
