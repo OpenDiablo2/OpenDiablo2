@@ -1,5 +1,7 @@
 package d2enum
 
+//go:generate stringer -linecomment -trimprefix Difficulty -type DifficultyType
+
 // DifficultyType is an enum for the possible difficulties
 type DifficultyType int
 
@@ -11,18 +13,3 @@ const (
 	// DifficultyHell is the hell difficulty
 	DifficultyHell
 )
-
-func (d *DifficultyType) String() string {
-	lookup := map[DifficultyType]string{
-		DifficultyNormal:    "normal",
-		DifficultyNightmare: "nightmare",
-		DifficultyHell:      "hell",
-	}
-
-	s, ok := lookup[d]
-	if !ok {
-		return "unknown"
-	}
-
-	return s
-}
