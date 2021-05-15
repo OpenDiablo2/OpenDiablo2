@@ -62,7 +62,7 @@ func (v *BitMuncher) SetBitsRead(n int) {
 	v.bitsRead = n
 }
 
-// GetBit reads a bit and returns it as uint32
+// GetBit reads a bit and returns it as bool
 func (v *BitMuncher) GetBit() bool {
 	result := v.data[v.offset/byteLen] >> uint(v.offset%byteLen) & oneBit
 	v.offset++
