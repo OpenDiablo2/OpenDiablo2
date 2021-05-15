@@ -50,6 +50,18 @@ func TestBitmuncherGetBits(t *testing.T) {
 	assert.Equal(t, byte(bm.GetBits(bitsPerByte)), testData[0], "get bits didn't return expected value")
 }
 
+func TestBitMuncherGetBitsWrongNumber(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("wrong bytes count read, but no error reproted")
+		}
+	}()
+
+	_ = bm.GetBits(33)
+}
+
 func TestBitmuncherGetBytes(t *testing.T) {
 	bm := CreateBitMuncher(testData, 0)
 

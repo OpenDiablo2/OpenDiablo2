@@ -1,5 +1,7 @@
 package d2datautils
 
+import "log"
+
 // BitMuncher is used for parsing files that are not byte-aligned such as the DCC files.
 type BitMuncher struct {
 	data     []byte
@@ -105,6 +107,8 @@ func (v *BitMuncher) GetUInt32() uint32 {
 func (v *BitMuncher) GetBits(bits int) uint32 {
 	if bits == 0 {
 		return 0
+	} else if bits > fourBytes {
+		log.Panicf("BitMuncher - GetBits: number of bits to read must be less or equal to %d", fourBytes)
 	}
 
 	result := uint32(0)
@@ -158,6 +162,7 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 	return int32(result)
 }
 
+// Align aligns bit muncher to bytes
 func (v *BitMuncher) Align() {
 	if o := v.Offset() % byteLen; o > 0 {
 		v.SkipBits(byteLen - o)
