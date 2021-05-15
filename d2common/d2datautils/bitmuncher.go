@@ -157,3 +157,9 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 	// Force casting to a signed value
 	return int32(result)
 }
+
+func (v *BitMuncher) Align() {
+	if o := v.Offset() % byteLen; o > 0 {
+		v.SkipBits(byteLen - o)
+	}
+}

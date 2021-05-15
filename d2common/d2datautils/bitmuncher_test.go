@@ -135,3 +135,10 @@ func TestBitmuncherGetUint32(t *testing.T) {
 
 	assert.Equal(t, bm.GetUInt32(), testUint, "uint32 value wasn't returned properly")
 }
+
+func TestBitMuncherAlign(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+	_ = bm.GetBits(5)
+	bm.Align()
+	assert.Equal(t, 0, bm.Offset()%8, "offset after calling Align isn't 0")
+}
