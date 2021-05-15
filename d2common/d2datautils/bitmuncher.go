@@ -63,12 +63,12 @@ func (v *BitMuncher) SetBitsRead(n int) {
 }
 
 // GetBit reads a bit and returns it as uint32
-func (v *BitMuncher) GetBit() uint32 {
-	result := uint32(v.data[v.offset/byteLen]>>uint(v.offset%byteLen)) & oneBit
+func (v *BitMuncher) GetBit() bool {
+	result := v.data[v.offset/byteLen] >> uint(v.offset%byteLen) & oneBit
 	v.offset++
 	v.bitsRead++
 
-	return result
+	return result == 1
 }
 
 // SkipBits skips bits, incrementing the offset and bits read
@@ -112,8 +112,19 @@ func (v *BitMuncher) GetBits(bits int) uint32 {
 	}
 
 	result := uint32(0)
+
 	for i := 0; i < bits; i++ {
-		result |= v.GetBit() << uint(i)
+		bit := v.GetBit()
+
+		var value uint32
+
+		if bit {
+			value = 1
+		} else {
+			value = 0
+		}
+
+		result |= value << uint(i)
 	}
 
 	return result

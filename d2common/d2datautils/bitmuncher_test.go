@@ -36,9 +36,18 @@ func TestBitmuncherReadBit(t *testing.T) {
 
 	var result byte
 
-	for i := 0; i < bitsPerByte; i++ {
+	for i := byte(0); i < bitsPerByte; i++ {
 		v := bm.GetBit()
-		result |= byte(v) << byte(i)
+
+		var value byte
+
+		if v {
+			value = 1
+		} else {
+			value = 0
+		}
+
+		result |= value << i
 	}
 
 	assert.Equal(t, result, testData[0], "result of rpeated 8 times get bit didn't return expected byte")
