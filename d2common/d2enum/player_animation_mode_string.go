@@ -31,9 +31,9 @@ func _() {
 	_ = x[PlayerAnimationModeNone-20]
 }
 
-const _PlayerAnimationMode_name = "DTNUWLRNGHTNTWA1A2BLSCTHKKS1S2S3S4DDGHGH\"\" - aura skills, e.g. Paladin's Concentration Aura"
+const _PlayerAnimationMode_name = "DTNUWLRNGHTNTWA1A2BLSCTHKKS1S2S3S4DDGHGH"
 
-var _PlayerAnimationMode_index = [...]uint8{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 91}
+var _PlayerAnimationMode_index = [...]uint8{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 40}
 
 func (i PlayerAnimationMode) String() string {
 	if i < 0 || i >= PlayerAnimationMode(len(_PlayerAnimationMode_index)-1) {
