@@ -136,3 +136,14 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 	// Force casting to a signed value
 	return int32(result)
 }
+
+// EnsureBits checks, if `count` bits is available
+func (v *BitMuncher) EnsureBits(count int) bool {
+	bytesRead := v.offset / byteLen
+	bitOffset := v.offset % byteLen
+	numBytes := len(v.data)
+	remainingBytes := numBytes - bytesRead
+	remainingBits := remainingBytes*byteLen - bitOffset
+
+	return count <= remainingBits
+}

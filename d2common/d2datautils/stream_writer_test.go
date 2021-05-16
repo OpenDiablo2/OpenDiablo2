@@ -9,7 +9,7 @@ func TestStreamWriterBits(t *testing.T) {
 	data := []byte{221, 19}
 
 	for _, i := range data {
-		sr.PushBits(i, bitsPerByte)
+		sr.PushBits(i, byteLen)
 	}
 
 	output := sr.GetBytes()
@@ -25,7 +25,7 @@ func TestStreamWriterBits16(t *testing.T) {
 	data := []uint16{1024, 19}
 
 	for _, i := range data {
-		sr.PushBits16(i, bitsPerByte*bytesPerint16)
+		sr.PushBits16(i, byteLen*bytesPerint16)
 	}
 
 	output := sr.GetBytes()
@@ -45,7 +45,7 @@ func TestStreamWriterBits32(t *testing.T) {
 	data := []uint32{19324, 87}
 
 	for _, i := range data {
-		sr.PushBits32(i, bitsPerByte*bytesPerint32)
+		sr.PushBits32(i, byteLen*bytesPerint32)
 	}
 
 	output := sr.GetBytes()

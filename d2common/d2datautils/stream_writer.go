@@ -42,7 +42,7 @@ func (v *StreamWriter) PushBit(b bool) {
 	}
 	v.bitOffset++
 
-	if v.bitOffset != bitsPerByte {
+	if v.bitOffset != byteLen {
 		return
 	}
 
@@ -53,7 +53,7 @@ func (v *StreamWriter) PushBit(b bool) {
 
 // PushBits pushes bits (with max range 8)
 func (v *StreamWriter) PushBits(b byte, bits int) {
-	if bits > bitsPerByte {
+	if bits > byteLen {
 		log.Print("input bits number must be less (or equal) than 8")
 	}
 
@@ -67,7 +67,7 @@ func (v *StreamWriter) PushBits(b byte, bits int) {
 
 // PushBits16 pushes bits (with max range 16)
 func (v *StreamWriter) PushBits16(b uint16, bits int) {
-	if bits > bitsPerByte*bytesPerint16 {
+	if bits > byteLen*bytesPerint16 {
 		log.Print("input bits number must be less (or equal) than 16")
 	}
 
@@ -81,7 +81,7 @@ func (v *StreamWriter) PushBits16(b uint16, bits int) {
 
 // PushBits32 pushes bits (with max range 32)
 func (v *StreamWriter) PushBits32(b uint32, bits int) {
-	if bits > bitsPerByte*bytesPerint32 {
+	if bits > byteLen*bytesPerint32 {
 		log.Print("input bits number must be less (or equal) than 32")
 	}
 

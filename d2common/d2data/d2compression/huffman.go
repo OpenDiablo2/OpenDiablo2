@@ -210,12 +210,10 @@ func decode(input *d2datautils.BitMuncher, head *linkedNode) *linkedNode {
 	node := head
 
 	for node.child0 != nil {
-		// checks if GetBit causes panic (End of file)
-		defer func() {
-			if r := recover(); r != nil {
-				log.Fatal("HuffmanDecompress: Unexpected end of file")
-			}
-		}()
+		if !input.EnsureBits(1) {
+			log.Fatal("Unexpected end of file")
+		}
+
 		bit := input.GetBit()
 		if bit == 0 {
 			node = node.child0
