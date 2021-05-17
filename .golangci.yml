@@ -56,7 +56,6 @@ linters:
     - godox
     - gofmt
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
