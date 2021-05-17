@@ -32,8 +32,6 @@ linters-settings:
       # to possibly non-intuitive layout of struct fields (harder to read). Disable
       # `fieldalignment` check here until we evaluate if it is worthwhile.
       - fieldalignment
-      # https://github.com/golangci/golangci-lint/issues/1973
-      - sigchanyzer
   lll:
     line-length: 140
   misspell:
