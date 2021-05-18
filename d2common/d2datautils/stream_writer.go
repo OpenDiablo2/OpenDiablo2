@@ -26,6 +26,11 @@ func (v *StreamWriter) GetBytes() []byte {
 	return v.data.Bytes()
 }
 
+// Offset returns current bit offset
+func (v *StreamWriter) Offset() int {
+	return v.bitOffset
+}
+
 // PushBytes writes a bytes to the stream
 func (v *StreamWriter) PushBytes(b ...byte) {
 	for _, i := range b {
