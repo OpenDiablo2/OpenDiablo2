@@ -1,5 +1,7 @@
 package d2datautils
 
+import "log"
+
 // BitMuncher is used for parsing files that are not byte-aligned such as the DCC files.
 type BitMuncher struct {
 	data     []byte
@@ -12,6 +14,7 @@ const (
 	byteLen                   = 8
 	oneBit                    = 0x01
 	fourBytes                 = byteLen * 4
+	twoBytes                  = byteLen * 2
 )
 
 // CreateBitMuncher Creates a BitMuncher
@@ -59,13 +62,13 @@ func (v *BitMuncher) SetBitsRead(n int) {
 	v.bitsRead = n
 }
 
-// GetBit reads a bit and returns it as uint32
-func (v *BitMuncher) GetBit() uint32 {
-	result := uint32(v.data[v.offset/byteLen]>>uint(v.offset%byteLen)) & oneBit
+// GetBit reads a bit and returns it as bool
+func (v *BitMuncher) GetBit() bool {
+	result := v.data[v.offset/byteLen] >> uint(v.offset%byteLen) & oneBit
 	v.offset++
 	v.bitsRead++
 
-	return result
+	return result == 1
 }
 
 // SkipBits skips bits, incrementing the offset and bits read
@@ -74,9 +77,29 @@ func (v *BitMuncher) SkipBits(bits int) {
 	v.bitsRead += bits
 }
 
+// SkipByte skips one byte
+func (v *BitMuncher) SkipByte() {
+	v.SkipBits(byteLen)
+}
+
+// SkipBytes skips n bytes
+func (v *BitMuncher) SkipBytes(n int) {
+	v.SkipBits(byteLen * n)
+}
+
 // GetByte reads a byte from data
 func (v *BitMuncher) GetByte() byte {
 	return byte(v.GetBits(byteLen))
+}
+
+// GetInt16 reads an int16 from data
+func (v *BitMuncher) GetInt16() int16 {
+	return int16(v.MakeSigned(v.GetBits(twoBytes), twoBytes))
+}
+
+// GetUInt16 reads an unsigned uint16 from data
+func (v *BitMuncher) GetUInt16() uint16 {
+	return uint16(v.GetBits(twoBytes))
 }
 
 // GetInt32 reads an int32 from data
@@ -94,11 +117,34 @@ func (v *BitMuncher) GetUInt32() uint32 {
 func (v *BitMuncher) GetBits(bits int) uint32 {
 	if bits == 0 {
 		return 0
+	} else if bits > fourBytes {
+		log.Panicf("BitMuncher - GetBits: number of bits to read must be less or equal to %d", fourBytes)
 	}
 
 	result := uint32(0)
+
 	for i := 0; i < bits; i++ {
-		result |= v.GetBit() << uint(i)
+		bit := v.GetBit()
+
+		var value uint32
+
+		if bit {
+			value = 1
+		} else {
+			value = 0
+		}
+
+		result |= value << uint(i)
+	}
+
+	return result
+}
+
+// GetBytes returns byte slice of `n` length.
+func (v *BitMuncher) GetBytes(n int) (result []byte) {
+	result = make([]byte, n)
+	for i := 0; i < n; i++ {
+		result[i] = v.GetByte()
 	}
 
 	return result
@@ -135,4 +181,11 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 
 	// Force casting to a signed value
 	return int32(result)
+}
+
+// Align aligns bit muncher to bytes
+func (v *BitMuncher) Align() {
+	if o := v.Offset() % byteLen; o > 0 {
+		v.SkipBits(byteLen - o)
+	}
 }
