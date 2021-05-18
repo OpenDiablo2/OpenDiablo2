@@ -77,6 +77,16 @@ func (v *BitMuncher) SkipBits(bits int) {
 	v.bitsRead += bits
 }
 
+// SkipByte skips one byte
+func (v *BitMuncher) SkipByte() {
+	v.SkipBits(byteLen)
+}
+
+// SkipBytes skips n bytes
+func (v *BitMuncher) SkipBytes(n int) {
+	v.SkipBits(byteLen * n)
+}
+
 // GetByte reads a byte from data
 func (v *BitMuncher) GetByte() byte {
 	return byte(v.GetBits(byteLen))
