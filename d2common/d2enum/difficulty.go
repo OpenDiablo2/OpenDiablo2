@@ -1,13 +1,13 @@
 package d2enum
 
-// DifficultyType is an enum for the possible difficulties
-type DifficultyType int
+//go:generate stringer -linecomment -type DifficultyType -output difficulty_string.go
 
+// DifficultyType is an enum for the possible difficulties
+type DifficultyType uint8
+
+// Difficulty levels
 const (
-	// DifficultyNormal is the normal difficulty
-	DifficultyNormal DifficultyType = iota
-	// DifficultyNightmare is the nightmare difficulty
-	DifficultyNightmare
-	// DifficultyHell is the hell difficulty
-	DifficultyHell
+	DifficultyNormal    DifficultyType = iota // normal
+	DifficultyNightmare                       // nightmare
+	DifficultyHell                            // hell
 )
