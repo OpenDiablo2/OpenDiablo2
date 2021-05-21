@@ -18,7 +18,7 @@ const _DifficultyType_name = "normalnightmarehell"
 var _DifficultyType_index = [...]uint8{0, 6, 15, 19}
 
 func (i DifficultyType) String() string {
-	if i < 0 || i >= DifficultyType(len(_DifficultyType_index)-1) {
+	if i >= DifficultyType(len(_DifficultyType_index)-1) {
 		return "DifficultyType(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _DifficultyType_name[_DifficultyType_index[i]:_DifficultyType_index[i+1]]
