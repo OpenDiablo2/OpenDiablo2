@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/OpenDiablo2/OpenDiablo2)](https://goreportcard.com/report/github.com/OpenDiablo2/OpenDiablo2)
 [![GoDoc](https://pkg.go.dev/badge/github.com/OpenDiablo2/OpenDiablo2?utm_source=godoc)](https://pkg.go.dev/mod/github.com/OpenDiablo2/OpenDiablo2)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Discord](https://img.shields.io/discord/515518620034662421?label=Discord&style=social)](https://discord.gg/pRy8tdc)
+[![Discord](https://img.shields.io/discord/515518620034662421?label=Discord&style=social)](https://discord.gg/5jd4CwW)
 [![Twitch Status](https://img.shields.io/twitch/status/essial?style=social)](https://www.twitch.tv/essial)
 [![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/OpenDiablo2?label=reddit&style=social)](https://www.reddit.com/r/OpenDiablo2/)
 
