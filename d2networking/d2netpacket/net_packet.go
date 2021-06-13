@@ -11,8 +11,8 @@ import (
 // PacketData is unmarshalled to a struct of the type associated with
 // PacketType.
 type NetPacket struct {
-	PacketType d2netpackettype.NetPacketType `json:"packetType"`
 	PacketData json.RawMessage               `json:"packetData"`
+	PacketType d2netpackettype.NetPacketType `json:"packetType"`
 }
 
 // InspectPacketType determines the packet type from the given data

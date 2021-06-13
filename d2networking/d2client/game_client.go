@@ -35,19 +35,18 @@ const (
 // GameClient manages a connection to d2server.GameServer
 // and keeps a synchronized copy of the map and entities.
 type GameClient struct {
-	clientConnection ServerConnection                            // Abstract local/remote connection
-	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
+	clientConnection ServerConnection
 	asset            *d2asset.AssetManager
 	scriptEngine     *d2script.ScriptEngine
-	GameState        *d2hero.HeroState              // local player state
-	MapEngine        *d2mapengine.MapEngine         // Map and entities
-	mapGen           *d2mapgen.MapGenerator         // map generator
-	PlayerID         string                         // ID of the local player
-	Players          map[string]*d2mapentity.Player // IDs of the other players
-	Seed             int64                          // Map seed
-	RegenMap         bool                           // Regenerate tile cache on render (map has changed)
-
+	GameState        *d2hero.HeroState
+	MapEngine        *d2mapengine.MapEngine
+	mapGen           *d2mapgen.MapGenerator
+	Players          map[string]*d2mapentity.Player
 	*d2util.Logger
+	PlayerID       string
+	connectionType d2clientconnectiontype.ClientConnectionType
+	Seed           int64
+	RegenMap       bool
 }
 
 // Create constructs a new GameClient and returns a pointer to it.

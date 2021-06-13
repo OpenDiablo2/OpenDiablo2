@@ -13,14 +13,14 @@ import (
 // It is sent by the server to create the entity for a newly connected
 // player on a client.
 type AddPlayerPacket struct {
+	Equipment  d2inventory.CharacterEquipment `json:"equipment"`
+	Stats      *d2hero.HeroStatsState         `json:"heroStats"`
+	Skills     map[int]*d2hero.HeroSkill      `json:"heroSkills"`
 	ID         string                         `json:"id"`
 	Name       string                         `json:"name"`
 	X          int                            `json:"x"`
 	Y          int                            `json:"y"`
 	HeroType   d2enum.Hero                    `json:"hero"`
-	Equipment  d2inventory.CharacterEquipment `json:"equipment"`
-	Stats      *d2hero.HeroStatsState         `json:"heroStats"`
-	Skills     map[int]*d2hero.HeroSkill      `json:"heroSkills"`
 	LeftSkill  int                            `json:"leftSkill"`
 	RightSkill int                            `json:"rightSkill"`
 	Gold       int

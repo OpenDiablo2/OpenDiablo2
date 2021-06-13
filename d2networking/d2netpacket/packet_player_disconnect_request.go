@@ -11,8 +11,8 @@ import (
 // PlayerDisconnectRequestPacket contains a player ID and game state.
 // It is sent by a remote client to close the connection (leave a game).
 type PlayerDisconnectRequestPacket struct {
-	ID          string            `json:"id"`
 	PlayerState *d2hero.HeroState `json:"gameState"`
+	ID          string            `json:"id"`
 }
 
 // CreatePlayerDisconnectRequestPacket returns a NetPacket which defines a

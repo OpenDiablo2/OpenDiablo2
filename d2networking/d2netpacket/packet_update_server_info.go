@@ -9,8 +9,8 @@ import (
 // UpdateServerInfoPacket contains the ID for a player and the map seed.
 // It is sent by the server to synchronize these values on the client.
 type UpdateServerInfoPacket struct {
-	Seed     int64  `json:"seed"`
 	PlayerID string `json:"playerId"`
+	Seed     int64  `json:"seed"`
 }
 
 // CreateUpdateServerInfoPacket returns a NetPacket which declares an

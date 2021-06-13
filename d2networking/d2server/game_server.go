@@ -41,21 +41,20 @@ var (
 // GameServer manages a copy of the map and entities as well as manages packet routing and connections.
 // It can accept connections from localhost as well remote clients. It can also be started in a standalone mode.
 type GameServer struct {
-	sync.RWMutex
-	connections       map[string]ClientConnection
 	listener          net.Listener
-	networkServer     bool
 	ctx               context.Context
+	packetManagerChan chan ReceivedPacket
+	connections       map[string]ClientConnection
+	heroStateFactory  *d2hero.HeroStateFactory
 	cancel            context.CancelFunc
 	asset             *d2asset.AssetManager
-	mapEngines        []*d2mapengine.MapEngine
-	scriptEngine      *d2script.ScriptEngine
-	seed              int64
-	maxConnections    int
-	packetManagerChan chan ReceivedPacket
-	heroStateFactory  *d2hero.HeroStateFactory
-
 	*d2util.Logger
+	scriptEngine   *d2script.ScriptEngine
+	mapEngines     []*d2mapengine.MapEngine
+	maxConnections int
+	seed           int64
+	sync.RWMutex
+	networkServer bool
 }
 
 // ReceivedPacket encapsulates the data necessary for the packet manager goroutine to process data from clients.
