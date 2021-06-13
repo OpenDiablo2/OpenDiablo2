@@ -37,9 +37,9 @@ func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 type RecordManager struct {
 	Item struct {
 		Cube struct {
-			Recipes   CubeRecipes
 			Modifiers CubeModifiers
 			Types     CubeTypes
+			Recipes   CubeRecipes
 		}
 		Magic struct {
 			Prefix MagicPrefix
@@ -77,28 +77,28 @@ type RecordManager struct {
 		AutoMagic
 	}
 	Monster struct {
-		AI        MonsterAI
-		Equipment MonsterEquipment
-		Levels    MonsterLevels
-		Modes     MonModes
-		Name      struct {
-			Prefix UniqueMonsterAffixes
-			Suffix UniqueMonsterAffixes
-		}
-		Placements MonsterPlacements
-		Presets    MonPresets
-		Props      MonsterProperties
-		Sequences  MonsterSequences
-		Sounds     MonsterSounds
-		Stats      MonStats
-		Stats2     MonStats2
-		Types      MonsterTypes
-		Unique     struct {
+		Unique struct {
 			Appellations UniqueAppellations
 			Mods         MonsterUniqueModifiers
 			Constants    MonsterUniqueModifierConstants
 			Super        SuperUniques
 		}
+		Name struct {
+			Prefix UniqueMonsterAffixes
+			Suffix UniqueMonsterAffixes
+		}
+		Props      MonsterProperties
+		Modes      MonModes
+		Levels     MonsterLevels
+		Types      MonsterTypes
+		Presets    MonPresets
+		Equipment  MonsterEquipment
+		Sequences  MonsterSequences
+		Sounds     MonsterSounds
+		Stats      MonStats
+		Stats2     MonStats2
+		AI         MonsterAI
+		Placements MonsterPlacements
 	}
 	Level struct {
 		AutoMaps

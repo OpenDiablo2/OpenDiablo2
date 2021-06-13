@@ -78,31 +78,31 @@ type MissileElementalDamage struct {
 
 // MissileRecord is a representation of a row from missiles.txt
 type MissileRecord struct {
-	HitSubMissile          [4]string
 	ClientHitSubMissile    [4]string
-	SubMissile             [3]string
+	HitSubMissile          [4]string
 	ClientSubMissile       [3]string
+	SubMissile             [3]string
+	ProgSound              string
 	ExplosionMissile       string
 	HitSound               string
 	Name                   string
 	ProgOverlay            string
-	ProgSound              string
 	TravelSound            string
 	SkillName              string
+	ServerCollisionCalc    MissileCalc
 	ServerMovementCalc     MissileCalc
-	ClientCollisionCalc    MissileCalc
 	ClientMovementCalc     MissileCalc
 	ServerDamageCalc       MissileCalc
-	ServerCollisionCalc    MissileCalc
-	ElementalDamage        MissileElementalDamage
+	ClientCollisionCalc    MissileCalc
 	Animation              MissileAnimation
 	Damage                 MissileDamage
+	ElementalDamage        MissileElementalDamage
 	Collision              MissileCollision
 	Light                  MissileLight
-	Id                     int
+	ServerMovementFunc     int
 	ClientMovementFunc     int
 	ClientCollisionFunc    int
-	ServerMovementFunc     int
+	Id                     int
 	ServerCollisionFunc    int
 	ServerDamageFunc       int
 	Velocity               int
@@ -112,7 +112,7 @@ type MissileRecord struct {
 	Range                  int
 	LevelRangeBonus        int
 	XOffset                int
-	YOffset                int
+	DamageReductionRate    int
 	ZOffset                int
 	Size                   int
 	DestroyedByTPFrame     int
@@ -127,7 +127,7 @@ type MissileRecord struct {
 	HitClass               int
 	NumDirections          int
 	LocalBlood             int
-	DamageReductionRate    int
+	YOffset                int
 	DestroyedByTP          bool
 	CanDestroy             bool
 	UseAttackRating        bool
