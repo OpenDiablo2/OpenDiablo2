@@ -32,14 +32,13 @@ const (
 )
 
 // Block represents an entry in the block table
-type Block struct { // 16 bytes
+type Block struct {
+	FileName             string
 	FilePosition         uint32
 	CompressedFileSize   uint32
 	UncompressedFileSize uint32
 	Flags                FileFlag
-	// Local Stuff...
-	FileName       string
-	EncryptionSeed uint32
+	EncryptionSeed       uint32
 }
 
 // HasFlag returns true if the specified flag is present
