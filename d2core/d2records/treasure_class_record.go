@@ -6,15 +6,15 @@ type TreasureClass map[string]*TreasureClassRecord
 // TreasureClassRecord represents a rule for item drops in diablo 2
 type TreasureClassRecord struct {
 	Name       string
+	Treasures  []*Treasure
 	Group      int
 	Level      int
-	NumPicks   int
 	FreqUnique int
 	FreqSet    int
 	FreqRare   int
 	FreqMagic  int
 	FreqNoDrop int
-	Treasures  []*Treasure
+	NumPicks   int
 }
 
 // Treasure describes a treasure to drop

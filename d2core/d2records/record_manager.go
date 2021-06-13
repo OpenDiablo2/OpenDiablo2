@@ -80,8 +80,8 @@ type RecordManager struct {
 		Unique struct {
 			Appellations UniqueAppellations
 			Mods         MonsterUniqueModifiers
-			Constants    MonsterUniqueModifierConstants
 			Super        SuperUniques
+			Constants    MonsterUniqueModifierConstants
 		}
 		Name struct {
 			Prefix UniqueMonsterAffixes
@@ -101,21 +101,21 @@ type RecordManager struct {
 		Placements MonsterPlacements
 	}
 	Level struct {
-		AutoMaps
+		Warp    LevelWarps
 		Details LevelDetails
 		Maze    LevelMazeDetails
 		Presets LevelPresets
 		Sub     LevelSubstitutions
 		Types   LevelTypes
-		Warp    LevelWarps
+		AutoMaps
 	}
 	Character struct {
-		Classes PlayerClasses
-		Events
+		Classes    PlayerClasses
 		Experience ExperienceBreakpoints
 		MaxLevel   ExperienceMaxLevels
 		Modes      PlayerModes
 		Stats      CharStats
+		Events
 	}
 	Animation struct {
 		Data  *d2animdata.AnimationData
@@ -128,8 +128,8 @@ type RecordManager struct {
 		}
 	}
 	Hireling struct {
-		Details      Hirelings
 		Descriptions HirelingDescriptions
+		Details      Hirelings
 	}
 	Calculation struct {
 		Skills   Calculations
@@ -174,95 +174,95 @@ type RecordManager struct {
 
 func (r *RecordManager) init() error { // nolint:funlen // can't reduce
 	loaders := []struct {
-		path   string
 		loader recordLoader
+		path   string
 	}{
-		{d2resource.LevelType, levelTypesLoader},
-		{d2resource.LevelPreset, levelPresetLoader},
-		{d2resource.LevelWarp, levelWarpsLoader},
-		{d2resource.ObjectType, objectTypesLoader},
-		{d2resource.ObjectDetails, objectDetailsLoader},
-		{d2resource.ObjectMode, objectModesLoader},
-		{d2resource.Weapons, weaponsLoader},
-		{d2resource.Armor, armorLoader},
-		{d2resource.Misc, miscItemsLoader},
-		{d2resource.Books, booksLoader},
-		{d2resource.Belts, beltsLoader},
-		{d2resource.Colors, colorsLoader},
-		{d2resource.ItemTypes, itemTypesLoader}, // WARN: needs to be after weapons, armor, and misc
-		{d2resource.UniqueItems, uniqueItemsLoader},
-		{d2resource.Missiles, missilesLoader},
-		{d2resource.SoundSettings, soundDetailsLoader},
-		{d2resource.MonStats, monsterStatsLoader},
-		{d2resource.MonStats2, monsterStats2Loader},
-		{d2resource.MonPreset, monsterPresetLoader},
-		{d2resource.MonProp, monsterPropertiesLoader},
-		{d2resource.MonType, monsterTypesLoader},
-		{d2resource.MonMode, monsterModeLoader},
-		{d2resource.MagicPrefix, magicPrefixLoader},
-		{d2resource.MagicSuffix, magicSuffixLoader},
-		{d2resource.ItemStatCost, itemStatCostLoader},
-		{d2resource.ItemRatio, itemRatioLoader},
-		{d2resource.StorePage, storePagesLoader},
-		{d2resource.Overlays, overlaysLoader},
-		{d2resource.CharStats, charStatsLoader},
-		{d2resource.Gamble, gambleLoader},
-		{d2resource.Hireling, hirelingLoader},
-		{d2resource.Experience, experienceLoader},
-		{d2resource.Gems, gemsLoader},
-		{d2resource.QualityItems, itemQualityLoader},
-		{d2resource.Runes, runewordLoader},
-		{d2resource.DifficultyLevels, difficultyLevelsLoader},
-		{d2resource.AutoMap, autoMapLoader},
-		{d2resource.LevelDetails, levelDetailsLoader},
-		{d2resource.LevelMaze, levelMazeDetailsLoader},
-		{d2resource.LevelSubstitutions, levelSubstitutionsLoader},
-		{d2resource.CubeRecipes, cubeRecipeLoader},
-		{d2resource.SuperUniques, monsterSuperUniqeLoader},
-		{d2resource.Inventory, inventoryLoader},
-		{d2resource.Skills, skillDetailsLoader},
-		{d2resource.SkillCalc, skillCalcLoader},
-		{d2resource.MissileCalc, missileCalcLoader},
-		{d2resource.Properties, propertyLoader},
-		{d2resource.SkillDesc, skillDescriptionLoader},
-		{d2resource.BodyLocations, bodyLocationsLoader},
-		{d2resource.Sets, setLoader},
-		{d2resource.SetItems, setItemLoader},
-		{d2resource.AutoMagic, autoMagicLoader},
-		{d2resource.TreasureClass, treasureClassLoader},
-		{d2resource.TreasureClassEx, treasureClassExLoader},
-		{d2resource.States, statesLoader},
-		{d2resource.SoundEnvirons, soundEnvironmentLoader},
-		{d2resource.Shrines, shrineLoader},
-		{d2resource.ElemType, elemTypesLoader},
-		{d2resource.PlrMode, playerModesLoader},
-		{d2resource.PetType, petTypesLoader},
-		{d2resource.NPC, npcLoader},
-		{d2resource.MonsterUniqueModifier, monsterUniqModifiersLoader},
-		{d2resource.MonsterEquipment, monsterEquipmentLoader},
-		{d2resource.UniqueAppellation, uniqueAppellationsLoader},
-		{d2resource.MonsterLevel, monsterLevelsLoader},
-		{d2resource.MonsterSound, monsterSoundsLoader},
-		{d2resource.MonsterSequence, monsterSequencesLoader},
-		{d2resource.PlayerClass, playerClassLoader},
-		{d2resource.MonsterPlacement, monsterPlacementsLoader},
-		{d2resource.ObjectGroup, objectGroupsLoader},
-		{d2resource.CompCode, componentCodesLoader},
-		{d2resource.MonsterAI, monsterAiLoader},
-		{d2resource.RarePrefix, rareItemPrefixLoader},
-		{d2resource.RareSuffix, rareItemSuffixLoader},
-		{d2resource.Events, eventsLoader},
-		{d2resource.ArmorType, armorTypesLoader},      // anim mode tokens
-		{d2resource.WeaponClass, weaponClassesLoader}, // anim mode tokens
-		{d2resource.PlayerType, playerTypeLoader},     // anim mode tokens
-		{d2resource.Composite, compositeTypeLoader},   // anim mode tokens
-		{d2resource.HitClass, hitClassLoader},         // anim mode tokens
-		{d2resource.UniquePrefix, uniqueMonsterPrefixLoader},
-		{d2resource.UniqueSuffix, uniqueMonsterSuffixLoader},
-		{d2resource.CubeModifier, cubeModifierLoader},
-		{d2resource.CubeType, cubeTypeLoader},
-		{d2resource.HirelingDescription, hirelingDescriptionLoader},
-		{d2resource.LowQualityItems, lowQualityLoader},
+		{levelTypesLoader, d2resource.LevelType},
+		{levelPresetLoader, d2resource.LevelPreset},
+		{levelWarpsLoader, d2resource.LevelWarp},
+		{objectTypesLoader, d2resource.ObjectType},
+		{objectDetailsLoader, d2resource.ObjectDetails},
+		{objectModesLoader, d2resource.ObjectMode},
+		{weaponsLoader, d2resource.Weapons},
+		{armorLoader, d2resource.Armor},
+		{miscItemsLoader, d2resource.Misc},
+		{booksLoader, d2resource.Books},
+		{beltsLoader, d2resource.Belts},
+		{colorsLoader, d2resource.Colors},
+		{itemTypesLoader, d2resource.ItemTypes}, // WARN: needs to be after weapons, armor, and misc
+		{uniqueItemsLoader, d2resource.UniqueItems},
+		{missilesLoader, d2resource.Missiles},
+		{soundDetailsLoader, d2resource.SoundSettings},
+		{monsterStatsLoader, d2resource.MonStats},
+		{monsterStats2Loader, d2resource.MonStats2},
+		{monsterPresetLoader, d2resource.MonPreset},
+		{monsterPropertiesLoader, d2resource.MonProp},
+		{monsterTypesLoader, d2resource.MonType},
+		{monsterModeLoader, d2resource.MonMode},
+		{magicPrefixLoader, d2resource.MagicPrefix},
+		{magicSuffixLoader, d2resource.MagicSuffix},
+		{itemStatCostLoader, d2resource.ItemStatCost},
+		{itemRatioLoader, d2resource.ItemRatio},
+		{storePagesLoader, d2resource.StorePage},
+		{overlaysLoader, d2resource.Overlays},
+		{charStatsLoader, d2resource.CharStats},
+		{gambleLoader, d2resource.Gamble},
+		{hirelingLoader, d2resource.Hireling},
+		{experienceLoader, d2resource.Experience},
+		{gemsLoader, d2resource.Gems},
+		{itemQualityLoader, d2resource.QualityItems},
+		{runewordLoader, d2resource.Runes},
+		{difficultyLevelsLoader, d2resource.DifficultyLevels},
+		{autoMapLoader, d2resource.AutoMap},
+		{levelDetailsLoader, d2resource.LevelDetails},
+		{levelMazeDetailsLoader, d2resource.LevelMaze},
+		{levelSubstitutionsLoader, d2resource.LevelSubstitutions},
+		{cubeRecipeLoader, d2resource.CubeRecipes},
+		{monsterSuperUniqeLoader, d2resource.SuperUniques},
+		{inventoryLoader, d2resource.Inventory},
+		{skillDetailsLoader, d2resource.Skills},
+		{skillCalcLoader, d2resource.SkillCalc},
+		{missileCalcLoader, d2resource.MissileCalc},
+		{propertyLoader, d2resource.Properties},
+		{skillDescriptionLoader, d2resource.SkillDesc},
+		{bodyLocationsLoader, d2resource.BodyLocations},
+		{setLoader, d2resource.Sets},
+		{setItemLoader, d2resource.SetItems},
+		{autoMagicLoader, d2resource.AutoMagic},
+		{treasureClassLoader, d2resource.TreasureClass},
+		{treasureClassExLoader, d2resource.TreasureClassEx},
+		{statesLoader, d2resource.States},
+		{soundEnvironmentLoader, d2resource.SoundEnvirons},
+		{shrineLoader, d2resource.Shrines},
+		{elemTypesLoader, d2resource.ElemType},
+		{playerModesLoader, d2resource.PlrMode},
+		{petTypesLoader, d2resource.PetType},
+		{npcLoader, d2resource.NPC},
+		{monsterUniqModifiersLoader, d2resource.MonsterUniqueModifier},
+		{monsterEquipmentLoader, d2resource.MonsterEquipment},
+		{uniqueAppellationsLoader, d2resource.UniqueAppellation},
+		{monsterLevelsLoader, d2resource.MonsterLevel},
+		{monsterSoundsLoader, d2resource.MonsterSound},
+		{monsterSequencesLoader, d2resource.MonsterSequence},
+		{playerClassLoader, d2resource.PlayerClass},
+		{monsterPlacementsLoader, d2resource.MonsterPlacement},
+		{objectGroupsLoader, d2resource.ObjectGroup},
+		{componentCodesLoader, d2resource.CompCode},
+		{monsterAiLoader, d2resource.MonsterAI},
+		{rareItemPrefixLoader, d2resource.RarePrefix},
+		{rareItemSuffixLoader, d2resource.RareSuffix},
+		{eventsLoader, d2resource.Events},
+		{armorTypesLoader, d2resource.ArmorType},      // anim mode tokens
+		{weaponClassesLoader, d2resource.WeaponClass}, // anim mode tokens
+		{playerTypeLoader, d2resource.PlayerType},     // anim mode tokens
+		{compositeTypeLoader, d2resource.Composite},   // anim mode tokens
+		{hitClassLoader, d2resource.HitClass},         // anim mode tokens
+		{uniqueMonsterPrefixLoader, d2resource.UniquePrefix},
+		{uniqueMonsterSuffixLoader, d2resource.UniqueSuffix},
+		{cubeModifierLoader, d2resource.CubeModifier},
+		{cubeTypeLoader, d2resource.CubeType},
+		{hirelingDescriptionLoader, d2resource.HirelingDescription},
+		{lowQualityLoader, d2resource.LowQualityItems},
 	}
 
 	for idx := range loaders {
