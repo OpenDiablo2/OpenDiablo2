@@ -21,12 +21,12 @@ const (
 
 // Label is renderable text
 type Label struct {
+	blinkTimer time.Time
+	renderer   d2interface.Renderer
+	surface    d2interface.Surface
+	font       *d2font.Font
+	text       string
 	widgetBase
-	blinkTimer  time.Time
-	renderer    d2interface.Renderer
-	surface     d2interface.Surface
-	font        *d2font.Font
-	text        string
 	color       color.RGBA
 	hoverColor  color.RGBA
 	isHovered   bool

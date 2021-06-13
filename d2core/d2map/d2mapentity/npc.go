@@ -18,9 +18,9 @@ type NPC struct {
 	monstatRecord *d2records.MonStatRecord
 	monstatEx     *d2records.MonStat2Record
 	composite     *d2asset.Composite
+	name          string
+	Paths         []d2path.Path
 	mapEntity
-	name        string
-	Paths       []d2path.Path
 	action      int
 	path        int
 	repetitions int

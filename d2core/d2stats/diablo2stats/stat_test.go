@@ -301,86 +301,102 @@ func TestStat_Clone(t *testing.T) {
 func TestStat_Descriptions(t *testing.T) {
 	tests := []struct {
 		recordKey string
-		vals      []float64
 		expect    string
+		vals      []float64
 	}{
 		// DescFn1
-		{"strength", []float64{31}, "+31 to Strength"},
-		{"hpregen", []float64{20}, "Replenish Life +20"},
-		{"hpregen", []float64{-8}, "Drain Life -8"},
+		{"strength", "+31 to Strength", []float64{31}},
+		{"hpregen", "Replenish Life +20", []float64{20}},
+		{"hpregen", "Drain Life -8", []float64{-8}},
 
 		// DescFn2
-		{"toblock", []float64{16}, "+16% Increased Chance of Blocking"},
-		{"item_absorblight_percent", []float64{10}, "Lightning Absorb +10%"},
+		{"toblock", "+16% Increased Chance of Blocking", []float64{16}},
+		{"item_absorblight_percent", "Lightning Absorb +10%", []float64{10}},
 
 		// DescFn3
-		{"normal_damage_reduction", []float64{25}, "Damage Reduced by 25"},
-		{"item_restinpeace", []float64{25}, "Slain Monsters Rest in Peace"},
+		{"normal_damage_reduction", "Damage Reduced by 25", []float64{25}},
+		{"item_restinpeace", "Slain Monsters Rest in Peace", []float64{25}},
 
 		// DescFn4
-		{"poisonresist", []float64{25}, "Poison Resist +25%"},
-		{"item_fastermovevelocity", []float64{25}, "+25% Faster Run/Walk"},
+		{"poisonresist", "Poison Resist +25%", []float64{25}},
+		{"item_fastermovevelocity", "+25% Faster Run/Walk", []float64{25}},
 
 		// DescFn5
-		{"item_howl", []float64{25}, "Hit Causes Monster to Flee 25%"},
+		{"item_howl", "Hit Causes Monster to Flee 25%", []float64{25}},
 
 		// DescFn6
-		{"item_hp_perlevel", []float64{25}, "+25 to Life (Based on Character Level)"},
+		{"item_hp_perlevel", "+25 to Life (Based on Character Level)", []float64{25}},
 
 		// DescFn7
-		{"item_resist_ltng_perlevel", []float64{25},
-			"Lightning Resist +25% (Based on Character Level)"},
-		{"item_find_magic_perlevel", []float64{25}, "+25% Better Chance of Getting Magic Items (" +
-			"Based on Character Level)"},
+		{
+			"item_resist_ltng_perlevel",
+			"Lightning Resist +25% (Based on Character Level)",
+			[]float64{25},
+		},
+		{
+			"item_find_magic_perlevel", "+25% Better Chance of Getting Magic Items (Based on Character Level)",
+			[]float64{25},
+		},
 
 		// DescFn8
-		{"item_armorpercent_perlevel", []float64{25},
-			"+25% Enhanced Defense (Based on Character Level)"},
-		{"item_regenstamina_perlevel", []float64{25},
-			"Heal Stamina Plus +25% (Based on Character Level)"},
+		{
+			"item_armorpercent_perlevel",
+			"+25% Enhanced Defense (Based on Character Level)",
+			[]float64{25},
+		},
+		{
+			"item_regenstamina_perlevel",
+			"Heal Stamina Plus +25% (Based on Character Level)",
+			[]float64{25},
+		},
 
 		// DescFn9
-		{"item_thorns_perlevel", []float64{25}, "Attacker Takes Damage of 25 (" +
-			"Based on Character Level)"},
+		{
+			"item_thorns_perlevel", "Attacker Takes Damage of 25 (Based on Character Level)",
+			[]float64{25},
+		},
 
 		// DescFn11
-		{"item_replenish_durability", []float64{2}, "Repairs 2 durability per second"},
+		{"item_replenish_durability", "Repairs 2 durability per second", []float64{2}},
 
 		// DescFn12
-		{"item_stupidity", []float64{5}, "Hit Blinds Target +5"},
+		{"item_stupidity", "Hit Blinds Target +5", []float64{5}},
 
 		// DescFn13
-		{"item_addclassskills", []float64{5, 3}, "+5 to Paladin Skill Levels"},
+		{"item_addclassskills", "+5 to Paladin Skill Levels", []float64{5, 3}},
 
 		// DescFn14
-		{"item_addskill_tab", []float64{5, 3, 0}, "+5 to Combat Skills (Paladin Only)"},
-		{"item_addskill_tab", []float64{5, 3, 1}, "+5 to Offensive Auras (Paladin Only)"},
-		{"item_addskill_tab", []float64{5, 3, 2}, "+5 to Defensive Auras (Paladin Only)"},
+		{"item_addskill_tab", "+5 to Combat Skills (Paladin Only)", []float64{5, 3, 0}},
+		{"item_addskill_tab", "+5 to Offensive Auras (Paladin Only)", []float64{5, 3, 1}},
+		{"item_addskill_tab", "+5 to Defensive Auras (Paladin Only)", []float64{5, 3, 2}},
 
 		// DescFn15
-		{"item_skillonattack", []float64{5, 7, 64},
-			"5% Chance to cast level 7 Frozen Orb on attack"},
+		{
+			"item_skillonattack",
+			"5% Chance to cast level 7 Frozen Orb on attack",
+			[]float64{5, 7, 64},
+		},
 
 		// DescFn16
-		{"item_aura", []float64{3, 37}, "Level 3 Warmth Aura When Equipped"},
+		{"item_aura", "Level 3 Warmth Aura When Equipped", []float64{3, 37}},
 
 		// DescFn20
-		{"item_fractionaltargetac", []float64{-25}, "-25% Target Defense"},
+		{"item_fractionaltargetac", "-25% Target Defense", []float64{-25}},
 
 		// DescFn22
-		{"attack_vs_montype", []float64{25, 40}, "25% to Attack Rating versus Specter"},
+		{"attack_vs_montype", "25% to Attack Rating versus Specter", []float64{25, 40}},
 
 		// DescFn23
-		{"item_reanimate", []float64{25, 40}, "25% Reanimate as: Specter"},
+		{"item_reanimate", "25% Reanimate as: Specter", []float64{25, 40}},
 
 		// DescFn24
-		{"item_charged_skill", []float64{25, 64, 20, 19}, "Level 25 Frozen Orb (19/20 Charges)"},
+		{"item_charged_skill", "Level 25 Frozen Orb (19/20 Charges)", []float64{25, 64, 20, 19}},
 
 		// DescFn27
-		{"item_singleskill", []float64{25, 64, 3}, "+25 to Frozen Orb (Paladin Only)"},
+		{"item_singleskill", "+25 to Frozen Orb (Paladin Only)", []float64{25, 64, 3}},
 
 		// DescFn28
-		{"item_nonclassskill", []float64{25, 64}, "+25 to Frozen Orb"},
+		{"item_nonclassskill", "+25 to Frozen Orb", []float64{25, 64}},
 	}
 
 	for idx := range tests {

@@ -55,66 +55,56 @@ var _ d2item.Item = &Item{}
 // Item is a representation of a diablo2 item
 // nolint:structcheck,unused // WIP
 type Item struct {
-	factory *ItemFactory
-	name    string
-	Seed    int64
-	rand    *rand.Rand // non-global rand instance for re-generating the item
-
-	slotType d2enum.EquippedSlot
-
-	TypeCode    string
-	CommonCode  string
-	UniqueCode  string
-	SetCode     string
-	SetItemCode string
-	PrefixCodes []string
-	SuffixCodes []string
-
-	properties      map[PropertyPool][]*Property
-	statContext     d2item.StatContext
-	statList        d2stats.StatList
-	uniqueStatList  d2stats.StatList
 	setItemStatList d2stats.StatList
-
-	attributes *itemAttributes
-
-	GridX int
-	GridY int
-
-	sockets []*d2item.Item // there will be checks for handling the craziness this might entail
+	statContext     d2item.StatContext
+	uniqueStatList  d2stats.StatList
+	statList        d2stats.StatList
+	rand            *rand.Rand
+	properties      map[PropertyPool][]*Property
+	attributes      *itemAttributes
+	factory         *ItemFactory
+	TypeCode        string
+	SetCode         string
+	SetItemCode     string
+	CommonCode      string
+	name            string
+	UniqueCode      string
+	SuffixCodes     []string
+	PrefixCodes     []string
+	sockets         []*d2item.Item
+	slotType        d2enum.EquippedSlot
+	Seed            int64
+	GridX           int
+	GridY           int
 }
 
 // nolint:structcheck,unused // WIP
 type itemAttributes struct {
-	worldSprite     *d2ui.Sprite
-	inventorySprite *d2ui.Sprite
-
-	damageOneHand minMaxEnhanceable
-	damageTwoHand minMaxEnhanceable
-	damageMissile minMaxEnhanceable
-	stackSize     minMaxEnhanceable
-	durability    minMaxEnhanceable
-
-	personalization string
-
-	quality                 int
+	worldSprite             *d2ui.Sprite
+	inventorySprite         *d2ui.Sprite
+	personalization         string
+	damageOneHand           minMaxEnhanceable
+	damageTwoHand           minMaxEnhanceable
+	damageMissile           minMaxEnhanceable
+	stackSize               minMaxEnhanceable
+	durability              minMaxEnhanceable
+	classSpecific           d2enum.Hero
 	defense                 int
 	currentStackSize        int
 	currentDurability       int
-	baseItemLevel           int
+	quality                 int
 	requiredLevel           int
 	numSockets              int
 	requirementsEnhancement int
 	requiredStrength        int
 	requiredDexterity       int
-	classSpecific           d2enum.Hero
-
-	identitified   bool
-	crafted        bool
-	durable        bool // some items specify that they have no durability
-	indestructable bool
-	ethereal       bool
-	throwable      bool
+	baseItemLevel           int
+	identitified            bool
+	crafted                 bool
+	durable                 bool
+	indestructable          bool
+	ethereal                bool
+	throwable               bool
 }
 
 type minMaxEnhanceable struct {

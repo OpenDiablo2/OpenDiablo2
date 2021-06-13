@@ -18,11 +18,11 @@ const (
 
 // Button is a user actionable drawable toggle switch
 type Button struct {
-	widgetBase
 	surfaces []d2interface.Surface
-	width    int
-	height   int
-	state    buttonState
+	widgetBase
+	width  int
+	height int
+	state  buttonState
 }
 
 func (b *Button) onMouseButtonDown(_ d2interface.MouseEvent) bool {
