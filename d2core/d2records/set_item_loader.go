@@ -84,6 +84,8 @@ func setItemLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		}
 
 		record.Properties = props
+		record.SetPropertiesLevel1 = bonus1
+		record.SetPropertiesLevel2 = bonus2
 
 		records[record.SetItemKey] = record
 	}

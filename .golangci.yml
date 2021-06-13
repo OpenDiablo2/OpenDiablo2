@@ -51,7 +51,6 @@ linters:
     - godox
     - gofmt
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
@@ -63,7 +62,6 @@ linters:
     - nakedret
     - prealloc
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
     - stylecheck
