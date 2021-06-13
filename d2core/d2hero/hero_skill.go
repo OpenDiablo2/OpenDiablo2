@@ -10,8 +10,8 @@ import (
 type HeroSkill struct {
 	*d2records.SkillRecord
 	*d2records.SkillDescriptionRecord
-	SkillPoints int
 	Shallow     *shallowHeroSkill
+	SkillPoints int
 }
 
 // An auxiliary struct which only stores the ID of the SkillRecord, instead of the whole SkillRecord

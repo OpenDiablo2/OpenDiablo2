@@ -8,9 +8,9 @@ import (
 )
 
 type terminalLogger struct {
+	writer   io.Writer
 	terminal *Terminal
 	buffer   bytes.Buffer
-	writer   io.Writer
 }
 
 func (tl *terminalLogger) Write(p []byte) (int, error) {

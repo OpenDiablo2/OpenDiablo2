@@ -51,9 +51,9 @@ func newDC6Animation(
 
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {
-	Animation
-	dc6     *d2dc6.DC6
 	palette d2interface.Palette
+	dc6     *d2dc6.DC6
+	Animation
 }
 
 func (a *DC6Animation) init() error {

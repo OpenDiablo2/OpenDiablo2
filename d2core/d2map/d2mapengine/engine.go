@@ -22,23 +22,20 @@ const (
 
 // MapEngine loads the tiles which make up the isometric map and the entities
 type MapEngine struct {
-	asset *d2asset.AssetManager
+	entities map[string]d2interface.MapEntity
 	*d2mapstamp.StampFactory
 	*d2mapentity.MapEntityFactory
-	seed          int64                            // The map seed
-	entities      map[string]d2interface.MapEntity // Entities on the map
-	tiles         []MapTile
-	size          d2geom.Size               // Size of the map, in tiles
-	levelType     d2records.LevelTypeRecord // Level type of this map
-	dt1TileData   []d2dt1.Tile              // DT1 tile data
-	startSubTileX int                       // Starting X position
-	startSubTileY int                       // Starting Y position
-	dt1Files      []string                  // List of DS1 strings
-
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
-	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
-
+	asset *d2asset.AssetManager
 	*d2util.Logger
+	tiles         []MapTile
+	dt1TileData   []d2dt1.Tile
+	dt1Files      []string
+	levelType     d2records.LevelTypeRecord
+	size          d2geom.Size
+	startSubTileX int
+	startSubTileY int
+	seed          int64
+	IsLoading     bool
 }
 
 const (

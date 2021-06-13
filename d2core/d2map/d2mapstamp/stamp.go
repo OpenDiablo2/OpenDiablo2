@@ -21,12 +21,12 @@ const (
 type Stamp struct {
 	factory     *StampFactory
 	entity      *d2mapentity.MapEntityFactory
-	regionPath  string // The file path of the region
+	ds1         *d2ds1.DS1
+	regionPath  string
+	tiles       []d2dt1.Tile
+	levelType   d2records.LevelTypeRecord
+	levelPreset d2records.LevelPresetRecord
 	regionID    d2enum.RegionIdType
-	levelType   d2records.LevelTypeRecord   // The level type id for this stamp
-	levelPreset d2records.LevelPresetRecord // The level preset id for this stamp
-	tiles       []d2dt1.Tile                // The tiles contained on this stamp
-	ds1         *d2ds1.DS1                  // The backing DS1 file for this stamp
 }
 
 // Size returns the size of the stamp in tiles.

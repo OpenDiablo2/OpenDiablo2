@@ -15,17 +15,17 @@ import (
 // NPC is a passive complex entity with which the player can interact.
 // For example, Deckard Cain.
 type NPC struct {
-	mapEntity
-	Paths         []d2path.Path
-	name          string
-	composite     *d2asset.Composite
-	action        int
-	path          int
-	repetitions   int
 	monstatRecord *d2records.MonStatRecord
 	monstatEx     *d2records.MonStat2Record
-	HasPaths      bool
-	isDone        bool
+	composite     *d2asset.Composite
+	mapEntity
+	name        string
+	Paths       []d2path.Path
+	action      int
+	path        int
+	repetitions int
+	HasPaths    bool
+	isDone      bool
 }
 
 const (

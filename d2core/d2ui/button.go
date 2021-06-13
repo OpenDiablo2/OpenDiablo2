@@ -89,25 +89,25 @@ const (
 
 // ButtonLayout defines the type of buttons
 type ButtonLayout struct {
-	ResourceName     string
+	ClickableRect    *image.Rectangle
 	PaletteName      string
 	FontPath         string
-	ClickableRect    *image.Rectangle
+	ResourceName     string
+	Tooltip          int
 	XSegments        int
 	YSegments        int
 	BaseFrame        int
 	DisabledFrame    int
-	DisabledColor    uint32
-	TextOffset       int
+	TooltipXOffset   int
 	FixedWidth       int
 	FixedHeight      int
+	TextOffset       int
+	TooltipYOffset   int
 	LabelColor       uint32
+	DisabledColor    uint32
 	Toggleable       bool
 	AllowFrameChange bool
 	HasImage         bool
-	Tooltip          int
-	TooltipXOffset   int
-	TooltipYOffset   int
 }
 
 const (
@@ -793,18 +793,18 @@ var _ ClickableWidget = &Button{}
 
 // Button defines a standard wide UI button
 type Button struct {
-	*BaseWidget
-	buttonLayout          *ButtonLayout
+	disabledSurface       d2interface.Surface
 	normalSurface         d2interface.Surface
 	pressedSurface        d2interface.Surface
 	toggledSurface        d2interface.Surface
 	pressedToggledSurface d2interface.Surface
-	disabledSurface       d2interface.Surface
-	onClick               func()
-	enabled               bool
-	pressed               bool
-	toggled               bool
-	tooltip               *Tooltip
+	buttonLayout          *ButtonLayout
+	*BaseWidget
+	onClick func()
+	tooltip *Tooltip
+	enabled bool
+	pressed bool
+	toggled bool
 }
 
 // NewButton creates an instance of Button
@@ -906,10 +906,11 @@ func (ui *UIManager) createButton(layout *ButtonLayout, text string) *Button {
 }
 
 type buttonStateDescriptor struct {
-	baseFrame            int
-	offsetX, offsetY     int
 	prerenderdestination *d2interface.Surface
 	fmtErr               string
+	baseFrame            int
+	offsetX              int
+	offsetY              int
 }
 
 func (v *Button) createTooltip() {
@@ -981,10 +982,10 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	// pressed button
 	if numButtonStates > buttonStatePressed {
 		state := &buttonStateDescriptor{
-			baseFrame + buttonStatePressed,
-			xOffset - pressedButtonOffset, textY + pressedButtonOffset,
 			&v.pressedSurface,
 			"failed to render button pressedSurface, err: %v\n",
+			baseFrame + buttonStatePressed,
+			xOffset - pressedButtonOffset, textY + pressedButtonOffset,
 		}
 
 		buttonStateConfigs = append(buttonStateConfigs, state)
@@ -993,30 +994,30 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	// toggle button
 	if numButtonStates > buttonStateToggled {
 		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
-			baseFrame + buttonStateToggled,
-			xOffset, textY,
 			&v.toggledSurface,
 			"failed to render button toggledSurface, err: %v\n",
+			baseFrame + buttonStateToggled,
+			xOffset, textY,
 		})
 	}
 
 	// pressed+toggled
 	if numButtonStates > buttonStatePressedToggled {
 		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
-			baseFrame + buttonStatePressedToggled,
-			xOffset, textY,
 			&v.pressedToggledSurface,
 			"failed to render button pressedToggledSurface, err: %v\n",
+			baseFrame + buttonStatePressedToggled,
+			xOffset, textY,
 		})
 	}
 
 	// disabled button
 	if btnLayout.DisabledFrame != -1 {
 		disabledState := &buttonStateDescriptor{
-			btnLayout.DisabledFrame,
-			xOffset, textY,
 			&v.disabledSurface,
 			"failed to render button disabledSurface, err: %v\n",
+			btnLayout.DisabledFrame,
+			xOffset, textY,
 		}
 
 		buttonStateConfigs = append(buttonStateConfigs, disabledState)

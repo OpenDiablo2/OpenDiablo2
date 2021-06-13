@@ -12,19 +12,16 @@ const (
 
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
-	uuid     string
-	Position d2vector.Position
-	Target   d2vector.Position
-	velocity d2vector.Vector
-
-	Speed     float64
-	path      []d2vector.Position
-	drawLayer int
-
 	done        func()
 	directioner func(direction int)
-
-	highlight bool
+	uuid        string
+	path        []d2vector.Position
+	velocity    d2vector.Vector
+	Position    d2vector.Position
+	Target      d2vector.Position
+	Speed       float64
+	drawLayer   int
+	highlight   bool
 }
 
 // newMapEntity creates an instance of mapEntity

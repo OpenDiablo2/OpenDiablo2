@@ -11,8 +11,8 @@ import (
 type CastOverlay struct {
 	*AnimatedEntity
 	record     *d2records.OverlayRecord
-	playLoop   bool
 	onDoneFunc func()
+	playLoop   bool
 }
 
 // ID returns the overlay uuid

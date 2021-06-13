@@ -36,14 +36,13 @@ func CreateAudio(l d2util.LogLevel, am *d2asset.AssetManager) *AudioProvider {
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {
 	asset        *d2asset.AssetManager
-	audioContext *audio.Context // The Audio context
-	bgmAudio     *audio.Player  // The audio player
+	audioContext *audio.Context
+	bgmAudio     *audio.Player
 	bgmStream    *wav.Stream
-	lastBgm      string
-	sfxVolume    float64
-	bgmVolume    float64
-
 	*d2util.Logger
+	lastBgm   string
+	sfxVolume float64
+	bgmVolume float64
 }
 
 // PlayBGM loads an audio stream and plays it in the background

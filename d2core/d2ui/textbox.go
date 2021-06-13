@@ -17,17 +17,16 @@ var _ ClickableWidget = &TextBox{}
 // TextBox represents a text input box
 type TextBox struct {
 	*BaseWidget
-	textLabel    *Label
-	lineBar      *Label
+	textLabel *Label
+	lineBar   *Label
+	*d2util.Logger
+	bgSprite     *Sprite
 	text         string
 	filter       string
-	bgSprite     *Sprite
+	maxValue     int
 	enabled      bool
 	isFocused    bool
 	isNumberOnly bool
-	maxValue     int
-
-	*d2util.Logger
 }
 
 // NewTextbox creates a new instance of a text box

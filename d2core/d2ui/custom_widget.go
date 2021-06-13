@@ -9,9 +9,9 @@ var _ Widget = &CustomWidget{}
 type CustomWidget struct {
 	*BaseWidget
 	renderFunc func(target d2interface.Surface)
-	cached     bool
 	cachedImg  *d2interface.Surface
 	tooltip    *Tooltip
+	cached     bool
 }
 
 // NewCustomWidgetCached creates a new widget and caches anything rendered via the

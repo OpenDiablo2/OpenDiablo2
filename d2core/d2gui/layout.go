@@ -58,16 +58,14 @@ var _ widget = &Layout{}
 // Layouts are gui elements as well, so they can be nested in other layouts.
 type Layout struct {
 	widgetBase
-
-	renderer     d2interface.Renderer
-	assetManager *d2asset.AssetManager
-
+	renderer        d2interface.Renderer
+	assetManager    *d2asset.AssetManager
+	entries         []*layoutEntry
 	width           int
 	height          int
 	verticalAlign   VerticalAlign
 	horizontalAlign HorizontalAlign
 	positionType    PositionType
-	entries         []*layoutEntry
 }
 
 // CreateLayout creates a new  GUI layout

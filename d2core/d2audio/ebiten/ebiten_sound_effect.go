@@ -53,8 +53,8 @@ func (s *panStream) Read(p []byte) (n int, err error) {
 // SoundEffect represents an ebiten implementation of a sound effect
 type SoundEffect struct {
 	player      *audio.Player
-	volumeScale float64
 	panStream   *panStream
+	volumeScale float64
 }
 
 // SetPan sets the audio pan, left is -1.0, center is 0.0, right is 1.0

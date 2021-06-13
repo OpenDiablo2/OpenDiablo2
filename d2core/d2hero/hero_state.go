@@ -7,13 +7,13 @@ import (
 
 // HeroState stores the state of the player
 type HeroState struct {
-	HeroName   string                         `json:"heroName"`
-	HeroType   d2enum.Hero                    `json:"heroType"`
-	Act        int                            `json:"act"`
-	FilePath   string                         `json:"-"`
 	Equipment  d2inventory.CharacterEquipment `json:"equipment"`
-	Stats      *HeroStatsState                `json:"stats"`
 	Skills     map[int]*HeroSkill             `json:"skills"`
+	Stats      *HeroStatsState                `json:"stats"`
+	FilePath   string                         `json:"-"`
+	HeroName   string                         `json:"heroName"`
+	Act        int                            `json:"act"`
+	HeroType   d2enum.Hero                    `json:"heroType"`
 	X          float64                        `json:"x"`
 	Y          float64                        `json:"y"`
 	LeftSkill  int                            `json:"leftSkill"`
