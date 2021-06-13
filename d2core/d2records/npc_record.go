@@ -10,16 +10,10 @@ type NPCs map[string]*NPCRecord
 // NPCRecord represents a single line in NPC.txt
 // The information has been gathered from [https:// d2mods.info/forum/kb/viewarticle?a=387]
 type NPCRecord struct {
-	// Name is an ID pointer to row of this npc in monstats.txt
-	Name string
-
-	Multipliers *costMultiplier
-
+	Multipliers      *costMultiplier
 	QuestMultipliers map[int]*costMultiplier
-
-	// MaxBuy is the maximum amount of gold an NPC will pay for an item for the corresponding
-	// difficulty
-	MaxBuy struct {
+	Name             string
+	MaxBuy           struct {
 		Normal    int
 		Nightmare int
 		Hell      int

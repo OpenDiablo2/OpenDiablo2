@@ -20,27 +20,27 @@ const cellsPerRow = 4
 
 // DCCDirection represents a DCCDirection file.
 type DCCDirection struct {
-	OutSizeCoded               int
-	CompressionFlags           int
-	Variable0Bits              int
-	WidthBits                  int
-	HeightBits                 int
-	XOffsetBits                int
+	PixelBuffer                []DCCPixelBufferEntry
+	PixelData                  []byte
+	Cells                      []*DCCCell
+	Frames                     []*DCCDirectionFrame
+	Box                        d2geom.Rectangle
+	PixelMaskBitstreamSize     int
 	YOffsetBits                int
 	OptionalDataBits           int
 	CodedBytesBits             int
 	EqualCellsBitstreamSize    int
-	PixelMaskBitstreamSize     int
+	XOffsetBits                int
 	EncodingTypeBitsreamSize   int
 	RawPixelCodesBitstreamSize int
-	Frames                     []*DCCDirectionFrame
-	PaletteEntries             [256]byte
-	Box                        d2geom.Rectangle
-	Cells                      []*DCCCell
-	PixelData                  []byte
-	HorizontalCellCount        int
+	HeightBits                 int
 	VerticalCellCount          int
-	PixelBuffer                []DCCPixelBufferEntry
+	WidthBits                  int
+	Variable0Bits              int
+	CompressionFlags           int
+	HorizontalCellCount        int
+	OutSizeCoded               int
+	PaletteEntries             [256]byte
 }
 
 // CreateDCCDirection creates an instance of a DCCDirection.

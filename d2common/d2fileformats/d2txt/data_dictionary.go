@@ -11,10 +11,10 @@ import (
 
 // DataDictionary represents a data file (Excel)
 type DataDictionary struct {
+	Err    error
 	lookup map[string]int
 	r      *csv.Reader
 	record []string
-	Err    error
 }
 
 // LoadDataDictionary loads the contents of a spreadsheet style txt file

@@ -2,8 +2,8 @@ package d2input
 
 // KeyCharsEvent represents a key character event
 type KeyCharsEvent struct {
-	HandlerEvent
 	chars []rune
+	HandlerEvent
 }
 
 // Chars returns the characters

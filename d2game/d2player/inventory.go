@@ -74,19 +74,18 @@ type Inventory struct {
 	grid          *ItemGrid
 	itemTooltip   *d2ui.Tooltip
 	panelGroup    *d2ui.WidgetGroup
-	hoverX        int
-	hoverY        int
-	originX       int
-	originY       int
-	lastMouseX    int
-	lastMouseY    int
-	hovering      bool
-	isOpen        bool
-	onCloseCb     func()
-	gold          int
 	moveGoldPanel *MoveGoldPanel
-
+	onCloseCb     func()
 	*d2util.Logger
+	originY    int
+	lastMouseX int
+	lastMouseY int
+	hoverY     int
+	gold       int
+	hoverX     int
+	originX    int
+	hovering   bool
+	isOpen     bool
 }
 
 // Toggle negates the open state of the inventory

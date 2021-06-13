@@ -19,12 +19,12 @@ var _ ClickableWidget = &Scrollbar{}
 // Scrollbar is a vertical slider ui element
 type Scrollbar struct {
 	*BaseWidget
-	enabled         bool
+	onActivate      func()
+	scrollbarSprite *Sprite
 	currentOffset   int
 	maxOffset       int
 	lastDirChange   int
-	onActivate      func()
-	scrollbarSprite *Sprite
+	enabled         bool
 }
 
 // NewScrollbar creates a scrollbar instance

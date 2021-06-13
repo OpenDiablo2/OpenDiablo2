@@ -8,10 +8,10 @@ type Inventory map[string]*InventoryRecord //nolint:gochecknoglobals // Currentl
 // InventoryRecord represents a single row from inventory.txt, it describes the grid
 // layout and positioning of various inventory-related ui panels.
 type InventoryRecord struct {
-	Name  string
 	Panel *box
 	Grid  *grid
 	Slots map[d2enum.EquippedSlot]*box
+	Name  string
 }
 
 type box struct {

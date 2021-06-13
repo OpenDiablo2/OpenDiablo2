@@ -10,8 +10,8 @@ import (
 // PongPacket contains the time at which it was sent and the ID of the
 // client. It is sent by the client in response to a Pong packet.
 type PongPacket struct {
-	ID string    `json:"id"`
 	TS time.Time `json:"ts"`
+	ID string    `json:"id"`
 }
 
 // CreatePongPacket returns a NetPacket which declares a PongPacket with

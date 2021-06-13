@@ -12,14 +12,14 @@ type IndexedObjects [][][]*ObjectLookupRecord
 
 // ObjectLookupRecord is a representation of a row from objectLookups.txt
 type ObjectLookupRecord struct {
-	Act           int
-	Type          d2enum.ObjectType
-	Id            int //nolint:golint,stylecheck // ID is the right key
+	S4            string
+	ColorMap      string
+	S8            string
 	Name          string
 	Description   string
-	ObjectsTxtId  int //nolint:golint,stylecheck // ID is the right key
-	MonstatsTxtId int //nolint:golint,stylecheck // ID is the right key
-	Direction     int
+	S7            string
+	S6            string
+	S5            string
 	Base          string
 	Token         string
 	Mode          string
@@ -35,11 +35,11 @@ type ObjectLookupRecord struct {
 	S1            string
 	S2            string
 	S3            string
-	S4            string
-	S5            string
-	S6            string
-	S7            string
-	S8            string
-	ColorMap      string
+	Act           int
+	Direction     int
+	MonstatsTxtID int
+	ObjectsTxtID  int
+	ID            int
+	Type          d2enum.ObjectType
 	Index         int
 }

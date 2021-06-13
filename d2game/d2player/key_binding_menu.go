@@ -106,28 +106,24 @@ func NewKeyBindingMenu(
 // KeyBindingMenu represents the menu to view/edit the
 // key bindings
 type KeyBindingMenu struct {
+	renderer             d2interface.Renderer
+	currentBindingLayout *bindingLayout
+	asset                *d2asset.AssetManager
+	ui                   *d2ui.UIManager
+	guiManager           *d2gui.GuiManager
+	keyMap               *KeyMap
+	escapeMenu           *EscapeMenu
+	mainLayout           *d2gui.Layout
+	contentLayout        *d2gui.Layout
+	scrollbar            *d2gui.LayoutScrollbar
+	lastBindingLayout    *bindingLayout
+	changesToBeSaved     map[d2enum.GameEvent]*bindingChange
 	*d2gui.Box
-
-	asset      *d2asset.AssetManager
-	renderer   d2interface.Renderer
-	ui         *d2ui.UIManager
-	guiManager *d2gui.GuiManager
-	keyMap     *KeyMap
-	escapeMenu *EscapeMenu
-
-	mainLayout       *d2gui.Layout
-	contentLayout    *d2gui.Layout
-	scrollbar        *d2gui.LayoutScrollbar
-	bindingLayouts   []*bindingLayout
-	changesToBeSaved map[d2enum.GameEvent]*bindingChange
-
-	isAwaitingKeyDown          bool
+	*d2util.Logger
+	bindingLayouts             []*bindingLayout
 	currentBindingModifierType KeyBindingType
 	currentBindingModifier     d2enum.GameEvent
-	currentBindingLayout       *bindingLayout
-	lastBindingLayout          *bindingLayout
-
-	*d2util.Logger
+	isAwaitingKeyDown          bool
 }
 
 // Close will disable the render of the menu and clear

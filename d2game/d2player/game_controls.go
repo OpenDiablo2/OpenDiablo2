@@ -266,34 +266,33 @@ func NewGameControls(
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
-	keyMap                 *KeyMap
+	renderer       d2interface.Renderer
+	inputListener  inputCallbackListener
+	leftMenuRect   *d2geom.Rectangle
+	asset          *d2asset.AssetManager
+	rightMenuRect  *d2geom.Rectangle
+	hero           *d2mapentity.Player
+	heroState      *d2hero.HeroStateFactory
+	mapRenderer    *d2maprenderer.MapRenderer
+	escapeMenu     *EscapeMenu
+	ui             *d2ui.UIManager
+	inventory      *Inventory
+	hud            *HUD
+	skilltree      *skillTree
+	heroStatsPanel *HeroStatsPanel
+	PartyPanel     *PartyPanel
+	questLog       *QuestLog
+	HelpOverlay    *HelpOverlay
+	bottomMenuRect *d2geom.Rectangle
+	keyMap         *KeyMap
+	*d2util.Logger
 	actionableRegions      []actionableRegion
-	asset                  *d2asset.AssetManager
-	renderer               d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
-	inputListener          inputCallbackListener
-	hero                   *d2mapentity.Player
-	heroState              *d2hero.HeroStateFactory
-	mapRenderer            *d2maprenderer.MapRenderer
-	escapeMenu             *EscapeMenu
-	ui                     *d2ui.UIManager
-	inventory              *Inventory
-	hud                    *HUD
-	skilltree              *skillTree
-	heroStatsPanel         *HeroStatsPanel
-	PartyPanel             *PartyPanel
-	questLog               *QuestLog
-	HelpOverlay            *HelpOverlay
-	bottomMenuRect         *d2geom.Rectangle
-	leftMenuRect           *d2geom.Rectangle
-	rightMenuRect          *d2geom.Rectangle
-	lastMouseX             int
 	lastMouseY             int
 	lastLeftBtnActionTime  float64
 	lastRightBtnActionTime float64
+	lastMouseX             int
 	FreeCam                bool
 	isSinglePlayer         bool
-
-	*d2util.Logger
 }
 
 type actionableType int
@@ -307,9 +306,9 @@ type actionableRegion struct {
 // SkillResourcePath points to a DC6 resource which contains the icons of multiple skills as frames.
 // The IconNumber is the frame at which we can find our skill sprite in the DC6 file.
 type SkillResource struct {
-	SkillResourcePath string // path to a skills DC6 file(see getSkillResourceByClass)
-	IconNumber        int    // the index of the frame in the DC6 file
 	SkillIcon         *d2ui.Sprite
+	SkillResourcePath string
+	IconNumber        int
 }
 
 // OnKeyRepeat is called to handle repeated key presses

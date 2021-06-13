@@ -62,20 +62,19 @@ const (
 
 // AssetManager loads files and game objects
 type AssetManager struct {
+	fonts      d2interface.Cache
+	transforms d2interface.Cache
+	palettes   d2interface.Cache
+	dt1s       d2interface.Cache
+	ds1s       d2interface.Cache
+	cofs       d2interface.Cache
+	dccs       d2interface.Cache
+	animations d2interface.Cache
 	*d2util.Logger
+	Records *d2records.RecordManager
 	*d2loader.Loader
-
-	tables           []d2tbl.TextDictionary
-	dt1s             d2interface.Cache
-	ds1s             d2interface.Cache
-	cofs             d2interface.Cache
-	dccs             d2interface.Cache
-	animations       d2interface.Cache
-	fonts            d2interface.Cache
-	palettes         d2interface.Cache
-	transforms       d2interface.Cache
-	Records          *d2records.RecordManager
 	language         string
+	tables           []d2tbl.TextDictionary
 	languageModifier int
 }
 

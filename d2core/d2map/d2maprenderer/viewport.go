@@ -26,11 +26,11 @@ const (
 
 // Viewport is used for converting vectors between screen (pixel), orthogonal (Camera) and world (isometric) space.
 type Viewport struct {
+	camera            *Camera
+	transStack        []worldTrans
 	defaultScreenRect d2geom.Rectangle
 	screenRect        d2geom.Rectangle
-	transStack        []worldTrans
 	transCurrent      worldTrans
-	camera            *Camera
 	align             int
 }
 

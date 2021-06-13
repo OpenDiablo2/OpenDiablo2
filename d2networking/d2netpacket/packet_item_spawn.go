@@ -8,9 +8,9 @@ import (
 
 // SpawnItemPacket contains the data required to create a Item entity
 type SpawnItemPacket struct {
+	Codes []string `json:"codes"`
 	X     int      `json:"x"`
 	Y     int      `json:"y"`
-	Codes []string `json:"codes"`
 }
 
 // CreateSpawnItemPacket returns a NetPacket which declares a

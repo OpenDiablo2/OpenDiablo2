@@ -21,9 +21,9 @@ const (
 
 // AnimationData is a representation of the binary data from `data/global/AnimData.d2`
 type AnimationData struct {
-	hashTable
 	blocks  [numBlocks]*block
 	entries map[string][]*AnimationDataRecord
+	hashTable
 }
 
 // GetRecordNames returns a slice of all record name strings
@@ -179,10 +179,10 @@ func Load(data []byte) (*AnimationData, error) {
 			}
 
 			r := &AnimationDataRecord{
-				name,
-				frames,
-				speed,
-				events,
+				name:               name,
+				framesPerDirection: frames,
+				speed:              speed,
+				events:             events,
 			}
 
 			records[recordIdx] = r
@@ -195,8 +195,8 @@ func Load(data []byte) (*AnimationData, error) {
 		}
 
 		b := &block{
-			recordCount,
-			records,
+			recordCount: recordCount,
+			records:     records,
 		}
 
 		animdata.blocks[blockIdx] = b
@@ -232,7 +232,7 @@ func (ad *AnimationData) Marshal() []byte {
 	recordIdx := 0
 
 	// numberOfEntries is a number of entries in all map indexes
-	var numberOfEntries = 0
+	numberOfEntries := 0
 
 	for i := 0; i < len(keys); i++ {
 		numberOfEntries += len(ad.entries[keys[i]])

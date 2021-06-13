@@ -16,7 +16,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	for d.Next() {
 		record := &MissileRecord{
 			Name: d.String("Missile"),
-			Id:   d.Number("Id"),
+			ID:   d.Number("Id"),
 
 			ClientMovementFunc:  d.Number("pCltDoFunc"),
 			ClientCollisionFunc: d.Number("pCltHitFunc"),
@@ -29,24 +29,24 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				Desc: "*srv calc 1 desc",
 				Params: []MissileCalcParam{
 					{
-						d.Number("Param1"),
 						d.String("*param1 desc"),
+						d.Number("Param1"),
 					},
 					{
-						d.Number("Param2"),
 						d.String("*param2 desc"),
+						d.Number("Param2"),
 					},
 					{
-						d.Number("Param3"),
 						d.String("*param3 desc"),
+						d.Number("Param3"),
 					},
 					{
-						d.Number("Param4"),
 						d.String("*param4 desc"),
+						d.Number("Param4"),
 					},
 					{
-						d.Number("Param5"),
 						d.String("*param5 desc"),
+						d.Number("Param5"),
 					},
 				},
 			},
@@ -56,24 +56,24 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				Desc: "*client calc 1 desc",
 				Params: []MissileCalcParam{
 					{
-						d.Number("CltParam1"),
 						d.String("*client param1 desc"),
+						d.Number("CltParam1"),
 					},
 					{
-						d.Number("CltParam2"),
 						d.String("*client param2 desc"),
+						d.Number("CltParam2"),
 					},
 					{
-						d.Number("CltParam3"),
 						d.String("*client param3 desc"),
+						d.Number("CltParam3"),
 					},
 					{
-						d.Number("CltParam4"),
 						d.String("*client param4 desc"),
+						d.Number("CltParam4"),
 					},
 					{
-						d.Number("CltParam5"),
 						d.String("*client param5 desc"),
+						d.Number("CltParam5"),
 					},
 				},
 			},
@@ -83,16 +83,16 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				Desc: "*server hit calc 1 desc",
 				Params: []MissileCalcParam{
 					{
-						d.Number("sHitPar1"),
 						d.String("*server hit param1 desc"),
+						d.Number("sHitPar1"),
 					},
 					{
-						d.Number("sHitPar2"),
 						d.String("*server hit param2 desc"),
+						d.Number("sHitPar2"),
 					},
 					{
-						d.Number("sHitPar3"),
 						d.String("*server hit param3 desc"),
+						d.Number("sHitPar3"),
 					},
 				},
 			},
@@ -102,16 +102,16 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				Desc: "*client hit calc 1 desc",
 				Params: []MissileCalcParam{
 					{
-						d.Number("cHitPar1"),
 						d.String("*client hit param1 desc"),
+						d.Number("cHitPar1"),
 					},
 					{
-						d.Number("cHitPar2"),
 						d.String("*client hit param2 desc"),
+						d.Number("cHitPar2"),
 					},
 					{
-						d.Number("cHitPar3"),
 						d.String("*client hit param3 desc"),
+						d.Number("cHitPar3"),
 					},
 				},
 			},
@@ -121,12 +121,12 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				Desc: "*damage calc 1",
 				Params: []MissileCalcParam{
 					{
-						d.Number("dParam1"),
 						d.String("*damage param1 desc"),
+						d.Number("dParam1"),
 					},
 					{
-						d.Number("dParam2"),
 						d.String("*damage param2 desc"),
+						d.Number("dParam2"),
 					},
 				},
 			},
@@ -296,7 +296,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			},
 		}
 
-		records[record.Id] = record
+		records[record.ID] = record
 		r.missilesByName[sanitizeMissilesKey(record.Name)] = record
 	}
 

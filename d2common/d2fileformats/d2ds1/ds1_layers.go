@@ -37,11 +37,12 @@ func (l LayerGroupType) String() string {
 type layerGroup []*Layer
 
 type ds1Layers struct {
-	width, height int
 	Floors        layerGroup
 	Walls         layerGroup
 	Shadows       layerGroup
 	Substitutions layerGroup
+	width         int
+	height        int
 }
 
 func (l *ds1Layers) ensureInit() {

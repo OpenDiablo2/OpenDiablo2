@@ -57,17 +57,15 @@ var _ widget = &Layout{}
 // Layout is a gui element container which will automatically position/align gui elements.
 // Layouts are gui elements as well, so they can be nested in other layouts.
 type Layout struct {
-	widgetBase
-
 	renderer     d2interface.Renderer
 	assetManager *d2asset.AssetManager
-
+	entries      []*layoutEntry
+	widgetBase
 	width           int
 	height          int
 	verticalAlign   VerticalAlign
 	horizontalAlign HorizontalAlign
 	positionType    PositionType
-	entries         []*layoutEntry
 }
 
 // CreateLayout creates a new  GUI layout

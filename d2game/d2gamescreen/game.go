@@ -103,28 +103,26 @@ func CreateGame(
 
 // Game represents the Gameplay screen
 type Game struct {
+	terminal      d2interface.Terminal
+	inputManager  d2interface.InputManager
+	renderer      d2interface.Renderer
+	audioProvider d2interface.AudioProvider
 	*d2mapentity.MapEntityFactory
-	asset                *d2asset.AssetManager
-	gameClient           *d2client.GameClient
-	mapRenderer          *d2maprenderer.MapRenderer
+	gameControls *d2player.GameControls
+	localPlayer  *d2mapentity.Player
+	*d2util.Logger
 	uiManager            *d2ui.UIManager
-	gameControls         *d2player.GameControls
-	localPlayer          *d2mapentity.Player
-	lastRegionType       d2enum.RegionIdType
-	ticksSinceLevelCheck float64
 	escapeMenu           *d2player.EscapeMenu
 	soundEngine          *d2audio.SoundEngine
-	soundEnv             d2audio.SoundEnvironment
+	mapRenderer          *d2maprenderer.MapRenderer
 	guiManager           *d2gui.GuiManager
 	keyMap               *d2player.KeyMap
-
-	renderer      d2interface.Renderer
-	inputManager  d2interface.InputManager
-	audioProvider d2interface.AudioProvider
-	terminal      d2interface.Terminal
-
-	*d2util.Logger
-	logLevel d2util.LogLevel
+	gameClient           *d2client.GameClient
+	asset                *d2asset.AssetManager
+	soundEnv             d2audio.SoundEnvironment
+	ticksSinceLevelCheck float64
+	lastRegionType       d2enum.RegionIdType
+	logLevel             d2util.LogLevel
 }
 
 // OnLoad loads the resources for the Gameplay screen
@@ -132,16 +130,20 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
 
 	commands := []struct {
+		fn   func([]string) error
 		name string
 		desc string
 		args []string
-		fn   func([]string) error
 	}{
-		{"spawnitem", "spawns an item at the local player position",
-			[]string{"code1", "code2", "code3", "code4", "code5"}, v.commandSpawnItem},
-		{"spawnitemat", "spawns an item at the x,y coordinates",
-			[]string{"x", "y", "code1", "code2", "code3", "code4", "code5"}, v.commandSpawnItemAt},
-		{"spawnmon", "spawn monster at the local player position", []string{"name"}, v.commandSpawnMon},
+		{
+			v.commandSpawnItem, "spawnitem", "spawns an item at the local player position",
+			[]string{"code1", "code2", "code3", "code4", "code5"},
+		},
+		{
+			v.commandSpawnItemAt, "spawnitemat", "spawns an item at the x,y coordinates",
+			[]string{"x", "y", "code1", "code2", "code3", "code4", "code5"},
+		},
+		{v.commandSpawnMon, "spawnmon", "spawn monster at the local player position", []string{"name"}},
 	}
 
 	for _, cmd := range commands {

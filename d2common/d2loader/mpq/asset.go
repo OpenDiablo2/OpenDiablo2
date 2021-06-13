@@ -19,9 +19,9 @@ var _ asset.Asset = &Asset{}
 // Asset represents a file record within an MPQ archive
 type Asset struct {
 	stream d2interface.DataStream
-	data   []byte
-	path   string
 	source *Source
+	path   string
+	data   []byte
 }
 
 // Type returns the asset type

@@ -24,9 +24,9 @@ const (
 )
 
 type miniPanelContent struct {
-	buttonType d2ui.ButtonType
 	onActivate func()
 	tooltip    string
+	buttonType d2ui.ButtonType
 }
 
 type miniPanelActions struct {
@@ -59,23 +59,22 @@ func newMiniPanel(asset *d2asset.AssetManager,
 }
 
 type miniPanel struct {
-	ui               *d2ui.UIManager
+	panelGroup       *d2ui.WidgetGroup
 	asset            *d2asset.AssetManager
 	container        *d2ui.Sprite
 	sprite           *d2ui.Sprite
 	menuButton       *d2ui.Button
 	miniPanelTooltip *d2ui.Tooltip
-	isOpen           bool
-	tempIsOpen       bool
-	disabled         bool
-	isSinglePlayer   bool
-	movedLeft        bool
-	movedRight       bool
-	panelGroup       *d2ui.WidgetGroup
-	groupAlwaysVis   *d2ui.WidgetGroup
 	tooltipGroup     *d2ui.WidgetGroup
-
+	groupAlwaysVis   *d2ui.WidgetGroup
+	ui               *d2ui.UIManager
 	*d2util.Logger
+	movedLeft      bool
+	movedRight     bool
+	isSinglePlayer bool
+	tempIsOpen     bool
+	isOpen         bool
+	disabled       bool
 }
 
 func (m *miniPanel) load(actions *miniPanelActions) {
@@ -141,17 +140,20 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 	// nolint:golint,gomnd // divide by 2 does not need a magic number
 	x, y = screenWidth/2+buttonOffsetX, screenHeight+buttonOffsetY-buttonHeight
 	buttonsFirst := []miniPanelContent{
-		{d2ui.ButtonTypeMinipanelCharacter,
+		{
 			actions.characterToggle,
 			m.asset.TranslateString("minipanelchar"),
+			d2ui.ButtonTypeMinipanelCharacter,
 		},
-		{d2ui.ButtonTypeMinipanelInventory,
+		{
 			actions.inventoryToggle,
 			m.asset.TranslateString("minipanelinv"),
+			d2ui.ButtonTypeMinipanelInventory,
 		},
-		{d2ui.ButtonTypeMinipanelSkill,
+		{
 			actions.skilltreeToggle,
 			m.asset.TranslateString("minipaneltree"),
+			d2ui.ButtonTypeMinipanelSkill,
 		},
 	}
 
@@ -163,9 +165,10 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 	idxOffset := len(buttonsFirst)
 
 	if !m.isSinglePlayer {
-		partyContent := miniPanelContent{d2ui.ButtonTypeMinipanelParty,
+		partyContent := miniPanelContent{
 			actions.partyToggle,
 			m.asset.TranslateString("minipanelparty"),
+			d2ui.ButtonTypeMinipanelParty,
 		}
 
 		// nolint:gomnd // party buton is 3 in order
@@ -175,21 +178,25 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 	}
 
 	buttonsLast := []miniPanelContent{
-		{d2ui.ButtonTypeMinipanelAutomap,
+		{
 			actions.automapToggle,
 			m.asset.TranslateString("minipanelautomap"),
+			d2ui.ButtonTypeMinipanelAutomap,
 		},
-		{d2ui.ButtonTypeMinipanelMessage,
+		{
 			actions.messageToggle,
 			m.asset.TranslateString("minipanelmessage"),
+			d2ui.ButtonTypeMinipanelMessage,
 		},
-		{d2ui.ButtonTypeMinipanelQuest,
+		{
 			actions.questToggle,
 			m.asset.TranslateString("minipanelquest"),
+			d2ui.ButtonTypeMinipanelQuest,
 		},
-		{d2ui.ButtonTypeMinipanelMen,
+		{
 			actions.menuToggle,
 			m.asset.TranslateString("minipanelmenubtn"),
+			d2ui.ButtonTypeMinipanelMen,
 		},
 	}
 

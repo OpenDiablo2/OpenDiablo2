@@ -99,26 +99,21 @@ func NewEscapeMenu(navigator d2interface.Navigator,
 
 // EscapeMenu represents the in-game menu that shows up when the esc key is pressed
 type EscapeMenu struct {
-	isOpen        bool
+	renderer      d2interface.Renderer
 	selectSound   d2interface.SoundEffect
-	currentLayout layoutID
-
-	// leftPent and rightPent are generated once and shared between the layouts
-	leftPent  *d2gui.AnimatedSprite
-	rightPent *d2gui.AnimatedSprite
-	layouts   map[layoutID]*layout
-
-	renderer       d2interface.Renderer
-	audioProvider  d2interface.AudioProvider
-	navigator      d2interface.Navigator
+	navigator     d2interface.Navigator
+	audioProvider d2interface.AudioProvider
+	*d2util.Logger
+	layouts        map[layoutID]*layout
+	rightPent      *d2gui.AnimatedSprite
+	leftPent       *d2gui.AnimatedSprite
+	onCloseCb      func()
 	guiManager     *d2gui.GuiManager
 	assetManager   *d2asset.AssetManager
 	keyMap         *KeyMap
 	keyBindingMenu *KeyBindingMenu
-
-	onCloseCb func()
-
-	*d2util.Logger
+	currentLayout  layoutID
+	isOpen         bool
 }
 
 type layout struct {
@@ -137,8 +132,8 @@ func (l *layout) Trigger() {
 
 type showLayoutLabel struct {
 	*d2gui.Label
-	target     layoutID
 	showLayout func(id layoutID)
+	target     layoutID
 }
 
 func (l *showLayoutLabel) Trigger() {
@@ -148,12 +143,12 @@ func (l *showLayoutLabel) Trigger() {
 type enumLabel struct {
 	*d2gui.Layout
 	textChangingLabel *d2gui.Label
-	optionID          optionID
-	values            []string
-	current           int
 	playSound         func()
 	updateValue       func(optID optionID, value string)
 	*EscapeMenu
+	values   []string
+	optionID optionID
+	current  int
 }
 
 func (l *enumLabel) Trigger() {

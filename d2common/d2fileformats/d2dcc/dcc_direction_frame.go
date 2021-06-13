@@ -9,13 +9,13 @@ import (
 
 // DCCDirectionFrame represents a direction frame for a DCC.
 type DCCDirectionFrame struct {
-	Box                   d2geom.Rectangle
 	Cells                 []DCCCell
 	PixelData             []byte
-	Width                 int
+	Box                   d2geom.Rectangle
+	YOffset               int
 	Height                int
 	XOffset               int
-	YOffset               int
+	Width                 int
 	NumberOfOptionalBytes int
 	NumberOfCodedBytes    int
 	HorizontalCellCount   int

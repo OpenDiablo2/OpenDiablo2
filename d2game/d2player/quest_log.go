@@ -144,29 +144,26 @@ func NewQuestLog(asset *d2asset.AssetManager,
 
 // QuestLog represents the quest log
 type QuestLog struct {
-	asset         *d2asset.AssetManager
+	tab           [d2enum.ActsNumber]questLogTab
+	quests        [d2enum.ActsNumber]*questEntire
+	audioProvider d2interface.AudioProvider
+	completeSound d2interface.SoundEffect
 	uiManager     *d2ui.UIManager
+	questStatus   map[int]int
+	questName     *d2ui.Label
+	questDescr    *d2ui.Label
 	panel         *d2ui.Sprite
 	onCloseCb     func()
 	panelGroup    *d2ui.WidgetGroup
-	selectedTab   int
-	selectedQuest int
-	act           int
-	tab           [d2enum.ActsNumber]questLogTab
-	audioProvider d2interface.AudioProvider
-	completeSound d2interface.SoundEffect
-
-	questName     *d2ui.Label
-	questDescr    *d2ui.Label
-	quests        [d2enum.ActsNumber]*questEntire
-	questStatus   map[int]int
-	maxPlayersAct int
-
-	originX int
-	originY int
-	isOpen  bool
-
+	asset         *d2asset.AssetManager
 	*d2util.Logger
+	act           int
+	selectedTab   int
+	maxPlayersAct int
+	originX       int
+	originY       int
+	selectedQuest int
+	isOpen        bool
 }
 
 type questEntire struct {

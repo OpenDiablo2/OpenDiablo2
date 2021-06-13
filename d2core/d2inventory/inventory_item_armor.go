@@ -6,13 +6,13 @@ import (
 
 // InventoryItemArmor stores the info of an armor item in the inventory
 type InventoryItemArmor struct {
-	InventorySizeX int    `json:"inventorySizeX"`
+	ArmorClass     string `json:"armorClass"`
+	ItemName       string `json:"itemName"`
+	ItemCode       string `json:"itemCode"`
 	InventorySizeY int    `json:"inventorySizeY"`
 	InventorySlotX int    `json:"inventorySlotX"`
 	InventorySlotY int    `json:"inventorySlotY"`
-	ItemName       string `json:"itemName"`
-	ItemCode       string `json:"itemCode"`
-	ArmorClass     string `json:"armorClass"`
+	InventorySizeX int    `json:"inventorySizeX"`
 }
 
 // GetArmorClass returns the class of the armor

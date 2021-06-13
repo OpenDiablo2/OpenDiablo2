@@ -16,10 +16,10 @@ import (
 
 // Stream represents a stream of data in an MPQ archive
 type Stream struct {
-	Data      []byte
-	Positions []uint32
 	MPQ       *MPQ
 	Block     *Block
+	Data      []byte
+	Positions []uint32
 	Index     uint32
 	Size      uint32
 	Position  uint32

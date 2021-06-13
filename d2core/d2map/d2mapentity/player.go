@@ -13,24 +13,24 @@ import (
 
 // Player is the player character entity.
 type Player struct {
-	mapEntity
-	name              string
-	animationMode     string
-	composite         *d2asset.Composite
-	Equipment         *d2inventory.CharacterEquipment
-	Stats             *d2hero.HeroStatsState
 	Skills            map[int]*d2hero.HeroSkill
 	LeftSkill         *d2hero.HeroSkill
 	RightSkill        *d2hero.HeroSkill
-	Class             d2enum.Hero
-	Gold              int
-	lastPathSize      int
-	isInTown          bool
-	isRunToggled      bool
-	isRunning         bool
-	isCasting         bool
+	composite         *d2asset.Composite
+	Equipment         *d2inventory.CharacterEquipment
+	Stats             *d2hero.HeroStatsState
 	onFinishedCasting func()
-	Act               int
+	name              string
+	animationMode     string
+	mapEntity
+	Gold         int
+	lastPathSize int
+	Class        d2enum.Hero
+	Act          int
+	isRunToggled bool
+	isRunning    bool
+	isCasting    bool
+	isInTown     bool
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.

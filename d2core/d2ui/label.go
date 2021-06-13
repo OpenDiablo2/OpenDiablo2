@@ -16,14 +16,13 @@ var _ Widget = &Label{}
 
 // Label represents a user interface label
 type Label struct {
-	*BaseWidget
-	text            string
-	Alignment       HorizontalAlign
-	font            *d2font.Font
-	Color           map[int]color.Color
 	backgroundColor color.Color
-
+	*BaseWidget
+	font  *d2font.Font
+	Color map[int]color.Color
 	*d2util.Logger
+	text      string
+	Alignment HorizontalAlign
 }
 
 // NewLabel creates a new instance of a UI label

@@ -58,14 +58,14 @@ type BinkAudioTrack struct {
 
 // BinkDecoder represents the bink decoder
 type BinkDecoder struct {
+	streamReader          *d2datautils.StreamReader
 	AudioTracks           []BinkAudioTrack
 	FrameIndexTable       []uint32
-	streamReader          *d2datautils.StreamReader
-	fileSize              uint32
+	VideoHeight           uint32
 	numberOfFrames        uint32
 	largestFrameSizeBytes uint32
 	VideoWidth            uint32
-	VideoHeight           uint32
+	fileSize              uint32
 	FPS                   uint32
 	FrameTimeMS           uint32
 	VideoMode             BinkVideoMode
@@ -73,9 +73,6 @@ type BinkDecoder struct {
 	videoCodecRevision    byte
 	HasAlphaPlane         bool
 	Grayscale             bool
-
-	// Mask bit 0, as this is defined as a keyframe
-
 }
 
 // CreateBinkDecoder returns a new instance of the bink decoder

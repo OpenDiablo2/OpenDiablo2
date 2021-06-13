@@ -49,23 +49,24 @@ const (
 // Box takes a content layout and wraps in
 // a box
 type Box struct {
+	sfc           d2interface.Surface
 	renderer      d2interface.Renderer
 	asset         *d2asset.AssetManager
-	sprites       []*d2ui.Sprite
 	uiManager     *d2ui.UIManager
 	layout        *Layout
 	contentLayout *Layout
-	Options       []*LabelButton
-	sfc           d2interface.Surface
-
-	x, y               int
-	paddingX, paddingY int
-	width, height      int
-	disableBorder      bool
-	isOpen             bool
-	title              string
-
 	*d2util.Logger
+	title         string
+	Options       []*LabelButton
+	sprites       []*d2ui.Sprite
+	x             int
+	paddingY      int
+	width         int
+	height        int
+	paddingX      int
+	y             int
+	disableBorder bool
+	isOpen        bool
 }
 
 // NewBox return a new Box instance

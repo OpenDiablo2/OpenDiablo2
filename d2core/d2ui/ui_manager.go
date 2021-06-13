@@ -13,21 +13,20 @@ import (
 
 // UIManager manages a collection of UI elements (buttons, textboxes, labels)
 type UIManager struct {
-	asset            *d2asset.AssetManager
-	renderer         d2interface.Renderer
-	inputManager     d2interface.InputManager
-	audio            d2interface.AudioProvider
-	widgets          []Widget
-	tooltips         []*Tooltip
+	renderer      d2interface.Renderer
+	inputManager  d2interface.InputManager
+	audio         d2interface.AudioProvider
+	clickSfx      d2interface.SoundEffect
+	pressedWidget ClickableWidget
+	asset         *d2asset.AssetManager
+	*d2util.Logger
 	widgetsGroups    []*WidgetGroup
+	tooltips         []*Tooltip
+	widgets          []Widget
 	clickableWidgets []ClickableWidget
-	cursorButtons    CursorButton
 	CursorX          int
 	CursorY          int
-	pressedWidget    ClickableWidget
-	clickSfx         d2interface.SoundEffect
-
-	*d2util.Logger
+	cursorButtons    CursorButton
 }
 
 // Note: methods for creating buttons and stuff are in their respective files

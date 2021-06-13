@@ -17,13 +17,12 @@ type MonsterProperties map[string]*MonPropRecord
 
 // MonPropRecord is a representation of a single row of monprop.txt
 type MonPropRecord struct {
-	ID string
-
 	Properties struct {
 		Normal    [numMonProps]*MonProp
 		Nightmare [numMonProps]*MonProp
 		Hell      [numMonProps]*MonProp
 	}
+	ID string
 }
 
 // MonProp is a monster property

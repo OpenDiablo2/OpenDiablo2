@@ -13,9 +13,9 @@ import (
 
 // TCPClientConnection represents a client connection over TCP
 type TCPClientConnection struct {
-	id            string
 	tcpConnection net.Conn
 	playerState   *d2hero.HeroState
+	id            string
 }
 
 // CreateTCPClientConnection creates a new tcp client connection instance

@@ -34,10 +34,10 @@ type colorMCacheEntry struct {
 
 type ebitenSurface struct {
 	renderer       *Renderer
-	stateStack     []surfaceState
-	stateCurrent   surfaceState
 	image          *ebiten.Image
 	colorMCache    map[colorMCacheKey]*colorMCacheEntry
+	stateStack     []surfaceState
+	stateCurrent   surfaceState
 	monotonicClock int64
 }
 

@@ -20,14 +20,14 @@ const (
 // Composite is a composite entity animation
 type Composite struct {
 	*AssetManager
-	baseType    d2enum.ObjectType
-	basePath    string
-	token       string
-	palettePath string
-	direction   int
-	equipment   [d2enum.CompositeTypeMax]string
 	mode        *compositeMode
 	size        *size
+	equipment   [d2enum.CompositeTypeMax]string
+	token       string
+	palettePath string
+	basePath    string
+	direction   int
+	baseType    d2enum.ObjectType
 }
 
 type size struct {
@@ -241,13 +241,11 @@ type animationMode interface {
 }
 
 type compositeMode struct {
-	cof           *d2cof.COF
-	animationMode animationMode
-	weaponClass   string
-	playedCount   int
-
-	layers []d2interface.Animation
-
+	animationMode  animationMode
+	cof            *d2cof.COF
+	weaponClass    string
+	layers         []d2interface.Animation
+	playedCount    int
 	frameCount     int
 	frameIndex     int
 	animationSpeed float64

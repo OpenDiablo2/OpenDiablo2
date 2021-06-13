@@ -10,22 +10,22 @@ import (
 
 func (a *App) initTerminalCommands() {
 	terminalCommands := []struct {
+		fn   func(args []string) error
 		name string
 		desc string
 		args []string
-		fn   func(args []string) error
 	}{
-		{"dumpheap", "dumps the heap to pprof/heap.pprof", nil, a.dumpHeap},
-		{"fullscreen", "toggles fullscreen", nil, a.toggleFullScreen},
-		{"capframe", "captures a still frame", []string{"filename"}, a.setupCaptureFrame},
-		{"capgifstart", "captures an animation (start)", []string{"filename"}, a.startAnimationCapture},
-		{"capgifstop", "captures an animation (stop)", nil, a.stopAnimationCapture},
-		{"vsync", "toggles vsync", nil, a.toggleVsync},
-		{"fps", "toggle fps counter", nil, a.toggleFpsCounter},
-		{"timescale", "set scalar for elapsed time", []string{"float"}, a.setTimeScale},
-		{"quit", "exits the game", nil, a.quitGame},
-		{"screen-gui", "enters the gui playground screen", nil, a.enterGuiPlayground},
-		{"js", "eval JS scripts", []string{"code"}, a.evalJS},
+		{a.dumpHeap, "dumpheap", "dumps the heap to pprof/heap.pprof", nil},
+		{a.toggleFullScreen, "fullscreen", "toggles fullscreen", nil},
+		{a.setupCaptureFrame, "capframe", "captures a still frame", []string{"filename"}},
+		{a.startAnimationCapture, "capgifstart", "captures an animation (start)", []string{"filename"}},
+		{a.stopAnimationCapture, "capgifstop", "captures an animation (stop)", nil},
+		{a.toggleVsync, "vsync", "toggles vsync", nil},
+		{a.toggleFpsCounter, "fps", "toggle fps counter", nil},
+		{a.setTimeScale, "timescale", "set scalar for elapsed time", []string{"float"}},
+		{a.quitGame, "quit", "exits the game", nil},
+		{a.enterGuiPlayground, "screen-gui", "enters the gui playground screen", nil},
+		{a.evalJS, "js", "eval JS scripts", []string{"code"}},
 	}
 
 	for _, cmd := range terminalCommands {
@@ -37,7 +37,7 @@ func (a *App) initTerminalCommands() {
 
 func (a *App) dumpHeap([]string) error {
 	if _, err := os.Stat("./pprof/"); os.IsNotExist(err) {
-		if err := os.Mkdir("./pprof/", 0750); err != nil {
+		if err := os.Mkdir("./pprof/", 0o750); err != nil {
 			a.Fatal(err.Error())
 		}
 	}

@@ -6,12 +6,12 @@ import (
 
 // InventoryItemMisc stores the info of an miscellaneous item in the inventory
 type InventoryItemMisc struct {
+	ItemName       string `json:"itemName"`
+	ItemCode       string `json:"itemCode"`
 	InventorySizeX int    `json:"inventorySizeX"`
 	InventorySizeY int    `json:"inventorySizeY"`
 	InventorySlotX int    `json:"inventorySlotX"`
 	InventorySlotY int    `json:"inventorySlotY"`
-	ItemName       string `json:"itemName"`
-	ItemCode       string `json:"itemCode"`
 }
 
 // InventoryItemName returns the name of the miscellaneous item

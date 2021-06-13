@@ -21,9 +21,9 @@ const (
 // when it is visible.
 type UIFrame struct {
 	*BaseWidget
-	frame            *Sprite
-	frameOrientation frameOrientation
+	frame *Sprite
 	*d2util.Logger
+	frameOrientation frameOrientation
 }
 
 // frame indices into dc6 images for panels

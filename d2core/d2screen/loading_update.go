@@ -3,8 +3,8 @@ package d2screen
 const progressCompleted = 1.0
 
 type loadingUpdate struct {
-	progress float64
 	err      error
+	progress float64
 	done     bool
 }
 

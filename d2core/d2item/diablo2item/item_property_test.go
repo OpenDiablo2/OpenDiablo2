@@ -443,122 +443,122 @@ func TestNewProperty(t *testing.T) { //nolint:funlen // it's mostly test-case de
 	tests := []struct {
 		propKey        string
 		inputValues    []int
-		expectNumStats int
 		expectStr      []string
+		expectNumStats int
 	}{
 		{ // fnId 1 + 3
 			"allstats",
 			[]int{1, 10},
-			4,
 			[]string{
 				"+# to Strength",
 				"+# to Dexterity",
 				"+# to Vitality",
 				"+# to Energy",
 			},
+			4,
 		},
 		{ // fnId 2
 			"ac%",
 			[]int{1, 10},
-			1,
 			[]string{"+#% Enhanced Defense"},
+			1,
 		},
 		{ // fnId 5
 			// dmg-min, dmg-max, dmg%, indestructable, and ethereal dont have stats!
 			"dmg-min",
 			[]int{1, 10},
-			0,
 			[]string{""},
+			0,
 		},
 		{ // fnId 6
 			// dmg-min, dmg-max, dmg%, indestructable, and ethereal dont have stats!
 			"dmg-max",
 			[]int{1, 10},
-			0,
 			[]string{""},
+			0,
 		},
 		{ // fnId 7
 			// dmg-min, dmg-max, dmg%, indestructable, and ethereal dont have stats!
 			"dmg%",
 			[]int{1, 10},
-			0,
 			[]string{""},
+			0,
 		},
 		{ // fnId 8
 			"cast1",
 			[]int{1, 10},
-			1,
 			[]string{"+#% Faster Cast Rate"},
+			1,
 		},
 		{
 			"indestruct",
 			[]int{0, 1},
-			0,
 			[]string{""},
+			0,
 		},
 		{
 			"ethereal",
 			[]int{0, 1},
-			0,
 			[]string{""},
+			0,
 		},
 		{ // fnId 10
 			"skilltab",
 			[]int{10, 1, 3},
-			1,
 			[]string{"+# to Offensive Auras (Paladin Only)"},
+			1,
 		},
 		{ // fnId 11
 			"levelup-skill",
 			[]int{64, 100, 3},
-			1,
 			[]string{"#% Chance to cast level # Frozen Orb when you Level-Up"},
+			1,
 		},
 		{ // fnId 12
 			"skill-rand",
 			[]int{10, 64, 64},
-			1,
 			[]string{"+# to Frozen Orb"},
+			1,
 		},
 		{ // fnId 13
 			"dur%",
 			[]int{1, 10},
-			1,
 			[]string{"Increase Maximum Durability +#%"},
+			1,
 		},
 		{ // fnId 14
 			"sock",
 			[]int{0, 6},
-			1,
 			[]string{""},
+			1,
 		},
 		{ // fnId 15, 16, 17
 			"dmg-pois",
 			[]int{100, 5, 10},
-			3,
 			[]string{
 				"+# to Minimum Poison Damage",
 				"+# to Maximum Poison Damage",
 				"", // length, non-printing
 			},
+			3,
 		},
 		{ // fnId 19
 			"charged",
 			[]int{64, 20, 10},
-			1,
 			[]string{"Level # Frozen Orb (#/# Charges)"},
+			1,
 		},
 		{ // fnId 21
 			"pal",
 			[]int{1, 5},
-			1,
 			[]string{"+# to Paladin Skill Levels"},
+			1,
 		},
 		{ // fnId 22
 			"oskill",
 			[]int{64, 1, 5},
-			1,
 			[]string{"+# to Frozen Orb"},
+			1,
 		},
 	}
 

@@ -31,15 +31,13 @@ const originalFPS float64 = 25
 
 // A Sound that can be started and stopped
 type Sound struct {
-	effect  d2interface.SoundEffect
-	entry   *d2records.SoundDetailRecord
+	effect d2interface.SoundEffect
+	entry  *d2records.SoundDetailRecord
+	*d2util.Logger
 	volume  float64
 	vTarget float64
 	vRate   float64
 	state   envState
-	// panning float64 // lets forget about this for now
-
-	*d2util.Logger
 }
 
 func (s *Sound) update(elapsed float64) {
@@ -111,13 +109,12 @@ func (s *Sound) String() string {
 
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
-	asset    *d2asset.AssetManager
 	provider d2interface.AudioProvider
-	timer    float64
-	accTime  float64
+	asset    *d2asset.AssetManager
 	sounds   map[*Sound]struct{}
-
 	*d2util.Logger
+	timer   float64
+	accTime float64
 }
 
 // NewSoundEngine creates a new sound engine

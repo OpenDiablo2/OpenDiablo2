@@ -11,10 +11,10 @@ import (
 var _ d2interface.Cache = &Cache{} // Static check to confirm struct conforms to interface
 
 type cacheNode struct {
+	value  interface{}
 	next   *cacheNode
 	prev   *cacheNode
 	key    string
-	value  interface{}
 	weight int
 }
 

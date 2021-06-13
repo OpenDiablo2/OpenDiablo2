@@ -19,8 +19,8 @@ var _ Widget = &Tooltip{}
 // Tooltip contains a label containing text with a transparent, black background
 type Tooltip struct {
 	*BaseWidget
-	lines           []string
 	label           *Label
+	lines           []string
 	backgroundColor int
 	originX         tooltipXOrigin
 	originY         tooltipYOrigin

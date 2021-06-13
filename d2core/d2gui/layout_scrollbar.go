@@ -13,36 +13,29 @@ import (
 // and attaches to a main layout. You need to use a wrapper for your content
 // as main layout in order for the scrollbar to work properly
 type LayoutScrollbar struct {
-	sliderSprites []*d2ui.Sprite
-	gutterSprites []*d2ui.Sprite
-
-	parentLayout *Layout
-	targetLayout *Layout
-	sliderLayout *Layout
-
-	arrowUpLayout   *Layout
-	arrowDownLayout *Layout
-
-	arrowUpSprite   *d2ui.Sprite
-	arrowDownSprite *d2ui.Sprite
-
-	maxY                   int
-	minY                   int
+	arrowDownLayout        *Layout
+	arrowUpSprite          *d2ui.Sprite
+	parentLayout           *Layout
+	targetLayout           *Layout
+	sliderLayout           *Layout
+	arrowUpLayout          *Layout
+	arrowDownSprite        *d2ui.Sprite
+	sliderSprites          []*d2ui.Sprite
+	gutterSprites          []*d2ui.Sprite
 	arrowClickSliderOffset int
+	minY                   int
+	maxY                   int
 	viewportSize           int
 	contentSize            int
-
-	clickedAtY         int
-	mouseYOnSlider     int
-	lastY              int
-	gutterHeight       int
-	sliderHeight       int
-	contentToViewRatio float32
-
-	// isVisible bool
-	arrowUpClicked   bool
-	arrowDownClicked bool
-	sliderClicked    bool
+	clickedAtY             int
+	mouseYOnSlider         int
+	lastY                  int
+	gutterHeight           int
+	sliderHeight           int
+	contentToViewRatio     float32
+	arrowUpClicked         bool
+	arrowDownClicked       bool
+	sliderClicked          bool
 }
 
 const (

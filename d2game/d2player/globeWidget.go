@@ -48,10 +48,10 @@ var _ d2ui.ClickableWidget = &globeWidget{}
 
 type globeFrame struct {
 	sprite  *d2ui.Sprite
+	gw      *globeWidget
 	offsetX int
 	offsetY int
 	idx     int
-	gw      *globeWidget
 }
 
 func (gf *globeFrame) setFrameIndex() {
@@ -140,20 +140,19 @@ func newGlobeWidget(ui *d2ui.UIManager,
 }
 
 type globeWidget struct {
-	*d2ui.BaseWidget
+	tooltip  *d2ui.Tooltip
 	asset    *d2asset.AssetManager
 	value    *int
 	valueMax *int
 	globe    *globeFrame
 	overlap  *globeFrame
 	*d2util.Logger
-
-	pressed         bool
-	isTooltipLocked bool
-	tooltip         *d2ui.Tooltip
+	*d2ui.BaseWidget
+	tooltipTrans    string
 	tooltipX        int
 	tooltipY        int
-	tooltipTrans    string
+	isTooltipLocked bool
+	pressed         bool
 }
 
 func (g *globeWidget) load() {

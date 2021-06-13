@@ -65,18 +65,16 @@ func Unmarshal(data []byte) (*COF, error) {
 
 // COF is a structure that represents a COF file.
 type COF struct {
-	// unknown bytes for header
-	unknownHeaderBytes []byte
-	// unknown bytes (first "body's" bytes)
-	unknownBodyBytes   []byte
-	NumberOfDirections int
-	FramesPerDirection int
-	NumberOfLayers     int
-	Speed              int
-	CofLayers          []CofLayer
 	CompositeLayers    map[d2enum.CompositeType]int
+	unknownHeaderBytes []byte
 	AnimationFrames    []d2enum.AnimationFrame
 	Priority           [][][]d2enum.CompositeType
+	CofLayers          []CofLayer
+	unknownBodyBytes   []byte
+	NumberOfLayers     int
+	Speed              int
+	NumberOfDirections int
+	FramesPerDirection int
 }
 
 // Unmarshal a byte slice to this COF

@@ -23,12 +23,11 @@ const logPrefix = "UDP Connection"
 // d2server.ClientConnection interface to represent remote client from the
 // server perspective.
 type UDPClientConnection struct {
-	id            string            // ID of the associated RemoteClientConnection
-	address       *net.UDPAddr      // IP address of the associated RemoteClientConnection
-	udpConnection *net.UDPConn      // Server's UDP Connection
-	playerState   *d2hero.HeroState // Client's game state
-
+	address       *net.UDPAddr
+	udpConnection *net.UDPConn
+	playerState   *d2hero.HeroState
 	*d2util.Logger
+	id string
 }
 
 // CreateUDPClientConnection constructs a new UDPClientConnection and

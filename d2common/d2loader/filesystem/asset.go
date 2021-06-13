@@ -17,11 +17,11 @@ var _ asset.Asset = &Asset{}
 
 // Asset represents an asset that is in the host filesystem
 type Asset struct {
-	assetType types.AssetType
 	source    *Source
-	data      []byte
-	path      string
 	file      *os.File
+	path      string
+	data      []byte
+	assetType types.AssetType
 }
 
 // Type returns the asset type

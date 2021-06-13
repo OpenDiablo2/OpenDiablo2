@@ -9,8 +9,8 @@ var _ d2stats.StatValue = &Diablo2StatValue{}
 
 // Diablo2StatValue is a diablo 2 implementation of a stat value
 type Diablo2StatValue struct {
-	number      float64
 	stringerFn  func(d2stats.StatValue) string
+	number      float64
 	numberType  d2stats.StatNumberType
 	combineType d2stats.ValueCombineType
 }

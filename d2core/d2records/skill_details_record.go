@@ -12,66 +12,66 @@ type SkillDetails map[int]*SkillRecord
 
 // SkillRecord is a row from the skills.txt file. Here are two resources for more info on each field
 type SkillRecord struct {
-	Skill             string
-	Charclass         string
-	Skilldesc         string
+	Passivecalc1      d2calculation.Calculation
+	DmgSymPerCalc     d2calculation.Calculation
+	ToHitCalc         d2calculation.Calculation
 	Prgcalc1          d2calculation.Calculation
 	Prgcalc2          d2calculation.Calculation
 	Prgcalc3          d2calculation.Calculation
-	Srvmissile        string
-	Srvmissilea       string
-	Srvmissileb       string
-	Srvmissilec       string
-	Srvoverlay        string
-	Aurastate         string
-	Auratargetstate   string
+	Calc4             d2calculation.Calculation
+	Calc3             d2calculation.Calculation
+	Calc2             d2calculation.Calculation
+	Calc1             d2calculation.Calculation
+	Perdelay          d2calculation.Calculation
+	Skpoints          d2calculation.Calculation
+	ELenSymPerCalc    d2calculation.Calculation
 	Auralencalc       d2calculation.Calculation
 	Aurarangecalc     d2calculation.Calculation
-	Aurastat1         string
+	Cltcalc3          d2calculation.Calculation
 	Aurastatcalc1     d2calculation.Calculation
-	Aurastat2         string
+	Cltcalc2          d2calculation.Calculation
 	Aurastatcalc2     d2calculation.Calculation
-	Aurastat3         string
+	Cltcalc1          d2calculation.Calculation
 	Aurastatcalc3     d2calculation.Calculation
-	Aurastat4         string
+	Sumsk5calc        d2calculation.Calculation
 	Aurastatcalc4     d2calculation.Calculation
-	Aurastat5         string
+	Sumsk4calc        d2calculation.Calculation
 	Aurastatcalc5     d2calculation.Calculation
-	Aurastat6         string
+	EDmgSymPerCalc    d2calculation.Calculation
 	Aurastatcalc6     d2calculation.Calculation
-	Auraevent1        string
-	Auraevent2        string
-	Auraevent3        string
-	Auratgtevent      string
-	Auratgteventfunc  string
-	Passivestate      string
-	Passiveitype      string
-	Passivestat1      string
-	Passivecalc1      d2calculation.Calculation
-	Passivestat2      string
-	Passivecalc2      d2calculation.Calculation
-	Passivestat3      string
-	Passivecalc3      d2calculation.Calculation
-	Passivestat4      string
-	Passivecalc4      d2calculation.Calculation
-	Passivestat5      string
+	Sumsk3calc        d2calculation.Calculation
+	Sumsk2calc        d2calculation.Calculation
+	Sumsk1calc        d2calculation.Calculation
+	Petmax            d2calculation.Calculation
 	Passivecalc5      d2calculation.Calculation
+	Passivecalc4      d2calculation.Calculation
+	Passivecalc3      d2calculation.Calculation
+	Passivecalc2      d2calculation.Calculation
+	Sumskill4         string
+	Passivestat2      string
+	Passivestat1      string
+	Passivestat3      string
+	Passiveitype      string
+	Passivestat4      string
+	Passivestate      string
+	Passivestat5      string
+	Auratgteventfunc  string
 	Passiveevent      string
 	Passiveeventfunc  string
 	Summon            string
 	Pettype           string
-	Petmax            d2calculation.Calculation
+	Auratgtevent      string
 	Summode           string
-	Sumskill1         string
-	Sumsk1calc        d2calculation.Calculation
+	Skill             string
+	Auraevent3        string
 	Sumskill2         string
-	Sumsk2calc        d2calculation.Calculation
+	Auraevent2        string
 	Sumskill3         string
-	Sumsk3calc        d2calculation.Calculation
-	Sumskill4         string
-	Sumsk4calc        d2calculation.Calculation
+	Auraevent1        string
+	Aurastat6         string
+	Aurastat5         string
 	Sumskill5         string
-	Sumsk5calc        d2calculation.Calculation
+	Aurastat4         string
 	Sumoverlay        string
 	Stsound           string
 	Stsoundclass      string
@@ -90,9 +90,9 @@ type SkillRecord struct {
 	Cltmissileb       string
 	Cltmissilec       string
 	Cltmissiled       string
-	Cltcalc1          d2calculation.Calculation
-	Cltcalc2          d2calculation.Calculation
-	Cltcalc3          d2calculation.Calculation
+	Aurastat3         string
+	Aurastat2         string
+	Aurastat1         string
 	Range             string
 	Itypea1           string
 	Itypea2           string
@@ -104,35 +104,35 @@ type SkillRecord struct {
 	Itypeb3           string
 	Etypeb1           string
 	Etypeb2           string
-	Anim              d2enum.PlayerAnimationMode
+	Auratargetstate   string
 	Seqtrans          string
 	Monanim           string
 	ItemCastSound     string
 	ItemCastOverlay   string
-	Skpoints          d2calculation.Calculation
+	Aurastate         string
 	Reqskill1         string
 	Reqskill2         string
 	Reqskill3         string
 	State1            string
 	State2            string
 	State3            string
-	Perdelay          d2calculation.Calculation
-	Calc1             d2calculation.Calculation
-	Calc2             d2calculation.Calculation
-	Calc3             d2calculation.Calculation
-	Calc4             d2calculation.Calculation
-	ToHitCalc         d2calculation.Calculation
-	DmgSymPerCalc     d2calculation.Calculation
+	Srvoverlay        string
+	Srvmissilec       string
+	Srvmissileb       string
+	Srvmissilea       string
+	Srvmissile        string
+	Skilldesc         string
+	Charclass         string
 	EType             string
-	EDmgSymPerCalc    d2calculation.Calculation
-	ELenSymPerCalc    d2calculation.Calculation
+	Sumskill1         string
+	Anim              d2enum.PlayerAnimationMode
 	ID                int
 	Srvstfunc         int
 	Srvdofunc         int
 	Srvprgfunc1       int
 	Srvprgfunc2       int
 	Srvprgfunc3       int
-	Prgdam            int
+	CostMult          int
 	Aurafilter        int
 	Auraeventfunc1    int
 	Auraeventfunc2    int
@@ -212,7 +212,7 @@ type SkillRecord struct {
 	ELevLen3          int
 	Aitype            int
 	Aibonus           int
-	CostMult          int
+	Prgdam            int
 	CostAdd           int
 	Prgstack          bool
 	Decquant          bool
@@ -222,7 +222,7 @@ type SkillRecord struct {
 	Weaponsnd         bool
 	Warp              bool
 	Immediate         bool
-	Enhanceable       bool
+	Kick              bool
 	Noammo            bool
 	Durability        bool
 	UseAttackRate     bool
@@ -252,5 +252,5 @@ type SkillRecord struct {
 	General           bool
 	Scroll            bool
 	InGame            bool
-	Kick              bool
+	Enhanceable       bool
 }

@@ -11,8 +11,8 @@ import (
 // PlayerConnectionRequestPacket contains a player ID and game state.
 // It is sent by a remote client to initiate a connection (join a game).
 type PlayerConnectionRequestPacket struct {
-	ID          string            `json:"id"`
 	PlayerState *d2hero.HeroState `json:"gameState"`
+	ID          string            `json:"id"`
 }
 
 // CreatePlayerConnectionRequestPacket returns a NetPacket which defines a

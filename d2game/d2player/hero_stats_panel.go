@@ -69,10 +69,10 @@ const (
 
 // PanelText represents text on the panel
 type PanelText struct {
-	X           int
-	Y           int
 	Text        string
 	Font        string
+	X           int
+	Y           int
 	AlignCenter bool
 }
 
@@ -123,23 +123,21 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager,
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
-	asset           *d2asset.AssetManager
+	panelGroup      *d2ui.WidgetGroup
 	uiManager       *d2ui.UIManager
 	panel           *d2ui.Sprite
 	heroState       *d2hero.HeroStatsState
-	heroName        string
-	heroClass       d2enum.Hero
+	remainingPoints *d2ui.Label
+	newStatPoints   *d2ui.WidgetGroup
 	labels          *StatsPanelLabels
 	onCloseCb       func()
-	panelGroup      *d2ui.WidgetGroup
-	newStatPoints   *d2ui.WidgetGroup
-	remainingPoints *d2ui.Label
-
-	originX int
-	originY int
-	isOpen  bool
-
+	asset           *d2asset.AssetManager
 	*d2util.Logger
+	heroName  string
+	heroClass d2enum.Hero
+	originX   int
+	originY   int
+	isOpen    bool
 }
 
 // Load the data for the hero status panel
@@ -202,22 +200,22 @@ func (s *HeroStatsPanel) loadNewStatPoints() {
 	s.newStatPoints.AddWidget(s.remainingPoints)
 
 	buttons := []struct {
+		cb func()
 		x  int
 		y  int
-		cb func()
 	}{
-		{205, 140, func() {
+		{func() {
 			s.heroState.Strength++
-		}},
-		{205, 201, func() {
+		}, 205, 140},
+		{func() {
 			s.heroState.Dexterity++
-		}},
-		{205, 286, func() {
+		}, 205, 201},
+		{func() {
 			s.heroState.Vitality++
-		}},
-		{205, 347, func() {
+		}, 205, 286},
+		{func() {
 			s.heroState.Energy++
-		}},
+		}, 205, 347},
 	}
 
 	var socket *d2ui.Sprite
@@ -344,46 +342,47 @@ func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 	cr := strings.Split(s.asset.TranslateString("strchrcol"), "\n")
 	pr := strings.Split(s.asset.TranslateString("strchrpos"), "\n")
 	// all static labels are not stored since we use them only once to generate the image cache
-	var staticLabelConfigs = []struct {
-		x, y        int
+	staticLabelConfigs := []struct {
 		txt         string
 		font        string
+		x           int
+		y           int
 		centerAlign bool
 	}{
-		{labelHeroNameX, labelHeroNameY, s.heroName, d2resource.Font16, true},
-		{labelHeroClassX, labelHeroClassY, s.asset.TranslateString(s.heroClass), d2resource.Font16, true},
+		{s.heroName, d2resource.Font16, labelHeroNameX, labelHeroNameY, true},
+		{s.asset.TranslateString(s.heroClass), d2resource.Font16, labelHeroClassX, labelHeroClassY, true},
 
-		{labelLevelX, labelLevelY, s.asset.TranslateString("strchrlvl"), d2resource.Font6, true},
-		{labelExperienceX, labelExperienceY, s.asset.TranslateString("strchrexp"), d2resource.Font6, true},
-		{labelNextLevelX, labelNextLevelY, s.asset.TranslateString("strchrnxtlvl"), d2resource.Font6, true},
-		{labelStrengthX, labelStrengthY, s.asset.TranslateString("strchrstr"), d2resource.Font6, false},
-		{labelDexterityX, labelDexterityY, s.asset.TranslateString("strchrdex"), d2resource.Font6, false},
-		{labelVitalityX, labelVitalityY, s.asset.TranslateString("strchrvit"), d2resource.Font6, false},
-		{labelEnergyX, labelEnergyY, s.asset.TranslateString("strchreng"), d2resource.Font6, false},
-		{labelDefenseX, labelDefenseY, s.asset.TranslateString("strchrdef"), d2resource.Font6, false},
-		{labelStaminaX, labelStaminaY, s.asset.TranslateString("strchrstm"), d2resource.Font6, true},
-		{labelLifeX, labelLifeY, s.asset.TranslateString("strchrlif"), d2resource.Font6, true},
-		{labelManaX, labelManaY, s.asset.TranslateString("strchrman"), d2resource.Font6, true},
+		{s.asset.TranslateString("strchrlvl"), d2resource.Font6, labelLevelX, labelLevelY, true},
+		{s.asset.TranslateString("strchrexp"), d2resource.Font6, labelExperienceX, labelExperienceY, true},
+		{s.asset.TranslateString("strchrnxtlvl"), d2resource.Font6, labelNextLevelX, labelNextLevelY, true},
+		{s.asset.TranslateString("strchrstr"), d2resource.Font6, labelStrengthX, labelStrengthY, false},
+		{s.asset.TranslateString("strchrdex"), d2resource.Font6, labelDexterityX, labelDexterityY, false},
+		{s.asset.TranslateString("strchrvit"), d2resource.Font6, labelVitalityX, labelVitalityY, false},
+		{s.asset.TranslateString("strchreng"), d2resource.Font6, labelEnergyX, labelEnergyY, false},
+		{s.asset.TranslateString("strchrdef"), d2resource.Font6, labelDefenseX, labelDefenseY, false},
+		{s.asset.TranslateString("strchrstm"), d2resource.Font6, labelStaminaX, labelStaminaY, true},
+		{s.asset.TranslateString("strchrlif"), d2resource.Font6, labelLifeX, labelLifeY, true},
+		{s.asset.TranslateString("strchrman"), d2resource.Font6, labelManaX, labelManaY, true},
 
 		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
-		{labelResFireLine1X, labelResFireLine1Y, fr[0], d2resource.Font6, true},
-		{labelResFireLine2X, labelResFireLine2Y, fr[len(fr)-1], d2resource.Font6, true},
+		{fr[0], d2resource.Font6, labelResFireLine1X, labelResFireLine1Y, true},
+		{fr[len(fr)-1], d2resource.Font6, labelResFireLine2X, labelResFireLine2Y, true},
 
-		{labelResColdLine1X, labelResColdLine1Y, cr[0], d2resource.Font6, true},
-		{labelResColdLine2X, labelResColdLine2Y, cr[len(cr)-1], d2resource.Font6, true},
+		{cr[0], d2resource.Font6, labelResColdLine1X, labelResColdLine1Y, true},
+		{cr[len(cr)-1], d2resource.Font6, labelResColdLine2X, labelResColdLine2Y, true},
 
-		{labelResLightLine1X, labelResLightLine1Y, lr[0], d2resource.Font6, true},
-		{labelResLightLine2X, labelResLightLine2Y, lr[len(lr)-1], d2resource.Font6, true},
+		{lr[0], d2resource.Font6, labelResLightLine1X, labelResLightLine1Y, true},
+		{lr[len(lr)-1], d2resource.Font6, labelResLightLine2X, labelResLightLine2Y, true},
 
-		{labelResPoisLine1X, labelResPoisLine1Y, pr[0], d2resource.Font6, true},
-		{labelResPoisLine2X, labelResPoisLine2Y, pr[len(pr)-1], d2resource.Font6, true},
+		{pr[0], d2resource.Font6, labelResPoisLine1X, labelResPoisLine1Y, true},
+		{pr[len(pr)-1], d2resource.Font6, labelResPoisLine2X, labelResPoisLine2Y, true},
 	}
 
 	for _, cfg := range staticLabelConfigs {
 		label = s.createTextLabel(PanelText{
-			cfg.x, cfg.y,
 			cfg.txt,
 			cfg.font,
+			cfg.x, cfg.y,
 			cfg.centerAlign,
 		})
 

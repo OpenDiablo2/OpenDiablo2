@@ -6,14 +6,14 @@ import (
 
 // InventoryItemWeapon stores the info of an weapon item in the inventory
 type InventoryItemWeapon struct {
-	InventorySizeX     int    `json:"inventorySizeX"`
-	InventorySizeY     int    `json:"inventorySizeY"`
-	InventorySlotX     int    `json:"inventorySlotX"`
-	InventorySlotY     int    `json:"inventorySlotY"`
-	ItemName           string `json:"itemName"`
-	ItemCode           string `json:"itemCode"`
 	WeaponClass        string `json:"weaponClass"`
 	WeaponClassOffHand string `json:"weaponClassOffHand"`
+	ItemName           string `json:"itemName"`
+	ItemCode           string `json:"itemCode"`
+	InventorySlotX     int    `json:"inventorySlotX"`
+	InventorySlotY     int    `json:"inventorySlotY"`
+	InventorySizeX     int    `json:"inventorySizeX"`
+	InventorySizeY     int    `json:"inventorySizeY"`
 }
 
 // GetWeaponClass returns the class of the weapon

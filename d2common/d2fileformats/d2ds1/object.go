@@ -6,12 +6,12 @@ import (
 
 // Object is a game world object
 type Object struct {
+	Paths []d2path.Path
 	Type  int
 	ID    int
 	X     int
 	Y     int
 	Flags int
-	Paths []d2path.Path
 }
 
 // Equals checks if this Object is equivalent to the given Object

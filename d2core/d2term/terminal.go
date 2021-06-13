@@ -52,31 +52,27 @@ type historyEntry struct {
 }
 
 type commandEntry struct {
+	fn          func([]string) error
 	description string
 	arguments   []string
-	fn          func([]string) error
 }
 
 // Terminal handles the in-game terminal
 type Terminal struct {
-	outputHistory []historyEntry
-	outputIndex   int
-
+	commands       map[string]commandEntry
 	command        string
 	commandHistory []string
+	outputHistory  []historyEntry
 	commandIndex   int
-
-	lineCount int
-	visState  visibility
-	visAnim   float64
-
-	bgColor      color.RGBA
-	fgColor      color.RGBA
-	infoColor    color.RGBA
-	warningColor color.RGBA
-	errorColor   color.RGBA
-
-	commands map[string]commandEntry
+	lineCount      int
+	visState       visibility
+	outputIndex    int
+	visAnim        float64
+	bgColor        color.RGBA
+	fgColor        color.RGBA
+	infoColor      color.RGBA
+	warningColor   color.RGBA
+	errorColor     color.RGBA
 }
 
 // NewTerminal creates and returns a terminal
@@ -115,7 +111,7 @@ func (t *Terminal) Bind(name, description string, arguments []string, fn func(ar
 		t.Warningf("rebinding command with name: %s", name)
 	}
 
-	t.commands[name] = commandEntry{description, arguments, fn}
+	t.commands[name] = commandEntry{fn, description, arguments}
 
 	return nil
 }

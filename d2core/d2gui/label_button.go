@@ -11,15 +11,15 @@ import (
 // LabelButton is a label that can change when hovered and has
 // a callback function that can be called when clicked
 type LabelButton struct {
+	callback func()
+	*d2util.Logger
+	layout     *Layout
 	label      string
-	callback   func()
+	x          int
+	y          int
 	hoverColor color.RGBA
 	canHover   bool
 	isHovered  bool
-	layout     *Layout
-	x, y       int
-
-	*d2util.Logger
 }
 
 // NewLabelButton generates a new instance of LabelButton

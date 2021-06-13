@@ -15,14 +15,13 @@ import (
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
-	uuid      string
-	Position  d2vector.Position
-	composite *d2asset.Composite
-	highlight bool
-	// nameLabel    d2ui.Label
+	composite    *d2asset.Composite
 	objectRecord *d2records.ObjectDetailRecord
-	drawLayer    int
+	uuid         string
 	name         string
+	Position     d2vector.Position
+	drawLayer    int
+	highlight    bool
 }
 
 // setMode changes the graphical mode of this animated entity

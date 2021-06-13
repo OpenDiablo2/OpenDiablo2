@@ -8,9 +8,9 @@ import (
 
 // SkillListRow represents a row of skills that is shown when the skill select menu is rendered.
 type SkillListRow struct {
-	Rectangle   d2geom.Rectangle
-	Skills      []*d2hero.HeroSkill
 	cachedImage d2interface.Surface
+	Skills      []*d2hero.HeroSkill
+	Rectangle   d2geom.Rectangle
 }
 
 // AddSkill appends to the skills of the row.

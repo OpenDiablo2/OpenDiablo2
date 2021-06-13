@@ -31,11 +31,11 @@ const (
 
 // DT1 represents a DT1 file.
 type DT1 struct {
+	Tiles         []Tile
 	majorVersion  int32
 	minorVersion  int32
 	numberOfTiles int32
 	bodyPosition  int32
-	Tiles         []Tile
 }
 
 // New creates a new DT1
