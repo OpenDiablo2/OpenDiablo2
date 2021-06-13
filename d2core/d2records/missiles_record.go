@@ -70,39 +70,39 @@ type MissileDamage struct {
 
 // MissileElementalDamage parameters for calculating missile elemental damage
 type MissileElementalDamage struct {
-	Damage        MissileDamage
 	ElementType   string
-	Duration      int    // frames, 25 = 1 second
-	LevelDuration [3]int // 0,1,2, unknown level intervals, bonus duration per level
+	Damage        MissileDamage
+	LevelDuration [3]int
+	Duration      int
 }
 
 // MissileRecord is a representation of a row from missiles.txt
 type MissileRecord struct {
-	Damage                 MissileDamage
 	HitSubMissile          [4]string
 	ClientHitSubMissile    [4]string
 	SubMissile             [3]string
 	ClientSubMissile       [3]string
+	ExplosionMissile       string
 	HitSound               string
 	Name                   string
 	ProgOverlay            string
 	ProgSound              string
 	TravelSound            string
 	SkillName              string
-	ExplosionMissile       string
-	ServerCollisionCalc    MissileCalc
-	ClientMovementCalc     MissileCalc
-	ServerDamageCalc       MissileCalc
 	ServerMovementCalc     MissileCalc
 	ClientCollisionCalc    MissileCalc
+	ClientMovementCalc     MissileCalc
+	ServerDamageCalc       MissileCalc
+	ServerCollisionCalc    MissileCalc
 	ElementalDamage        MissileElementalDamage
 	Animation              MissileAnimation
+	Damage                 MissileDamage
 	Collision              MissileCollision
 	Light                  MissileLight
-	ServerMovementFunc     int
+	Id                     int
 	ClientMovementFunc     int
 	ClientCollisionFunc    int
-	Id                     int
+	ServerMovementFunc     int
 	ServerCollisionFunc    int
 	ServerDamageFunc       int
 	Velocity               int
@@ -112,7 +112,7 @@ type MissileRecord struct {
 	Range                  int
 	LevelRangeBonus        int
 	XOffset                int
-	DamageReductionRate    int
+	YOffset                int
 	ZOffset                int
 	Size                   int
 	DestroyedByTPFrame     int
@@ -127,7 +127,7 @@ type MissileRecord struct {
 	HitClass               int
 	NumDirections          int
 	LocalBlood             int
-	YOffset                int
+	DamageReductionRate    int
 	DestroyedByTP          bool
 	CanDestroy             bool
 	UseAttackRating        bool

@@ -36,45 +36,45 @@ func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
 	Item struct {
-		All                 CommonItems
-		Armors              CommonItems
-		Misc                CommonItems
-		Weapons             CommonItems
-		Equivalency         ItemEquivalenceMap
-		EquivalenceByRecord ItemEquivalenceByRecord
-		AutoMagic
-		Belts
-		Books
-		Gems
-		Magic struct {
-			Prefix MagicPrefix
-			Suffix MagicSuffix
-		}
-		MagicPrefixGroups  ItemAffixGroups
-		MagicSuffixGroups  ItemAffixGroups
-		Quality            ItemQualities
-		LowQualityPrefixes LowQualities
-		Rare               struct {
-			Prefix RarePrefixes
-			Suffix RareSuffixes
-		}
-		Ratios ItemRatios
-		Cube   struct {
+		Cube struct {
 			Recipes   CubeRecipes
 			Modifiers CubeModifiers
 			Types     CubeTypes
 		}
-		Runewords
-		Sets
-		SetItems
-		Stats    ItemStatCosts
+		Magic struct {
+			Prefix MagicPrefix
+			Suffix MagicSuffix
+		}
 		Treasure struct {
 			Normal    TreasureClass
 			Expansion TreasureClass
 		}
-		Types  ItemTypes
-		Unique UniqueItems
+		All                 CommonItems
+		Equivalency         ItemEquivalenceMap
+		EquivalenceByRecord ItemEquivalenceByRecord
+		Unique              UniqueItems
+		Belts
+		Books
+		Gems
+		Weapons           CommonItems
+		MagicPrefixGroups ItemAffixGroups
+		MagicSuffixGroups ItemAffixGroups
+		Quality           ItemQualities
+		Types             ItemTypes
+		Misc              CommonItems
+		Ratios            ItemRatios
+		Armors            CommonItems
+		Runewords
+		Sets
+		SetItems
+		Stats ItemStatCosts
 		StorePages
+		Rare struct {
+			Prefix RarePrefixes
+			Suffix RareSuffixes
+		}
+		LowQualityPrefixes LowQualities
+		AutoMagic
 	}
 	Monster struct {
 		AI        MonsterAI
