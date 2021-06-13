@@ -61,19 +61,18 @@ func NewHeroSkillsPanel(asset *d2asset.AssetManager,
 
 // SkillPanel represents a skill select menu popup that is displayed when the player left clicks on his active left/right skill.
 type SkillPanel struct {
-	asset                *d2asset.AssetManager
-	activeSkill          *d2hero.HeroSkill
-	hero                 *d2mapentity.Player
+	renderer     d2interface.Renderer
+	asset        *d2asset.AssetManager
+	activeSkill  *d2hero.HeroSkill
+	hero         *d2mapentity.Player
+	ui           *d2ui.UIManager
+	hoveredSkill *d2hero.HeroSkill
+	hoverTooltip *d2ui.Tooltip
+	*d2util.Logger
 	ListRows             []*SkillListRow
-	renderer             d2interface.Renderer
-	ui                   *d2ui.UIManager
-	hoveredSkill         *d2hero.HeroSkill
-	hoverTooltip         *d2ui.Tooltip
 	isOpen               bool
 	regenerateImageCache bool
 	isLeftPanel          bool
-
-	*d2util.Logger
 }
 
 // Open opens the hero skills panel

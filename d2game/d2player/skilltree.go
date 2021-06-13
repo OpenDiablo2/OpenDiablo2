@@ -72,8 +72,8 @@ const (
 )
 
 type skillTreeTab struct {
-	buttonText      string
 	button          *d2ui.Button
+	buttonText      string
 	closeButtonPosX int
 }
 
@@ -121,28 +121,27 @@ func newSkillTree(
 }
 
 type skillTree struct {
-	resources       *skillTreeHeroTypeResources
-	asset           *d2asset.AssetManager
-	uiManager       *d2ui.UIManager
-	skills          map[int]*d2hero.HeroSkill
-	skillIcons      []*skillIcon
-	heroClass       d2enum.Hero
+	tab        [numTabs]*skillTreeTab
+	panelGroup *d2ui.WidgetGroup
+	uiManager  *d2ui.UIManager
+	skills     map[int]*d2hero.HeroSkill
+	iconGroup  *d2ui.WidgetGroup
+	*d2util.Logger
 	availSPLabel    *d2ui.Label
 	closeButton     *d2ui.Button
-	tab             [numTabs]*skillTreeTab
+	asset           *d2asset.AssetManager
 	remainingPoints *d2ui.Label
-	isOpen          bool
-	originX         int
-	originY         int
-	selectedTab     int
-	onCloseCb       func()
-	panelGroup      *d2ui.WidgetGroup
-	iconGroup       *d2ui.WidgetGroup
-	panel           *d2ui.CustomWidget
+	resources       *skillTreeHeroTypeResources
 	stats           *d2hero.HeroStatsState
-
-	*d2util.Logger
-	l d2util.LogLevel
+	panel           *d2ui.CustomWidget
+	onCloseCb       func()
+	skillIcons      []*skillIcon
+	l               d2util.LogLevel
+	selectedTab     int
+	originY         int
+	originX         int
+	heroClass       d2enum.Hero
+	isOpen          bool
 }
 
 func (s *skillTree) load() {

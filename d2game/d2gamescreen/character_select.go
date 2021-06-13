@@ -68,42 +68,40 @@ func CreateCharacterSelect(
 
 // CharacterSelect represents the character select screen
 type CharacterSelect struct {
-	asset *d2asset.AssetManager
-	*d2mapentity.MapEntityFactory
-	*d2hero.HeroStateFactory
-	background             *d2ui.Sprite
-	newCharButton          *d2ui.Button
-	convertCharButton      *d2ui.Button
-	deleteCharButton       *d2ui.Button
-	exitButton             *d2ui.Button
-	okButton               *d2ui.Button
+	characterStatsLabel    [8]*d2ui.Label
+	characterNameLabel     [8]*d2ui.Label
+	characterImage         [8]*d2mapentity.Player
+	characterExpLabel      [8]*d2ui.Label
+	renderer               d2interface.Renderer
+	navigator              d2interface.Navigator
+	inputManager           d2interface.InputManager
+	audioProvider          d2interface.AudioProvider
+	okCancelBox            *d2ui.Sprite
 	deleteCharCancelButton *d2ui.Button
 	deleteCharOkButton     *d2ui.Button
 	selectionBox           *d2ui.Sprite
-	okCancelBox            *d2ui.Sprite
+	okButton               *d2ui.Button
 	d2HeroTitle            *d2ui.Label
 	deleteCharConfirmLabel *d2ui.Label
 	charScrollbar          *d2ui.Scrollbar
-	characterNameLabel     [8]*d2ui.Label
-	characterStatsLabel    [8]*d2ui.Label
-	characterExpLabel      [8]*d2ui.Label
-	characterImage         [8]*d2mapentity.Player
+	exitButton             *d2ui.Button
+	deleteCharButton       *d2ui.Button
+	convertCharButton      *d2ui.Button
+	newCharButton          *d2ui.Button
+	background             *d2ui.Sprite
+	*d2hero.HeroStateFactory
+	*d2mapentity.MapEntityFactory
+	uiManager *d2ui.UIManager
+	asset     *d2asset.AssetManager
+	*d2util.Logger
+	connectionHost         string
 	gameStates             []*d2hero.HeroState
 	selectedCharacter      int
-	tickTimer              float64
 	storedTickTimer        float64
+	tickTimer              float64
+	connectionType         d2clientconnectiontype.ClientConnectionType
 	showDeleteConfirmation bool
 	loaded                 bool
-	connectionType         d2clientconnectiontype.ClientConnectionType
-	connectionHost         string
-
-	uiManager     *d2ui.UIManager
-	inputManager  d2interface.InputManager
-	audioProvider d2interface.AudioProvider
-	renderer      d2interface.Renderer
-	navigator     d2interface.Navigator
-
-	*d2util.Logger
 }
 
 const (

@@ -22,22 +22,22 @@ const (
 )
 
 type heroRenderConfig struct {
-	idleAnimationPath               string
+	selectSfx                       string
 	idleSelectedAnimationPath       string
 	forwardWalkAnimationPath        string
 	forwardWalkOverlayAnimationPath string
-	forwardWalkOverlayBlend         bool
+	deselectSfx                     string
 	selectedAnimationPath           string
 	selectedOverlayAnimationPath    string
 	backWalkAnimationPath           string
 	backWalkOverlayAnimationPath    string
+	idleAnimationPath               string
 	selectionBounds                 image.Rectangle
-	selectSfx                       string
-	deselectSfx                     string
 	position                        image.Point
 	idlePlayLengthMs                int
 	forwardWalkPlayLengthMs         int
 	backWalkPlayLengthMs            int
+	forwardWalkOverlayBlend         bool
 }
 
 func point(x, y int) image.Point {
@@ -107,136 +107,136 @@ func getHeroRenderConfiguration() map[d2enum.Hero]*heroRenderConfig {
 	configs := make(map[d2enum.Hero]*heroRenderConfig)
 
 	configs[d2enum.HeroBarbarian] = &heroRenderConfig{
-		d2resource.CharacterSelectBarbarianUnselected,
-		d2resource.CharacterSelectBarbarianUnselectedH,
-		d2resource.CharacterSelectBarbarianForwardWalk,
-		d2resource.CharacterSelectBarbarianForwardWalkOverlay,
-		false,
-		d2resource.CharacterSelectBarbarianSelected,
-		"",
-		d2resource.CharacterSelectBarbarianBackWalk,
-		"",
-		rect(barbRectMinX, barbRectMinY, barbRectMaxX, barbRectMaxY),
-		d2resource.SFXBarbarianSelect,
-		d2resource.SFXBarbarianDeselect,
-		point(barbPosX, barbPosY),
-		barbIdleLength,
-		barbForwardLength,
-		barbBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectBarbarianUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectBarbarianUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectBarbarianForwardWalk,
+		forwardWalkOverlayAnimationPath: d2resource.CharacterSelectBarbarianForwardWalkOverlay,
+		forwardWalkOverlayBlend:         false,
+		selectedAnimationPath:           d2resource.CharacterSelectBarbarianSelected,
+		selectedOverlayAnimationPath:    "",
+		backWalkAnimationPath:           d2resource.CharacterSelectBarbarianBackWalk,
+		backWalkOverlayAnimationPath:    "",
+		selectionBounds:                 rect(barbRectMinX, barbRectMinY, barbRectMaxX, barbRectMaxY),
+		selectSfx:                       d2resource.SFXBarbarianSelect,
+		deselectSfx:                     d2resource.SFXBarbarianDeselect,
+		position:                        point(barbPosX, barbPosY),
+		idlePlayLengthMs:                barbIdleLength,
+		forwardWalkPlayLengthMs:         barbForwardLength,
+		backWalkPlayLengthMs:            barbBackLength,
 	}
 
 	configs[d2enum.HeroSorceress] = &heroRenderConfig{
-		d2resource.CharacterSelectSorceressUnselected,
-		d2resource.CharacterSelectSorceressUnselectedH,
-		d2resource.CharacterSelectSorceressForwardWalk,
-		d2resource.CharacterSelectSorceressForwardWalkOverlay,
-		true,
-		d2resource.CharacterSelectSorceressSelected,
-		d2resource.CharacterSelectSorceressSelectedOverlay,
-		d2resource.CharacterSelectSorceressBackWalk,
-		d2resource.CharacterSelectSorceressBackWalkOverlay,
-		rect(sorcRectMinX, sorcRectMinY, sorcRectMaxX, sorcRectMaxY),
-		d2resource.SFXSorceressSelect,
-		d2resource.SFXSorceressDeselect,
-		point(sorcPosX, sorcPosY),
-		sorcIdleLength,
-		sorcForwardLength,
-		sorcBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectSorceressUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectSorceressUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectSorceressForwardWalk,
+		forwardWalkOverlayAnimationPath: d2resource.CharacterSelectSorceressForwardWalkOverlay,
+		forwardWalkOverlayBlend:         true,
+		selectedAnimationPath:           d2resource.CharacterSelectSorceressSelected,
+		selectedOverlayAnimationPath:    d2resource.CharacterSelectSorceressSelectedOverlay,
+		backWalkAnimationPath:           d2resource.CharacterSelectSorceressBackWalk,
+		backWalkOverlayAnimationPath:    d2resource.CharacterSelectSorceressBackWalkOverlay,
+		selectionBounds:                 rect(sorcRectMinX, sorcRectMinY, sorcRectMaxX, sorcRectMaxY),
+		selectSfx:                       d2resource.SFXSorceressSelect,
+		deselectSfx:                     d2resource.SFXSorceressDeselect,
+		position:                        point(sorcPosX, sorcPosY),
+		idlePlayLengthMs:                sorcIdleLength,
+		forwardWalkPlayLengthMs:         sorcForwardLength,
+		backWalkPlayLengthMs:            sorcBackLength,
 	}
 
 	configs[d2enum.HeroNecromancer] = &heroRenderConfig{
-		d2resource.CharacterSelectNecromancerUnselected,
-		d2resource.CharacterSelectNecromancerUnselectedH,
-		d2resource.CharacterSelectNecromancerForwardWalk,
-		d2resource.CharacterSelectNecromancerForwardWalkOverlay,
-		true,
-		d2resource.CharacterSelectNecromancerSelected,
-		d2resource.CharacterSelectNecromancerSelectedOverlay,
-		d2resource.CharacterSelectNecromancerBackWalk,
-		d2resource.CharacterSelectNecromancerBackWalkOverlay,
-		rect(necRectMinX, necRectMinY, necRectMaxX, necRectMaxY),
-		d2resource.SFXNecromancerSelect,
-		d2resource.SFXNecromancerDeselect,
-		point(necPosX, necPosY),
-		necIdleLength,
-		necForwardLength,
-		necBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectNecromancerUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectNecromancerUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectNecromancerForwardWalk,
+		forwardWalkOverlayAnimationPath: d2resource.CharacterSelectNecromancerForwardWalkOverlay,
+		forwardWalkOverlayBlend:         true,
+		selectedAnimationPath:           d2resource.CharacterSelectNecromancerSelected,
+		selectedOverlayAnimationPath:    d2resource.CharacterSelectNecromancerSelectedOverlay,
+		backWalkAnimationPath:           d2resource.CharacterSelectNecromancerBackWalk,
+		backWalkOverlayAnimationPath:    d2resource.CharacterSelectNecromancerBackWalkOverlay,
+		selectionBounds:                 rect(necRectMinX, necRectMinY, necRectMaxX, necRectMaxY),
+		selectSfx:                       d2resource.SFXNecromancerSelect,
+		deselectSfx:                     d2resource.SFXNecromancerDeselect,
+		position:                        point(necPosX, necPosY),
+		idlePlayLengthMs:                necIdleLength,
+		forwardWalkPlayLengthMs:         necForwardLength,
+		backWalkPlayLengthMs:            necBackLength,
 	}
 
 	configs[d2enum.HeroPaladin] = &heroRenderConfig{
-		d2resource.CharacterSelectPaladinUnselected,
-		d2resource.CharacterSelectPaladinUnselectedH,
-		d2resource.CharacterSelectPaladinForwardWalk,
-		d2resource.CharacterSelectPaladinForwardWalkOverlay,
-		false,
-		d2resource.CharacterSelectPaladinSelected,
-		"",
-		d2resource.CharacterSelectPaladinBackWalk,
-		"",
-		rect(palRectMinX, palRectMinY, palRectMaxX, palRectMaxY),
-		d2resource.SFXPaladinSelect,
-		d2resource.SFXPaladinDeselect,
-		point(palPosX, palPosY),
-		palIdleLength,
-		palForwardLength,
-		palBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectPaladinUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectPaladinUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectPaladinForwardWalk,
+		forwardWalkOverlayAnimationPath: d2resource.CharacterSelectPaladinForwardWalkOverlay,
+		forwardWalkOverlayBlend:         false,
+		selectedAnimationPath:           d2resource.CharacterSelectPaladinSelected,
+		selectedOverlayAnimationPath:    "",
+		backWalkAnimationPath:           d2resource.CharacterSelectPaladinBackWalk,
+		backWalkOverlayAnimationPath:    "",
+		selectionBounds:                 rect(palRectMinX, palRectMinY, palRectMaxX, palRectMaxY),
+		selectSfx:                       d2resource.SFXPaladinSelect,
+		deselectSfx:                     d2resource.SFXPaladinDeselect,
+		position:                        point(palPosX, palPosY),
+		idlePlayLengthMs:                palIdleLength,
+		forwardWalkPlayLengthMs:         palForwardLength,
+		backWalkPlayLengthMs:            palBackLength,
 	}
 
 	configs[d2enum.HeroAmazon] = &heroRenderConfig{
-		d2resource.CharacterSelectAmazonUnselected,
-		d2resource.CharacterSelectAmazonUnselectedH,
-		d2resource.CharacterSelectAmazonForwardWalk,
-		"",
-		false,
-		d2resource.CharacterSelectAmazonSelected,
-		"",
-		d2resource.CharacterSelectAmazonBackWalk,
-		"",
-		rect(amaRectMinX, amaRectMinY, amaRectMaxX, amaRectMaxY),
-		d2resource.SFXAmazonSelect,
-		d2resource.SFXAmazonDeselect,
-		point(amaPosX, amaPosY),
-		amaIdleLength,
-		amaForwardLength,
-		amaBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectAmazonUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectAmazonUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectAmazonForwardWalk,
+		forwardWalkOverlayAnimationPath: "",
+		forwardWalkOverlayBlend:         false,
+		selectedAnimationPath:           d2resource.CharacterSelectAmazonSelected,
+		selectedOverlayAnimationPath:    "",
+		backWalkAnimationPath:           d2resource.CharacterSelectAmazonBackWalk,
+		backWalkOverlayAnimationPath:    "",
+		selectionBounds:                 rect(amaRectMinX, amaRectMinY, amaRectMaxX, amaRectMaxY),
+		selectSfx:                       d2resource.SFXAmazonSelect,
+		deselectSfx:                     d2resource.SFXAmazonDeselect,
+		position:                        point(amaPosX, amaPosY),
+		idlePlayLengthMs:                amaIdleLength,
+		forwardWalkPlayLengthMs:         amaForwardLength,
+		backWalkPlayLengthMs:            amaBackLength,
 	}
 
 	configs[d2enum.HeroAssassin] = &heroRenderConfig{
-		d2resource.CharacterSelectAssassinUnselected,
-		d2resource.CharacterSelectAssassinUnselectedH,
-		d2resource.CharacterSelectAssassinForwardWalk,
-		"",
-		false,
-		d2resource.CharacterSelectAssassinSelected,
-		"",
-		d2resource.CharacterSelectAssassinBackWalk,
-		"",
-		rect(assRectMinX, assRectMinY, assRectMaxX, assRectMaxY),
-		d2resource.SFXAssassinSelect,
-		d2resource.SFXAssassinDeselect,
-		point(assPosX, assPosY),
-		assIdleLength,
-		assForwardLength,
-		assBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectAssassinUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectAssassinUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectAssassinForwardWalk,
+		forwardWalkOverlayAnimationPath: "",
+		forwardWalkOverlayBlend:         false,
+		selectedAnimationPath:           d2resource.CharacterSelectAssassinSelected,
+		selectedOverlayAnimationPath:    "",
+		backWalkAnimationPath:           d2resource.CharacterSelectAssassinBackWalk,
+		backWalkOverlayAnimationPath:    "",
+		selectionBounds:                 rect(assRectMinX, assRectMinY, assRectMaxX, assRectMaxY),
+		selectSfx:                       d2resource.SFXAssassinSelect,
+		deselectSfx:                     d2resource.SFXAssassinDeselect,
+		position:                        point(assPosX, assPosY),
+		idlePlayLengthMs:                assIdleLength,
+		forwardWalkPlayLengthMs:         assForwardLength,
+		backWalkPlayLengthMs:            assBackLength,
 	}
 
 	configs[d2enum.HeroDruid] = &heroRenderConfig{
-		d2resource.CharacterSelectDruidUnselected,
-		d2resource.CharacterSelectDruidUnselectedH,
-		d2resource.CharacterSelectDruidForwardWalk,
-		"",
-		false,
-		d2resource.CharacterSelectDruidSelected,
-		"",
-		d2resource.CharacterSelectDruidBackWalk,
-		"",
-		rect(druRectMinX, druRectMinY, druRectMaxX, druRectMaxY),
-		d2resource.SFXDruidSelect,
-		d2resource.SFXDruidDeselect,
-		point(druPosX, druPosY),
-		druIdleLength,
-		druForwardLength,
-		druBackLength,
+		idleAnimationPath:               d2resource.CharacterSelectDruidUnselected,
+		idleSelectedAnimationPath:       d2resource.CharacterSelectDruidUnselectedH,
+		forwardWalkAnimationPath:        d2resource.CharacterSelectDruidForwardWalk,
+		forwardWalkOverlayAnimationPath: "",
+		forwardWalkOverlayBlend:         false,
+		selectedAnimationPath:           d2resource.CharacterSelectDruidSelected,
+		selectedOverlayAnimationPath:    "",
+		backWalkAnimationPath:           d2resource.CharacterSelectDruidBackWalk,
+		backWalkOverlayAnimationPath:    "",
+		selectionBounds:                 rect(druRectMinX, druRectMinY, druRectMaxX, druRectMaxY),
+		selectSfx:                       d2resource.SFXDruidSelect,
+		deselectSfx:                     d2resource.SFXDruidDeselect,
+		position:                        point(druPosX, druPosY),
+		idlePlayLengthMs:                druIdleLength,
+		forwardWalkPlayLengthMs:         druForwardLength,
+		backWalkPlayLengthMs:            druBackLength,
 	}
 
 	return configs
@@ -244,19 +244,19 @@ func getHeroRenderConfiguration() map[d2enum.Hero]*heroRenderConfig {
 
 // HeroRenderInfo stores the rendering information of a hero for the Select Hero Class screen
 type HeroRenderInfo struct {
-	Stance                   d2enum.HeroStance
-	IdleSprite               *d2ui.Sprite
-	IdleSelectedSprite       *d2ui.Sprite
+	DeselectSfx              d2interface.SoundEffect
+	SelectSfx                d2interface.SoundEffect
+	shc                      *SelectHeroClass
 	ForwardWalkSprite        *d2ui.Sprite
 	ForwardWalkSpriteOverlay *d2ui.Sprite
 	SelectedSprite           *d2ui.Sprite
 	SelectedSpriteOverlay    *d2ui.Sprite
 	BackWalkSprite           *d2ui.Sprite
 	BackWalkSpriteOverlay    *d2ui.Sprite
+	IdleSelectedSprite       *d2ui.Sprite
+	IdleSprite               *d2ui.Sprite
 	SelectionBounds          image.Rectangle
-	SelectSfx                d2interface.SoundEffect
-	DeselectSfx              d2interface.SoundEffect
-	shc                      *SelectHeroClass
+	Stance                   d2enum.HeroStance
 }
 
 func (hri *HeroRenderInfo) advance(elapsed float64) {
@@ -314,10 +314,10 @@ func CreateSelectHeroClass(
 
 // SelectHeroClass represents the Select Hero Class screen
 type SelectHeroClass struct {
+	navigator       d2interface.Navigator
+	audioProvider   d2interface.AudioProvider
+	renderer        d2interface.Renderer
 	asset           *d2asset.AssetManager
-	uiManager       *d2ui.UIManager
-	bgImage         *d2ui.Sprite
-	campfire        *d2ui.Sprite
 	headingLabel    *d2ui.Label
 	heroClassLabel  *d2ui.Label
 	heroDesc1Label  *d2ui.Label
@@ -328,21 +328,19 @@ type SelectHeroClass struct {
 	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
 	*d2inventory.InventoryItemFactory
 	*d2hero.HeroStateFactory
-	selectedHero       d2enum.Hero
+	campfire           *d2ui.Sprite
 	exitButton         *d2ui.Button
 	okButton           *d2ui.Button
 	expansionCheckbox  *d2ui.Checkbox
 	expansionCharLabel *d2ui.Label
 	hardcoreCheckbox   *d2ui.Checkbox
 	hardcoreCharLabel  *d2ui.Label
-	connectionType     d2clientconnectiontype.ClientConnectionType
-	connectionHost     string
-
-	audioProvider d2interface.AudioProvider
-	renderer      d2interface.Renderer
-	navigator     d2interface.Navigator
-
+	bgImage            *d2ui.Sprite
+	uiManager          *d2ui.UIManager
 	*d2util.Logger
+	connectionHost string
+	connectionType d2clientconnectiontype.ClientConnectionType
+	selectedHero   d2enum.Hero
 }
 
 // OnLoad loads the resources for the Select Hero Class screen

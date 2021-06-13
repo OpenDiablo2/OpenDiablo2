@@ -129,11 +129,11 @@ func CreateMainMenu(
 
 // MainMenu represents the main menu
 type MainMenu struct {
+	inputManager        d2interface.InputManager
+	navigator           d2interface.Navigator
+	audioProvider       d2interface.AudioProvider
+	renderer            d2interface.Renderer
 	tcpIPBackground     *d2ui.Sprite
-	trademarkBackground *d2ui.Sprite
-	background          *d2ui.Sprite
-	diabloLogoLeft      *d2ui.Sprite
-	diabloLogoRight     *d2ui.Sprite
 	diabloLogoLeftBack  *d2ui.Sprite
 	diabloLogoRightBack *d2ui.Sprite
 	serverIPBackground  *d2ui.Sprite
@@ -163,21 +163,18 @@ type MainMenu struct {
 	joinTipLabel        *d2ui.Label
 	hostTipLabel        *d2ui.Label
 	tcpJoinGameEntry    *d2ui.TextBox
-	screenMode          mainMenuScreenMode
-	leftButtonHeld      bool
-
-	asset         *d2asset.AssetManager
-	inputManager  d2interface.InputManager
-	renderer      d2interface.Renderer
-	audioProvider d2interface.AudioProvider
-	scriptEngine  *d2script.ScriptEngine // nolint:structcheck,unused // it will be used...
-	navigator     d2interface.Navigator
-	uiManager     *d2ui.UIManager
-	heroState     *d2hero.HeroStateFactory
-
-	buildInfo BuildInfo
-
+	heroState           *d2hero.HeroStateFactory
+	uiManager           *d2ui.UIManager
+	asset               *d2asset.AssetManager
+	diabloLogoRight     *d2ui.Sprite
+	diabloLogoLeft      *d2ui.Sprite
+	background          *d2ui.Sprite
+	scriptEngine        *d2script.ScriptEngine
+	trademarkBackground *d2ui.Sprite
 	*d2util.Logger
+	buildInfo      BuildInfo
+	screenMode     mainMenuScreenMode
+	leftButtonHeld bool
 }
 
 // OnLoad is called to load the resources for the main menu

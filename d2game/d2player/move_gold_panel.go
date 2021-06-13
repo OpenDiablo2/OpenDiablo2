@@ -49,21 +49,19 @@ func NewMoveGoldPanel(asset *d2asset.AssetManager,
 
 // MoveGoldPanel represents the move gold panel
 type MoveGoldPanel struct {
-	asset        *d2asset.AssetManager
+	actionLabel2 *d2ui.Label
 	uiManager    *d2ui.UIManager
 	panel        *d2ui.Sprite
 	onCloseCb    func()
 	panelGroup   *d2ui.WidgetGroup
-	gold         int
-	actionLabel1 *d2ui.Label
-	actionLabel2 *d2ui.Label
 	value        *d2ui.TextBox
-
+	actionLabel1 *d2ui.Label
+	asset        *d2asset.AssetManager
+	*d2util.Logger
+	gold    int
 	originX int
 	originY int
 	isOpen  bool
-
-	*d2util.Logger
 }
 
 // Load the data for the move gold panel
