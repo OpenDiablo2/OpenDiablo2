@@ -136,7 +136,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 				continue
 			}
 
-			objectRecord := mr.factory.asset.Records.Object.Details[lookup.ObjectsTxtId]
+			objectRecord := mr.factory.asset.Records.Object.Details[lookup.ObjectsTxtID]
 
 			if objectRecord != nil {
 				// nolint:gomnd // constant

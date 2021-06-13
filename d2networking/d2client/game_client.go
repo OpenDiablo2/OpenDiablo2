@@ -266,7 +266,6 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 			player.SetIsInTown(tile.RegionType == d2enum.RegionAct1Town)
 
 			err := player.SetAnimationMode(player.GetAnimationMode())
-
 			if err != nil {
 				fmtStr := "GameClient: error setting animation mode for player %s: %s"
 				g.Errorf(fmtStr, player.ID(), err)
@@ -394,9 +393,8 @@ func (g *GameClient) createMissileEntity(
 	missileEntity, err := g.MapEngine.NewMissile(
 		int(player.Position.X()),
 		int(player.Position.Y()),
-		g.asset.Records.Missiles[missileRecord.Id],
+		g.asset.Records.Missiles[missileRecord.ID],
 	)
-
 	if err != nil {
 		return nil, err
 	}

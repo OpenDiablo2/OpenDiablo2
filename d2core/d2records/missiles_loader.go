@@ -16,7 +16,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	for d.Next() {
 		record := &MissileRecord{
 			Name: d.String("Missile"),
-			Id:   d.Number("Id"),
+			ID:   d.Number("Id"),
 
 			ClientMovementFunc:  d.Number("pCltDoFunc"),
 			ClientCollisionFunc: d.Number("pCltHitFunc"),
@@ -296,7 +296,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			},
 		}
 
-		records[record.Id] = record
+		records[record.ID] = record
 		r.missilesByName[sanitizeMissilesKey(record.Name)] = record
 	}
 

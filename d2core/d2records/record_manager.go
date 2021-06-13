@@ -398,7 +398,7 @@ func (r *RecordManager) initObjectRecords(lookups []ObjectLookupRecord) {
 			records[record.Act][record.Type] = make([]*ObjectLookupRecord, 1000)
 		}
 
-		records[record.Act][record.Type][record.Id] = record
+		records[record.Act][record.Type][record.ID] = record
 	}
 
 	r.Object.Lookup = records

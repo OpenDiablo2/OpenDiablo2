@@ -19,7 +19,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 type mainMenuScreenMode int
@@ -169,7 +168,6 @@ type MainMenu struct {
 	diabloLogoRight     *d2ui.Sprite
 	diabloLogoLeft      *d2ui.Sprite
 	background          *d2ui.Sprite
-	scriptEngine        *d2script.ScriptEngine
 	trademarkBackground *d2ui.Sprite
 	*d2util.Logger
 	buildInfo      BuildInfo

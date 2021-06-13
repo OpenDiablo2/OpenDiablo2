@@ -11,7 +11,7 @@ type (
 	// MonStatRecord represents a single row from `data/global/excel/monstats.txt` in the MPQ files.
 	// These records are used for creating monsters.
 	MonStatRecord struct {
-		TreasureClassQuestCompleteId   string
+		TreasureClassQuestCompleteID   string
 		Key                            string
 		BaseKey                        string
 		NextKey                        string
@@ -24,8 +24,8 @@ type (
 		AnimationDirectoryToken        string
 		SpawnKey                       string
 		SpawnAnimationKey              string
-		MinionId1                      string
-		MinionId2                      string
+		MinionID1                      string
+		MinionID2                      string
 		SoundKeyNormal                 string
 		SoundKeySpecial                string
 		MissileA1                      string
@@ -36,14 +36,14 @@ type (
 		MissileS4                      string
 		MissileC                       string
 		MissileSQ                      string
-		SkillId1                       string
-		SkillId2                       string
-		SkillId3                       string
-		SkillId4                       string
-		SkillId5                       string
-		SkillId6                       string
-		SkillId7                       string
-		SkillId8                       string
+		SkillID1                       string
+		SkillID2                       string
+		SkillID3                       string
+		SkillID4                       string
+		SkillID5                       string
+		SkillID6                       string
+		SkillID7                       string
+		SkillID8                       string
 		SkillAnimation1                string
 		SkillAnimation2                string
 		SkillAnimation3                string
@@ -52,7 +52,7 @@ type (
 		SkillAnimation6                string
 		SkillAnimation7                string
 		SkillAnimation8                string
-		DamageSkillId                  string
+		DamageSkillID                  string
 		ElementAttackMode1             string
 		ElementAttackMode2             string
 		ElementAttackMode3             string
@@ -71,9 +71,9 @@ type (
 		TreasureClassQuestNormal       string
 		TreasureClassQuestNightmare    string
 		TreasureClassQuestHell         string
-		TreasureClassQuestTriggerId    string
+		TreasureClassQuestTriggerID    string
 		ResistanceMagicNightmare       int
-		PaletteId                      int
+		PaletteID                      int
 		SpawnOffsetX                   int
 		SpawnOffsetY                   int
 		MinionPartyMin                 int

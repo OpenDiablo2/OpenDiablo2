@@ -102,7 +102,7 @@ type MissileRecord struct {
 	ServerMovementFunc     int
 	ClientMovementFunc     int
 	ClientCollisionFunc    int
-	Id                     int
+	ID                     int
 	ServerCollisionFunc    int
 	ServerDamageFunc       int
 	Velocity               int

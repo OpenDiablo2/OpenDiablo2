@@ -37,9 +37,9 @@ type ObjectLookupRecord struct {
 	S3            string
 	Act           int
 	Direction     int
-	MonstatsTxtId int
-	ObjectsTxtId  int
-	Id            int
+	MonstatsTxtID int
+	ObjectsTxtID  int
+	ID            int
 	Type          d2enum.ObjectType
 	Index         int
 }
