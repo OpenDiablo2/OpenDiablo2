@@ -18,6 +18,6 @@ type UniqueMonsterAffixes map[string]*UniqueMonsterAffixRecord
 // UniqueMonsterAffixRecord is a string table key and a bit vector for the possible monster types
 // that the suffix can be used with.
 type UniqueMonsterAffixRecord struct {
-	StringTableKey   string
 	MonsterTypeFlags *akara.BitSet
+	StringTableKey   string
 }

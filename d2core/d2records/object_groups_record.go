@@ -15,22 +15,11 @@ type ObjectGroups map[int]*ObjectGroupRecord
 // ObjectGroupRecord represents a single line in objgroup.txt.
 // Information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=394].
 type ObjectGroupRecord struct {
-	// GroupName is the name of the group.
+	Members   *[objectsGroupSize]ObjectGroupMember
 	GroupName string
-
-	// Offset is the ID of the group, referred to by Levels.txt.
-	Offset int
-
-	// Members are the objects in the group.
-	Members *[objectsGroupSize]ObjectGroupMember
-
-	// Shrines determines whether this is a group of shrines.
-	// Note: for shrine groups, densities must be set to 0.
-	Shrines bool
-
-	// Wells determines whether this is a group of wells.
-	// Note: for wells groups, densities must be set to 0.
-	Wells bool
+	Offset    int
+	Shrines   bool
+	Wells     bool
 }
 
 // ObjectGroupMember represents a member of an object group.

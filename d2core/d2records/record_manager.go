@@ -35,50 +35,13 @@ func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
-	*d2util.Logger
-	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
-	Animation    struct {
-		Data  *d2animdata.AnimationData
-		Token struct {
-			Player    PlayerTypes
-			Composite CompositeTypes
-			Armor     ArmorTypes
-			Weapon    WeaponClasses
-			HitClass  HitClasses
-		}
-	}
-	BodyLocations
-	Calculation struct {
-		Skills   Calculations
-		Missiles Calculations
-	}
-	Character struct {
-		Classes PlayerClasses
-		Events
-		Experience ExperienceBreakpoints
-		MaxLevel   ExperienceMaxLevels
-		Modes      PlayerModes
-		Stats      CharStats
-	}
-	ComponentCodes
-	Colors
-	DifficultyLevels
-	ElemTypes
-	Gamble
-	Hireling struct {
-		Details      Hirelings
-		Descriptions HirelingDescriptions
-	}
 	Item struct {
-		All CommonItems // NOTE: populated when armor, weapons, and misc items are ALL loaded
-
-		Armors  CommonItems
-		Misc    CommonItems
-		Weapons CommonItems
-
-		Equivalency         ItemEquivalenceMap      // NOTE: populated when all items are loaded
-		EquivalenceByRecord ItemEquivalenceByRecord // NOTE: populated when all items are loaded
-
+		All                 CommonItems
+		Armors              CommonItems
+		Misc                CommonItems
+		Weapons             CommonItems
+		Equivalency         ItemEquivalenceMap
+		EquivalenceByRecord ItemEquivalenceByRecord
 		AutoMagic
 		Belts
 		Books
@@ -113,21 +76,6 @@ type RecordManager struct {
 		Unique UniqueItems
 		StorePages
 	}
-	Layout struct {
-		Inventory
-		Overlays
-	}
-	Level struct {
-		AutoMaps
-		Details LevelDetails
-		Maze    LevelMazeDetails
-		Presets LevelPresets
-		Sub     LevelSubstitutions
-		Types   LevelTypes
-		Warp    LevelWarps
-	}
-	Missiles
-	missilesByName
 	Monster struct {
 		AI        MonsterAI
 		Equipment MonsterEquipment
@@ -152,7 +100,69 @@ type RecordManager struct {
 			Super        SuperUniques
 		}
 	}
+	Level struct {
+		AutoMaps
+		Details LevelDetails
+		Maze    LevelMazeDetails
+		Presets LevelPresets
+		Sub     LevelSubstitutions
+		Types   LevelTypes
+		Warp    LevelWarps
+	}
+	Character struct {
+		Classes PlayerClasses
+		Events
+		Experience ExperienceBreakpoints
+		MaxLevel   ExperienceMaxLevels
+		Modes      PlayerModes
+		Stats      CharStats
+	}
+	Animation struct {
+		Data  *d2animdata.AnimationData
+		Token struct {
+			Player    PlayerTypes
+			Composite CompositeTypes
+			Armor     ArmorTypes
+			Weapon    WeaponClasses
+			HitClass  HitClasses
+		}
+	}
+	Hireling struct {
+		Details      Hirelings
+		Descriptions HirelingDescriptions
+	}
+	Calculation struct {
+		Skills   Calculations
+		Missiles Calculations
+	}
+	Skill struct {
+		Details      SkillDetails
+		Descriptions SkillDescriptions
+	}
+	Layout struct {
+		Inventory
+		Overlays
+	}
+	Sound struct {
+		Details     SoundDetails
+		Environment SoundEnvironments
+	}
+	*d2util.Logger
+	Gamble
+	ElemTypes
+	DifficultyLevels
+	Colors
+	Missiles
+	missilesByName
+	ComponentCodes
 	NPCs
+	BodyLocations
+	PetTypes
+	Properties
+	boundLoaders map[ // NOTE: populated when armor, weapons, and misc items are ALL loaded
+	// NOTE: populated when all items are loaded
+	string][]recordLoader
+	States
 	Object struct {
 		Details ObjectDetails
 		Lookup  IndexedObjects
@@ -160,17 +170,6 @@ type RecordManager struct {
 		Shrines
 		Types ObjectTypes
 	}
-	PetTypes
-	Properties
-	Skill struct {
-		Details      SkillDetails
-		Descriptions SkillDescriptions
-	}
-	Sound struct {
-		Details     SoundDetails
-		Environment SoundEnvironments
-	}
-	States
 }
 
 func (r *RecordManager) init() error { // nolint:funlen // can't reduce

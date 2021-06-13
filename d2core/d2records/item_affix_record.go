@@ -18,43 +18,34 @@ type ItemAffixCommonModifier = PropertyDescriptor
 
 // ItemAffixCommonGroup is a grouping that is common between prefix/suffix
 type ItemAffixCommonGroup struct {
-	ID      int
 	Members map[string]*ItemAffixCommonRecord
+	ID      int
 }
 
 // ItemAffixCommonRecord is a common definition that both prefix and suffix use
 type ItemAffixCommonRecord struct {
-	Group     *ItemAffixCommonGroup
-	Modifiers []*ItemAffixCommonModifier
-
-	ItemInclude []string
-	ItemExclude []string
-
+	Group          *ItemAffixCommonGroup
 	Name           string
 	Class          string
 	TransformColor string
-
-	Version int
-	Type    d2enum.ItemAffixSubType
-
-	Level    int
-	MaxLevel int
-
-	LevelReq      int
-	ClassLevelReq int
-
-	Frequency int
-	GroupID   int
-
-	PriceAdd   int
-	PriceScale int
-
-	IsPrefix bool
-	IsSuffix bool
-
-	Spawnable bool
-	Rare      bool
-	Transform bool
+	Modifiers      []*ItemAffixCommonModifier
+	ItemInclude    []string
+	ItemExclude    []string
+	PriceScale     int
+	Type           d2enum.ItemAffixSubType
+	Level          int
+	MaxLevel       int
+	Version        int
+	ClassLevelReq  int
+	Frequency      int
+	GroupID        int
+	PriceAdd       int
+	LevelReq       int
+	IsPrefix       bool
+	IsSuffix       bool
+	Spawnable      bool
+	Rare           bool
+	Transform      bool
 }
 
 // AddMember adds an affix to the group
