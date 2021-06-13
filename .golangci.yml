@@ -27,11 +27,6 @@ linters-settings:
   govet:
     enable-all: true
     check-shadowing: true
-    disable:
-      # While struct sizes could be smaller if fields aligned properly, that also leads
-      # to possibly non-intuitive layout of struct fields (harder to read). Disable
-      # `fieldalignment` check here until we evaluate if it is worthwhile.
-      - fieldalignment
   lll:
     line-length: 140
   misspell:
