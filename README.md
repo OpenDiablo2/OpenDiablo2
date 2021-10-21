@@ -1,3 +1,9 @@
+# NOTE 
+This project is currently being split into an Engine (called Abyss Engine) and the game as a project (still called OpenDiablo 2). The new project repo is located here:
+
+https://github.com/AbyssEngine/
+
+
 # OpenDiablo2
 
 ![CircleCI](https://img.shields.io/circleci/build/github/OpenDiablo2/OpenDiablo2/master)
