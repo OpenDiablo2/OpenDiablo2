@@ -49,6 +49,16 @@ func CreateUDPClientConnection(udpConnection *net.UDPConn, id string, l d2util.L
 
 // GetUniqueID returns UDPClientConnection.id
 func (u UDPClientConnection) GetUniqueID() string {
+		result := &UDPClientConnection{
+		id:            id,
+		address:       address,
+		udpConnection: udpConnection,
+	}
+
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetPrefix(logPrefix)
+	result.Logger.SetLevel(l)
+
 	return u.id
 }
 
