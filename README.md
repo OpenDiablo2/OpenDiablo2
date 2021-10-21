@@ -1,8 +1,10 @@
 # NOTE 
-This project is currently being split into an Engine (called Abyss Engine) and the game as a project (still called OpenDiablo 2). The new project repo is located here:
-
+<image align="left" src="https://user-images.githubusercontent.com/242652/138285004-b27d55b3-163b-4fe3-a8ff-6c34518044bd.png">
+This project is currently being split into an Engine+Toolset (called Abyss Engine) and the game as a project (still called OpenDiablo 2). The new project repo is located here:
+<br /><br />
 https://github.com/AbyssEngine/
 
+<br clear="all" />
 
 # OpenDiablo2
 
