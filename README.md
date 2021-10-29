@@ -77,7 +77,7 @@ _Stay awhile and listen_ ...
 *   Diablo2 Logo
     *   Jose Pardilla (th3-prophetman)
 *   DT1 File Specifications
-    *   Paul SIRAMY (http://paul.siramy.free.fr/\_divers/dt1\_doc/)
+    *   Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
 *   Other Specifications and general info
     *   Various users on [Phrozen Keep](https://d2mods.info/home.php)
 
