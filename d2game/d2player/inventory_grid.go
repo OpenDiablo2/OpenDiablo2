@@ -67,16 +67,15 @@ func NewItemGrid(asset *d2asset.AssetManager,
 type ItemGrid struct {
 	asset          *d2asset.AssetManager
 	uiManager      *d2ui.UIManager
-	items          []InventoryItem
-	equipmentSlots map[d2enum.EquippedSlot]EquipmentSlot
-	width          int
-	height         int
-	originX        int
-	originY        int
 	sprites        map[string]*d2ui.Sprite
-	slotSize       int
-
+	equipmentSlots map[d2enum.EquippedSlot]EquipmentSlot
 	*d2util.Logger
+	items    []InventoryItem
+	height   int
+	originX  int
+	originY  int
+	slotSize int
+	width    int
 }
 
 // SlotToScreen translates slot coordinates to screen coordinates

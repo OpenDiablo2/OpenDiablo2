@@ -108,29 +108,25 @@ func NewPartyPanel(asset *d2asset.AssetManager,
 
 // PartyPanel represents the party panel
 type PartyPanel struct {
-	asset      *d2asset.AssetManager
-	uiManager  *d2ui.UIManager
-	panel      *d2ui.Sprite
-	bar        *d2ui.Sprite
-	heroState  *d2hero.HeroStatsState
-	heroName   string
-	labels     *StatsPanelLabels
-	onCloseCb  func()
-	panelGroup *d2ui.WidgetGroup
-
 	partyIndexes [d2enum.MaxPlayersInGame]*partyIndex
 	indexes      [d2enum.MaxPlayersInGame]*d2ui.WidgetGroup
-
-	players map[string]*d2mapentity.Player
-	me      *d2mapentity.Player
-
-	originX int
-	originY int
-	isOpen  bool
-	barX    int
-	barY    int
-
+	players      map[string]*d2mapentity.Player
+	uiManager    *d2ui.UIManager
+	panel        *d2ui.Sprite
+	me           *d2mapentity.Player
+	labels       *StatsPanelLabels
+	onCloseCb    func()
+	panelGroup   *d2ui.WidgetGroup
+	bar          *d2ui.Sprite
+	heroState    *d2hero.HeroStatsState
+	asset        *d2asset.AssetManager
 	*d2util.Logger
+	heroName string
+	originX  int
+	originY  int
+	barX     int
+	barY     int
+	isOpen   bool
 }
 
 // newPartyIndex creates new party index
@@ -199,13 +195,12 @@ func (s *PartyPanel) newPartyIndex() *partyIndex {
 
 // partyIndex represents a party index
 type partyIndex struct {
-	asset *d2asset.AssetManager
-	me    *d2mapentity.Player
-
+	asset                        *d2asset.AssetManager
+	me                           *d2mapentity.Player
 	hero                         *d2mapentity.Player
 	name                         *d2ui.Label
 	nameTooltip                  *d2ui.Tooltip
-	nameRect                     d2geom.Rectangle
+	inviteAcceptButton           *d2ui.Button
 	class                        *d2ui.Label
 	level                        *d2ui.Label
 	relationshipSwitcher         *d2ui.SwitchableButton
@@ -217,7 +212,7 @@ type partyIndex struct {
 	listeningSwitcher            *d2ui.SwitchableButton
 	listeningActiveTooltip       *d2ui.Tooltip
 	listeningInactiveTooltip     *d2ui.Tooltip
-	inviteAcceptButton           *d2ui.Button
+	nameRect                     d2geom.Rectangle
 	relationships                d2enum.PlayersRelationships
 }
 

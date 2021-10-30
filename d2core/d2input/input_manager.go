@@ -10,13 +10,11 @@ import (
 
 type inputManager struct {
 	inputService d2interface.InputService
+	entries      handlerEntryList
 	cursorX      int
 	cursorY      int
-
-	buttonMod d2enum.MouseButtonMod
-	keyMod    d2enum.KeyMod
-
-	entries handlerEntryList
+	buttonMod    d2enum.MouseButtonMod
+	keyMod       d2enum.KeyMod
 }
 
 // NewInputManager returns a new input manager instance
@@ -140,7 +138,7 @@ func (im *inputManager) updatePressedKey(k d2enum.Key, e HandlerEvent) {
 
 func (im *inputManager) updateInputChars(eventBase HandlerEvent) {
 	if chars := im.inputService.InputChars(); len(chars) > 0 {
-		event := KeyCharsEvent{eventBase, chars}
+		event := KeyCharsEvent{chars, eventBase}
 
 		fn := func(handler d2interface.InputEventHandler) bool {
 			if l, ok := handler.(d2interface.KeyCharsHandler); ok {

@@ -23,14 +23,13 @@ const logPrefix = "Remote Client"
 // RemoteClientConnection is the implementation of ClientConnection
 // for a remote client.
 type RemoteClientConnection struct {
+	clientListener d2networking.ClientListener
 	asset          *d2asset.AssetManager
 	heroState      *d2hero.HeroStateFactory
-	clientListener d2networking.ClientListener // The GameClient
-	uniqueID       string                      // Unique ID generated on construction
-	tcpConnection  *net.TCPConn                // UDP connection to the server
-	active         bool                        // The connection is currently open
-
+	tcpConnection  *net.TCPConn
 	*d2util.Logger
+	uniqueID string
+	active   bool
 }
 
 // Create constructs a new RemoteClientConnection

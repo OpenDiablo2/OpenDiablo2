@@ -54,21 +54,21 @@ const (
 )
 
 type buttonStyleConfig struct {
-	segmentsX     int
-	segmentsY     int
 	animationPath string
 	palettePath   string
+	segmentsX     int
+	segmentsY     int
 	fontStyle     FontStyle
 	textOffset    int
 }
 
 func getButtonStyleConfig(b ButtonStyle) *buttonStyleConfig {
 	buttonStyleConfigs := map[ButtonStyle]*buttonStyleConfig{
-		ButtonStyleMedium:   {1, 1, d2resource.MediumButtonBlank, d2resource.PaletteUnits, FontStyleExocet10, 0},
-		ButtonStyleOkCancel: {1, 1, d2resource.CancelButton, d2resource.PaletteUnits, FontStyleRediculous, 0},
-		ButtonStyleShort:    {1, 1, d2resource.ShortButtonBlank, d2resource.PaletteUnits, FontStyleRediculous, -1},
-		ButtonStyleTall:     {1, 1, d2resource.TallButtonBlank, d2resource.PaletteUnits, FontStyleExocet10, 5},
-		ButtonStyleWide:     {2, 1, d2resource.WideButtonBlank, d2resource.PaletteUnits, FontStyleExocet10, 1},
+		ButtonStyleMedium:   {d2resource.MediumButtonBlank, d2resource.PaletteUnits, 1, 1, FontStyleExocet10, 0},
+		ButtonStyleOkCancel: {d2resource.CancelButton, d2resource.PaletteUnits, 1, 1, FontStyleRediculous, 0},
+		ButtonStyleShort:    {d2resource.ShortButtonBlank, d2resource.PaletteUnits, 1, 1, FontStyleRediculous, -1},
+		ButtonStyleTall:     {d2resource.TallButtonBlank, d2resource.PaletteUnits, 1, 1, FontStyleExocet10, 5},
+		ButtonStyleWide:     {d2resource.WideButtonBlank, d2resource.PaletteUnits, 2, 1, FontStyleExocet10, 1},
 	}
 
 	return buttonStyleConfigs[b]

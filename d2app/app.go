@@ -54,31 +54,31 @@ const (
 
 // App represents the main application for the engine
 type App struct {
-	lastTime          float64
-	lastScreenAdvance float64
-	showFPS           bool
-	timeScale         float64
-	captureState      captureState
+	terminal      d2interface.Terminal
+	errorMessage  error
+	audio         d2interface.AudioProvider
+	renderer      d2interface.Renderer
+	inputManager  d2interface.InputManager
+	tAllocSamples *ring.Ring
+	guiManager    *d2gui.GuiManager
+	screen        *d2screen.ScreenManager
+	config        *d2config.Configuration
+	*d2util.Logger
+	scriptEngine *d2script.ScriptEngine
+	asset        *d2asset.AssetManager
+	ui           *d2ui.UIManager
+	*Options
+	charset           string
+	language          string
+	gitCommit         string
+	gitBranch         string
 	capturePath       string
 	captureFrames     []*image.RGBA
-	gitBranch         string
-	gitCommit         string
-	language          string
-	charset           string
-	asset             *d2asset.AssetManager
-	inputManager      d2interface.InputManager
-	terminal          d2interface.Terminal
-	scriptEngine      *d2script.ScriptEngine
-	audio             d2interface.AudioProvider
-	renderer          d2interface.Renderer
-	screen            *d2screen.ScreenManager
-	ui                *d2ui.UIManager
-	tAllocSamples     *ring.Ring
-	guiManager        *d2gui.GuiManager
-	config            *d2config.Configuration
-	*d2util.Logger
-	errorMessage error
-	*Options
+	captureState      captureState
+	timeScale         float64
+	lastScreenAdvance float64
+	lastTime          float64
+	showFPS           bool
 }
 
 // Options is used to store all of the app options that can be set with arguments
@@ -141,7 +141,9 @@ func (a *App) startDedicatedServer() error {
 		return srvErr
 	}
 
-	c := make(chan os.Signal)
+	// We must use a buffered channel or risk missing the signal
+	// if we're not ready to receive when the signal is sent.
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // This traps Control-c to safely shut down the server
 
 	go func() {

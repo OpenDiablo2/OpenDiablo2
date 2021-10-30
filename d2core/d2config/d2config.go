@@ -8,17 +8,17 @@ import (
 
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
-	MpqLoadOrder    []string
 	MpqPath         string
+	Backend         string
+	path            string
+	MpqLoadOrder    []string
 	TicksPerSecond  int
+	BgmVolume       float64
 	FpsCap          int
 	SfxVolume       float64
-	BgmVolume       float64
 	FullScreen      bool
 	RunInBackground bool
 	VsyncEnabled    bool
-	Backend         string
-	path            string
 }
 
 // Save saves the configuration object to disk

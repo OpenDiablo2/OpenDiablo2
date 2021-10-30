@@ -24,19 +24,17 @@ const (
 const defaultPlayLength = 1.0
 
 type animationFrame struct {
-	decoded bool
-
+	image   d2interface.Surface
 	width   int
 	height  int
 	offsetX int
 	offsetY int
-
-	image d2interface.Surface
+	decoded bool
 }
 
 type animationDirection struct {
-	decoded bool
 	frames  []animationFrame
+	decoded bool
 }
 
 // static check that we implement the animation interface
@@ -44,22 +42,22 @@ var _ d2interface.Animation = &Animation{}
 
 // Animation has directionality, play modes, and frame counting
 type Animation struct {
+	colorMod         color.Color
 	renderer         d2interface.Renderer
 	onBindRenderer   func(renderer d2interface.Renderer) error
 	directions       []animationDirection
-	effect           d2enum.DrawEffect
-	colorMod         color.Color
+	playedCount      int
 	frameIndex       int
 	directionIndex   int
 	lastFrameTime    float64
-	playedCount      int
+	effect           d2enum.DrawEffect
 	playMode         playMode
-	playLength       float64 // https://github.com/OpenDiablo2/OpenDiablo2/issues/813
+	playLength       float64
 	subStartingFrame int
 	subEndingFrame   int
 	originAtBottom   bool
 	playLoop         bool
-	hasSubLoop       bool // runs after first animation ends
+	hasSubLoop       bool
 	hasShadow        bool
 }
 

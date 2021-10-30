@@ -12,7 +12,7 @@ type ExperienceMaxLevels map[d2enum.Hero]int
 // ExperienceBreakpointRecord describes the experience points required to
 // gain a level for all character classes
 type ExperienceBreakpointRecord struct {
-	Level           int
 	HeroBreakpoints map[d2enum.Hero]int
+	Level           int
 	Ratio           int
 }

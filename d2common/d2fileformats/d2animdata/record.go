@@ -2,10 +2,10 @@ package d2animdata
 
 // AnimationDataRecord represents a single record from the AnimData.d2 file
 type AnimationDataRecord struct {
+	events             map[int]AnimationEvent
 	name               string
 	framesPerDirection uint32
 	speed              uint16
-	events             map[int]AnimationEvent
 }
 
 // FramesPerDirection returns frames per direction value

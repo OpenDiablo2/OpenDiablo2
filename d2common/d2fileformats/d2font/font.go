@@ -28,9 +28,9 @@ const (
 // Font represents a displayable font
 type Font struct {
 	sheet  d2interface.Animation
-	table  []byte
-	Glyphs map[rune]*d2fontglyph.FontGlyph
 	color  color.Color
+	Glyphs map[rune]*d2fontglyph.FontGlyph
+	table  []byte
 }
 
 // Load loads a new font from byte slice

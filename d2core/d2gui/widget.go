@@ -33,20 +33,18 @@ type widget interface {
 }
 
 type widgetBase struct {
-	x         int
-	y         int
-	Sx        int
-	Sy        int
-	layer     int
-	visible   bool
-	expanding bool
-
-	offsetX int
-	offsetY int
-
 	mouseEnterHandler MouseMoveHandler
 	mouseLeaveHandler MouseMoveHandler
 	mouseClickHandler MouseHandler
+	x                 int
+	y                 int
+	Sx                int
+	offsetX           int
+	offsetY           int
+	Sy                int
+	layer             int
+	expanding         bool
+	visible           bool
 }
 
 // SetPosition sets the widget position

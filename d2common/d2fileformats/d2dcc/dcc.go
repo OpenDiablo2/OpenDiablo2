@@ -11,13 +11,13 @@ const directionOffsetMultiplier = 8
 
 // DCC represents a DCC file.
 type DCC struct {
-	Signature          int
+	fileData           []byte
+	Directions         []*DCCDirection
+	directionOffsets   []int
 	Version            int
 	NumberOfDirections int
 	FramesPerDirection int
-	Directions         []*DCCDirection
-	directionOffsets   []int
-	fileData           []byte
+	Signature          int
 }
 
 // Load loads a DCC file.

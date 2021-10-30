@@ -10,10 +10,10 @@ import (
 // KeyMap represents the key mappings of the game. Each game event
 // can be associated to 2 different keys. A key of -1 means none
 type KeyMap struct {
-	mutex              sync.RWMutex
 	mapping            map[d2enum.Key]d2enum.GameEvent
 	controls           map[d2enum.GameEvent]*KeyBinding
 	keyToStringMapping map[d2enum.Key]string
+	mutex              sync.RWMutex
 }
 
 // KeyBindingType defines whether it's a primary or

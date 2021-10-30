@@ -11,10 +11,10 @@ import (
 // entity.
 type CastPacket struct {
 	SourceEntityID string  `json:"sourceEntityId"`
+	TargetEntityID string  `json:"targetEntityId"`
 	SkillID        int     `json:"skillId"`
 	TargetX        float64 `json:"targetX"`
 	TargetY        float64 `json:"targetY"`
-	TargetEntityID string  `json:"targetEntityId"`
 }
 
 // CreateCastPacket returns a NetPacket which declares a CastPacket with the

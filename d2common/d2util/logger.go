@@ -60,8 +60,8 @@ func NewLogger() *Logger {
 
 // Logger is used to write log messages, and can have a log level to determine verbosity
 type Logger struct {
-	prefix string
 	io.Writer
+	prefix       string
 	level        LogLevel
 	colorEnabled bool
 }

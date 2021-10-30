@@ -21,18 +21,17 @@ const (
 
 // Label is renderable text
 type Label struct {
+	blinkTimer time.Time
+	renderer   d2interface.Renderer
+	surface    d2interface.Surface
+	font       *d2font.Font
+	text       string
 	widgetBase
-
-	renderer    d2interface.Renderer
-	text        string
-	font        *d2font.Font
-	surface     d2interface.Surface
 	color       color.RGBA
 	hoverColor  color.RGBA
 	isHovered   bool
 	isBlinking  bool
 	isDisplayed bool
-	blinkTimer  time.Time
 }
 
 func createLabel(renderer d2interface.Renderer, text string, font *d2font.Font, col color.RGBA) (*Label, error) {

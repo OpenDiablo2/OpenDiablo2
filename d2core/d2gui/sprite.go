@@ -22,13 +22,11 @@ var _ widget = &Sprite{}
 
 // Sprite is an image
 type Sprite struct {
+	animation d2interface.Animation
 	widgetBase
-
 	segmentsX   int
 	segmentsY   int
 	frameOffset int
-
-	animation d2interface.Animation
 }
 
 // AnimatedSprite is a sprite that has animation

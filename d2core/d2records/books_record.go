@@ -6,14 +6,14 @@ type Books map[string]*BookRecord
 // BookRecord is a representation of a row from books.txt
 type BookRecord struct {
 	Name            string
-	Namco           string // The displayed name, where the string prefix is "Tome"
+	Namco           string
 	Completed       string
 	ScrollSpellCode string
 	BookSpellCode   string
-	Pspell          int
-	SpellIcon       int
 	ScrollSkill     string
 	BookSkill       string
+	Pspell          int
+	SpellIcon       int
 	BaseCost        int
 	CostPerCharge   int
 }

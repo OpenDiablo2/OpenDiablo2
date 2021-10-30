@@ -47,16 +47,15 @@ type ClickableWidget interface {
 // BaseWidget contains default functionality that all widgets share
 type BaseWidget struct {
 	manager        *UIManager
-	x              int
-	y              int
-	width          int
-	height         int
-	renderPriority RenderPriority
-	visible        bool
-
-	hovered        bool
 	onHoverStartCb func()
 	onHoverEndCb   func()
+	x              int
+	height         int
+	renderPriority RenderPriority
+	y              int
+	width          int
+	visible        bool
+	hovered        bool
 }
 
 // NewBaseWidget creates a new BaseWidget with defaults

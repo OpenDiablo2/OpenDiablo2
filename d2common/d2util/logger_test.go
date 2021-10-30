@@ -54,39 +54,39 @@ func Test_logger_LogLevels(t *testing.T) {
 	// for each log level we set, we will use different log methods (info, warning, etc) and check
 	// what the output in the writer is (clearing the writer data before each test)
 	tests := []struct {
-		logLevel LogLevel
 		expect   map[LogLevel]string
+		logLevel LogLevel
 	}{
-		{LogLevelDebug, map[LogLevel]string{
+		{map[LogLevel]string{
 			LogLevelError:   expectedError,
 			LogLevelWarning: expectedWarning,
 			LogLevelInfo:    expectedInfo,
 			LogLevelDebug:   expectedDebug,
-		}},
-		{LogLevelInfo, map[LogLevel]string{
+		}, LogLevelDebug},
+		{map[LogLevel]string{
 			LogLevelError:   expectedError,
 			LogLevelWarning: expectedWarning,
 			LogLevelInfo:    expectedInfo,
 			LogLevelDebug:   noMessage,
-		}},
-		{LogLevelWarning, map[LogLevel]string{
+		}, LogLevelInfo},
+		{map[LogLevel]string{
 			LogLevelError:   expectedError,
 			LogLevelWarning: expectedWarning,
 			LogLevelInfo:    noMessage,
 			LogLevelDebug:   noMessage,
-		}},
-		{LogLevelError, map[LogLevel]string{
+		}, LogLevelWarning},
+		{map[LogLevel]string{
 			LogLevelError:   expectedError,
 			LogLevelWarning: noMessage,
 			LogLevelInfo:    noMessage,
 			LogLevelDebug:   noMessage,
-		}},
-		{LogLevelNone, map[LogLevel]string{
+		}, LogLevelError},
+		{map[LogLevel]string{
 			LogLevelError:   noMessage,
 			LogLevelWarning: noMessage,
 			LogLevelInfo:    noMessage,
 			LogLevelDebug:   noMessage,
-		}},
+		}, LogLevelNone},
 	}
 
 	for idx := range tests {

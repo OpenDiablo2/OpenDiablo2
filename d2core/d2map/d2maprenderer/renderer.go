@@ -52,19 +52,18 @@ const (
 
 // MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
-	asset               *d2asset.AssetManager
-	renderer            d2interface.Renderer   // Used for drawing operations
-	mapEngine           *d2mapengine.MapEngine // The map engine that is being rendered
-	palette             d2interface.Palette    // The palette used for this map
-	viewport            *Viewport              // Used for rendering offsets
-	Camera              Camera                 // Used to determine where on the map we are rendering
-	imageCacheRecords   map[uint32]d2interface.Surface
-	mapDebugVisLevel    int     // Map debug visibility index (0=none, 1=tiles, 2=sub-tiles)
-	entityDebugVisLevel int     // Entity Debug visibility index (0=none, 1=vectors)
-	lastFrameTime       float64 // The last time the map was rendered
-	currentFrame        int     // Current render frame (for animations)
-
+	renderer          d2interface.Renderer
+	palette           d2interface.Palette
+	Camera            Camera
+	asset             *d2asset.AssetManager
+	mapEngine         *d2mapengine.MapEngine
+	viewport          *Viewport
+	imageCacheRecords map[uint32]d2interface.Surface
 	*d2util.Logger
+	mapDebugVisLevel    int
+	entityDebugVisLevel int
+	lastFrameTime       float64
+	currentFrame        int
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.

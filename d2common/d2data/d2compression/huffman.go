@@ -38,12 +38,12 @@ import (
 
 // linkedNode is a node which is both hierachcical (parent/child) and doubly linked (next/prev)
 type linkedNode struct {
-	decompressedValue int
-	weight            int
 	parent            *linkedNode
 	child0            *linkedNode
 	prev              *linkedNode
 	next              *linkedNode
+	decompressedValue int
+	weight            int
 }
 
 // createLinkedNode creates a linked node

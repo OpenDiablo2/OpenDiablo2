@@ -50,9 +50,9 @@ func newDCCAnimation(
 
 // DCCAnimation represents an animation decoded from DCC
 type DCCAnimation struct {
-	Animation
-	dcc     *d2dcc.DCC
 	palette d2interface.Palette
+	dcc     *d2dcc.DCC
+	Animation
 }
 
 func (a *DCCAnimation) init() error {

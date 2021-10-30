@@ -7,16 +7,16 @@ type LevelWarps map[int]*LevelWarpRecord
 // it describes the warp graphics offsets and dimensions for levels
 type LevelWarpRecord struct {
 	Name       string
-	ID         int
+	Direction  string
 	SelectX    int
 	SelectY    int
 	SelectDX   int
 	SelectDY   int
-	ExitWalkX  int
+	ID         int
 	ExitWalkY  int
 	OffsetX    int
 	OffsetY    int
-	LitVersion bool
 	Tiles      int
-	Direction  string
+	ExitWalkX  int
+	LitVersion bool
 }

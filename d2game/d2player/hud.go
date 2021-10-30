@@ -77,13 +77,13 @@ const (
 
 // HUD represents the always visible user interface of the game
 type HUD struct {
-	actionableRegions  []actionableRegion
+	panelBackground    *d2ui.CustomWidget
 	asset              *d2asset.AssetManager
 	uiManager          *d2ui.UIManager
 	mapEngine          *d2mapengine.MapEngine
 	mapRenderer        *d2maprenderer.MapRenderer
-	lastMouseX         int
-	lastMouseY         int
+	gameControls       *GameControls
+	panelGroup         *d2ui.WidgetGroup
 	hero               *d2mapentity.Player
 	mainPanel          *d2ui.Sprite
 	globeSprite        *d2ui.Sprite
@@ -93,9 +93,9 @@ type HUD struct {
 	runButton          *d2ui.Button
 	zoneChangeText     *d2ui.Label
 	miniPanel          *miniPanel
-	isZoneTextShown    bool
-	hpStatsIsVisible   bool
-	manaStatsIsVisible bool
+	addSkillButton     *d2ui.Button
+	addStatsButton     *d2ui.Button
+	*d2util.Logger
 	skillSelectMenu    *SkillSelectMenu
 	staminaTooltip     *d2ui.Tooltip
 	runWalkTooltip     *d2ui.Tooltip
@@ -107,13 +107,12 @@ type HUD struct {
 	widgetExperience   *d2ui.CustomWidget
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
-	panelBackground    *d2ui.CustomWidget
-	addStatsButton     *d2ui.Button
-	addSkillButton     *d2ui.Button
-	panelGroup         *d2ui.WidgetGroup
-	gameControls       *GameControls
-
-	*d2util.Logger
+	actionableRegions  []actionableRegion
+	lastMouseY         int
+	lastMouseX         int
+	hpStatsIsVisible   bool
+	isZoneTextShown    bool
+	manaStatsIsVisible bool
 }
 
 // NewHUD creates a HUD object

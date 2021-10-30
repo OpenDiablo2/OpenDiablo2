@@ -54,20 +54,18 @@ func CreateCredits(navigator d2interface.Navigator,
 
 // Credits represents the credits screen
 type Credits struct {
-	creditsBackground  *d2ui.Sprite
-	exitButton         *d2ui.Button
+	renderer          d2interface.Renderer
+	navigator         d2interface.Navigator
+	creditsBackground *d2ui.Sprite
+	exitButton        *d2ui.Button
+	uiManager         *d2ui.UIManager
+	*d2util.Logger
+	asset              *d2asset.AssetManager
 	creditsText        []string
 	labels             []*labelItem
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
-
-	asset     *d2asset.AssetManager
-	renderer  d2interface.Renderer
-	navigator d2interface.Navigator
-	uiManager *d2ui.UIManager
-
-	*d2util.Logger
 }
 
 // LoadContributors loads the contributors data from file

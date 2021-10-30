@@ -179,20 +179,19 @@ func NewHelpOverlay(
 
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type HelpOverlay struct {
-	asset            *d2asset.AssetManager
-	isOpen           bool
-	frames           []*d2ui.Sprite
-	text             []*d2ui.Label
-	lines            []line
 	bullets          [bullets]*d2ui.Label
-	uiManager        *d2ui.UIManager
 	closeButton      *d2ui.Button
-	keyMap           *KeyMap
-	onCloseCb        func()
-	panelGroup       *d2ui.WidgetGroup
 	backgroundWidget *d2ui.CustomWidget
-
+	panelGroup       *d2ui.WidgetGroup
+	onCloseCb        func()
+	keyMap           *KeyMap
+	uiManager        *d2ui.UIManager
+	asset            *d2asset.AssetManager
 	*d2util.Logger
+	lines  []line
+	text   []*d2ui.Label
+	frames []*d2ui.Sprite
+	isOpen bool
 }
 
 // Toggle the visibility state of the overlay
@@ -556,11 +555,11 @@ func (h *HelpOverlay) setupLabelsWithLines() {
 }
 
 type line struct {
+	Color  color.Color
 	StartX int
 	StartY int
 	MoveX  int
 	MoveY  int
-	Color  color.Color
 }
 
 type callout struct {

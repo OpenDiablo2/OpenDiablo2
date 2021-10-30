@@ -6,22 +6,16 @@ type Runewords map[string]*RuneRecord
 // RuneRecord is a representation of a single row of runes.txt. It defines
 // runewords available in the game.
 type RuneRecord struct {
-	Name     string
-	RuneName string // More of a note - the actual name should be read from the TBL files.
-	Complete bool   // An enabled/disabled flag. Only "Complete" runewords work in game.
-	Server   bool   // Marks a runeword as only available on ladder, not single player or tcp/ip.
-
-	// The item types for includsion/exclusion for this runeword record
+	Name      string
+	RuneName  string
 	ItemTypes struct {
 		Include []string
 		Exclude []string
 	}
-
-	// Runes slice of ID pointers from Misc.txt, controls what runes are
-	// required to make the rune word and in what order they are to be socketed.
-	Runes []string
-
+	Runes      []string
 	Properties []*RunewordProperty
+	Complete   bool
+	Server     bool
 }
 
 // RunewordProperty is a representation of a stat possessed by this runeword

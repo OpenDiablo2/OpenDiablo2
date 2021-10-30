@@ -16,16 +16,15 @@ const (
 
 // GuiManager is a GUI widget manager that handles dynamic layout/positioning of widgets
 type GuiManager struct {
-	asset         *d2asset.AssetManager
-	layout        *Layout
-	cursorAnim    d2interface.Animation
+	cursorAnim  d2interface.Animation
+	loadingAnim d2interface.Animation
+	asset       *d2asset.AssetManager
+	layout      *Layout
+	*d2util.Logger
 	cursorX       int
 	cursorY       int
-	loadingAnim   d2interface.Animation
 	cursorVisible bool
 	loading       bool
-
-	*d2util.Logger
 }
 
 // CreateGuiManager creates an instance of the GuiManager

@@ -3,19 +3,19 @@ package d2dt1
 // Tile is a representation of a map tile
 type Tile struct {
 	unknown2           []byte
-	Direction          int32
-	RoofHeight         int16
-	MaterialFlags      MaterialFlags
+	Blocks             []Block
+	Sequence           int32
+	RarityFrameIndex   int32
 	Height             int32
 	Width              int32
 	Type               int32
-	Style              int32
-	Sequence           int32
-	RarityFrameIndex   int32
-	SubTileFlags       [25]SubTileFlags
+	Direction          int32
 	blockHeaderPointer int32
 	blockHeaderSize    int32
-	Blocks             []Block
+	Style              int32
+	RoofHeight         int16
+	SubTileFlags       [25]SubTileFlags
+	MaterialFlags      MaterialFlags
 }
 
 func (t *Tile) unknown1() []byte {

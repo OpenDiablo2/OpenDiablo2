@@ -39,8 +39,8 @@ func (t tokenType) String() string {
 
 // Token is a lexical token of a calculation string.
 type Token struct {
-	Type  tokenType
 	Value string
+	Type  tokenType
 }
 
 func (t *Token) String() string {
@@ -49,11 +49,11 @@ func (t *Token) String() string {
 
 // Lexer is the tokenizer for calculation strings.
 type Lexer struct {
-	data         []byte
 	CurrentToken Token
+	nextToken    Token
+	data         []byte
 	index        int
 	peeked       bool
-	nextToken    Token
 }
 
 // New creates a new Lexer for tokenizing the given data.
@@ -79,7 +79,7 @@ func (l *Lexer) extractOpToken() Token {
 			panic("Invalid operator at index!" + strconv.Itoa(l.index))
 		} else {
 			l.index += 2
-			return Token{Symbol, string(c) + "="}
+			return Token{Type: Symbol, Value: string(c) + "="}
 		}
 	}
 
@@ -87,15 +87,15 @@ func (l *Lexer) extractOpToken() Token {
 		next, ok := l.peekNext()
 		if ok == nil && next == '=' {
 			l.index += 2
-			return Token{Symbol, string(c) + "="}
+			return Token{Type: Symbol, Value: string(c) + "="}
 		}
 		l.index++
 
-		return Token{Symbol, string(c)}
+		return Token{Type: Symbol, Value: string(c)}
 	}
 	l.index++
 
-	return Token{Symbol, string(c)}
+	return Token{Type: Symbol, Value: string(c)}
 }
 
 func (l *Lexer) extractNumber() Token {
@@ -106,7 +106,7 @@ func (l *Lexer) extractNumber() Token {
 		l.index++
 	}
 
-	return Token{Number, sb.String()}
+	return Token{Type: Number, Value: sb.String()}
 }
 
 func (l *Lexer) extractString() Token {
@@ -119,7 +119,7 @@ func (l *Lexer) extractString() Token {
 	}
 	l.index++
 
-	return Token{String, sb.String()}
+	return Token{Type: String, Value: sb.String()}
 }
 
 func (l *Lexer) extractName() Token {
@@ -132,7 +132,7 @@ func (l *Lexer) extractName() Token {
 		l.index++
 	}
 
-	return Token{Name, sb.String()}
+	return Token{Type: Name, Value: sb.String()}
 }
 
 // Peek returns the next token, but does not advance the tokenizer.
@@ -143,7 +143,7 @@ func (l *Lexer) Peek() Token {
 	}
 
 	if l.index == len(l.data) {
-		l.nextToken = Token{EOF, ""}
+		l.nextToken = Token{Type: EOF, Value: ""}
 		return l.nextToken
 	}
 
@@ -152,7 +152,7 @@ func (l *Lexer) Peek() Token {
 	}
 
 	if l.index == len(l.data) {
-		l.nextToken = Token{EOF, ""}
+		l.nextToken = Token{Type: EOF, Value: ""}
 		return l.nextToken
 	}
 

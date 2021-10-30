@@ -6,41 +6,41 @@ import (
 )
 
 type binaryOperation struct {
+	Function          func(v1, v2 int) int
 	Operator          string
 	Precedence        int
 	IsRightAssociated bool
-	Function          func(v1, v2 int) int
 }
 
 type unaryOperation struct {
+	Function   func(v int) int
 	Operator   string
 	Precedence int
-	Function   func(v int) int
 }
 
 type ternaryOperation struct {
+	Function          func(v1, v2, v3 int) int
 	Operator          string
 	Marker            string
 	Precedence        int
 	IsRightAssociated bool
-	Function          func(v1, v2, v3 int) int
 }
 
 func getUnaryOperations() map[string]unaryOperation {
 	return map[string]unaryOperation{
 		"+": {
-			"+",
-			4,
 			func(v int) int {
 				return v
 			},
+			"+",
+			4,
 		},
 		"-": {
-			"-",
-			4,
 			func(v int) int {
 				return -v
 			},
+			"-",
+			4,
 		},
 	}
 }
@@ -48,16 +48,16 @@ func getUnaryOperations() map[string]unaryOperation {
 func getTernaryOperations() map[string]ternaryOperation {
 	return map[string]ternaryOperation{
 		"?": {
-			"?",
-			":",
-			0,
-			true,
 			func(v1, v2, v3 int) int {
 				if v1 != 0 {
 					return v2
 				}
 				return v3
 			},
+			"?",
+			":",
+			0,
+			true,
 		},
 	}
 }
@@ -65,110 +65,110 @@ func getTernaryOperations() map[string]ternaryOperation {
 func getBinaryOperations() map[string]binaryOperation { //nolint:funlen // No reason to split function, just creates the operations.
 	return map[string]binaryOperation{
 		"==": {
-			"==",
-			1,
-			false,
 			func(v1, v2 int) int {
 				if v1 == v2 {
 					return 1
 				}
 				return 0
 			},
-		},
-		"!=": {
-			"!=",
+			"==",
 			1,
 			false,
+		},
+		"!=": {
 			func(v1, v2 int) int {
 				if v1 != v2 {
 					return 1
 				}
 				return 0
 			},
+			"!=",
+			1,
+			false,
 		},
 		"<": {
-			"<",
-			2,
-			false,
 			func(v1, v2 int) int {
 				if v1 < v2 {
 					return 1
 				}
 				return 0
 			},
-		},
-		">": {
-			">",
+			"<",
 			2,
 			false,
+		},
+		">": {
 			func(v1, v2 int) int {
 				if v1 > v2 {
 					return 1
 				}
 				return 0
 			},
-		},
-		"<=": {
-			"<=",
+			">",
 			2,
 			false,
+		},
+		"<=": {
 			func(v1, v2 int) int {
 				if v1 <= v2 {
 					return 1
 				}
 				return 0
 			},
-		},
-		">=": {
-			">=",
+			"<=",
 			2,
 			false,
+		},
+		">=": {
 			func(v1, v2 int) int {
 				if v1 >= v2 {
 					return 1
 				}
 				return 0
 			},
+			">=",
+			2,
+			false,
 		},
 		"+": {
-			"+",
-			3,
-			false,
 			func(v1, v2 int) int {
 				return v1 + v2
 			},
-		},
-		"-": {
-			"-",
+			"+",
 			3,
 			false,
+		},
+		"-": {
 			func(v1, v2 int) int {
 				return v1 - v2
 			},
+			"-",
+			3,
+			false,
 		},
 		"*": {
-			"*",
-			5,
-			false,
 			func(v1, v2 int) int {
 				return v1 * v2
 			},
-		},
-		"/": {
-			"/",
+			"*",
 			5,
 			false,
+		},
+		"/": {
 			func(v1, v2 int) int {
 				return v1 / v2
 			},
+			"/",
+			5,
+			false,
 		},
 		"^": {
-			"^",
-			6,
-			true,
 			func(v1, v2 int) int {
 				return int(math.Pow(float64(v1), float64(v2)))
 			},
+			"^",
+			6,
+			true,
 		},
 	}
 }

@@ -16,15 +16,14 @@ import (
 // LocalClientConnection is the implementation of ClientConnection
 // for a local client.
 type LocalClientConnection struct {
+	clientListener    d2networking.ClientListener
 	asset             *d2asset.AssetManager
 	heroState         *d2hero.HeroStateFactory
-	clientListener    d2networking.ClientListener // The game client
-	uniqueID          string                      // Unique ID generated on construction
-	openNetworkServer bool                        // True if this is a server
-	playerState       *d2hero.HeroState           // Local player state
-	gameServer        *d2server.GameServer        // Game Server
-
-	logLevel d2util.LogLevel
+	playerState       *d2hero.HeroState
+	gameServer        *d2server.GameServer
+	uniqueID          string
+	logLevel          d2util.LogLevel
+	openNetworkServer bool
 }
 
 // GetUniqueID returns LocalClientConnection.uniqueID.

@@ -75,12 +75,8 @@ type Property struct {
 	factory      *ItemFactory
 	record       *d2records.PropertyRecord
 	stats        []d2stats.Stat
+	inputParams  []int
 	PropertyType PropertyType
-
-	// the inputValues that were passed initially when calling `NewProperty`
-	inputParams []int
-
-	// some properties are statless and used only for computing a value
 	computedInt  int
 	computedBool bool
 }
