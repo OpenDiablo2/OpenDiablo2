@@ -27,5 +27,6 @@ const (
 	PlayerAnimationModeDead                                   // DD
 	PlayerAnimationModeSequence                               // GH
 	PlayerAnimationModeKnockBack                              // GH
-	PlayerAnimationModeNone                                   // "" - aura skills, e.g. Paladin's Concentration Aura
+	// "" - aura skills, e.g. Paladin's Concentration Aura
+	PlayerAnimationModeNone //
 )
