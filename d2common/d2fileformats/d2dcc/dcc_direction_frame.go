@@ -36,7 +36,7 @@ func CreateDCCDirectionFrame(bits *d2datautils.BitMuncher, direction *DCCDirecti
 	result.YOffset = bits.GetSignedBits(direction.YOffsetBits)
 	result.NumberOfOptionalBytes = int(bits.GetBits(direction.OptionalDataBits))
 	result.NumberOfCodedBytes = int(bits.GetBits(direction.CodedBytesBits))
-	result.FrameIsBottomUp = bits.GetBit() == 1
+	result.FrameIsBottomUp = bits.GetBit()
 
 	if result.FrameIsBottomUp {
 		log.Panic("Bottom up frames are not implemented.")
@@ -56,7 +56,7 @@ func CreateDCCDirectionFrame(bits *d2datautils.BitMuncher, direction *DCCDirecti
 
 func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 	// nolint:gomnd // constant
-	var w = 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
+	w := 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
 
 	if (v.Width - w) <= 1 {
 		v.HorizontalCellCount = 1

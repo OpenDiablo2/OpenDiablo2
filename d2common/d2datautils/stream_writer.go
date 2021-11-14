@@ -26,6 +26,11 @@ func (v *StreamWriter) GetBytes() []byte {
 	return v.data.Bytes()
 }
 
+// Offset returns current bit offset
+func (v *StreamWriter) Offset() int {
+	return v.bitOffset
+}
+
 // PushBytes writes a bytes to the stream
 func (v *StreamWriter) PushBytes(b ...byte) {
 	for _, i := range b {
@@ -135,4 +140,11 @@ func (v *StreamWriter) PushUint64(val uint64) {
 	v.data.WriteByte(byte(val >> 40))
 	v.data.WriteByte(byte(val >> 48))
 	v.data.WriteByte(byte(val >> 56))
+}
+
+// Align aligns stream writer to bytes
+func (v *StreamWriter) Align() {
+	if o := v.bitOffset % bitsPerByte; o > 0 {
+		v.PushBits(0, bitsPerByte-o)
+	}
 }
