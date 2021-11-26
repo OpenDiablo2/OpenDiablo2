@@ -36,7 +36,7 @@ func TestBitmuncherReadBit(t *testing.T) {
 
 	var result byte
 
-	for i := 0; i < bitsPerByte; i++ {
+	for i := 0; i < byteLen; i++ {
 		v := bm.GetBit()
 		result |= byte(v) << byte(i)
 	}
@@ -47,7 +47,7 @@ func TestBitmuncherReadBit(t *testing.T) {
 func TestBitmuncherGetBits(t *testing.T) {
 	bm := CreateBitMuncher(testData, 0)
 
-	assert.Equal(t, byte(bm.GetBits(bitsPerByte)), testData[0], "get bits didn't return expected value")
+	assert.Equal(t, byte(bm.GetBits(byteLen)), testData[0], "get bits didn't return expected value")
 }
 
 func TestBitmuncherGetNoBits(t *testing.T) {
@@ -77,7 +77,7 @@ func TestBitmuncherGetOneSignedBit(t *testing.T) {
 func TestBitmuncherSkipBits(t *testing.T) {
 	bm := CreateBitMuncher(testData, 0)
 
-	bm.SkipBits(bitsPerByte)
+	bm.SkipBits(byteLen)
 
 	assert.Equal(t, bm.GetByte(), testData[1], "skipping 8 bits didn't moved bit muncher's position into next byte")
 }
@@ -88,7 +88,7 @@ func TestBitmuncherGetInt32(t *testing.T) {
 	var testInt int32
 
 	for i := 0; i < bytesPerint32; i++ {
-		testInt |= int32(testData[i]) << int32(bitsPerByte*i)
+		testInt |= int32(testData[i]) << int32(byteLen*i)
 	}
 
 	assert.Equal(t, bm.GetInt32(), testInt, "int32 value wasn't returned properly")
@@ -100,8 +100,20 @@ func TestBitmuncherGetUint32(t *testing.T) {
 	var testUint uint32
 
 	for i := 0; i < bytesPerint32; i++ {
-		testUint |= uint32(testData[i]) << uint32(bitsPerByte*i)
+		testUint |= uint32(testData[i]) << uint32(byteLen*i)
 	}
 
 	assert.Equal(t, bm.GetUInt32(), testUint, "uint32 value wasn't returned properly")
+}
+
+func TestBitMuncherEnsureBits(t *testing.T) {
+	bm := CreateBitMuncher(testData, 0)
+
+	assert.Equal(t, true, bm.EnsureBits(byteLen*len(testData)), "unexpected value returned by EnsureBits")
+	assert.Equal(t, false, bm.EnsureBits(byteLen*len(testData)+1), "unexpected value returned by EnsureBits")
+
+	bm.SkipBits(5)
+
+	assert.Equal(t, true, bm.EnsureBits(byteLen*len(testData)-5), "unexpected value returned by EnsureBits")
+	assert.Equal(t, false, bm.EnsureBits(byteLen*len(testData)-4), "unexpected value returned by EnsureBits")
 }
